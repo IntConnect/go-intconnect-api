@@ -97,6 +97,7 @@ func main() {
 		injector.UserModule,
 		injector.ProtectedRoutesModule,
 		injector.ValidatorModule,
+		injector.NodeModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

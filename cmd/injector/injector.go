@@ -1,6 +1,7 @@
 package injector
 
 import (
+	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/user"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/routes"
@@ -18,6 +19,12 @@ var UserModule = fx.Module("userFeature",
 	fx.Provide(fx.Annotate(user.NewRepository, fx.As(new(user.Repository)))),
 	fx.Provide(fx.Annotate(user.NewService, fx.As(new(user.Service)))),
 	fx.Provide(fx.Annotate(user.NewHandler, fx.As(new(user.Controller)))),
+)
+
+var NodeModule = fx.Module("nodeFeature",
+	fx.Provide(fx.Annotate(node.NewRepository, fx.As(new(node.Repository)))),
+	fx.Provide(fx.Annotate(node.NewService, fx.As(new(node.Service)))),
+	fx.Provide(fx.Annotate(node.NewHandler, fx.As(new(node.Controller)))),
 )
 
 var ValidatorModule = fx.Module("validatorFeature",
