@@ -3,10 +3,12 @@ package mapper
 import (
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"net/http"
+	"time"
 )
 
 func MapJwtClaimIntoUserClaim(jwtClaim jwt.MapClaims) (*model.JwtClaimDto, error) {
@@ -14,4 +16,39 @@ func MapJwtClaimIntoUserClaim(jwtClaim jwt.MapClaims) (*model.JwtClaimDto, error
 	err := mapstructure.Decode(jwtClaim, &userClaim)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &userClaim, nil
+}
+
+func MapUserEntityIntoUserResponse(userEntity *entity.User) *model.UserResponse {
+	var userResponse model.UserResponse
+	decoderConfig := &mapstructure.DecoderConfig{
+		DecodeHook: helper.StringIntoTypeHookFunc,
+		Result:     &userResponse,
+	}
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+
+	err = decoder.Decode(userEntity)
+	userResponse.CreatedAt = userEntity.CreatedAt.Format(time.RFC3339)
+	userResponse.UpdatedAt = userEntity.UpdatedAt.Format(time.RFC3339)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	return &userResponse
+}
+
+func MapUserEntitiesIntoUserResponses(userEntities []entity.User) []*model.UserResponse {
+	var userResponses []*model.UserResponse
+	for _, userEntity := range userEntities {
+		userResponses = append(userResponses, MapUserEntityIntoUserResponse(&userEntity))
+	}
+	return userResponses
+}
+
+func MapCreateUserDtoIntoUserEntity(createUserDto *model.CreateUserDto) *entity.User {
+	var userEntity entity.User
+	err := mapstructure.Decode(createUserDto, &userEntity)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	return &userEntity
+}
+
+func MapUpdateUserDtoIntoUserEntity(updateUserDto *model.UpdateUserDto, userEntity *entity.User) {
+	helper.DecoderConfigMapper(updateUserDto, &userEntity)
 }

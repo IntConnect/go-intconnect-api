@@ -6,10 +6,12 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"go-intconnect-api/cmd/injector"
 	"go-intconnect-api/configs"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/middleware"
 	"go.uber.org/fx"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -37,7 +39,7 @@ func NewDatabaseCredentials(viperConfig *viper.Viper) *configs.DatabaseCredentia
 }
 
 // --- Provider untuk Gin Engine ---
-func NewGinEngine() *gin.Engine {
+func NewGinEngine() (*gin.Engine, *gin.RouterGroup) {
 	gin.SetMode(gin.DebugMode)
 	ginEngine := gin.Default()
 	ginEngine.Use(cors.New(cors.Config{
@@ -53,7 +55,7 @@ func NewGinEngine() *gin.Engine {
 	ginEngineRoot := ginEngine.Group("/")
 	ginEngineRoot.Use(middleware.RequestMetaMiddleware())
 
-	return ginEngine
+	return ginEngine, ginEngineRoot
 }
 
 // --- Invoker ---
@@ -75,15 +77,26 @@ func Run(fxLifecycle fx.Lifecycle, ginEngine *gin.Engine) {
 	})
 }
 
+func NewDatabaseConnection(databaseCredentials *configs.DatabaseCredentials) *gorm.DB {
+	databaseConnection := configs.NewDatabaseConnection(databaseCredentials)
+	return databaseConnection.GetDatabaseConnection()
+}
+
 func main() {
+
 	fxContainer := fx.New(
 		// Provider
 		fx.Provide(
 			NewViperConfig,
 			NewDatabaseCredentials,
+			NewDatabaseConnection,
+			configs.InitializeValidator,
 			// configs.NewDatabaseConnection, // kalau mau tambahkan DB
 			NewGinEngine,
 		),
+		injector.UserModule,
+		injector.ProtectedRoutesModule,
+		injector.ValidatorModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

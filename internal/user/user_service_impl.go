@@ -105,7 +105,6 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserDt
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"email":    userEntity.Email,
 			"username": userEntity.Username,
-			"role":     userEntity.UserGroup.Name,
 			"exp":      time.Now().Add(time.Hour * 72).Unix(),
 		})
 		tokenString, err = tokenInstance.SignedString([]byte(userService.viperConfig.GetString("JWT_SECRET")))
@@ -128,7 +127,6 @@ func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserDto *m
 		user, err := userService.userRepository.FindById(gormTransaction, updateUserDto.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		mapper.MapUpdateUserDtoIntoUserEntity(updateUserDto, user)
-		user.UserGroup.ID = uint64(updateUserDto.UserGroupId)
 		err = userService.userRepository.Update(gormTransaction, user)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
