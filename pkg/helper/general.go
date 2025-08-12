@@ -3,6 +3,7 @@ package helper
 import (
 	"github.com/go-viper/mapstructure/v2"
 	"go-intconnect-api/pkg/exception"
+	"gorm.io/gorm"
 	"math/rand"
 	"net/http"
 	"reflect"
@@ -40,9 +41,14 @@ func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}
 			return float32(val), err
 		}
 	case reflect.TypeOf(time.Time{}):
-		if str, ok := data.(string); ok {
-			parsedTime, err := time.Parse("2006-01-02", str) // Sesuaikan format tanggal
-			return parsedTime, err
+		if rawTime, ok := data.(time.Time); ok {
+			return rawTime.String(), nil
+		}
+	case reflect.TypeOf(gorm.DeletedAt{}):
+		if gormDeletedAt, ok := data.(gorm.DeletedAt); ok {
+			return gormDeletedAt.Time.String(), nil
+		} else {
+			return nil, nil
 		}
 	}
 	return data, nil
