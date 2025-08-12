@@ -19,5 +19,5 @@ func NewAuthenticationRoutes(routerGroup *gin.RouterGroup, userController user.C
 }
 
 func (routerGroup *AuthenticationRoutes) Setup() {
-	routerGroup.routerGroup.POST("login", routerGroup.userController.Login)
+	routerGroup.routerGroup.POST("login", routerGroup.userController.LoginUser)
 }

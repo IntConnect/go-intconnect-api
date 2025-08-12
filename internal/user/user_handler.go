@@ -22,12 +22,12 @@ func NewHandler(userService Service, viperConfig *viper.Viper) *Handler {
 	}
 }
 
-func (userHandler *Handler) FindAll(ginContext *gin.Context) {
+func (userHandler *Handler) FindAllUser(ginContext *gin.Context) {
 	userResponses := userHandler.userService.FindAll()
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been fetched", userResponses))
 }
 
-func (userHandler *Handler) FindAllPagination(ginContext *gin.Context) {
+func (userHandler *Handler) FindAllUserPagination(ginContext *gin.Context) {
 	paginationReq := model.PaginationRequest{
 		Page:  1,
 		Size:  10,
@@ -42,7 +42,7 @@ func (userHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been fetched", userResponses))
 }
 
-func (userHandler *Handler) Login(ginContext *gin.Context) {
+func (userHandler *Handler) LoginUser(ginContext *gin.Context) {
 	var loginUserDto model.LoginUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&loginUserDto)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
