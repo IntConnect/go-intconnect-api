@@ -1,0 +1,79 @@
+package user
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"go-intconnect-api/internal/model"
+	"go-intconnect-api/pkg/exception"
+	"go-intconnect-api/pkg/helper"
+	"net/http"
+	"strconv"
+)
+
+type Handler struct {
+	userService Service
+	viperConfig *viper.Viper
+}
+
+func NewHandler(userService Service, viperConfig *viper.Viper) *Handler {
+	return &Handler{
+		userService: userService,
+		viperConfig: viperConfig,
+	}
+}
+
+func (userHandler *Handler) FindAll(ginContext *gin.Context) {
+	userResponses := userHandler.userService.FindAll()
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been fetched", userResponses))
+}
+
+func (userHandler *Handler) FindAllPagination(ginContext *gin.Context) {
+	paginationReq := model.PaginationRequest{
+		Page:  1,
+		Size:  10,
+		Sort:  "id",
+		Order: "asc",
+	}
+
+	// Bind query parameters to the struct
+	err := ginContext.ShouldBindQuery(&paginationReq)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	userResponses := userHandler.userService.FindAllPagination(&paginationReq)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been fetched", userResponses))
+}
+
+func (userHandler *Handler) Login(ginContext *gin.Context) {
+	var loginUserDto model.LoginUserDto
+	err := ginContext.ShouldBindBodyWithJSON(&loginUserDto)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	generatedToken := userHandler.userService.HandleLogin(ginContext, &loginUserDto)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User logged successfully", gin.H{
+		"token": generatedToken,
+	}))
+}
+
+func (userHandler *Handler) CreateUser(ginContext *gin.Context) {
+	var createUserModel model.CreateUserDto
+	err := ginContext.ShouldBindBodyWithJSON(&createUserModel)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	userHandler.userService.Create(ginContext, &createUserModel)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been created", nil))
+}
+
+func (userHandler *Handler) UpdateUser(ginContext *gin.Context) {
+	var updateUserModel model.UpdateUserDto
+	err := ginContext.ShouldBindBodyWithJSON(&updateUserModel)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	userHandler.userService.Update(ginContext, &updateUserModel)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been created", nil))
+}
+
+func (userHandler *Handler) DeleteUser(ginContext *gin.Context) {
+	var deleteBomModel model.DeleteUserDto
+	currencyId := ginContext.Param("id")
+	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	deleteBomModel.Id = parsedBomId
+	userHandler.userService.Delete(ginContext, &deleteBomModel)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))
+}
