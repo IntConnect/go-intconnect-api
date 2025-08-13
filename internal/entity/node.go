@@ -2,6 +2,7 @@ package entity
 
 import (
 	"encoding/json"
+
 	"gorm.io/gorm"
 )
 

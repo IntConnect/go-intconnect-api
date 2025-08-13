@@ -1,15 +1,16 @@
 package node
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
-	"gorm.io/gorm"
 	"math"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"gorm.io/gorm"
 )
 
 type ServiceImpl struct {
@@ -29,7 +30,6 @@ func NewService(nodeRepository Repository, validatorService validator.Service, d
 	}
 }
 
-// Create - Membuat node baru
 func (nodeService *ServiceImpl) FindAll() []*model.NodeResponse {
 	var allNode []*model.NodeResponse
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -42,7 +42,6 @@ func (nodeService *ServiceImpl) FindAll() []*model.NodeResponse {
 	return allNode
 }
 
-// Create - Membuat node baru
 func (nodeService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.NodeResponse] {
 	paginationResp := model.PaginationResponse[*model.NodeResponse]{}
 	offsetVal := (paginationReq.Page - 1) * paginationReq.Size

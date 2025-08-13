@@ -5,6 +5,7 @@ import (
 	"go-intconnect-api/internal/user"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/routes"
+
 	"go.uber.org/fx"
 )
 
@@ -12,6 +13,13 @@ var ProtectedRoutesModule = fx.Module("protectedRoutes",
 	fx.Provide(routes.NewProtectedRoutes),
 	fx.Invoke(func(protectedRoutes *routes.ProtectedRoutes) {
 		protectedRoutes.Setup()
+	}),
+)
+
+var AuthenticationRoutesModule = fx.Module("authenticationRoutes",
+	fx.Provide(routes.NewAuthenticationRoutes),
+	fx.Invoke(func(authenticationRoutes *routes.AuthenticationRoutes) {
+		authenticationRoutes.Setup()
 	}),
 )
 

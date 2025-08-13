@@ -49,3 +49,8 @@ VALUES (3,
         '{}',
         'system');
 
+SELECT * FROM users;
+SELECT * FROM nodes;
+
+INSERT INTO users (id, username, email, password) VALUES (1, 'admin', 'admin@gmail.com', '$2a$12$TyWbaQx6LLW8Ik0ZNjCkbeYcKr96XtaTBsJn8uTxmWM/2FRD5AIPG')
+UPDATE nodes SET deleted_at = null;

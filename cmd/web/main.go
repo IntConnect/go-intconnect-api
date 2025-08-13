@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 	"go-intconnect-api/cmd/injector"
 	"go-intconnect-api/configs"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/middleware"
+	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"go.uber.org/fx"
 	"gorm.io/gorm"
-	"time"
 )
 
 // --- Provider untuk Viper config ---
@@ -95,6 +96,7 @@ func main() {
 			NewGinEngine,
 		),
 		injector.UserModule,
+		injector.AuthenticationRoutesModule,
 		injector.ProtectedRoutesModule,
 		injector.ValidatorModule,
 		injector.NodeModule,

@@ -1,19 +1,21 @@
 package user
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/viper"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
-	"gorm.io/gorm"
 	"math"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type ServiceImpl struct {
@@ -95,11 +97,10 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserDt
 		err = gormTransaction.
 			Where("email = ?", loginUserDto.UserIdentifier).
 			Or("username = ?", loginUserDto.UserIdentifier).
-			Preload("UserGroup").
 			First(&userEntity).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		if userEntity.Password != loginUserDto.Password {
+		if err = bcrypt.CompareHashAndPassword([]byte(userEntity.Password), []byte(loginUserDto.Password)); err != nil {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "User credentials invalid", err))
 		}
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
