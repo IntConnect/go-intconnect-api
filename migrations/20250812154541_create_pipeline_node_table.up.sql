@@ -1,14 +1,14 @@
 CREATE TABLE pipeline_nodes
 (
     id          SERIAL PRIMARY KEY,
-    pipeline_id BIGINT NOT NULL REFERENCES pipelines (id),
-    node_id     BIGINT NOT NULL REFERENCES nodes (id),
-    type        TEXT   NOT NULL,               -- contoh: "mqtt-in", "rs232-in", "http-out", "function"
-    name        TEXT   NOT NULL,
+    pipeline_id INT REFERENCES pipelines (id) ON DELETE CASCADE,
+    node_id     VARCHAR(50) NOT NULL, -- misalnya "n1", "uuid", dsb
+    type        VARCHAR(50) NOT NULL, -- contoh: mqtt-in, json-parser, mqtt-out
+    label       VARCHAR(100),
+    position_x  FLOAT,
+    position_y  FLOAT,
+    config      JSONB,                -- semua konfigurasi unik node (topic, QoS, dll)
     description TEXT,
-    config      JSONB     DEFAULT '{}'::jsonb, -- konfigurasi node
-    position_x  INT       DEFAULT 0,
-    position_y  INT       DEFAULT 0,
     created_by  VARCHAR(255),
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

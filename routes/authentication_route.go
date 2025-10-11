@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-intconnect-api/internal/user"
+
+	"github.com/gin-gonic/gin"
 )
 
 type AuthenticationRoutes struct {

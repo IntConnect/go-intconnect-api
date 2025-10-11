@@ -3,8 +3,9 @@ package exception
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"net/http"
+
+	"gorm.io/gorm"
 )
 
 func ParseGormError(err error) *ApplicationError {
@@ -49,15 +50,9 @@ func ParseGormError(err error) *ApplicationError {
 			StatusCode: http.StatusBadRequest,
 		}
 	}
-
-	var clientError *ApplicationError
-	isApplicationError := errors.As(err, &clientError)
-	if isApplicationError {
-		return NewApplicationError(clientError.StatusCode, clientError.Message, clientError.rawError)
-	}
 	return NewApplicationError(http.StatusInternalServerError, "Database error occurred", errors.New("database error occurred"))
-
 }
+
 func ParseGormErrorWithMessage(err error, additionalMessage interface{}) *ApplicationError {
 	gormError := ParseGormError(err)
 	gormError.Message = fmt.Sprintf("%s %s", gormError.Message, additionalMessage)

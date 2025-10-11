@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/user"
-	"go-intconnect-api/pkg/middleware"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 type ProtectedRoutes struct {
@@ -22,7 +22,7 @@ func NewProtectedRoutes(
 	userController user.Controller,
 	nodeController node.Controller,
 ) *ProtectedRoutes {
-	routerGroup.Use(middleware.AuthMiddleware(viperConfig))
+	//routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 
 	return &ProtectedRoutes{
 		routerGroup: routerGroup,
@@ -48,4 +48,11 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	nodeRouterGroup.POST("", protectedRoutes.nodeController.CreateNode)
 	nodeRouterGroup.PUT("", protectedRoutes.nodeController.UpdateNode)
 	nodeRouterGroup.DELETE("", protectedRoutes.nodeController.DeleteNode)
+
+	pipelineRouterGroup := protectedRoutes.routerGroup.Group("pipelines")
+	pipelineRouterGroup.GET("pagination", protectedRoutes.pipelineController.FindAllPagination)
+	pipelineRouterGroup.GET("", protectedRoutes.pipelineController.FindAll)
+	pipelineRouterGroup.POST("", protectedRoutes.pipelineController.CreateNode)
+	pipelineRouterGroup.PUT("", protectedRoutes.pipelineController.UpdateNode)
+	pipelineRouterGroup.DELETE("", protectedRoutes.pipelineController.DeleteNode)
 }

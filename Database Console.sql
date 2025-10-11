@@ -2,6 +2,7 @@
 DROP DATABASE IF EXISTS go_intconnect_system;
 CREATE DATABASE go_intconnect_system;
 
+
 INSERT INTO nodes (id, type, label, description, help_text, color, icon, component_name, default_config, created_by)
 VALUES (1,
         'input',
@@ -17,7 +18,6 @@ VALUES (1,
             "client_id": "mqtt_in_node_1"
         }',
         'system');
-
 
 -- Node 2: JSON Parser
 
@@ -36,7 +36,6 @@ VALUES (2,
 
 -- Node 3: MQTT Out
 
-
 INSERT INTO nodes (id, type, label, description, help_text, color, icon, component_name, default_config, created_by)
 VALUES (3,
         'output',
@@ -54,3 +53,4 @@ SELECT * FROM nodes;
 
 INSERT INTO users (id, username, email, password) VALUES (1, 'admin', 'admin@gmail.com', '$2a$12$TyWbaQx6LLW8Ik0ZNjCkbeYcKr96XtaTBsJn8uTxmWM/2FRD5AIPG')
 UPDATE nodes SET deleted_at = null;
+UPDATE users     SET deleted_at = null;

@@ -31,15 +31,15 @@ func NewService(nodeRepository Repository, validatorService validator.Service, d
 }
 
 func (nodeService *ServiceImpl) FindAll() []*model.NodeResponse {
-	var allNode []*model.NodeResponse
+	var nodeResponsesDto []*model.NodeResponse
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		nodeResponse, err := nodeService.nodeRepository.FindAll(gormTransaction)
+		nodeEntities, err := nodeService.nodeRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allNode = mapper.MapNodeEntitiesIntoNodeResponses(nodeResponse)
+		nodeResponsesDto = mapper.MapNodeEntitiesIntoNodeResponses(nodeEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return allNode
+	return nodeResponsesDto
 }
 
 func (nodeService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.NodeResponse] {
