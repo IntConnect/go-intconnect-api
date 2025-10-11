@@ -1,15 +1,16 @@
 package helper
 
 import (
-	"github.com/go-viper/mapstructure/v2"
 	"go-intconnect-api/pkg/exception"
-	"gorm.io/gorm"
 	"math/rand"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-viper/mapstructure/v2"
+	"gorm.io/gorm"
 )
 
 func CheckErrorOperation(indicatedError error, applicationError *exception.ApplicationError) bool {
@@ -87,4 +88,16 @@ func CheckPointerWrapper[T any](targetChecking *T, renderPayload func()) {
 	if targetChecking != nil {
 		renderPayload()
 	}
+}
+
+func DecodeFromSource[T any](targetMapping interface{}) T {
+	decoderConfig := &mapstructure.DecoderConfig{
+		DecodeHook: StringIntoTypeHookFunc,
+		Result:     &targetMapping,
+	}
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	err = decoder.Decode(targetMapping)
+	return targetMapping
+
 }

@@ -14,48 +14,48 @@ import (
 )
 
 type ServiceImpl struct {
-	nodeRepository   Repository
-	validatorService validator.Service
-	dbConnection     *gorm.DB
-	viperConfig      *viper.Viper
+	pipelineRepository Repository
+	validatorService   validator.Service
+	dbConnection       *gorm.DB
+	viperConfig        *viper.Viper
 }
 
-func NewService(nodeRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
+func NewService(pipelineRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper) *ServiceImpl {
 	return &ServiceImpl{
-		nodeRepository:   nodeRepository,
-		validatorService: validatorService,
-		dbConnection:     dbConnection,
-		viperConfig:      viperConfig,
+		pipelineRepository: pipelineRepository,
+		validatorService:   validatorService,
+		dbConnection:       dbConnection,
+		viperConfig:        viperConfig,
 	}
 }
 
-func (nodeService *ServiceImpl) FindAll() []*model.NodeResponse {
-	var nodeResponsesDto []*model.NodeResponse
-	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		nodeEntities, err := nodeService.nodeRepository.FindAll(gormTransaction)
+func (pipelineService *ServiceImpl) FindAll() []*model.PipelineResponse {
+	var pipelineResponsesDto []*model.PipelineResponse
+	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		pipelineEntities, err := pipelineService.pipelineRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		nodeResponsesDto = mapper.MapNodeEntitiesIntoNodeResponses(nodeEntities)
+		pipelineResponsesDto = mapper.MapPipelineEntitiesIntoPipelineResponses(pipelineEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return nodeResponsesDto
+	return pipelineResponsesDto
 }
 
-func (nodeService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.NodeResponse] {
-	paginationResp := model.PaginationResponse[*model.NodeResponse]{}
+func (pipelineService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.PipelineResponse] {
+	paginationResp := model.PaginationResponse[*model.PipelineResponse]{}
 	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
 	orderClause := paginationReq.Sort
 	if paginationReq.Order != "" {
 		orderClause += " " + paginationReq.Order
 	}
-	var allNode []*model.NodeResponse
-	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		nodeEntities, totalItems, err := nodeService.nodeRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
+	var allPipeline []*model.PipelineResponse
+	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		pipelineEntities, totalItems, err := pipelineService.pipelineRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
 		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allNode = mapper.MapNodeEntitiesIntoNodeResponses(nodeEntities)
-		paginationResp = model.PaginationResponse[*model.NodeResponse]{
-			Data:        allNode,
+		allPipeline = mapper.MapPipelineEntitiesIntoPipelineResponses(pipelineEntities)
+		paginationResp = model.PaginationResponse[*model.PipelineResponse]{
+			Data:        allPipeline,
 			TotalItems:  totalItems,
 			TotalPages:  totalPages,
 			CurrentPage: paginationReq.Page,
@@ -67,13 +67,13 @@ func (nodeService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 	return paginationResp
 }
 
-// Create - Membuat node baru
-func (nodeService *ServiceImpl) Create(ginContext *gin.Context, createNodeDto *model.CreateNodeDto) {
-	valErr := nodeService.validatorService.ValidateStruct(createNodeDto)
-	nodeService.validatorService.ParseValidationError(valErr, *createNodeDto)
-	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		nodeEntity := mapper.MapCreateNodeDtoIntoNodeEntity(createNodeDto)
-		err := nodeService.nodeRepository.Create(gormTransaction, nodeEntity)
+// Create - Membuat pipeline baru
+func (pipelineService *ServiceImpl) Create(ginContext *gin.Context, createPipelineDto *model.CreatePipelineDto) {
+	valErr := pipelineService.validatorService.ValidateStruct(createPipelineDto)
+	pipelineService.validatorService.ParseValidationError(valErr, *createPipelineDto)
+	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		pipelineEntity := mapper.MapCreatePipelineDtoIntoPipelineEntity(createPipelineDto)
+		err := pipelineService.pipelineRepository.Create(gormTransaction, pipelineEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil
@@ -81,25 +81,25 @@ func (nodeService *ServiceImpl) Create(ginContext *gin.Context, createNodeDto *m
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (nodeService *ServiceImpl) Update(ginContext *gin.Context, updateNodeDto *model.UpdateNodeDto) {
-	valErr := nodeService.validatorService.ValidateStruct(updateNodeDto)
-	nodeService.validatorService.ParseValidationError(valErr, *updateNodeDto)
-	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		node, err := nodeService.nodeRepository.FindById(gormTransaction, updateNodeDto.Id)
+func (pipelineService *ServiceImpl) Update(ginContext *gin.Context, updatePipelineDto *model.UpdatePipelineDto) {
+	valErr := pipelineService.validatorService.ValidateStruct(updatePipelineDto)
+	pipelineService.validatorService.ParseValidationError(valErr, *updatePipelineDto)
+	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		pipeline, err := pipelineService.pipelineRepository.FindById(gormTransaction, updatePipelineDto.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mapper.MapUpdateNodeDtoIntoNodeEntity(updateNodeDto, node)
-		err = nodeService.nodeRepository.Update(gormTransaction, node)
+		mapper.MapUpdatePipelineDtoIntoPipelineEntity(updatePipelineDto, pipeline)
+		err = pipelineService.pipelineRepository.Update(gormTransaction, pipeline)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (nodeService *ServiceImpl) Delete(ginContext *gin.Context, deleteNodeDto *model.DeleteNodeDto) {
-	valErr := nodeService.validatorService.ValidateStruct(deleteNodeDto)
-	nodeService.validatorService.ParseValidationError(valErr, *deleteNodeDto)
-	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := nodeService.nodeRepository.Delete(gormTransaction, deleteNodeDto.Id)
+func (pipelineService *ServiceImpl) Delete(ginContext *gin.Context, deletePipelineDto *model.DeletePipelineDto) {
+	valErr := pipelineService.validatorService.ValidateStruct(deletePipelineDto)
+	pipelineService.validatorService.ParseValidationError(valErr, *deletePipelineDto)
+	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		err := pipelineService.pipelineRepository.Delete(gormTransaction, deletePipelineDto.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil
