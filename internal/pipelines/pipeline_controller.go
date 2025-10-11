@@ -1,4 +1,4 @@
-package node
+package pipeline
 
 import "github.com/gin-gonic/gin"
 

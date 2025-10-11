@@ -1,8 +1,9 @@
-package node
+package pipeline
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-intconnect-api/internal/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Service interface {

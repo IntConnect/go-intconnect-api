@@ -1,4 +1,4 @@
-package node
+package pipeline
 
 import (
 	"fmt"
@@ -13,15 +13,15 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Node, error) {
-	var nodeEntities []entity.Node
+func (nodeRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Pipeline, error) {
+	var nodeEntities []entity.Pipeline
 	err := gormTransaction.Find(&nodeEntities).Error
 	fmt.Println(nodeEntities)
 	return nodeEntities, err
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Node, int64, error) {
-	var nodeEntities []entity.Node
+func (nodeRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Pipeline, int64, error) {
+	var nodeEntities []entity.Pipeline
 	var totalItems int64
 
 	if searchQuery != "" {
@@ -32,38 +32,33 @@ func (nodeRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gor
 	}
 
 	// Count total items
-	err := gormTransaction.Model(&entity.Node{}).
-		Preload("NodeGroup", func(gormTx *gorm.DB) *gorm.DB {
+	err := gormTransaction.Model(&entity.Pipeline{}).
+		Preload("PipelineGroup", func(gormTx *gorm.DB) *gorm.DB {
 			return gormTx.Select("id, name")
 		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&nodeEntities).Error
-	gormTransaction.Model(&entity.Node{}).Count(&totalItems)
+	gormTransaction.Model(&entity.Pipeline{}).Count(&totalItems)
 	return nodeEntities, totalItems, err
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, nodeId uint64) (*entity.Node, error) {
-	var nodeEntity entity.Node
-	err := gormTransaction.Model(&entity.Node{}).
-		Preload("NodeGroup", func(gormTx *gorm.DB) *gorm.DB {
+func (nodeRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, nodeId uint64) (*entity.Pipeline, error) {
+	var nodeEntity entity.Pipeline
+	err := gormTransaction.Model(&entity.Pipeline{}).
+		Preload("PipelineGroup", func(gormTx *gorm.DB) *gorm.DB {
 			return gormTx.Select("id, name")
 		}).Where("id = ?", nodeId).Find(&nodeEntity).Error
 
 	return &nodeEntity, err
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) FindByName(currencyName string) *entity.Node {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (nodeRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, currencyEntity *entity.Node) error {
+func (nodeRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, currencyEntity *entity.Pipeline) error {
 	return gormTransaction.Model(currencyEntity).Create(currencyEntity).Error
 
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, nodeEntity *entity.Node) error {
+func (nodeRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, nodeEntity *entity.Pipeline) error {
 	return gormTransaction.Model(nodeEntity).Save(nodeEntity).Error
 }
 
 func (nodeRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.Node{}).Where("id = ?", id).Delete(entity.Node{}).Error
+	return gormTransaction.Model(entity.Pipeline{}).Where("id = ?", id).Delete(entity.Pipeline{}).Error
 }

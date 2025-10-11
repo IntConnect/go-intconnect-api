@@ -1,4 +1,4 @@
-package node
+package pipeline
 
 import (
 	"go-intconnect-api/internal/entity"
@@ -7,11 +7,10 @@ import (
 )
 
 type Repository interface {
-	FindAll(gormTransaction *gorm.DB) ([]entity.Node, error)
-	FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Node, int64, error)
-	FindById(gormTransaction *gorm.DB, nodeId uint64) (*entity.Node, error)
-	FindByName(nodeName string) *entity.Node
-	Create(gormTransaction *gorm.DB, nodeEntity *entity.Node) error
-	Update(gormTransaction *gorm.DB, nodeEntity *entity.Node) error
-	Delete(gormTransaction *gorm.DB, nodeId uint64) error
+	FindAll(gormTransaction *gorm.DB) ([]entity.Pipeline, error)
+	FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Pipeline, int64, error)
+	FindById(gormTransaction *gorm.DB, pipelineId uint64) (*entity.Pipeline, error)
+	Create(gormTransaction *gorm.DB, pipelineEntity *entity.Pipeline) error
+	Update(gormTransaction *gorm.DB, pipelineEntity *entity.Pipeline) error
+	Delete(gormTransaction *gorm.DB, pipelineId uint64) error
 }

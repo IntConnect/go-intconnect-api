@@ -1,4 +1,4 @@
-package node
+package pipeline
 
 import (
 	"go-intconnect-api/internal/model"
