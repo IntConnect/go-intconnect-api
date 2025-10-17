@@ -6,10 +6,10 @@ import (
 )
 
 type Service interface {
-	Create(ginContext *gin.Context, createUserDto *model.CreateUserDto)
+	Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest)
 	FindAll() []*model.UserResponse
 	FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.UserResponse]
-	HandleLogin(ginContext *gin.Context, loginUserDto *model.LoginUserDto) string
-	Update(ginContext *gin.Context, updateUserDto *model.UpdateUserDto)
-	Delete(ginContext *gin.Context, deleteUserDto *model.DeleteUserDto)
+	HandleLogin(ginContext *gin.Context, loginUserRequest *model.LoginUserRequest) string
+	Update(ginContext *gin.Context, updateUserRequest *model.UpdateUserRequest)
+	Delete(ginContext *gin.Context, deleteUserRequest *model.DeleteUserRequest)
 }

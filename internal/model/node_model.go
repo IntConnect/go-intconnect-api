@@ -13,7 +13,7 @@ type NodeResponse struct {
 	AuditableResponse *AuditableResponse     `json:"auditable_response" mapstructure:"-"`
 }
 
-type CreateNodeDto struct {
+type CreateNodeRequest struct {
 	Type          string                 `json:"type"`
 	Label         string                 `json:"label"`
 	Description   string                 `json:"description"`
@@ -24,7 +24,7 @@ type CreateNodeDto struct {
 	DefaultConfig map[string]interface{} `json:"default_config"`
 }
 
-type UpdateNodeDto struct {
+type UpdateNodeRequest struct {
 	Id            uint64                 `json:"id" validate:"required,number"`
 	Type          string                 `json:"type"`
 	Label         string                 `json:"label"`
@@ -36,7 +36,7 @@ type UpdateNodeDto struct {
 	DefaultConfig map[string]interface{} `json:"default_config"`
 }
 
-type DeleteNodeDto struct {
+type DeleteNodeRequest struct {
 	Id uint64 `json:"id" validate:"required,number"`
 }
 

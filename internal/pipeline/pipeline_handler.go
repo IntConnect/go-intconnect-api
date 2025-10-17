@@ -44,7 +44,7 @@ func (pipelineHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 }
 
 func (pipelineHandler *Handler) CreatePipeline(ginContext *gin.Context) {
-	var createPipelineModel model.CreatePipelineDto
+	var createPipelineModel model.CreatePipelineRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createPipelineModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	pipelineHandler.pipelineService.Create(ginContext, &createPipelineModel)
@@ -52,7 +52,7 @@ func (pipelineHandler *Handler) CreatePipeline(ginContext *gin.Context) {
 }
 
 func (pipelineHandler *Handler) UpdatePipeline(ginContext *gin.Context) {
-	var updatePipelineModel model.UpdatePipelineDto
+	var updatePipelineModel model.UpdatePipelineRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updatePipelineModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	pipelineHandler.pipelineService.Update(ginContext, &updatePipelineModel)
@@ -60,7 +60,7 @@ func (pipelineHandler *Handler) UpdatePipeline(ginContext *gin.Context) {
 }
 
 func (pipelineHandler *Handler) DeletePipeline(ginContext *gin.Context) {
-	var deletePipelineModel model.DeletePipelineDto
+	var deletePipelineModel model.DeletePipelineRequest
 	currencyId := ginContext.Param("id")
 	parsedPipelineId, err := strconv.ParseUint(currencyId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))

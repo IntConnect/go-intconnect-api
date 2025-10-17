@@ -68,11 +68,11 @@ func (nodeService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 }
 
 // Create - Membuat node baru
-func (nodeService *ServiceImpl) Create(ginContext *gin.Context, createProtocolConfigurationDto *model.CreateProtocolConfigurationDto) {
-	valErr := nodeService.validatorService.ValidateStruct(createProtocolConfigurationDto)
-	nodeService.validatorService.ParseValidationError(valErr, *createProtocolConfigurationDto)
+func (nodeService *ServiceImpl) Create(ginContext *gin.Context, createProtocolConfigurationRequest *model.CreateProtocolConfigurationRequest) {
+	valErr := nodeService.validatorService.ValidateStruct(createProtocolConfigurationRequest)
+	nodeService.validatorService.ParseValidationError(valErr, *createProtocolConfigurationRequest)
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		nodeEntity := mapper.MapCreateProtocolConfigurationDtoIntoProtocolConfigurationEntity(createProtocolConfigurationDto)
+		nodeEntity := mapper.MapCreateProtocolConfigurationRequestIntoProtocolConfigurationEntity(createProtocolConfigurationRequest)
 		err := nodeService.nodeRepository.Create(gormTransaction, nodeEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
@@ -81,13 +81,13 @@ func (nodeService *ServiceImpl) Create(ginContext *gin.Context, createProtocolCo
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (nodeService *ServiceImpl) Update(ginContext *gin.Context, updateProtocolConfigurationDto *model.UpdateProtocolConfigurationDto) {
-	valErr := nodeService.validatorService.ValidateStruct(updateProtocolConfigurationDto)
-	nodeService.validatorService.ParseValidationError(valErr, *updateProtocolConfigurationDto)
+func (nodeService *ServiceImpl) Update(ginContext *gin.Context, updateProtocolConfigurationRequest *model.UpdateProtocolConfigurationRequest) {
+	valErr := nodeService.validatorService.ValidateStruct(updateProtocolConfigurationRequest)
+	nodeService.validatorService.ParseValidationError(valErr, *updateProtocolConfigurationRequest)
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		node, err := nodeService.nodeRepository.FindById(gormTransaction, updateProtocolConfigurationDto.Id)
+		node, err := nodeService.nodeRepository.FindById(gormTransaction, updateProtocolConfigurationRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mapper.MapUpdateProtocolConfigurationDtoIntoProtocolConfigurationEntity(updateProtocolConfigurationDto, node)
+		mapper.MapUpdateProtocolConfigurationRequestIntoProtocolConfigurationEntity(updateProtocolConfigurationRequest, node)
 		err = nodeService.nodeRepository.Update(gormTransaction, node)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
@@ -95,11 +95,11 @@ func (nodeService *ServiceImpl) Update(ginContext *gin.Context, updateProtocolCo
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (nodeService *ServiceImpl) Delete(ginContext *gin.Context, deleteProtocolConfigurationDto *model.DeleteProtocolConfigurationDto) {
-	valErr := nodeService.validatorService.ValidateStruct(deleteProtocolConfigurationDto)
-	nodeService.validatorService.ParseValidationError(valErr, *deleteProtocolConfigurationDto)
+func (nodeService *ServiceImpl) Delete(ginContext *gin.Context, deleteProtocolConfigurationRequest *model.DeleteProtocolConfigurationRequest) {
+	valErr := nodeService.validatorService.ValidateStruct(deleteProtocolConfigurationRequest)
+	nodeService.validatorService.ParseValidationError(valErr, *deleteProtocolConfigurationRequest)
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := nodeService.nodeRepository.Delete(gormTransaction, deleteProtocolConfigurationDto.Id)
+		err := nodeService.nodeRepository.Delete(gormTransaction, deleteProtocolConfigurationRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil

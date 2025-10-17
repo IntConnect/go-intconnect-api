@@ -7,9 +7,9 @@ import (
 )
 
 type Service interface {
-	Create(ginContext *gin.Context, createPipelineDto *model.CreatePipelineDto)
+	Create(ginContext *gin.Context, createPipelineRequest *model.CreatePipelineRequest)
 	FindAll() []*model.PipelineResponse
 	FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.PipelineResponse]
-	Update(ginContext *gin.Context, updatePipelineDto *model.UpdatePipelineDto)
-	Delete(ginContext *gin.Context, deletePipelineDto *model.DeletePipelineDto)
+	Update(ginContext *gin.Context, updatePipelineRequest *model.UpdatePipelineRequest)
+	Delete(ginContext *gin.Context, deletePipelineRequest *model.DeletePipelineRequest)
 }

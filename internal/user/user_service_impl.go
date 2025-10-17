@@ -75,11 +75,11 @@ func (userService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 }
 
 // Create - Membuat user baru
-func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserDto *model.CreateUserDto) {
-	valErr := userService.validatorService.ValidateStruct(createUserDto)
-	userService.validatorService.ParseValidationError(valErr, *createUserDto)
+func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest) {
+	valErr := userService.validatorService.ValidateStruct(createUserRequest)
+	userService.validatorService.ParseValidationError(valErr, *createUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		userEntity := mapper.MapCreateUserDtoIntoUserEntity(createUserDto)
+		userEntity := mapper.MapCreateUserRequestIntoUserEntity(createUserRequest)
 		err := userService.userRepository.Create(gormTransaction, userEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
@@ -88,19 +88,19 @@ func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserDto *m
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserDto *model.LoginUserDto) string {
-	err := userService.validatorService.ValidateStruct(loginUserDto)
-	userService.validatorService.ParseValidationError(err, loginUserDto)
+func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRequest *model.LoginUserRequest) string {
+	err := userService.validatorService.ValidateStruct(loginUserRequest)
+	userService.validatorService.ParseValidationError(err, loginUserRequest)
 	var tokenString string
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userEntity entity.User
 		err = gormTransaction.
-			Where("email = ?", loginUserDto.UserIdentifier).
-			Or("username = ?", loginUserDto.UserIdentifier).
+			Where("email = ?", loginUserRequest.UserIdentifier).
+			Or("username = ?", loginUserRequest.UserIdentifier).
 			First(&userEntity).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		if err = bcrypt.CompareHashAndPassword([]byte(userEntity.Password), []byte(loginUserDto.Password)); err != nil {
+		if err = bcrypt.CompareHashAndPassword([]byte(userEntity.Password), []byte(loginUserRequest.Password)); err != nil {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "User credentials invalid", err))
 		}
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -121,13 +121,13 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserDt
 	return tokenString
 }
 
-func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserDto *model.UpdateUserDto) {
-	valErr := userService.validatorService.ValidateStruct(updateUserDto)
-	userService.validatorService.ParseValidationError(valErr, *updateUserDto)
+func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserRequest *model.UpdateUserRequest) {
+	valErr := userService.validatorService.ValidateStruct(updateUserRequest)
+	userService.validatorService.ParseValidationError(valErr, *updateUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		user, err := userService.userRepository.FindById(gormTransaction, updateUserDto.Id)
+		user, err := userService.userRepository.FindById(gormTransaction, updateUserRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mapper.MapUpdateUserDtoIntoUserEntity(updateUserDto, user)
+		mapper.MapUpdateUserRequestIntoUserEntity(updateUserRequest, user)
 		err = userService.userRepository.Update(gormTransaction, user)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
@@ -135,11 +135,11 @@ func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserDto *m
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (userService *ServiceImpl) Delete(ginContext *gin.Context, deleteUserDto *model.DeleteUserDto) {
-	valErr := userService.validatorService.ValidateStruct(deleteUserDto)
-	userService.validatorService.ParseValidationError(valErr, *deleteUserDto)
+func (userService *ServiceImpl) Delete(ginContext *gin.Context, deleteUserRequest *model.DeleteUserRequest) {
+	valErr := userService.validatorService.ValidateStruct(deleteUserRequest)
+	userService.validatorService.ParseValidationError(valErr, *deleteUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := userService.userRepository.Delete(gormTransaction, deleteUserDto.Id)
+		err := userService.userRepository.Delete(gormTransaction, deleteUserRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil

@@ -47,15 +47,15 @@ func NewService(pipelineRepository Repository, validatorService validator.Servic
 }
 
 func (pipelineService *ServiceImpl) FindAll() []*model.PipelineResponse {
-	var pipelineResponsesDto []*model.PipelineResponse
+	var pipelineResponsesRequest []*model.PipelineResponse
 	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		pipelineEntities, err := pipelineService.pipelineRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		pipelineResponsesDto = mapper.MapPipelineEntitiesIntoPipelineResponses(pipelineEntities)
+		pipelineResponsesRequest = mapper.MapPipelineEntitiesIntoPipelineResponses(pipelineEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return pipelineResponsesDto
+	return pipelineResponsesRequest
 }
 
 func (pipelineService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.PipelineResponse] {
@@ -84,12 +84,12 @@ func (pipelineService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 }
 
 // Create - Membuat pipeline baru
-func (pipelineService *ServiceImpl) Create(ginContext *gin.Context, createPipelineDto *model.CreatePipelineDto) {
-	valErr := pipelineService.validatorService.ValidateStruct(createPipelineDto)
-	pipelineService.validatorService.ParseValidationError(valErr, *createPipelineDto)
+func (pipelineService *ServiceImpl) Create(ginContext *gin.Context, createPipelineRequest *model.CreatePipelineRequest) {
+	valErr := pipelineService.validatorService.ValidateStruct(createPipelineRequest)
+	pipelineService.validatorService.ParseValidationError(valErr, *createPipelineRequest)
 
 	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		pipelineEntity := mapper.MapCreatePipelineDtoIntoPipelineEntity(createPipelineDto)
+		pipelineEntity := mapper.MapCreatePipelineRequestIntoPipelineEntity(createPipelineRequest)
 		pipelineEntity.Auditable = entity.NewAuditable("System")
 		err := pipelineService.pipelineRepository.Create(gormTransaction, pipelineEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -136,13 +136,13 @@ func (pipelineService *ServiceImpl) Create(ginContext *gin.Context, createPipeli
 
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
-func (pipelineService *ServiceImpl) Update(ginContext *gin.Context, updatePipelineDto *model.UpdatePipelineDto) {
-	valErr := pipelineService.validatorService.ValidateStruct(updatePipelineDto)
-	pipelineService.validatorService.ParseValidationError(valErr, *updatePipelineDto)
+func (pipelineService *ServiceImpl) Update(ginContext *gin.Context, updatePipelineRequest *model.UpdatePipelineRequest) {
+	valErr := pipelineService.validatorService.ValidateStruct(updatePipelineRequest)
+	pipelineService.validatorService.ParseValidationError(valErr, *updatePipelineRequest)
 	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		pipeline, err := pipelineService.pipelineRepository.FindById(gormTransaction, updatePipelineDto.Id)
+		pipeline, err := pipelineService.pipelineRepository.FindById(gormTransaction, updatePipelineRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mapper.MapUpdatePipelineDtoIntoPipelineEntity(updatePipelineDto, pipeline)
+		mapper.MapUpdatePipelineRequestIntoPipelineEntity(updatePipelineRequest, pipeline)
 		err = pipelineService.pipelineRepository.Update(gormTransaction, pipeline)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
@@ -150,11 +150,11 @@ func (pipelineService *ServiceImpl) Update(ginContext *gin.Context, updatePipeli
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (pipelineService *ServiceImpl) Delete(ginContext *gin.Context, deletePipelineDto *model.DeletePipelineDto) {
-	valErr := pipelineService.validatorService.ValidateStruct(deletePipelineDto)
-	pipelineService.validatorService.ParseValidationError(valErr, *deletePipelineDto)
+func (pipelineService *ServiceImpl) Delete(ginContext *gin.Context, deletePipelineRequest *model.DeletePipelineRequest) {
+	valErr := pipelineService.validatorService.ValidateStruct(deletePipelineRequest)
+	pipelineService.validatorService.ParseValidationError(valErr, *deletePipelineRequest)
 	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := pipelineService.pipelineRepository.Delete(gormTransaction, deletePipelineDto.ID)
+		err := pipelineService.pipelineRepository.Delete(gormTransaction, deletePipelineRequest.ID)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil

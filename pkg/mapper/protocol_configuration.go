@@ -33,13 +33,13 @@ func MapProtocolConfigurationEntitiesIntoProtocolConfigurationResponses(nodeEnti
 	return nodeResponses
 }
 
-func MapCreateProtocolConfigurationDtoIntoProtocolConfigurationEntity(createProtocolConfigurationDto *model.CreateProtocolConfigurationDto) *entity.ProtocolConfiguration {
+func MapCreateProtocolConfigurationRequestIntoProtocolConfigurationEntity(createProtocolConfigurationRequest *model.CreateProtocolConfigurationRequest) *entity.ProtocolConfiguration {
 	var nodeEntity entity.ProtocolConfiguration
-	err := mapstructure.Decode(createProtocolConfigurationDto, &nodeEntity)
+	err := mapstructure.Decode(createProtocolConfigurationRequest, &nodeEntity)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &nodeEntity
 }
 
-func MapUpdateProtocolConfigurationDtoIntoProtocolConfigurationEntity(updateProtocolConfigurationDto *model.UpdateProtocolConfigurationDto, nodeEntity *entity.ProtocolConfiguration) {
-	helper.DecoderConfigMapper(updateProtocolConfigurationDto, &nodeEntity)
+func MapUpdateProtocolConfigurationRequestIntoProtocolConfigurationEntity(updateProtocolConfigurationRequest *model.UpdateProtocolConfigurationRequest, nodeEntity *entity.ProtocolConfiguration) {
+	helper.DecoderConfigMapper(updateProtocolConfigurationRequest, &nodeEntity)
 }

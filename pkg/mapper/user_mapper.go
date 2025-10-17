@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-func MapJwtClaimIntoUserClaim(jwtClaim jwt.MapClaims) (*model.JwtClaimDto, error) {
-	var userClaim model.JwtClaimDto
+func MapJwtClaimIntoUserClaim(jwtClaim jwt.MapClaims) (*model.JwtClaimRequest, error) {
+	var userClaim model.JwtClaimRequest
 	err := mapstructure.Decode(jwtClaim, &userClaim)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &userClaim, nil
@@ -42,13 +42,13 @@ func MapUserEntitiesIntoUserResponses(userEntities []entity.User) []*model.UserR
 	return userResponses
 }
 
-func MapCreateUserDtoIntoUserEntity(createUserDto *model.CreateUserDto) *entity.User {
+func MapCreateUserRequestIntoUserEntity(createUserRequest *model.CreateUserRequest) *entity.User {
 	var userEntity entity.User
-	err := mapstructure.Decode(createUserDto, &userEntity)
+	err := mapstructure.Decode(createUserRequest, &userEntity)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &userEntity
 }
 
-func MapUpdateUserDtoIntoUserEntity(updateUserDto *model.UpdateUserDto, userEntity *entity.User) {
-	helper.DecoderConfigMapper(updateUserDto, &userEntity)
+func MapUpdateUserRequestIntoUserEntity(updateUserRequest *model.UpdateUserRequest, userEntity *entity.User) {
+	helper.DecoderConfigMapper(updateUserRequest, &userEntity)
 }

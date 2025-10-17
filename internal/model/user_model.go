@@ -1,6 +1,6 @@
 package model
 
-type JwtClaimDto struct {
+type JwtClaimRequest struct {
 	Email    *string `json:"email" mapstructure:"email"`
 	Username *string `json:"username" mapstructure:"username"`
 	Role     string  `json:"role" mapstructure:"role"`
@@ -15,14 +15,14 @@ type UserResponse struct {
 	UpdatedAt string `json:"updated_at" mapstructure:"-"`
 }
 
-type CreateUserDto struct {
+type CreateUserRequest struct {
 	Username    string `json:"username" validate:"required"`
 	Email       string `json:"email" validate:"required,email"`
 	Password    string `json:"password" validate:"required"`
 	UserGroupId int    `json:"user_group_id" validate:"required,number"`
 }
 
-type UpdateUserDto struct {
+type UpdateUserRequest struct {
 	Id          uint64 `json:"id" validate:"required,number"`
 	Username    string `json:"username" validate:"required"`
 	Email       string `json:"email" validate:"required,email"`
@@ -30,11 +30,11 @@ type UpdateUserDto struct {
 	UserGroupId int    `json:"user_group_id" validate:"required,number"`
 }
 
-type DeleteUserDto struct {
+type DeleteUserRequest struct {
 	Id uint64 `json:"id" validate:"required,number"`
 }
 
-type LoginUserDto struct {
+type LoginUserRequest struct {
 	UserIdentifier string `json:"user_identifier" validate:"required"`
 	Password       string `json:"password" validate:"required"`
 }

@@ -1,6 +1,6 @@
 package model
 
-type CreatePipelineNodeDto struct {
+type CreatePipelineNodeRequest struct {
 	TempID      string         `json:"temp_id"` // id VueFlow
 	NodeID      uint64         `json:"node_id"`
 	Type        string         `json:"type"`
@@ -11,7 +11,7 @@ type CreatePipelineNodeDto struct {
 	Description string         `json:"description"`
 }
 
-type UpdatePipelineNodeDto struct {
+type UpdatePipelineNodeRequest struct {
 	Id          uint64                 `json:"id"`
 	Name        string                 `json:"name"`
 	Description string                 `json:"description"`

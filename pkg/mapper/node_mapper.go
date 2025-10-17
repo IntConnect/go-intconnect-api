@@ -32,13 +32,13 @@ func MapNodeEntitiesIntoNodeResponses(nodeEntities []entity.Node) []*model.NodeR
 	return nodeResponses
 }
 
-func MapCreateNodeDtoIntoNodeEntity(createNodeDto *model.CreateNodeDto) *entity.Node {
+func MapCreateNodeRequestIntoNodeEntity(createNodeRequest *model.CreateNodeRequest) *entity.Node {
 	var nodeEntity entity.Node
-	err := mapstructure.Decode(createNodeDto, &nodeEntity)
+	err := mapstructure.Decode(createNodeRequest, &nodeEntity)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &nodeEntity
 }
 
-func MapUpdateNodeDtoIntoNodeEntity(updateNodeDto *model.UpdateNodeDto, nodeEntity *entity.Node) {
-	helper.DecoderConfigMapper(updateNodeDto, &nodeEntity)
+func MapUpdateNodeRequestIntoNodeEntity(updateNodeRequest *model.UpdateNodeRequest, nodeEntity *entity.Node) {
+	helper.DecoderConfigMapper(updateNodeRequest, &nodeEntity)
 }

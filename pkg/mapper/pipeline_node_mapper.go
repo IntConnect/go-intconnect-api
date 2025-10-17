@@ -11,31 +11,31 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
-func MapCreatePipelineNodeDtosIntoPipelineNodeEntities(createPipelineNodeDtos []model.CreatePipelineNodeDto) []*entity.PipelineNode {
+func MapCreatePipelineNodeRequestsIntoPipelineNodeEntities(createPipelineNodeRequests []model.CreatePipelineNodeRequest) []*entity.PipelineNode {
 	var pipelineNodeEntities []*entity.PipelineNode
-	for _, createPipelineNodeDto := range createPipelineNodeDtos {
-		pipelineNodeEntities = append(pipelineNodeEntities, MapCreatePipelineNodeDtoIntoPipelineNodeEntity(createPipelineNodeDto))
+	for _, createPipelineNodeRequest := range createPipelineNodeRequests {
+		pipelineNodeEntities = append(pipelineNodeEntities, MapCreatePipelineNodeRequestIntoPipelineNodeEntity(createPipelineNodeRequest))
 	}
 	return pipelineNodeEntities
 }
 
-func MapCreatePipelineNodeDtoIntoPipelineNodeEntity(createPipelineNodeDto model.CreatePipelineNodeDto) *entity.PipelineNode {
+func MapCreatePipelineNodeRequestIntoPipelineNodeEntity(createPipelineNodeRequest model.CreatePipelineNodeRequest) *entity.PipelineNode {
 	var pipelineNodeEntity entity.PipelineNode
-	err := mapstructure.Decode(createPipelineNodeDto, &pipelineNodeEntity)
+	err := mapstructure.Decode(createPipelineNodeRequest, &pipelineNodeEntity)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 
 	// Paksa konversi jadi value, bukan pointer
-	pipelineNodeEntity.NodeId = uint64(createPipelineNodeDto.NodeID)
-	pipelineNodeEntity.Type = createPipelineNodeDto.Type
-	pipelineNodeEntity.Label = createPipelineNodeDto.Label
-	pipelineNodeEntity.PositionX = createPipelineNodeDto.PositionX
-	pipelineNodeEntity.PositionY = createPipelineNodeDto.PositionY
-	pipelineNodeEntity.TempId = createPipelineNodeDto.TempID
-	pipelineNodeEntity.Config = createPipelineNodeDto.Config
+	pipelineNodeEntity.NodeId = uint64(createPipelineNodeRequest.NodeID)
+	pipelineNodeEntity.Type = createPipelineNodeRequest.Type
+	pipelineNodeEntity.Label = createPipelineNodeRequest.Label
+	pipelineNodeEntity.PositionX = createPipelineNodeRequest.PositionX
+	pipelineNodeEntity.PositionY = createPipelineNodeRequest.PositionY
+	pipelineNodeEntity.TempId = createPipelineNodeRequest.TempID
+	pipelineNodeEntity.Config = createPipelineNodeRequest.Config
 
 	// Optional jika ada config
-	if createPipelineNodeDto.Config != nil {
-		jsonBytes, err := json.Marshal(createPipelineNodeDto.Config)
+	if createPipelineNodeRequest.Config != nil {
+		jsonBytes, err := json.Marshal(createPipelineNodeRequest.Config)
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, "invalid config json", err))
 		pipelineNodeEntity.ConfigRaw = jsonBytes
 	}

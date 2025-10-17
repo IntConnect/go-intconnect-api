@@ -25,16 +25,16 @@ func MapPipelineEntitiesIntoPipelineResponses(pipelineEntities []entity.Pipeline
 	return pipelineResponses
 }
 
-func MapCreatePipelineDtoIntoPipelineEntity(createPipelineDto *model.CreatePipelineDto) *entity.Pipeline {
+func MapCreatePipelineRequestIntoPipelineEntity(createPipelineRequest *model.CreatePipelineRequest) *entity.Pipeline {
 	var pipelineEntity entity.Pipeline
-	err := mapstructure.Decode(createPipelineDto, &pipelineEntity)
+	err := mapstructure.Decode(createPipelineRequest, &pipelineEntity)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	pipelineEntity.PipelineNode = MapCreatePipelineNodeDtosIntoPipelineNodeEntities(createPipelineDto.Nodes)
-	pipelineEntity.PipelineEdge = MapCreatePipelineEdgeDtosIntoPipelineEdgeEntities(createPipelineDto.Edges)
-	pipelineEntity.Config = createPipelineDto.Config
+	pipelineEntity.PipelineNode = MapCreatePipelineNodeRequestsIntoPipelineNodeEntities(createPipelineRequest.Nodes)
+	pipelineEntity.PipelineEdge = MapCreatePipelineEdgeRequestsIntoPipelineEdgeEntities(createPipelineRequest.Edges)
+	pipelineEntity.Config = createPipelineRequest.Config
 	return &pipelineEntity
 }
 
-func MapUpdatePipelineDtoIntoPipelineEntity(updatePipelineDto *model.UpdatePipelineDto, pipelineEntity *entity.Pipeline) {
-	helper.DecoderConfigMapper(updatePipelineDto, &pipelineEntity)
+func MapUpdatePipelineRequestIntoPipelineEntity(updatePipelineRequest *model.UpdatePipelineRequest, pipelineEntity *entity.Pipeline) {
+	helper.DecoderConfigMapper(updatePipelineRequest, &pipelineEntity)
 }

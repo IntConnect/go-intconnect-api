@@ -32,16 +32,16 @@ func NewService(nodeRepository Repository, validatorService validator.Service, d
 }
 
 func (nodeService *ServiceImpl) FindAll() []*model.NodeResponse {
-	var nodeResponsesDto []*model.NodeResponse
+	var nodeResponsesRequest []*model.NodeResponse
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		nodeEntities, err := nodeService.nodeRepository.FindAll(gormTransaction)
 		fmt.Println(nodeEntities)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		nodeResponsesDto = mapper.MapNodeEntitiesIntoNodeResponses(nodeEntities)
+		nodeResponsesRequest = mapper.MapNodeEntitiesIntoNodeResponses(nodeEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return nodeResponsesDto
+	return nodeResponsesRequest
 }
 
 func (nodeService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.NodeResponse] {
@@ -70,11 +70,11 @@ func (nodeService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 }
 
 // Create - Membuat node baru
-func (nodeService *ServiceImpl) Create(ginContext *gin.Context, createNodeDto *model.CreateNodeDto) {
-	valErr := nodeService.validatorService.ValidateStruct(createNodeDto)
-	nodeService.validatorService.ParseValidationError(valErr, *createNodeDto)
+func (nodeService *ServiceImpl) Create(ginContext *gin.Context, createNodeRequest *model.CreateNodeRequest) {
+	valErr := nodeService.validatorService.ValidateStruct(createNodeRequest)
+	nodeService.validatorService.ParseValidationError(valErr, *createNodeRequest)
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		nodeEntity := mapper.MapCreateNodeDtoIntoNodeEntity(createNodeDto)
+		nodeEntity := mapper.MapCreateNodeRequestIntoNodeEntity(createNodeRequest)
 		err := nodeService.nodeRepository.Create(gormTransaction, nodeEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
@@ -83,13 +83,13 @@ func (nodeService *ServiceImpl) Create(ginContext *gin.Context, createNodeDto *m
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (nodeService *ServiceImpl) Update(ginContext *gin.Context, updateNodeDto *model.UpdateNodeDto) {
-	valErr := nodeService.validatorService.ValidateStruct(updateNodeDto)
-	nodeService.validatorService.ParseValidationError(valErr, *updateNodeDto)
+func (nodeService *ServiceImpl) Update(ginContext *gin.Context, updateNodeRequest *model.UpdateNodeRequest) {
+	valErr := nodeService.validatorService.ValidateStruct(updateNodeRequest)
+	nodeService.validatorService.ParseValidationError(valErr, *updateNodeRequest)
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		node, err := nodeService.nodeRepository.FindById(gormTransaction, updateNodeDto.Id)
+		node, err := nodeService.nodeRepository.FindById(gormTransaction, updateNodeRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mapper.MapUpdateNodeDtoIntoNodeEntity(updateNodeDto, node)
+		mapper.MapUpdateNodeRequestIntoNodeEntity(updateNodeRequest, node)
 		err = nodeService.nodeRepository.Update(gormTransaction, node)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
@@ -97,11 +97,11 @@ func (nodeService *ServiceImpl) Update(ginContext *gin.Context, updateNodeDto *m
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (nodeService *ServiceImpl) Delete(ginContext *gin.Context, deleteNodeDto *model.DeleteNodeDto) {
-	valErr := nodeService.validatorService.ValidateStruct(deleteNodeDto)
-	nodeService.validatorService.ParseValidationError(valErr, *deleteNodeDto)
+func (nodeService *ServiceImpl) Delete(ginContext *gin.Context, deleteNodeRequest *model.DeleteNodeRequest) {
+	valErr := nodeService.validatorService.ValidateStruct(deleteNodeRequest)
+	nodeService.validatorService.ParseValidationError(valErr, *deleteNodeRequest)
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := nodeService.nodeRepository.Delete(gormTransaction, deleteNodeDto.Id)
+		err := nodeService.nodeRepository.Delete(gormTransaction, deleteNodeRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil

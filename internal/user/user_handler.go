@@ -43,17 +43,17 @@ func (userHandler *Handler) FindAllUserPagination(ginContext *gin.Context) {
 }
 
 func (userHandler *Handler) LoginUser(ginContext *gin.Context) {
-	var loginUserDto model.LoginUserDto
-	err := ginContext.ShouldBindBodyWithJSON(&loginUserDto)
+	var loginUserRequest model.LoginUserRequest
+	err := ginContext.ShouldBindBodyWithJSON(&loginUserRequest)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	generatedToken := userHandler.userService.HandleLogin(ginContext, &loginUserDto)
+	generatedToken := userHandler.userService.HandleLogin(ginContext, &loginUserRequest)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User logged successfully", gin.H{
 		"token": generatedToken,
 	}))
 }
 
 func (userHandler *Handler) CreateUser(ginContext *gin.Context) {
-	var createUserModel model.CreateUserDto
+	var createUserModel model.CreateUserRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createUserModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userHandler.userService.Create(ginContext, &createUserModel)
@@ -61,7 +61,7 @@ func (userHandler *Handler) CreateUser(ginContext *gin.Context) {
 }
 
 func (userHandler *Handler) UpdateUser(ginContext *gin.Context) {
-	var updateUserModel model.UpdateUserDto
+	var updateUserModel model.UpdateUserRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateUserModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userHandler.userService.Update(ginContext, &updateUserModel)
@@ -69,7 +69,7 @@ func (userHandler *Handler) UpdateUser(ginContext *gin.Context) {
 }
 
 func (userHandler *Handler) DeleteUser(ginContext *gin.Context) {
-	var deleteBomModel model.DeleteUserDto
+	var deleteBomModel model.DeleteUserRequest
 	currencyId := ginContext.Param("id")
 	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))

@@ -43,7 +43,7 @@ func (nodeHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 }
 
 func (nodeHandler *Handler) CreateNode(ginContext *gin.Context) {
-	var createNodeModel model.CreateNodeDto
+	var createNodeModel model.CreateNodeRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createNodeModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	nodeHandler.nodeService.Create(ginContext, &createNodeModel)
@@ -51,7 +51,7 @@ func (nodeHandler *Handler) CreateNode(ginContext *gin.Context) {
 }
 
 func (nodeHandler *Handler) UpdateNode(ginContext *gin.Context) {
-	var updateNodeModel model.UpdateNodeDto
+	var updateNodeModel model.UpdateNodeRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateNodeModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	nodeHandler.nodeService.Update(ginContext, &updateNodeModel)
@@ -59,7 +59,7 @@ func (nodeHandler *Handler) UpdateNode(ginContext *gin.Context) {
 }
 
 func (nodeHandler *Handler) DeleteNode(ginContext *gin.Context) {
-	var deleteBomModel model.DeleteNodeDto
+	var deleteBomModel model.DeleteNodeRequest
 	currencyId := ginContext.Param("id")
 	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))

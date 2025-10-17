@@ -21,7 +21,7 @@ func IsAdminMiddleware() gin.HandlerFunc {
 		}
 
 		// Konversi claims ke struct userJwtClaim
-		userClaim, ok := claims.(*model.JwtClaimDto)
+		userClaim, ok := claims.(*model.JwtClaimRequest)
 		if !ok {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusForbidden, "Invalid token claim", errors.New("invalid token claims")))
 			return

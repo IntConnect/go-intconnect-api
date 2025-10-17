@@ -10,17 +10,17 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
-func MapCreatePipelineEdgeDtosIntoPipelineEdgeEntities(createPipelineEdgeDtos []model.CreatePipelineEdgeDto) []*entity.PipelineEdge {
+func MapCreatePipelineEdgeRequestsIntoPipelineEdgeEntities(createPipelineEdgeRequests []model.CreatePipelineEdgeRequest) []*entity.PipelineEdge {
 	var pipelineEdgeEntities []*entity.PipelineEdge
-	for _, createPipelineEdgeDto := range createPipelineEdgeDtos {
-		pipelineEdgeEntities = append(pipelineEdgeEntities, MapCreatePipelineEdgeDtoIntoPipelineEdgeEntity(createPipelineEdgeDto))
+	for _, createPipelineEdgeRequest := range createPipelineEdgeRequests {
+		pipelineEdgeEntities = append(pipelineEdgeEntities, MapCreatePipelineEdgeRequestIntoPipelineEdgeEntity(createPipelineEdgeRequest))
 	}
 	return pipelineEdgeEntities
 }
 
-func MapCreatePipelineEdgeDtoIntoPipelineEdgeEntity(createPipelineEdgeDto model.CreatePipelineEdgeDto) *entity.PipelineEdge {
+func MapCreatePipelineEdgeRequestIntoPipelineEdgeEntity(createPipelineEdgeRequest model.CreatePipelineEdgeRequest) *entity.PipelineEdge {
 	var pipelineEdgeEntity entity.PipelineEdge
-	err := mapstructure.Decode(createPipelineEdgeDto, &pipelineEdgeEntity)
+	err := mapstructure.Decode(createPipelineEdgeRequest, &pipelineEdgeEntity)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &pipelineEdgeEntity
 }

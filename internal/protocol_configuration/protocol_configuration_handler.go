@@ -44,7 +44,7 @@ func (protocolConfigurationHandler *Handler) FindAllPagination(ginContext *gin.C
 }
 
 func (protocolConfigurationHandler *Handler) CreateProtocolConfiguration(ginContext *gin.Context) {
-	var createProtocolConfigurationModel model.CreateProtocolConfigurationDto
+	var createProtocolConfigurationModel model.CreateProtocolConfigurationRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createProtocolConfigurationModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	protocolConfigurationHandler.protocolConfigurationService.Create(ginContext, &createProtocolConfigurationModel)
@@ -52,7 +52,7 @@ func (protocolConfigurationHandler *Handler) CreateProtocolConfiguration(ginCont
 }
 
 func (protocolConfigurationHandler *Handler) UpdateProtocolConfiguration(ginContext *gin.Context) {
-	var updateProtocolConfigurationModel model.UpdateProtocolConfigurationDto
+	var updateProtocolConfigurationModel model.UpdateProtocolConfigurationRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateProtocolConfigurationModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	protocolConfigurationHandler.protocolConfigurationService.Update(ginContext, &updateProtocolConfigurationModel)
@@ -60,7 +60,7 @@ func (protocolConfigurationHandler *Handler) UpdateProtocolConfiguration(ginCont
 }
 
 func (protocolConfigurationHandler *Handler) DeleteProtocolConfiguration(ginContext *gin.Context) {
-	var deleteBomModel model.DeleteProtocolConfigurationDto
+	var deleteBomModel model.DeleteProtocolConfigurationRequest
 	currencyId := ginContext.Param("id")
 	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))

@@ -1,15 +1,15 @@
 package model
 
-type CreatePipelineDto struct {
-	Name        string                  `json:"name"`
-	Description string                  `json:"description"`
-	IsActive    bool                    `json:"is_active"`
-	Config      map[string]interface{}  `json:"config"`
-	Nodes       []CreatePipelineNodeDto `json:"nodes" mapstructure:"-"`
-	Edges       []CreatePipelineEdgeDto `json:"edges" mapstructure:"-"`
+type CreatePipelineRequest struct {
+	Name        string                      `json:"name"`
+	Description string                      `json:"description"`
+	IsActive    bool                        `json:"is_active"`
+	Config      map[string]interface{}      `json:"config"`
+	Nodes       []CreatePipelineNodeRequest `json:"nodes" mapstructure:"-"`
+	Edges       []CreatePipelineEdgeRequest `json:"edges" mapstructure:"-"`
 }
 
-type UpdatePipelineDto struct {
+type UpdatePipelineRequest struct {
 	Id          uint64                 `json:"id"`
 	Name        string                 `json:"name"`
 	Description string                 `json:"description"`
@@ -26,6 +26,6 @@ type PipelineResponse struct {
 	*AuditableResponse `json:"auditable_response"`
 }
 
-type DeletePipelineDto struct {
+type DeletePipelineRequest struct {
 	ID uint64 `json:"id"`
 }
