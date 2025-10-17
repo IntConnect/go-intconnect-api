@@ -11,7 +11,8 @@ import (
 )
 
 func MapPipelineEntityIntoPipelineResponse(pipelineEntity *entity.Pipeline) *model.PipelineResponse {
-	pipelineResponse := helper.DecodeFromSource[*model.PipelineResponse](pipelineEntity)
+	var pipelineResponse *model.PipelineResponse
+	pipelineResponse = helper.DecodeFromSource[*model.PipelineResponse](pipelineEntity, pipelineResponse)
 	pipelineResponse.AuditableResponse = AuditableEntityIntoEntityResponse(&pipelineEntity.Auditable)
 	return pipelineResponse
 }
@@ -28,6 +29,9 @@ func MapCreatePipelineDtoIntoPipelineEntity(createPipelineDto *model.CreatePipel
 	var pipelineEntity entity.Pipeline
 	err := mapstructure.Decode(createPipelineDto, &pipelineEntity)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	pipelineEntity.PipelineNode = MapCreatePipelineNodeDtosIntoPipelineNodeEntities(createPipelineDto.Nodes)
+	pipelineEntity.PipelineEdge = MapCreatePipelineEdgeDtosIntoPipelineEdgeEntities(createPipelineDto.Edges)
+	pipelineEntity.Config = createPipelineDto.Config
 	return &pipelineEntity
 }
 

@@ -100,6 +100,9 @@ func main() {
 		injector.ProtectedRoutesModule,
 		injector.ValidatorModule,
 		injector.NodeModule,
+		injector.PipelineModule,
+		injector.PipelineEdgeModule,
+		injector.PipelineNodeModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

@@ -90,14 +90,14 @@ func CheckPointerWrapper[T any](targetChecking *T, renderPayload func()) {
 	}
 }
 
-func DecodeFromSource[T any](targetMapping interface{}) T {
+func DecodeFromSource[T any](sourceMapping interface{}, targetMapping T) T {
 	decoderConfig := &mapstructure.DecoderConfig{
 		DecodeHook: StringIntoTypeHookFunc,
 		Result:     &targetMapping,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
 	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	err = decoder.Decode(targetMapping)
+	err = decoder.Decode(sourceMapping)
 	return targetMapping
 
 }

@@ -2,6 +2,9 @@ package injector
 
 import (
 	"go-intconnect-api/internal/node"
+	"go-intconnect-api/internal/pipeline"
+	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
+	pipelineNode "go-intconnect-api/internal/pipeline_node"
 	"go-intconnect-api/internal/user"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/routes"
@@ -37,4 +40,18 @@ var NodeModule = fx.Module("nodeFeature",
 
 var ValidatorModule = fx.Module("validatorFeature",
 	fx.Provide(fx.Annotate(validator.NewService, fx.As(new(validator.Service)))),
+)
+
+var PipelineModule = fx.Module("pipelineFeature",
+	fx.Provide(fx.Annotate(pipeline.NewRepository, fx.As(new(pipeline.Repository)))),
+	fx.Provide(fx.Annotate(pipeline.NewService, fx.As(new(pipeline.Service)))),
+	fx.Provide(fx.Annotate(pipeline.NewHandler, fx.As(new(pipeline.Controller)))),
+)
+
+var PipelineNodeModule = fx.Module("pipelineNodeFeature",
+	fx.Provide(fx.Annotate(pipelineNode.NewRepository, fx.As(new(pipelineNode.Repository)))),
+)
+
+var PipelineEdgeModule = fx.Module("pipelineFeature",
+	fx.Provide(fx.Annotate(pipelineEdge.NewRepository, fx.As(new(pipelineEdge.Repository)))),
 )

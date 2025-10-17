@@ -7,7 +7,7 @@ import (
 )
 
 type Node struct {
-	ID               uint64                 `gorm:"column:id;primaryKey;autoIncrement"`
+	Id               uint64                 `gorm:"column:id;primaryKey;autoIncrement"`
 	Type             string                 `gorm:"column:type"`
 	Label            string                 `gorm:"column:label"`
 	Description      string                 `gorm:"column:description"`
@@ -15,8 +15,9 @@ type Node struct {
 	Color            string                 `gorm:"column:color"`
 	Icon             string                 `gorm:"column:icon"`
 	ComponentName    string                 `gorm:"column:component_name"`
-	DefaultConfig    map[string]interface{} `gorm:"-"`
-	DefaultConfigRaw []byte                 `gorm:"column:default_config;type:jsonb"`
+	DefaultConfig    map[string]interface{} `gorm:"-:all" mapstructure:"-"`
+	DefaultConfigRaw []byte                 `gorm:"column:config;type:jsonb" mapstructure:"-"`
+	PipelineNode     []PipelineNode         `gorm:"foreignKey:NodeId;references:Id;" mapstructure:"-"`
 	Auditable
 }
 

@@ -20,6 +20,12 @@ func (nodeRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]e
 	return nodeEntities, err
 }
 
+func (nodeRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, nodeIds []uint64) ([]entity.Node, error) {
+	var nodeEntities []entity.Node
+	err := gormTransaction.Where("id IN ?", nodeIds).Find(&nodeEntities).Error
+	return nodeEntities, err
+}
+
 func (nodeRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Node, int64, error) {
 	var nodeEntities []entity.Node
 	var totalItems int64
@@ -50,13 +56,13 @@ func (nodeRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, nod
 	return &nodeEntity, err
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) FindByName(currencyName string) *entity.Node {
+func (nodeRepositoryImpl *RepositoryImpl) FindByName(pipelineName string) *entity.Node {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, currencyEntity *entity.Node) error {
-	return gormTransaction.Model(currencyEntity).Create(currencyEntity).Error
+func (nodeRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineEntity *entity.Node) error {
+	return gormTransaction.Model(pipelineEntity).Create(pipelineEntity).Error
 
 }
 

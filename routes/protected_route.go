@@ -2,6 +2,7 @@ package routes
 
 import (
 	"go-intconnect-api/internal/node"
+	"go-intconnect-api/internal/pipeline"
 	"go-intconnect-api/internal/user"
 
 	"github.com/gin-gonic/gin"
@@ -9,10 +10,11 @@ import (
 )
 
 type ProtectedRoutes struct {
-	routerGroup    *gin.RouterGroup
-	viperConfig    *viper.Viper
-	userController user.Controller
-	nodeController node.Controller
+	routerGroup        *gin.RouterGroup
+	viperConfig        *viper.Viper
+	userController     user.Controller
+	nodeController     node.Controller
+	pipelineController pipeline.Controller
 }
 
 func NewProtectedRoutes(
@@ -21,15 +23,17 @@ func NewProtectedRoutes(
 
 	userController user.Controller,
 	nodeController node.Controller,
+	pipelineController pipeline.Controller,
 ) *ProtectedRoutes {
 	//routerGroup.Use(middleware.AuthMiddleware(viperConfig))
-
+	wrapperRouterGroup := routerGroup.Group("/api")
 	return &ProtectedRoutes{
-		routerGroup: routerGroup,
+		routerGroup: wrapperRouterGroup,
 		viperConfig: viperConfig,
 
-		userController: userController,
-		nodeController: nodeController,
+		userController:     userController,
+		nodeController:     nodeController,
+		pipelineController: pipelineController,
 	}
 }
 
@@ -52,7 +56,7 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	pipelineRouterGroup := protectedRoutes.routerGroup.Group("pipelines")
 	pipelineRouterGroup.GET("pagination", protectedRoutes.pipelineController.FindAllPagination)
 	pipelineRouterGroup.GET("", protectedRoutes.pipelineController.FindAll)
-	pipelineRouterGroup.POST("", protectedRoutes.pipelineController.CreateNode)
-	pipelineRouterGroup.PUT("", protectedRoutes.pipelineController.UpdateNode)
-	pipelineRouterGroup.DELETE("", protectedRoutes.pipelineController.DeleteNode)
+	pipelineRouterGroup.POST("", protectedRoutes.pipelineController.CreatePipeline)
+	pipelineRouterGroup.PUT("", protectedRoutes.pipelineController.UpdatePipeline)
+	pipelineRouterGroup.DELETE("", protectedRoutes.pipelineController.DeletePipeline)
 }
