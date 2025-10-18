@@ -31,10 +31,8 @@ func (pipelineNodeEntity *PipelineNode) AfterFind(gormTransaction *gorm.DB) (err
 }
 
 func (pipelineNodeEntity *PipelineNode) BeforeSave(gormTransaction *gorm.DB) (err error) {
-	fmt.Println("TRIGGERED")
 	if pipelineNodeEntity.Config != nil {
 		pipelineNodeEntity.ConfigRaw, err = json.Marshal(pipelineNodeEntity.Config)
 	}
-	fmt.Println(pipelineNodeEntity.ConfigRaw)
 	return
 }

@@ -1,7 +1,6 @@
 package pipeline_node
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 
 	"gorm.io/gorm"
@@ -16,7 +15,6 @@ func NewRepository() *RepositoryImpl {
 func (nodeRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.PipelineNode, error) {
 	var nodeEntities []entity.PipelineNode
 	err := gormTransaction.Find(&nodeEntities).Error
-	fmt.Println(nodeEntities)
 	return nodeEntities, err
 }
 
@@ -51,7 +49,6 @@ func (nodeRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, nod
 }
 
 func (nodeRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineNodeEntity *entity.PipelineNode) error {
-	fmt.Println(pipelineNodeEntity)
 	return gormTransaction.Create(pipelineNodeEntity).Error
 
 }

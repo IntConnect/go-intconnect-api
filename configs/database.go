@@ -26,7 +26,6 @@ func NewDatabaseConnection(databaseCredentials *DatabaseCredentials) *DatabaseCo
 
 func (dbConn *DatabaseConnection) GetDatabaseConnection() *gorm.DB {
 
-	fmt.Println(dbConn.databaseInstance)
 	if dbConn.databaseInstance == nil {
 		sqlDialect := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta",
 			dbConn.databaseCredentials.DatabaseUsername,

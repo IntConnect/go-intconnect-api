@@ -16,7 +16,6 @@ func NewRepository() *RepositoryImpl {
 func (nodeRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.PipelineEdge, error) {
 	var nodeEntities []entity.PipelineEdge
 	err := gormTransaction.Find(&nodeEntities).Error
-	fmt.Println(nodeEntities)
 	return nodeEntities, err
 }
 

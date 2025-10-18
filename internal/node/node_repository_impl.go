@@ -1,7 +1,6 @@
 package node
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 
 	"gorm.io/gorm"
@@ -16,7 +15,6 @@ func NewRepository() *RepositoryImpl {
 func (nodeRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Node, error) {
 	var nodeEntities []entity.Node
 	err := gormTransaction.Find(&nodeEntities).Error
-	fmt.Println(nodeEntities)
 	return nodeEntities, err
 }
 
