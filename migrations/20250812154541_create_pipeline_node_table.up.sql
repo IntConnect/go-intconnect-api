@@ -8,11 +8,5 @@ CREATE TABLE pipeline_nodes
     position_x  FLOAT,
     position_y  FLOAT,
     config      JSONB,                -- semua konfigurasi unik node (topic, QoS, dll)
-    description TEXT,
-    created_by  VARCHAR(255),
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_by  VARCHAR(255),
-    deleted_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_by  VARCHAR(255)
+    description TEXT
 );

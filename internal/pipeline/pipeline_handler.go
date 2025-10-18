@@ -37,6 +37,15 @@ func (pipelineHandler *Handler) FindById(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Pipeline has been fetched", pipelineResponses))
 }
 
+func (pipelineHandler *Handler) RunPipeline(ginContext *gin.Context) {
+	pipelineId := ginContext.Param("id")
+	parsedPipelineId, err := strconv.ParseUint(pipelineId, 10, 64)
+	if err != nil {
+	}
+	pipelineResponses := pipelineHandler.pipelineService.RunPipeline(ginContext, parsedPipelineId)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Pipeline has been fetched", pipelineResponses))
+}
+
 func (pipelineHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 	paginationReq := model.PaginationRequest{
 		Page:  1,

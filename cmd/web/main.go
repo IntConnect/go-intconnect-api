@@ -83,6 +83,23 @@ func NewDatabaseConnection(databaseCredentials *configs.DatabaseCredentials) *go
 	return databaseConnection.GetDatabaseConnection()
 }
 
+func NewRedisInstance(redisConfig configs.RedisConfig) *configs.RedisInstance {
+	redisInstance, err := configs.InitRedisInstance(redisConfig)
+	if err != nil {
+		panic(err)
+	}
+	return redisInstance
+}
+
+func NewRedisConfig() configs.RedisConfig {
+	return configs.RedisConfig{
+		IPAddress: "localhost:6379",
+		Password:  "",
+		Database:  0,
+	}
+
+}
+
 func main() {
 
 	fxContainer := fx.New(
@@ -92,8 +109,9 @@ func main() {
 			NewDatabaseCredentials,
 			NewDatabaseConnection,
 			configs.InitializeValidator,
-			// configs.NewDatabaseConnection, // kalau mau tambahkan DB
 			NewGinEngine,
+			NewRedisConfig,
+			NewRedisInstance,
 		),
 		injector.UserModule,
 		injector.AuthenticationRoutesModule,

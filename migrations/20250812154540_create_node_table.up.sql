@@ -2,6 +2,7 @@ CREATE TABLE nodes
 (
     id             SERIAL PRIMARY KEY NOT NULL,
     type           VARCHAR(255)       NOT NULL,
+    name           VARCHAR(255)       NOT NULL,
     label          VARCHAR(255)       NOT NULL,
     description    VARCHAR(255)       NOT NULL,
     help_text      TEXT               NOT NULL,

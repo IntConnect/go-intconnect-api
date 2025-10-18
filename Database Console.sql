@@ -3,11 +3,13 @@ DROP DATABASE IF EXISTS go_intconnect_system;
 CREATE DATABASE go_intconnect_system;
 
 
-INSERT INTO nodes (id, type, label, description, help_text, color, icon, component_name, default_config, created_by,
+INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, component_name, default_config,
+                   created_by,
                    deleted_at)
 VALUES (1,
         'input',
         'MQTT Source Input',
+        'mqtt_input',
         'Node to receive data from MQTT broker',
         'This node connects to an MQTT broker and receives data from a specified topic.',
         '#FF5733',
@@ -23,11 +25,13 @@ VALUES (1,
 
 -- Node 2: JSON Parser
 
-INSERT INTO nodes (id, type, label, description, help_text, color, icon, component_name, default_config, created_by,
+INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, component_name, default_config,
+                   created_by,
                    deleted_at)
 VALUES (2,
         'processor',
         'JSON Parser',
+        'json_parse',
         'Node to parse JSON data',
         'This node parses incoming JSON data and prepares it for further processing.',
         '#33FF57',
@@ -37,14 +41,15 @@ VALUES (2,
         'system',
         NULL);
 
-
 -- Node 3: MQTT Out
 
-INSERT INTO nodes (id, type, label, description, help_text, color, icon, component_name, default_config, created_by,
+INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, component_name, default_config,
+                   created_by,
                    deleted_at)
 VALUES (3,
         'output',
         'MQTT Sink Output',
+        'mqtt_output',
         'Node to send data to MQTT broker',
         'This node connects to an MQTT broker and sends processed data to a specified topic.',
         '#3357FF',
@@ -68,6 +73,9 @@ SELECT *
 FROM pipeline_nodes;
 
 
-DELETE FROM pipeline_edges;
-DELETE FROM pipeline_nodes;
-DELETE FROM pipelines;
+DELETE
+FROM pipeline_edges;
+DELETE
+FROM pipeline_nodes;
+DELETE
+FROM pipelines;

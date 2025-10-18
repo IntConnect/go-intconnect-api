@@ -58,6 +58,7 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	pipelineRouterGroup.GET("", protectedRoutes.pipelineController.FindAll)
 	pipelineRouterGroup.GET("/:id", protectedRoutes.pipelineController.FindById)
 	pipelineRouterGroup.POST("", protectedRoutes.pipelineController.CreatePipeline)
+	pipelineRouterGroup.GET("/run/:id", protectedRoutes.pipelineController.RunPipeline)
 	pipelineRouterGroup.PUT("", protectedRoutes.pipelineController.UpdatePipeline)
 	pipelineRouterGroup.DELETE("", protectedRoutes.pipelineController.DeletePipeline)
 }

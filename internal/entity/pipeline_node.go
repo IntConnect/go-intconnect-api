@@ -19,7 +19,6 @@ type PipelineNode struct {
 	ConfigRaw  []byte                 `gorm:"column:config;type:jsonb" mapstructure:"-"`
 	Pipeline   Pipeline               `gorm:"foreignKey:PipelineId;references:Id"`
 	Node       Node                   `gorm:"foreignKey:NodeId;references:Id"`
-	Auditable
 }
 
 func (pipelineNodeEntity *PipelineNode) AfterFind(gormTransaction *gorm.DB) (err error) {

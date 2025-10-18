@@ -39,5 +39,6 @@ func MapPipelineNodeEntityIntoPipelineNodeResponse(pipelineNodeEntity *entity.Pi
 	err := mapstructure.Decode(pipelineNodeEntity, &pipelineNodeResponse)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	pipelineNodeResponse.Config = pipelineNodeEntity.Config
+	pipelineNodeResponse.NodeResponse = MapNodeEntityIntoNodeResponse(&pipelineNodeEntity.Node)
 	return &pipelineNodeResponse
 }

@@ -43,6 +43,7 @@ func (pipelineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB,
 	var pipelineEntity entity.Pipeline
 	err := gormTransaction.
 		Preload("PipelineNode").
+		Preload("PipelineNode.Node").
 		Preload("PipelineEdge").
 		First(&pipelineEntity, "id = ?", pipelineId).Error
 

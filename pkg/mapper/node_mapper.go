@@ -1,12 +1,13 @@
 package mapper
 
 import (
-	"github.com/go-viper/mapstructure/v2"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"net/http"
+
+	"github.com/go-viper/mapstructure/v2"
 )
 
 func MapNodeEntityIntoNodeResponse(nodeEntity *entity.Node) *model.NodeResponse {

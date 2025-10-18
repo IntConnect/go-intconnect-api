@@ -1,7 +1,9 @@
 package pipeline
 
 import (
+	"encoding/json"
 	"fmt"
+	"go-intconnect-api/configs"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/node"
@@ -26,6 +28,7 @@ type ServiceImpl struct {
 	validatorService       validator.Service
 	dbConnection           *gorm.DB
 	viperConfig            *viper.Viper
+	redisInstance          *configs.RedisInstance
 }
 
 func NewService(pipelineRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
@@ -33,6 +36,7 @@ func NewService(pipelineRepository Repository, validatorService validator.Servic
 	pipelineNodeRepository pipelineNode.Repository,
 	pipelineEdgeRepository pipelineEdge.Repository,
 	nodeRepository node.Repository,
+	redisInstance *configs.RedisInstance,
 
 ) *ServiceImpl {
 	return &ServiceImpl{
@@ -43,6 +47,7 @@ func NewService(pipelineRepository Repository, validatorService validator.Servic
 		pipelineNodeRepository: pipelineNodeRepository,
 		pipelineEdgeRepository: pipelineEdgeRepository,
 		nodeRepository:         nodeRepository,
+		redisInstance:          redisInstance,
 	}
 }
 
@@ -67,6 +72,35 @@ func (pipelineService *ServiceImpl) FindById(ginContext *gin.Context, pipelineId
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return pipelineResponse
+}
+
+func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelineId uint64) *model.PipelineResponse {
+	var pipelineResponse *model.PipelineResponse
+	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		pipelineEntity, err := pipelineService.pipelineRepository.FindById(gormTransaction, pipelineId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		pipelineResponse = mapper.MapPipelineEntityIntoPipelineResponse(pipelineEntity)
+		fmt.Println(pipelineResponse.PipelineNode[0].NodeResponse.Name)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	// ✅ Publish ke Redis setelah data berhasil diambil
+	if pipelineService.redisInstance != nil && pipelineResponse != nil {
+		payload, err := json.Marshal(pipelineResponse)
+		if err != nil {
+			fmt.Printf("❌ Failed to marshal pipeline response: %v\n", err)
+		} else {
+			topic := fmt.Sprintf("pipeline")
+			if err := pipelineService.redisInstance.Publish(topic, string(payload)); err != nil {
+				fmt.Printf("❌ Failed to publish pipeline to Redis: %v\n", err)
+			} else {
+				fmt.Printf("📢 Published pipeline Id %d to topic '%s'\n", pipelineResponse.Id, topic)
+			}
+		}
+	} else {
+		fmt.Println("⚠️ Redis instance or pipeline response is nil, skipping publish")
+	}
 	return pipelineResponse
 }
 
@@ -124,7 +158,6 @@ func (pipelineService *ServiceImpl) Create(ginContext *gin.Context, createPipeli
 		for i := range pipelineEntity.PipelineNode {
 			pipelineNodeEntity := pipelineEntity.PipelineNode[i]
 			pipelineNodeEntity.PipelineId = pipelineEntity.Id
-			pipelineNodeEntity.Auditable = entity.NewAuditable("System")
 
 			err := pipelineService.pipelineNodeRepository.Create(gormTransaction, pipelineNodeEntity)
 			helper.CheckErrorOperation(err, exception.ParseGormError(err))

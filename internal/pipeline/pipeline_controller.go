@@ -9,4 +9,5 @@ type Controller interface {
 	CreatePipeline(ginContext *gin.Context)
 	DeletePipeline(ginContext *gin.Context)
 	UpdatePipeline(ginContext *gin.Context)
+	RunPipeline(ginContext *gin.Context)
 }

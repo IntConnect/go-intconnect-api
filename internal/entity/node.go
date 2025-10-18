@@ -11,6 +11,7 @@ type Node struct {
 	Type             string                 `gorm:"column:type"`
 	Label            string                 `gorm:"column:label"`
 	Description      string                 `gorm:"column:description"`
+	Name             string                 `gorm:"column:name"`
 	HelpText         string                 `gorm:"column:help_text"`
 	Color            string                 `gorm:"column:color"`
 	Icon             string                 `gorm:"column:icon"`
