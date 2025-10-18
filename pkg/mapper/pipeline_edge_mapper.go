@@ -22,5 +22,22 @@ func MapCreatePipelineEdgeRequestIntoPipelineEdgeEntity(createPipelineEdgeReques
 	var pipelineEdgeEntity entity.PipelineEdge
 	err := mapstructure.Decode(createPipelineEdgeRequest, &pipelineEdgeEntity)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	pipelineEdgeEntity.Data = createPipelineEdgeRequest.Data
 	return &pipelineEdgeEntity
+}
+
+func MapPipelineEdgeEntitiesIntoPipelineEdgeResponse(pipelineEdgeEntities []*entity.PipelineEdge) []*model.PipelineEdgeResponse {
+	var pipelineEdgeResponses []*model.PipelineEdgeResponse
+	for _, pipelineEdgeEntity := range pipelineEdgeEntities {
+		pipelineEdgeResponses = append(pipelineEdgeResponses, MapPipelineEdgeEntityIntoPipelineEdgeResponse(pipelineEdgeEntity))
+	}
+	return pipelineEdgeResponses
+}
+
+func MapPipelineEdgeEntityIntoPipelineEdgeResponse(pipelineEdgeEntity *entity.PipelineEdge) *model.PipelineEdgeResponse {
+	var pipelineEdgeResponse model.PipelineEdgeResponse
+	err := mapstructure.Decode(pipelineEdgeEntity, &pipelineEdgeResponse)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+
+	return &pipelineEdgeResponse
 }

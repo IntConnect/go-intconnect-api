@@ -10,10 +10,10 @@ type Pipeline struct {
 	Id           uint64                 `gorm:"column:id;primaryKey;autoIncrement"`
 	Name         string                 `gorm:"column:name"`
 	Description  string                 `gorm:"column:description"`
-	Config       map[string]interface{} `gorm:"-:all" mapstructure:"-"`
-	ConfigRaw    []byte                 `gorm:"column:config;type:jsonb" mapstructure:"-"`
-	PipelineNode []*PipelineNode        `gorm:"foreignKey:PipelineId;references:Id;" mapstructure:"-"`
-	PipelineEdge []*PipelineEdge        `gorm:"foreignKey:PipelineId;references:Id" mapstructure:"-"`
+	Config       map[string]interface{} `gorm:"-:all"`
+	ConfigRaw    []byte                 `gorm:"column:config;type:jsonb"`
+	PipelineNode []*PipelineNode        `gorm:"foreignKey:PipelineId;references:Id;"`
+	PipelineEdge []*PipelineEdge        `gorm:"foreignKey:PipelineId;references:Id"`
 	Auditable
 }
 

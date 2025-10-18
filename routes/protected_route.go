@@ -56,6 +56,7 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	pipelineRouterGroup := protectedRoutes.routerGroup.Group("pipelines")
 	pipelineRouterGroup.GET("pagination", protectedRoutes.pipelineController.FindAllPagination)
 	pipelineRouterGroup.GET("", protectedRoutes.pipelineController.FindAll)
+	pipelineRouterGroup.GET("/:id", protectedRoutes.pipelineController.FindById)
 	pipelineRouterGroup.POST("", protectedRoutes.pipelineController.CreatePipeline)
 	pipelineRouterGroup.PUT("", protectedRoutes.pipelineController.UpdatePipeline)
 	pipelineRouterGroup.DELETE("", protectedRoutes.pipelineController.DeletePipeline)

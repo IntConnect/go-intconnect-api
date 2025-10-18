@@ -1,7 +1,6 @@
 package pipeline
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 
 	"gorm.io/gorm"
@@ -13,21 +12,21 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Pipeline, error) {
-	var nodeEntities []entity.Pipeline
-	err := gormTransaction.Find(&nodeEntities).Error
-	fmt.Println(nodeEntities)
-	return nodeEntities, err
+func (pipelineRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.Pipeline, error) {
+	var pipelineEntities []*entity.Pipeline
+	err := gormTransaction.
+		Find(&pipelineEntities).Error
+	return pipelineEntities, err
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Pipeline, int64, error) {
-	var nodeEntities []entity.Pipeline
+func (pipelineRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]*entity.Pipeline, int64, error) {
+	var pipelineEntities []*entity.Pipeline
 	var totalItems int64
 
 	if searchQuery != "" {
 		// Add search condition
 		searchPattern := "%" + searchQuery + "%"
-		gormTransaction = gormTransaction.Where("nodename LIKE ? OR email LIKE ?  OR password = ?", searchPattern, searchPattern, searchPattern)
+		gormTransaction = gormTransaction.Where("name LIKE ? OR description LIKE ?", searchPattern, searchPattern, searchPattern)
 
 	}
 
@@ -35,30 +34,30 @@ func (nodeRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gor
 	err := gormTransaction.Model(&entity.Pipeline{}).
 		Preload("PipelineGroup", func(gormTx *gorm.DB) *gorm.DB {
 			return gormTx.Select("id, name")
-		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&nodeEntities).Error
+		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&pipelineEntities).Error
 	gormTransaction.Model(&entity.Pipeline{}).Count(&totalItems)
-	return nodeEntities, totalItems, err
+	return pipelineEntities, totalItems, err
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, nodeId uint64) (*entity.Pipeline, error) {
-	var nodeEntity entity.Pipeline
-	err := gormTransaction.Model(&entity.Pipeline{}).
-		Preload("PipelineGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Where("id = ?", nodeId).Find(&nodeEntity).Error
+func (pipelineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, pipelineId uint64) (*entity.Pipeline, error) {
+	var pipelineEntity entity.Pipeline
+	err := gormTransaction.
+		Preload("PipelineNode").
+		Preload("PipelineEdge").
+		First(&pipelineEntity, "id = ?", pipelineId).Error
 
-	return &nodeEntity, err
+	return &pipelineEntity, err
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineEntity *entity.Pipeline) error {
-	return gormTransaction.Omit("Config", "PipelineNode", "PipelineEdge").Create(pipelineEntity).Error
+func (pipelineRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineEntity *entity.Pipeline) error {
+	return gormTransaction.Omit("PipelineNode", "PipelineEdge").Create(pipelineEntity).Error
 
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, nodeEntity *entity.Pipeline) error {
-	return gormTransaction.Model(nodeEntity).Save(nodeEntity).Error
+func (pipelineRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, pipelineEntity *entity.Pipeline) error {
+	return gormTransaction.Model(pipelineEntity).Save(pipelineEntity).Error
 }
 
-func (nodeRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
+func (pipelineRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
 	return gormTransaction.Model(entity.Pipeline{}).Where("id = ?", id).Delete(entity.Pipeline{}).Error
 }

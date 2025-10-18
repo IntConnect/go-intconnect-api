@@ -58,6 +58,18 @@ func (pipelineService *ServiceImpl) FindAll() []*model.PipelineResponse {
 	return pipelineResponsesRequest
 }
 
+func (pipelineService *ServiceImpl) FindById(ginContext *gin.Context, pipelineId uint64) *model.PipelineResponse {
+	var pipelineResponse *model.PipelineResponse
+	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		pipelineEntities, err := pipelineService.pipelineRepository.FindById(gormTransaction, pipelineId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		pipelineResponse = mapper.MapPipelineEntityIntoPipelineResponse(pipelineEntities)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return pipelineResponse
+}
+
 func (pipelineService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.PipelineResponse] {
 	paginationResp := model.PaginationResponse[*model.PipelineResponse]{}
 	offsetVal := (paginationReq.Page - 1) * paginationReq.Size

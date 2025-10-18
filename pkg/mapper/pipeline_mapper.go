@@ -13,14 +13,16 @@ import (
 func MapPipelineEntityIntoPipelineResponse(pipelineEntity *entity.Pipeline) *model.PipelineResponse {
 	var pipelineResponse *model.PipelineResponse
 	pipelineResponse = helper.DecodeFromSource[*model.PipelineResponse](pipelineEntity, pipelineResponse)
+	pipelineResponse.PipelineNode = MapPipelineNodeEntitiesIntoPipelineNodeResponse(pipelineEntity.PipelineNode)
+	pipelineResponse.PipelineEdge = MapPipelineEdgeEntitiesIntoPipelineEdgeResponse(pipelineEntity.PipelineEdge)
 	pipelineResponse.AuditableResponse = AuditableEntityIntoEntityResponse(&pipelineEntity.Auditable)
 	return pipelineResponse
 }
 
-func MapPipelineEntitiesIntoPipelineResponses(pipelineEntities []entity.Pipeline) []*model.PipelineResponse {
+func MapPipelineEntitiesIntoPipelineResponses(pipelineEntities []*entity.Pipeline) []*model.PipelineResponse {
 	var pipelineResponses []*model.PipelineResponse
 	for _, pipelineEntity := range pipelineEntities {
-		pipelineResponses = append(pipelineResponses, MapPipelineEntityIntoPipelineResponse(&pipelineEntity))
+		pipelineResponses = append(pipelineResponses, MapPipelineEntityIntoPipelineResponse(pipelineEntity))
 	}
 	return pipelineResponses
 }

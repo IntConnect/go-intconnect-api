@@ -16,7 +16,7 @@ type PipelineNode struct {
 	Label      string                 `gorm:"column:label"`
 	PositionX  float64                `gorm:"column:position_x"`
 	PositionY  float64                `gorm:"column:position_y"`
-	Config     map[string]interface{} `gorm:"-:all" mapstructure:"-"` // Ignore in all operations
+	Config     map[string]interface{} `gorm:"-:all"` // Ignore in all operations
 	ConfigRaw  []byte                 `gorm:"column:config;type:jsonb" mapstructure:"-"`
 	Pipeline   Pipeline               `gorm:"foreignKey:PipelineId;references:Id"`
 	Node       Node                   `gorm:"foreignKey:NodeId;references:Id"`
@@ -35,5 +35,6 @@ func (pipelineNodeEntity *PipelineNode) BeforeSave(gormTransaction *gorm.DB) (er
 	if pipelineNodeEntity.Config != nil {
 		pipelineNodeEntity.ConfigRaw, err = json.Marshal(pipelineNodeEntity.Config)
 	}
+	fmt.Println(pipelineNodeEntity.ConfigRaw)
 	return
 }

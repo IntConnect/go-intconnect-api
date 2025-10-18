@@ -18,11 +18,13 @@ type UpdatePipelineRequest struct {
 }
 
 type PipelineResponse struct {
-	ID                 uint64                 `json:"id"`
-	Name               string                 `json:"name"`
-	Description        string                 `json:"description"`
-	Config             map[string]interface{} `json:"config"`
-	ConfigRaw          []byte                 `json:"config_raw"`
+	ID           uint64                  `json:"id"`
+	Name         string                  `json:"name"`
+	Description  string                  `json:"description"`
+	Config       map[string]interface{}  `json:"config"`
+	PipelineNode []*PipelineNodeResponse `json:"pipeline_node"`
+	PipelineEdge []*PipelineEdgeResponse `json:"pipeline_edge"`
+
 	*AuditableResponse `json:"auditable_response"`
 }
 

@@ -52,12 +52,12 @@ func (nodeRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, nod
 
 func (nodeRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineNodeEntity *entity.PipelineNode) error {
 	fmt.Println(pipelineNodeEntity)
-	return gormTransaction.Omit("Config", "ConfigRaw", "Pipeline", "Node").Create(pipelineNodeEntity).Error
+	return gormTransaction.Create(pipelineNodeEntity).Error
 
 }
 
 func (nodeRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, nodeEntity *entity.PipelineNode) error {
-	return gormTransaction.Omit("Config").Create(nodeEntity).Error
+	return gormTransaction.Create(nodeEntity).Error
 }
 
 func (nodeRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
