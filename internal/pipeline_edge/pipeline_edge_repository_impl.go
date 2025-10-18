@@ -1,7 +1,6 @@
 package pipeline_edge
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 
 	"gorm.io/gorm"
