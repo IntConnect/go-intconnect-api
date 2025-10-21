@@ -38,7 +38,14 @@ func MapPipelineNodeEntityIntoPipelineNodeResponse(pipelineNodeEntity *entity.Pi
 	var pipelineNodeResponse model.PipelineNodeResponse
 	err := mapstructure.Decode(pipelineNodeEntity, &pipelineNodeResponse)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	pipelineNodeResponse.Config = pipelineNodeEntity.Config
+	pipelineNodeResponse.Config = MapPipelineNodeConfigEntityIntoPipelineNodeConfigResponse(pipelineNodeEntity.Config)
 	pipelineNodeResponse.NodeResponse = MapNodeEntityIntoNodeResponse(&pipelineNodeEntity.Node)
 	return &pipelineNodeResponse
+}
+
+func MapPipelineNodeConfigEntityIntoPipelineNodeConfigResponse(pipelineNodeConfig map[string]interface{}) *model.PipelineNodeConfig {
+	var parsedPipelineNodeConfig *model.PipelineNodeConfig
+	err := mapstructure.Decode(pipelineNodeConfig, &parsedPipelineNodeConfig)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	return parsedPipelineNodeConfig
 }

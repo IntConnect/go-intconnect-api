@@ -26,13 +26,23 @@ type UpdatePipelineNodeRequest struct {
 }
 
 type PipelineNodeResponse struct {
-	Id           uint64         `json:"id"`
-	PipelineId   uint64         `json:"pipeline_id"`
-	NodeId       uint64         `json:"node_id"`
-	Type         string         `json:"type"`
-	Label        string         `json:"label"`
-	PositionX    float64        `json:"position_x"`
-	PositionY    float64        `json:"position_y"`
-	Config       map[string]any `json:"config"`
-	NodeResponse *NodeResponse  `json:"node_response"`
+	Id           uint64              `json:"id"`
+	PipelineId   uint64              `json:"pipeline_id"`
+	NodeId       uint64              `json:"node_id"`
+	Type         string              `json:"type"`
+	Label        string              `json:"label"`
+	PositionX    float64             `json:"position_x"`
+	PositionY    float64             `json:"position_y"`
+	Config       *PipelineNodeConfig `json:"config" mapstructure:"-"`
+	NodeResponse *NodeResponse       `json:"node_response"`
+}
+type PipelineNodeConfig struct {
+	QoS                           string `json:"qos"`
+	Name                          string `json:"name"`
+	Topic                         string `json:"topic"`
+	Action                        string `json:"action"`
+	Output                        string `json:"output"`
+	NodeTempId                    string `json:"node_id" mapstructure:"node_id"`
+	ProtocolConfigurationId       uint64 `json:"protocol_configuration_id" mapstructure:"protocol_configuration_id"`
+	ProtocolConfigurationResponse `json:"protocol_configuration_response" mapstructure:"protocol_configuration_response"`
 }

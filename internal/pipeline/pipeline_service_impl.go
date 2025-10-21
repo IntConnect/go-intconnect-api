@@ -9,11 +9,13 @@ import (
 	"go-intconnect-api/internal/node"
 	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
 	pipelineNode "go-intconnect-api/internal/pipeline_node"
+	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
 	"math"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -21,14 +23,15 @@ import (
 )
 
 type ServiceImpl struct {
-	pipelineRepository     Repository
-	pipelineNodeRepository pipelineNode.Repository
-	pipelineEdgeRepository pipelineEdge.Repository
-	nodeRepository         node.Repository
-	validatorService       validator.Service
-	dbConnection           *gorm.DB
-	viperConfig            *viper.Viper
-	redisInstance          *configs.RedisInstance
+	pipelineRepository              Repository
+	pipelineNodeRepository          pipelineNode.Repository
+	pipelineEdgeRepository          pipelineEdge.Repository
+	nodeRepository                  node.Repository
+	validatorService                validator.Service
+	dbConnection                    *gorm.DB
+	viperConfig                     *viper.Viper
+	redisInstance                   *configs.RedisInstance
+	protocolConfigurationRepository protocolConfiguration.Repository
 }
 
 func NewService(pipelineRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
@@ -37,17 +40,18 @@ func NewService(pipelineRepository Repository, validatorService validator.Servic
 	pipelineEdgeRepository pipelineEdge.Repository,
 	nodeRepository node.Repository,
 	redisInstance *configs.RedisInstance,
-
+	protocolConfigurationRepository protocolConfiguration.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
-		pipelineRepository:     pipelineRepository,
-		validatorService:       validatorService,
-		dbConnection:           dbConnection,
-		viperConfig:            viperConfig,
-		pipelineNodeRepository: pipelineNodeRepository,
-		pipelineEdgeRepository: pipelineEdgeRepository,
-		nodeRepository:         nodeRepository,
-		redisInstance:          redisInstance,
+		pipelineRepository:              pipelineRepository,
+		validatorService:                validatorService,
+		dbConnection:                    dbConnection,
+		viperConfig:                     viperConfig,
+		pipelineNodeRepository:          pipelineNodeRepository,
+		pipelineEdgeRepository:          pipelineEdgeRepository,
+		nodeRepository:                  nodeRepository,
+		redisInstance:                   redisInstance,
+		protocolConfigurationRepository: protocolConfigurationRepository,
 	}
 }
 
@@ -80,8 +84,36 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		pipelineEntity, err := pipelineService.pipelineRepository.FindById(gormTransaction, pipelineId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
 		pipelineResponse = mapper.MapPipelineEntityIntoPipelineResponse(pipelineEntity)
-		fmt.Println(pipelineResponse.PipelineNode[0].NodeResponse.Name)
+		var protocolConfigurationIds []uint64
+		for _, pipelineNodeResponse := range pipelineResponse.PipelineNode {
+			protocolConfigurationIds = append(protocolConfigurationIds, pipelineNodeResponse.Config.ProtocolConfigurationId)
+		}
+		protocolConfigurations, err := pipelineService.protocolConfigurationRepository.FindAllByIds(gormTransaction, protocolConfigurationIds)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		if len(protocolConfigurationIds) != len(protocolConfigurations) {
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "Some protocol configuration not found", nil))
+		}
+		protocolConfigMap := make(map[uint64]model.ProtocolConfigurationResponse)
+		for _, protocolConfigurationEntity := range protocolConfigurations {
+			protocolConfigMap[protocolConfigurationEntity.Id] = *mapper.MapProtocolConfigurationEntityIntoProtocolConfigurationResponse(&protocolConfigurationEntity)
+		}
+		// 4️⃣ Mapping tiap node dengan ProtocolConfiguration-nya
+		for _, pipelineNodeResponse := range pipelineResponse.PipelineNode {
+			cfgId := pipelineNodeResponse.Config.ProtocolConfigurationId
+			if cfgId == 0 {
+				continue // tidak semua node harus punya protocol configuration
+			}
+
+			if cfg, ok := protocolConfigMap[cfgId]; ok {
+				pipelineNodeResponse.Config.ProtocolConfigurationResponse = cfg
+			} else {
+				// kalau tidak ditemukan, bisa log atau skip
+				fmt.Printf("ProtocolConfiguration dengan ID %d tidak ditemukan\n", cfgId)
+			}
+		}
+		helper.DebugPrintArray(pipelineResponse.PipelineNode)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

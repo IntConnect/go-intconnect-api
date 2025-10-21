@@ -16,6 +16,7 @@ func MapPipelineEntityIntoPipelineResponse(pipelineEntity *entity.Pipeline) *mod
 	pipelineResponse.PipelineNode = MapPipelineNodeEntitiesIntoPipelineNodeResponse(pipelineEntity.PipelineNode)
 	pipelineResponse.PipelineEdge = MapPipelineEdgeEntitiesIntoPipelineEdgeResponse(pipelineEntity.PipelineEdge)
 	pipelineResponse.AuditableResponse = AuditableEntityIntoEntityResponse(&pipelineEntity.Auditable)
+
 	return pipelineResponse
 }
 

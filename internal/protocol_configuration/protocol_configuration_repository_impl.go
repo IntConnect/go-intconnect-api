@@ -18,6 +18,14 @@ func (protocolConfigurationRepositoryImpl *RepositoryImpl) FindAll(gormTransacti
 	return protocolConfigurationEntities, err
 }
 
+func (protocolConfigurationRepositoryImpl *RepositoryImpl) FindAllByIds(gormTransaction *gorm.DB, protocolConfigurationIds []uint64) ([]entity.ProtocolConfiguration, error) {
+	var protocolConfigurationEntities []entity.ProtocolConfiguration
+	err := gormTransaction.
+		Where("id IN ?", protocolConfigurationIds).
+		Find(&protocolConfigurationEntities).Error
+	return protocolConfigurationEntities, err
+}
+
 func (protocolConfigurationRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.ProtocolConfiguration, int64, error) {
 	var protocolConfigurationEntities []entity.ProtocolConfiguration
 	var totalItems int64

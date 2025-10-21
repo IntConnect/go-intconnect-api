@@ -14,4 +14,5 @@ type Repository interface {
 	Create(gormTransaction *gorm.DB, protocolConfigurationEntity *entity.ProtocolConfiguration) error
 	Update(gormTransaction *gorm.DB, protocolConfigurationEntity *entity.ProtocolConfiguration) error
 	Delete(gormTransaction *gorm.DB, protocolConfigurationId uint64) error
+	FindAllByIds(gormTransaction *gorm.DB, protocolConfigurationIds []uint64) ([]entity.ProtocolConfiguration, error)
 }
