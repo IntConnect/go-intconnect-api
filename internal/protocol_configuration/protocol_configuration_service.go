@@ -12,4 +12,5 @@ type Service interface {
 	FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.ProtocolConfigurationResponse]
 	Update(ginContext *gin.Context, updateProtocolConfigurationRequest *model.UpdateProtocolConfigurationRequest)
 	Delete(ginContext *gin.Context, deleteProtocolConfigurationRequest *model.DeleteProtocolConfigurationRequest)
+	FindById(ginContext *gin.Context, protocolConfigurationId uint64) *model.ProtocolConfigurationResponse
 }

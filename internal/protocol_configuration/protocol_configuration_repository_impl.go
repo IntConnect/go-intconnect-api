@@ -41,10 +41,7 @@ func (protocolConfigurationRepositoryImpl *RepositoryImpl) FindAllPagination(gor
 func (protocolConfigurationRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, protocolConfigurationId uint64) (*entity.ProtocolConfiguration, error) {
 	var protocolConfigurationEntity entity.ProtocolConfiguration
 	err := gormTransaction.Model(&entity.ProtocolConfiguration{}).
-		Preload("ProtocolConfigurationGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Where("id = ?", protocolConfigurationId).Find(&protocolConfigurationEntity).Error
-
+		Where("id = ?", protocolConfigurationId).Find(&protocolConfigurationEntity).Error
 	return &protocolConfigurationEntity, err
 }
 
@@ -54,7 +51,7 @@ func (protocolConfigurationRepositoryImpl *RepositoryImpl) FindByName(currencyNa
 }
 
 func (protocolConfigurationRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, currencyEntity *entity.ProtocolConfiguration) error {
-	return gormTransaction.Model(currencyEntity).Create(currencyEntity).Error
+	return gormTransaction.Create(currencyEntity).Error
 
 }
 

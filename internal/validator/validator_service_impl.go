@@ -1,13 +1,14 @@
 package validator
 
 import (
-	universalTranslator "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"go-intconnect-api/pkg/exception"
 	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
+
+	universalTranslator "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 )
 
 type ServiceImpl struct {

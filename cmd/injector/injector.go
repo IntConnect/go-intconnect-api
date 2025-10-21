@@ -5,6 +5,7 @@ import (
 	"go-intconnect-api/internal/pipeline"
 	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
 	pipelineNode "go-intconnect-api/internal/pipeline_node"
+	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	"go-intconnect-api/internal/user"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/routes"
@@ -46,6 +47,12 @@ var PipelineModule = fx.Module("pipelineFeature",
 	fx.Provide(fx.Annotate(pipeline.NewRepository, fx.As(new(pipeline.Repository)))),
 	fx.Provide(fx.Annotate(pipeline.NewService, fx.As(new(pipeline.Service)))),
 	fx.Provide(fx.Annotate(pipeline.NewHandler, fx.As(new(pipeline.Controller)))),
+)
+
+var PipelineConfigurationModule = fx.Module("pipelineConfigurationFeature",
+	fx.Provide(fx.Annotate(protocolConfiguration.NewRepository, fx.As(new(protocolConfiguration.Repository)))),
+	fx.Provide(fx.Annotate(protocolConfiguration.NewService, fx.As(new(protocolConfiguration.Service)))),
+	fx.Provide(fx.Annotate(protocolConfiguration.NewHandler, fx.As(new(protocolConfiguration.Controller)))),
 )
 
 var PipelineNodeModule = fx.Module("pipelineNodeFeature",

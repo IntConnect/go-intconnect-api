@@ -121,6 +121,7 @@ func main() {
 		injector.PipelineModule,
 		injector.PipelineEdgeModule,
 		injector.PipelineNodeModule,
+		injector.PipelineConfigurationModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

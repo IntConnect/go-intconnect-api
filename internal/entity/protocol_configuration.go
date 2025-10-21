@@ -7,25 +7,26 @@ import (
 )
 
 type ProtocolConfiguration struct {
-	Id                 uint64                 `gorm:"column:id;primaryKey;autoIncrement"`
-	Name               string                 `gorm:"column:id"`
-	Protocol           string                 `gorm:"column:protocol"`
-	Description        string                 `gorm:"column:description"`
-	SpecificSetting    map[string]interface{} `gorm:"column:-"`
-	SpecificSettingRaw []byte                 `gorm:"column:specific_setting"`
+	Id          uint64                 `gorm:"column:id;primaryKey;autoIncrement"`
+	Name        string                 `gorm:"column:name"`
+	Protocol    string                 `gorm:"column:protocol"`
+	Description string                 `gorm:"column:description"`
+	Config      map[string]interface{} `gorm:"-:all"`
+	ConfigRaw   []byte                 `gorm:"column:config"`
+	IsActive    bool                   `gorm:"column:is_active"`
 	Auditable
 }
 
 func (protocolConfigurationEntity *ProtocolConfiguration) AfterFind(gormTransaction *gorm.DB) (err error) {
-	if len(protocolConfigurationEntity.SpecificSettingRaw) > 0 {
-		err = json.Unmarshal(protocolConfigurationEntity.SpecificSettingRaw, &protocolConfigurationEntity.SpecificSetting)
+	if len(protocolConfigurationEntity.ConfigRaw) > 0 {
+		err = json.Unmarshal(protocolConfigurationEntity.ConfigRaw, &protocolConfigurationEntity.Config)
 	}
 	return
 }
 
 func (protocolConfigurationEntity *ProtocolConfiguration) BeforeSave(gormTransaction *gorm.DB) (err error) {
-	if protocolConfigurationEntity.SpecificSetting != nil {
-		protocolConfigurationEntity.SpecificSettingRaw, err = json.Marshal(protocolConfigurationEntity.SpecificSetting)
+	if protocolConfigurationEntity.Config != nil {
+		protocolConfigurationEntity.ConfigRaw, err = json.Marshal(protocolConfigurationEntity.Config)
 	}
 	return
 }

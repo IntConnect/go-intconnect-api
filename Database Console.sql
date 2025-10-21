@@ -16,9 +16,9 @@ VALUES (1,
         'tabler-database-heart',
         'MqttInModal',
         '{
-            "broker": "tcp://localhost:1883",
+            "action": "single_sub",
             "topic": "sensor/data",
-            "client_id": "mqtt_in_node_1"
+            "qos": "0", "output": "auto-detect-1", "name": "MQTT In"
         }',
         'system',
         NULL);

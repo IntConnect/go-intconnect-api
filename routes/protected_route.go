@@ -3,6 +3,7 @@ package routes
 import (
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/pipeline"
+	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	"go-intconnect-api/internal/user"
 
 	"github.com/gin-gonic/gin"
@@ -10,11 +11,12 @@ import (
 )
 
 type ProtectedRoutes struct {
-	routerGroup        *gin.RouterGroup
-	viperConfig        *viper.Viper
-	userController     user.Controller
-	nodeController     node.Controller
-	pipelineController pipeline.Controller
+	routerGroup                     *gin.RouterGroup
+	viperConfig                     *viper.Viper
+	userController                  user.Controller
+	nodeController                  node.Controller
+	pipelineController              pipeline.Controller
+	protocolConfigurationController protocolConfiguration.Controller
 }
 
 func NewProtectedRoutes(
@@ -24,6 +26,7 @@ func NewProtectedRoutes(
 	userController user.Controller,
 	nodeController node.Controller,
 	pipelineController pipeline.Controller,
+	protocolConfigurationController protocolConfiguration.Controller,
 ) *ProtectedRoutes {
 	//routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 	wrapperRouterGroup := routerGroup.Group("/api")
@@ -31,9 +34,10 @@ func NewProtectedRoutes(
 		routerGroup: wrapperRouterGroup,
 		viperConfig: viperConfig,
 
-		userController:     userController,
-		nodeController:     nodeController,
-		pipelineController: pipelineController,
+		userController:                  userController,
+		nodeController:                  nodeController,
+		pipelineController:              pipelineController,
+		protocolConfigurationController: protocolConfigurationController,
 	}
 }
 
@@ -61,4 +65,13 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	pipelineRouterGroup.GET("/run/:id", protectedRoutes.pipelineController.RunPipeline)
 	pipelineRouterGroup.PUT("", protectedRoutes.pipelineController.UpdatePipeline)
 	pipelineRouterGroup.DELETE("", protectedRoutes.pipelineController.DeletePipeline)
+
+	protocolConfigurationRouterGroup := protectedRoutes.routerGroup.Group("protocol-configurations")
+	protocolConfigurationRouterGroup.GET("pagination", protectedRoutes.protocolConfigurationController.FindAllPagination)
+	protocolConfigurationRouterGroup.GET("", protectedRoutes.protocolConfigurationController.FindAll)
+	protocolConfigurationRouterGroup.GET("/:id", protectedRoutes.protocolConfigurationController.FindById)
+	protocolConfigurationRouterGroup.POST("", protectedRoutes.protocolConfigurationController.CreateProtocolConfiguration)
+	protocolConfigurationRouterGroup.PUT("", protectedRoutes.protocolConfigurationController.UpdateProtocolConfiguration)
+	protocolConfigurationRouterGroup.DELETE("", protectedRoutes.protocolConfigurationController.DeleteProtocolConfiguration)
+
 }

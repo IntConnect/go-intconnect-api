@@ -28,6 +28,14 @@ func (protocolConfigurationHandler *Handler) FindAll(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ProtocolConfiguration has been fetched", protocolConfigurationResponses))
 }
 
+func (protocolConfigurationHandler *Handler) FindById(ginContext *gin.Context) {
+	protocolConfigurationId := ginContext.Param("id")
+	parsedProtocolConfigurationId, err := strconv.ParseUint(protocolConfigurationId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, "Supplied param not valid", nil))
+	protocolConfigurationResponses := protocolConfigurationHandler.protocolConfigurationService.FindById(ginContext, parsedProtocolConfigurationId)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ProtocolConfiguration has been fetched", protocolConfigurationResponses))
+}
+
 func (protocolConfigurationHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 	paginationReq := model.PaginationRequest{
 		Page:  1,
