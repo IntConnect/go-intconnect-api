@@ -48,8 +48,7 @@ func (protocolConfigurationRepositoryImpl *RepositoryImpl) FindAllPagination(gor
 
 func (protocolConfigurationRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, protocolConfigurationId uint64) (*entity.ProtocolConfiguration, error) {
 	var protocolConfigurationEntity entity.ProtocolConfiguration
-	err := gormTransaction.Model(&entity.ProtocolConfiguration{}).
-		Where("id = ?", protocolConfigurationId).Find(&protocolConfigurationEntity).Error
+	err := gormTransaction.Where("id = ?", protocolConfigurationId).Find(&protocolConfigurationEntity).Error
 	return &protocolConfigurationEntity, err
 }
 

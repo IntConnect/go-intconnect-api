@@ -31,7 +31,7 @@ INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, c
 VALUES (2,
         'processor',
         'JSON Parser',
-        'json_parse',
+        'json_parser',
         'Node to parse JSON data',
         'This node parses incoming JSON data and prepares it for further processing.',
         '#33FF57',
@@ -40,6 +40,7 @@ VALUES (2,
         '{}',
         'system',
         NULL);
+
 
 -- Node 3: MQTT Out
 
@@ -78,4 +79,6 @@ FROM pipeline_edges;
 DELETE
 FROM pipeline_nodes;
 DELETE
-FROM pipelines;
+FROM pipelines WHERE id = 5;
+DELETE
+FROM pipeline_nodes WHERE pipeline_id = 5;

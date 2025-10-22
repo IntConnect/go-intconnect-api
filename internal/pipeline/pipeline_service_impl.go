@@ -88,7 +88,11 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 		pipelineResponse = mapper.MapPipelineEntityIntoPipelineResponse(pipelineEntity)
 		var protocolConfigurationIds []uint64
 		for _, pipelineNodeResponse := range pipelineResponse.PipelineNode {
-			protocolConfigurationIds = append(protocolConfigurationIds, pipelineNodeResponse.Config.ProtocolConfigurationId)
+			protocolConfigurationId := pipelineNodeResponse.Config.ProtocolConfigurationId
+			if protocolConfigurationId == 0 {
+				continue
+			}
+			protocolConfigurationIds = append(protocolConfigurationIds, protocolConfigurationId)
 		}
 		protocolConfigurations, err := pipelineService.protocolConfigurationRepository.FindAllByIds(gormTransaction, protocolConfigurationIds)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -99,18 +103,19 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 		for _, protocolConfigurationEntity := range protocolConfigurations {
 			protocolConfigMap[protocolConfigurationEntity.Id] = *mapper.MapProtocolConfigurationEntityIntoProtocolConfigurationResponse(&protocolConfigurationEntity)
 		}
+		fmt.Println(protocolConfigMap)
 		// 4️⃣ Mapping tiap node dengan ProtocolConfiguration-nya
 		for _, pipelineNodeResponse := range pipelineResponse.PipelineNode {
-			cfgId := pipelineNodeResponse.Config.ProtocolConfigurationId
-			if cfgId == 0 {
+			protocolConfigurationId := pipelineNodeResponse.Config.ProtocolConfigurationId
+			if protocolConfigurationId == 0 {
 				continue // tidak semua node harus punya protocol configuration
 			}
 
-			if cfg, ok := protocolConfigMap[cfgId]; ok {
-				pipelineNodeResponse.Config.ProtocolConfigurationResponse = cfg
+			if protocolConfigurationResponse, ok := protocolConfigMap[protocolConfigurationId]; ok {
+				pipelineNodeResponse.Config.ProtocolConfigurationResponse = protocolConfigurationResponse
 			} else {
 				// kalau tidak ditemukan, bisa log atau skip
-				fmt.Printf("ProtocolConfiguration dengan ID %d tidak ditemukan\n", cfgId)
+				fmt.Printf("ProtocolConfiguration dengan ID %d tidak ditemukan\n", protocolConfigurationId)
 			}
 		}
 		helper.DebugPrintArray(pipelineResponse.PipelineNode)
