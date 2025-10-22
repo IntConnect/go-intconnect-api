@@ -103,7 +103,6 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 		for _, protocolConfigurationEntity := range protocolConfigurations {
 			protocolConfigMap[protocolConfigurationEntity.Id] = *mapper.MapProtocolConfigurationEntityIntoProtocolConfigurationResponse(&protocolConfigurationEntity)
 		}
-		fmt.Println(protocolConfigMap)
 		// 4️⃣ Mapping tiap node dengan ProtocolConfiguration-nya
 		for _, pipelineNodeResponse := range pipelineResponse.PipelineNode {
 			protocolConfigurationId := pipelineNodeResponse.Config.ProtocolConfigurationId

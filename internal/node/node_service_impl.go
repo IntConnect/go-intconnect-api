@@ -1,7 +1,6 @@
 package node
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -35,7 +34,6 @@ func (nodeService *ServiceImpl) FindAll() []*model.NodeResponse {
 	var nodeResponsesRequest []*model.NodeResponse
 	err := nodeService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		nodeEntities, err := nodeService.nodeRepository.FindAll(gormTransaction)
-		fmt.Println(nodeEntities)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		nodeResponsesRequest = mapper.MapNodeEntitiesIntoNodeResponses(nodeEntities)
 		return nil

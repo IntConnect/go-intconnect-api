@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
@@ -39,6 +40,7 @@ func MapPipelineNodeEntityIntoPipelineNodeResponse(pipelineNodeEntity *entity.Pi
 	err := mapstructure.Decode(pipelineNodeEntity, &pipelineNodeResponse)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	pipelineNodeResponse.Config = MapPipelineNodeConfigEntityIntoPipelineNodeConfigResponse(pipelineNodeEntity.Config)
+	pipelineNodeResponse.Appearance = MapPipelineNodeAppearanceEntityIntoPipelineNodeAppearanceResponse(pipelineNodeEntity.Appearance)
 	pipelineNodeResponse.NodeResponse = MapNodeEntityIntoNodeResponse(&pipelineNodeEntity.Node)
 	return &pipelineNodeResponse
 }
@@ -48,4 +50,12 @@ func MapPipelineNodeConfigEntityIntoPipelineNodeConfigResponse(pipelineNodeConfi
 	err := mapstructure.Decode(pipelineNodeConfig, &parsedPipelineNodeConfig)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return parsedPipelineNodeConfig
+}
+
+func MapPipelineNodeAppearanceEntityIntoPipelineNodeAppearanceResponse(pipelineNodeAppearance map[string]interface{}) *model.PipelineNodeAppearance {
+	var parsedPipelineNodeAppearance *model.PipelineNodeAppearance
+	err := mapstructure.Decode(pipelineNodeAppearance, &parsedPipelineNodeAppearance)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	fmt.Println(pipelineNodeAppearance, parsedPipelineNodeAppearance)
+	return parsedPipelineNodeAppearance
 }

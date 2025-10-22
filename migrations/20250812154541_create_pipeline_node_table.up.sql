@@ -8,5 +8,6 @@ CREATE TABLE pipeline_nodes
     position_x  FLOAT,
     position_y  FLOAT,
     config      JSONB,                -- semua konfigurasi unik node (topic, QoS, dll)
+    appearance  JSONB,
     description TEXT
 );

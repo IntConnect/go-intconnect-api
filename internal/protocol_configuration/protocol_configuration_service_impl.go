@@ -1,7 +1,6 @@
 package protocol_configuration
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -85,10 +84,8 @@ func (protocolConfigurationService *ServiceImpl) Create(ginContext *gin.Context,
 	valErr := protocolConfigurationService.validatorService.ValidateStruct(createProtocolConfigurationRequest)
 	protocolConfigurationService.validatorService.ParseValidationError(valErr, *createProtocolConfigurationRequest)
 	err := protocolConfigurationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		fmt.Println(createProtocolConfigurationRequest)
 
 		protocolConfigurationEntity := mapper.MapCreateProtocolConfigurationRequestIntoProtocolConfigurationEntity(createProtocolConfigurationRequest)
-		fmt.Println(protocolConfigurationEntity)
 		err := protocolConfigurationService.protocolConfigurationRepository.Create(gormTransaction, protocolConfigurationEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 

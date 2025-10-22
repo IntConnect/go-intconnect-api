@@ -1,7 +1,6 @@
 package mapper
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
@@ -22,7 +21,6 @@ func MapNodeEntityIntoNodeResponse(nodeEntity *entity.Node) *model.NodeResponse 
 func MapNodeEntitiesIntoNodeResponses(nodeEntities []entity.Node) []*model.NodeResponse {
 	var nodeResponses []*model.NodeResponse
 	for _, nodeEntity := range nodeEntities {
-		fmt.Println(nodeEntity.DefaultConfig)
 		nodeResponses = append(nodeResponses, MapNodeEntityIntoNodeResponse(&nodeEntity))
 	}
 	return nodeResponses
