@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	Create(ginContext *gin.Context, createProtocolConfigurationRequest *model.CreateProtocolConfigurationRequest)
+	Create(ginContext *gin.Context, createProtocolConfigurationRequest *model.CreateProtocolConfigurationRequest) []*model.ProtocolConfigurationResponse
 	FindAll() []*model.ProtocolConfigurationResponse
 	FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.ProtocolConfigurationResponse]
 	Update(ginContext *gin.Context, updateProtocolConfigurationRequest *model.UpdateProtocolConfigurationRequest)

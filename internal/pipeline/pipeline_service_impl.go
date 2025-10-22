@@ -86,13 +86,19 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		pipelineResponse = mapper.MapPipelineEntityIntoPipelineResponse(pipelineEntity)
-		var protocolConfigurationIds []uint64
+		protocolConfigurationIdMap := map[uint64]struct{}{}
 		for _, pipelineNodeResponse := range pipelineResponse.PipelineNode {
-			protocolConfigurationId := pipelineNodeResponse.Config.ProtocolConfigurationId
-			if protocolConfigurationId == 0 {
+			id := pipelineNodeResponse.Config.ProtocolConfigurationId
+			if id == 0 {
 				continue
 			}
-			protocolConfigurationIds = append(protocolConfigurationIds, protocolConfigurationId)
+			protocolConfigurationIdMap[id] = struct{}{}
+		}
+
+		// 2️⃣ Buat slice unik untuk query
+		var protocolConfigurationIds []uint64
+		for id := range protocolConfigurationIdMap {
+			protocolConfigurationIds = append(protocolConfigurationIds, id)
 		}
 		protocolConfigurations, err := pipelineService.protocolConfigurationRepository.FindAllByIds(gormTransaction, protocolConfigurationIds)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))

@@ -79,6 +79,6 @@ FROM pipeline_edges;
 DELETE
 FROM pipeline_nodes;
 DELETE
-FROM pipelines WHERE id = 5;
+FROM pipelines WHERE id = 1;
 DELETE
 FROM pipeline_nodes WHERE pipeline_id = 5;

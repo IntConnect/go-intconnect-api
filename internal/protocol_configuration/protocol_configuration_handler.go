@@ -55,8 +55,8 @@ func (protocolConfigurationHandler *Handler) CreateProtocolConfiguration(ginCont
 	var createProtocolConfigurationModel model.CreateProtocolConfigurationRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createProtocolConfigurationModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	protocolConfigurationHandler.protocolConfigurationService.Create(ginContext, &createProtocolConfigurationModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ProtocolConfiguration has been created", nil))
+	protocolConfigurationResponses := protocolConfigurationHandler.protocolConfigurationService.Create(ginContext, &createProtocolConfigurationModel)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ProtocolConfiguration has been created", protocolConfigurationResponses))
 }
 
 func (protocolConfigurationHandler *Handler) UpdateProtocolConfiguration(ginContext *gin.Context) {

@@ -40,7 +40,7 @@ type PipelineNodeResponse struct {
 	NodeResponse *NodeResponse           `json:"node_response"`
 }
 type PipelineNodeConfig struct {
-	QoS                           string `json:"qos"`
+	QoS                           uint64 `json:"qos"`
 	Name                          string `json:"name"`
 	Topic                         string `json:"topic"`
 	Action                        string `json:"action"`

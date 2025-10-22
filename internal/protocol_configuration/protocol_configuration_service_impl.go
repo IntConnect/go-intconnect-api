@@ -80,7 +80,7 @@ func (protocolConfigurationService *ServiceImpl) FindById(ginContext *gin.Contex
 }
 
 // Create - Membuat protocolConfiguration baru
-func (protocolConfigurationService *ServiceImpl) Create(ginContext *gin.Context, createProtocolConfigurationRequest *model.CreateProtocolConfigurationRequest) {
+func (protocolConfigurationService *ServiceImpl) Create(ginContext *gin.Context, createProtocolConfigurationRequest *model.CreateProtocolConfigurationRequest) []*model.ProtocolConfigurationResponse {
 	valErr := protocolConfigurationService.validatorService.ValidateStruct(createProtocolConfigurationRequest)
 	protocolConfigurationService.validatorService.ParseValidationError(valErr, *createProtocolConfigurationRequest)
 	err := protocolConfigurationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -92,6 +92,9 @@ func (protocolConfigurationService *ServiceImpl) Create(ginContext *gin.Context,
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+	protocolConfigurationResponses := protocolConfigurationService.FindAll()
+	return protocolConfigurationResponses
 }
 
 func (protocolConfigurationService *ServiceImpl) Update(ginContext *gin.Context, updateProtocolConfigurationRequest *model.UpdateProtocolConfigurationRequest) {
