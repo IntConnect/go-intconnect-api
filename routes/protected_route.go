@@ -1,6 +1,7 @@
 package routes
 
 import (
+	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/pipeline"
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
@@ -17,6 +18,7 @@ type ProtectedRoutes struct {
 	nodeController                  node.Controller
 	pipelineController              pipeline.Controller
 	protocolConfigurationController protocolConfiguration.Controller
+	databaseConnectionController    databaseConnection.Controller
 }
 
 func NewProtectedRoutes(
@@ -27,6 +29,7 @@ func NewProtectedRoutes(
 	nodeController node.Controller,
 	pipelineController pipeline.Controller,
 	protocolConfigurationController protocolConfiguration.Controller,
+	databaseConnectionController databaseConnection.Controller,
 ) *ProtectedRoutes {
 	//routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 	wrapperRouterGroup := routerGroup.Group("/api")
@@ -38,6 +41,7 @@ func NewProtectedRoutes(
 		nodeController:                  nodeController,
 		pipelineController:              pipelineController,
 		protocolConfigurationController: protocolConfigurationController,
+		databaseConnectionController:    databaseConnectionController,
 	}
 }
 
@@ -73,5 +77,14 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	protocolConfigurationRouterGroup.POST("", protectedRoutes.protocolConfigurationController.CreateProtocolConfiguration)
 	protocolConfigurationRouterGroup.PUT("", protectedRoutes.protocolConfigurationController.UpdateProtocolConfiguration)
 	protocolConfigurationRouterGroup.DELETE("", protectedRoutes.protocolConfigurationController.DeleteProtocolConfiguration)
+
+	databaseConnectionRouterGroup := protectedRoutes.routerGroup.Group("database-connections")
+	databaseConnectionRouterGroup.GET("pagination", protectedRoutes.databaseConnectionController.FindAllPagination)
+	databaseConnectionRouterGroup.GET("", protectedRoutes.databaseConnectionController.FindAll)
+	databaseConnectionRouterGroup.GET("/:id", protectedRoutes.databaseConnectionController.FindById)
+	databaseConnectionRouterGroup.POST("", protectedRoutes.databaseConnectionController.CreateDatabaseConnection)
+	databaseConnectionRouterGroup.POST("schema/:id", protectedRoutes.databaseConnectionController.CreateDatabaseSchema)
+	databaseConnectionRouterGroup.PUT("", protectedRoutes.databaseConnectionController.UpdateDatabaseConnection)
+	databaseConnectionRouterGroup.DELETE("", protectedRoutes.databaseConnectionController.DeleteDatabaseConnection)
 
 }

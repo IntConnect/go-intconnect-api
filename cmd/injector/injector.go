@@ -1,6 +1,7 @@
 package injector
 
 import (
+	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/pipeline"
 	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
@@ -53,6 +54,12 @@ var PipelineConfigurationModule = fx.Module("pipelineConfigurationFeature",
 	fx.Provide(fx.Annotate(protocolConfiguration.NewRepository, fx.As(new(protocolConfiguration.Repository)))),
 	fx.Provide(fx.Annotate(protocolConfiguration.NewService, fx.As(new(protocolConfiguration.Service)))),
 	fx.Provide(fx.Annotate(protocolConfiguration.NewHandler, fx.As(new(protocolConfiguration.Controller)))),
+)
+
+var DatabaseConnectionModule = fx.Module("databaseConnectionFeature",
+	fx.Provide(fx.Annotate(databaseConnection.NewRepository, fx.As(new(databaseConnection.Repository)))),
+	fx.Provide(fx.Annotate(databaseConnection.NewService, fx.As(new(databaseConnection.Service)))),
+	fx.Provide(fx.Annotate(databaseConnection.NewHandler, fx.As(new(databaseConnection.Controller)))),
 )
 
 var PipelineNodeModule = fx.Module("pipelineNodeFeature",

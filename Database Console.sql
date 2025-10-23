@@ -72,6 +72,8 @@ SELECT *
 FROM pipelines;
 SELECT *
 FROM pipeline_nodes;
+SELECT *
+FROM database_connections;
 
 
 DELETE
@@ -79,6 +81,5 @@ FROM pipeline_edges;
 DELETE
 FROM pipeline_nodes;
 DELETE
-FROM pipelines WHERE id = 1;
-DELETE
-FROM pipeline_nodes WHERE pipeline_id = 5;
+FROM database_connections;
+
