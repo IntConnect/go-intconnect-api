@@ -13,4 +13,5 @@ type Repository interface {
 	Create(gormTransaction *gorm.DB, pipelineNodeEntity *entity.PipelineNode) error
 	Update(gormTransaction *gorm.DB, pipelineNodeEntity *entity.PipelineNode) error
 	Delete(gormTransaction *gorm.DB, pipelineNodeId uint64) error
+	DeleteByPipelineId(gormTransaction *gorm.DB, pipelineId uint64) error
 }

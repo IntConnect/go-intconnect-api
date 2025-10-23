@@ -226,14 +226,60 @@ func (pipelineService *ServiceImpl) Create(ginContext *gin.Context, createPipeli
 func (pipelineService *ServiceImpl) Update(ginContext *gin.Context, updatePipelineRequest *model.UpdatePipelineRequest) {
 	valErr := pipelineService.validatorService.ValidateStruct(updatePipelineRequest)
 	pipelineService.validatorService.ParseValidationError(valErr, *updatePipelineRequest)
+
 	err := pipelineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		pipeline, err := pipelineService.pipelineRepository.FindById(gormTransaction, updatePipelineRequest.Id)
+		pipelineEntity, err := pipelineService.pipelineRepository.FindById(gormTransaction, updatePipelineRequest.Id)
+		pipelineEntity.Auditable = entity.UpdateAuditable("System")
+		err = pipelineService.pipelineEdgeRepository.DeleteByPipelineId(gormTransaction, pipelineEntity.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mapper.MapUpdatePipelineRequestIntoPipelineEntity(updatePipelineRequest, pipeline)
-		err = pipelineService.pipelineRepository.Update(gormTransaction, pipeline)
+
+		err = pipelineService.pipelineNodeRepository.DeleteByPipelineId(gormTransaction, pipelineEntity.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+		updatedPipelineEntity := mapper.MapUpdatePipelineRequestIntoPipelineEntity(updatePipelineRequest)
+		updatedPipelineEntity.Auditable = entity.UpdateAuditable("System")
+		err = pipelineService.pipelineRepository.Update(gormTransaction, updatedPipelineEntity)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+		mapOfTemporaryIdWithDatabaseId := map[string]uint64{}
+		var nodeIds []uint64
+
+		for i := range updatedPipelineEntity.PipelineNode {
+			nodeIds = append(nodeIds, pipelineEntity.PipelineNode[i].NodeId)
+		}
+
+		nodeEntities, err := pipelineService.nodeRepository.FindBatchById(gormTransaction, nodeIds)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+		if len(nodeEntities) != len(nodeIds) {
+			return fmt.Errorf("not all nodes found: expected %d, got %d", len(nodeIds), len(nodeEntities))
+		}
+
+		// ✅ Fixed: Use index to work with pointers
+		for i := range updatedPipelineEntity.PipelineNode {
+			pipelineNodeEntity := pipelineEntity.PipelineNode[i]
+			pipelineNodeEntity.PipelineId = pipelineEntity.Id
+
+			err := pipelineService.pipelineNodeRepository.Create(gormTransaction, pipelineNodeEntity)
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+			mapOfTemporaryIdWithDatabaseId[pipelineNodeEntity.TempId] = pipelineNodeEntity.Id
+		}
+
+		// ✅ Fixed: Same for edges
+		for i := range updatedPipelineEntity.PipelineEdge {
+			pipelineEdgeEntity := pipelineEntity.PipelineEdge[i]
+			pipelineEdgeEntity.PipelineId = pipelineEntity.Id
+			pipelineEdgeEntity.SourceNodeId = mapOfTemporaryIdWithDatabaseId[pipelineEdgeEntity.SourceNodeTempId]
+			pipelineEdgeEntity.TargetNodeId = mapOfTemporaryIdWithDatabaseId[pipelineEdgeEntity.TargetNodeTempId]
+
+			err := pipelineService.pipelineEdgeRepository.Create(gormTransaction, pipelineEdgeEntity)
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		}
+
 		return nil
 	})
+
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 

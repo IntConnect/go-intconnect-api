@@ -38,6 +38,12 @@ func MapCreatePipelineRequestIntoPipelineEntity(createPipelineRequest *model.Cre
 	return &pipelineEntity
 }
 
-func MapUpdatePipelineRequestIntoPipelineEntity(updatePipelineRequest *model.UpdatePipelineRequest, pipelineEntity *entity.Pipeline) {
-	helper.DecoderConfigMapper(updatePipelineRequest, &pipelineEntity)
+func MapUpdatePipelineRequestIntoPipelineEntity(createPipelineRequest *model.UpdatePipelineRequest) *entity.Pipeline {
+	var pipelineEntity entity.Pipeline
+	err := mapstructure.Decode(createPipelineRequest, &pipelineEntity)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	pipelineEntity.PipelineNode = MapCreatePipelineNodeRequestsIntoPipelineNodeEntities(createPipelineRequest.Nodes)
+	pipelineEntity.PipelineEdge = MapCreatePipelineEdgeRequestsIntoPipelineEdgeEntities(createPipelineRequest.Edges)
+	pipelineEntity.Config = createPipelineRequest.Config
+	return &pipelineEntity
 }

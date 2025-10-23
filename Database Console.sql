@@ -60,6 +60,22 @@ VALUES (3,
         'system',
         NULL);
 
+INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, component_name, default_config,
+                   created_by,
+                   deleted_at)
+VALUES (4,
+        'output',
+        'Database Sink Output',
+        'db_output',
+        'Node to send data to database',
+        'This node send to an database',
+        '#3357FF',
+        'tabler-database-heart',
+        'DatabaseModal',
+        '{}',
+        'system',
+        NULL);
+
 SELECT *
 FROM users;
 SELECT *

@@ -56,7 +56,7 @@ func (pipelineRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, p
 }
 
 func (pipelineRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, pipelineEntity *entity.Pipeline) error {
-	return gormTransaction.Model(pipelineEntity).Save(pipelineEntity).Error
+	return gormTransaction.Omit("PipelineNode", "PipelineEdge").Updates(pipelineEntity).Error
 }
 
 func (pipelineRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {

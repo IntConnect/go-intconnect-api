@@ -60,3 +60,7 @@ func (nodeRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, nodeE
 func (nodeRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
 	return gormTransaction.Model(entity.PipelineEdge{}).Where("id = ?", id).Delete(entity.PipelineEdge{}).Error
 }
+
+func (nodeRepositoryImpl *RepositoryImpl) DeleteByPipelineId(gormTransaction *gorm.DB, pipelineEdgeId uint64) error {
+	return gormTransaction.Model(entity.PipelineEdge{}).Where("pipeline_id = ?", pipelineEdgeId).Delete(entity.PipelineEdge{}).Error
+}
