@@ -89,6 +89,8 @@ FROM pipelines;
 SELECT *
 FROM pipeline_nodes;
 SELECT *
+FROM pipeline_edges;
+SELECT *
 FROM database_connections;
 
 
@@ -97,5 +99,5 @@ FROM pipeline_edges;
 DELETE
 FROM pipeline_nodes;
 DELETE
-FROM database_connections;
+FROM pipelines;
 

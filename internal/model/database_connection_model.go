@@ -1,13 +1,14 @@
 package model
 
 type DatabaseConnectionResponse struct {
-	Id                uint64                            `json:"id"`
-	Name              string                            `json:"name"`
-	DatabaseType      string                            `json:"database_type"`
-	DatabaseName      string                            `json:"database_name"`
-	Description       string                            `json:"description"`
-	Config            *DatabaseConnectionConfigResponse `json:"config" mapstructure:"-"`
-	AuditableResponse *AuditableResponse                `json:"auditable_response" mapstructure:"-"`
+	Id           uint64                            `json:"id"`
+	Name         string                            `json:"name"`
+	DatabaseType string                            `json:"database_type"`
+	DatabaseName string                            `json:"database_name"`
+	Description  string                            `json:"description"`
+	Config       *DatabaseConnectionConfigResponse `json:"config" mapstructure:"-"`
+	//Tables[]          `json:"table"`
+	AuditableResponse *AuditableResponse `json:"auditable_response" mapstructure:"-"`
 }
 
 type CreateDatabaseConnectionRequest struct {
@@ -36,4 +37,11 @@ type DatabaseConnectionConfigResponse struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Database string `json:"database"`
+}
+
+type DatabaseTableResponse struct {
+	Name string `json:"name"`
+}
+
+type DatabaseColumnResponse struct {
 }

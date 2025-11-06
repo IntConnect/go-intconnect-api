@@ -1,6 +1,7 @@
 package database_connection
 
 import (
+	"database/sql"
 	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
@@ -8,6 +9,7 @@ import (
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
 	"go-intconnect-api/utils"
+	"log"
 	"math"
 	"strings"
 
@@ -38,8 +40,76 @@ func (databaseConnectionService *ServiceImpl) FindAll() []*model.DatabaseConnect
 	err := databaseConnectionService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		databaseConnectionResponse, err := databaseConnectionService.databaseConnectionRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		fmt.Println(databaseConnectionResponse)
 		allDatabaseConnection = mapper.MapDatabaseConnectionEntitiesIntoDatabaseConnectionResponses(databaseConnectionResponse)
+		for _, databaseConnection := range allDatabaseConnection {
+			dynamicDatabaseConnection, err := utils.NewDynamicDatabaseConnection(databaseConnection)
+			if err != nil {
+
+			}
+			dynamicDatabaseConnection.Exec("")
+			switch databaseConnection.DatabaseType {
+			case "postgresql":
+				rows, err := dynamicDatabaseConnection.Raw(`
+				SELECT 
+					c.table_name,
+					c.column_name,
+					c.data_type,
+					c.is_nullable,
+					c.column_default
+				FROM information_schema.columns c
+				JOIN information_schema.tables t
+				  ON c.table_name = t.table_name
+				WHERE t.table_schema = 'public'
+				ORDER BY c.table_name, c.ordinal_position;
+				`).Rows()
+				if err != nil {
+					log.Println("❌ Error fetching schema:", err)
+					continue
+				}
+				defer rows.Close()
+
+				type TableColumn struct {
+					TableName     string
+					ColumnName    string
+					DataType      string
+					IsNullable    string
+					ColumnDefault sql.NullString
+				}
+
+				schemas := map[string][]TableColumn{}
+				for rows.Next() {
+					var col TableColumn
+					rows.Scan(&col.TableName, &col.ColumnName, &col.DataType, &col.IsNullable, &col.ColumnDefault)
+					schemas[col.TableName] = append(schemas[col.TableName], col)
+				}
+
+				for table, columns := range schemas {
+					fmt.Printf("📋 Table: %s\n", table)
+					for _, c := range columns {
+						fmt.Printf("  - %s (%s) nullable:%s default:%v\n", c.ColumnName, c.DataType, c.IsNullable, c.ColumnDefault.String)
+					}
+				}
+
+				break
+			case "mysql":
+				allRows, err := dynamicDatabaseConnection.Raw("SHOW TABLES").Rows()
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer allRows.Close()
+
+				var tables []string
+				for allRows.Next() {
+					var tableName string
+					allRows.Scan(&tableName)
+					tables = append(tables, tableName)
+				}
+
+				fmt.Println("📋 Tables:", tables)
+				break
+			}
+
+		}
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
