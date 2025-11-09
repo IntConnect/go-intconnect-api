@@ -37,81 +37,112 @@ func NewService(databaseConnectionRepository Repository, validatorService valida
 
 func (databaseConnectionService *ServiceImpl) FindAll() []*model.DatabaseConnectionResponse {
 	var allDatabaseConnection []*model.DatabaseConnectionResponse
+
 	err := databaseConnectionService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		databaseConnectionResponse, err := databaseConnectionService.databaseConnectionRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		allDatabaseConnection = mapper.MapDatabaseConnectionEntitiesIntoDatabaseConnectionResponses(databaseConnectionResponse)
-		for _, databaseConnection := range allDatabaseConnection {
-			dynamicDatabaseConnection, err := utils.NewDynamicDatabaseConnection(databaseConnection)
-			if err != nil {
 
+		for _, dbConn := range allDatabaseConnection {
+			dynamicDB, err := utils.NewDynamicDatabaseConnection(dbConn)
+			fmt.Println(dynamicDB, err)
+			if err != nil {
+				log.Printf("❌ Failed to connect to %s: %v", dbConn.Name, err)
+				continue
 			}
-			dynamicDatabaseConnection.Exec("")
-			switch databaseConnection.DatabaseType {
+
+			switch dbConn.DatabaseType {
 			case "postgresql":
-				rows, err := dynamicDatabaseConnection.Raw(`
-				SELECT 
-					c.table_name,
-					c.column_name,
-					c.data_type,
-					c.is_nullable,
-					c.column_default
-				FROM information_schema.columns c
-				JOIN information_schema.tables t
-				  ON c.table_name = t.table_name
-				WHERE t.table_schema = 'public'
-				ORDER BY c.table_name, c.ordinal_position;
+				rows, err := dynamicDB.Raw(`
+					SELECT 
+						c.table_name,
+						c.column_name,
+						c.data_type,
+						c.is_nullable,
+						c.column_default
+					FROM information_schema.columns c
+					JOIN information_schema.tables t
+					  ON c.table_name = t.table_name
+					WHERE t.table_schema = 'public'
+					ORDER BY c.table_name, c.ordinal_position;
 				`).Rows()
+				fmt.Println(rows.Next(), err)
 				if err != nil {
-					log.Println("❌ Error fetching schema:", err)
+					log.Println("❌ Error fetching PostgreSQL schema:", err)
 					continue
 				}
 				defer rows.Close()
 
-				type TableColumn struct {
-					TableName     string
-					ColumnName    string
-					DataType      string
-					IsNullable    string
-					ColumnDefault sql.NullString
-				}
-
-				schemas := map[string][]TableColumn{}
+				schemas := map[string][]model.TableColumn{}
 				for rows.Next() {
-					var col TableColumn
-					rows.Scan(&col.TableName, &col.ColumnName, &col.DataType, &col.IsNullable, &col.ColumnDefault)
+					var col model.TableColumn
+					if err := rows.Scan(&col.TableName, &col.ColumnName, &col.DataType, &col.IsNullable, &col.ColumnDefault); err != nil {
+						log.Println("⚠️ Scan error:", err)
+						continue
+					}
+					fmt.Println(col)
 					schemas[col.TableName] = append(schemas[col.TableName], col)
 				}
 
-				for table, columns := range schemas {
-					fmt.Printf("📋 Table: %s\n", table)
-					for _, c := range columns {
-						fmt.Printf("  - %s (%s) nullable:%s default:%v\n", c.ColumnName, c.DataType, c.IsNullable, c.ColumnDefault.String)
-					}
+				// Simpan schema ke response
+				var allSchemas []model.TableSchema
+				for tableName, cols := range schemas {
+					allSchemas = append(allSchemas, model.TableSchema{
+						TableName: tableName,
+						Columns:   cols,
+					})
+				}
+				dbConn.Schemas = allSchemas
+
+			case "mysql":
+				tableRows, err := dynamicDB.Raw("SHOW TABLES").Rows()
+				if err != nil {
+					log.Println("❌ Error fetching MySQL tables:", err)
+					continue
 				}
 
-				break
-			case "mysql":
-				allRows, err := dynamicDatabaseConnection.Raw("SHOW TABLES").Rows()
-				if err != nil {
-					log.Fatal(err)
-				}
-				defer allRows.Close()
+				defer tableRows.Close()
 
 				var tables []string
-				for allRows.Next() {
-					var tableName string
-					allRows.Scan(&tableName)
-					tables = append(tables, tableName)
+				for tableRows.Next() {
+					var t string
+					tableRows.Scan(&t)
+					tables = append(tables, t)
 				}
 
-				fmt.Println("📋 Tables:", tables)
-				break
-			}
+				var allSchemas []model.TableSchema
+				for _, table := range tables {
+					colRows, err := dynamicDB.Raw(fmt.Sprintf("SHOW COLUMNS FROM `%s`", table)).Rows()
+					if err != nil {
+						log.Println("❌ Error fetching columns for table:", table, err)
+						continue
+					}
+					defer colRows.Close()
 
+					var columns []model.TableColumn
+					for colRows.Next() {
+						var field, colType, nullable, key, defaultValue, extra sql.NullString
+						colRows.Scan(&field, &colType, &nullable, &key, &defaultValue, &extra)
+						columns = append(columns, model.TableColumn{
+							ColumnName:    field.String,
+							DataType:      colType.String,
+							IsNullable:    nullable.String,
+							ColumnDefault: defaultValue,
+						})
+					}
+					allSchemas = append(allSchemas, model.TableSchema{
+						TableName: table,
+						Columns:   columns,
+					})
+				}
+
+				dbConn.Schemas = allSchemas
+			}
 		}
+
 		return nil
 	})
+
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return allDatabaseConnection
 }
@@ -183,7 +214,7 @@ func (databaseConnectionService *ServiceImpl) CreateSchema(ginContext *gin.Conte
 
 		var stringBuilder strings.Builder
 
-		stringBuilder.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", databaseConnectionResponse.DatabaseName))
+		stringBuilder.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", databaseConnectionResponse.Config.Database))
 
 		for i, databaseColumn := range createDatabaseSchemaRequest.Columns {
 			stringBuilder.WriteString(fmt.Sprintf("%s %s", databaseColumn.Name, databaseColumn.Type))

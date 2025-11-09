@@ -1,7 +1,6 @@
 package mapper
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
@@ -56,6 +55,5 @@ func MapPipelineNodeAppearanceEntityIntoPipelineNodeAppearanceResponse(pipelineN
 	var parsedPipelineNodeAppearance *model.PipelineNodeAppearance
 	err := mapstructure.Decode(pipelineNodeAppearance, &parsedPipelineNodeAppearance)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	fmt.Println(pipelineNodeAppearance, parsedPipelineNodeAppearance)
 	return parsedPipelineNodeAppearance
 }

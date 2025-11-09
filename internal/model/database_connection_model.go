@@ -1,14 +1,14 @@
 package model
 
+import "database/sql"
+
 type DatabaseConnectionResponse struct {
-	Id           uint64                            `json:"id"`
-	Name         string                            `json:"name"`
-	DatabaseType string                            `json:"database_type"`
-	DatabaseName string                            `json:"database_name"`
-	Description  string                            `json:"description"`
-	Config       *DatabaseConnectionConfigResponse `json:"config" mapstructure:"-"`
-	//Tables[]          `json:"table"`
-	AuditableResponse *AuditableResponse `json:"auditable_response" mapstructure:"-"`
+	Id                uint64                            `json:"id"`
+	Name              string                            `json:"name"`
+	DatabaseType      string                            `json:"database_type"`
+	Schemas           []TableSchema                     `json:"schemas"`
+	Config            *DatabaseConnectionConfigResponse `json:"config"`
+	AuditableResponse *AuditableResponse                `json:"auditable_response"`
 }
 
 type CreateDatabaseConnectionRequest struct {
@@ -43,5 +43,15 @@ type DatabaseTableResponse struct {
 	Name string `json:"name"`
 }
 
-type DatabaseColumnResponse struct {
+type TableSchema struct {
+	TableName string        `json:"table_name"`
+	Columns   []TableColumn `json:"columns"`
+}
+
+type TableColumn struct {
+	TableName     string         `json:"table_name"`
+	ColumnName    string         `json:"column_name"`
+	DataType      string         `json:"data_type"`
+	IsNullable    string         `json:"is_nullable"`
+	ColumnDefault sql.NullString `json:"column_default"`
 }

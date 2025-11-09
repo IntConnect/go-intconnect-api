@@ -92,6 +92,8 @@ SELECT *
 FROM pipeline_edges;
 SELECT *
 FROM database_connections;
+SELECT *
+FROM nodes;
 
 
 DELETE
@@ -100,4 +102,8 @@ DELETE
 FROM pipeline_nodes;
 DELETE
 FROM pipelines;
+DELETE
+FROM database_connections;
 
+
+CREATE DATABASE sensors;
