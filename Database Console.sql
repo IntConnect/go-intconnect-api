@@ -107,3 +107,14 @@ FROM database_connections;
 
 
 CREATE DATABASE sensors;
+SELECT current_database() AS database_name,
+       c.table_name,
+       c.column_name,
+       c.data_type,
+       c.is_nullable,
+       c.column_default
+FROM information_schema.columns c
+         JOIN information_schema.tables t
+              ON c.table_name = t.table_name
+WHERE t.table_schema = 'public'
+ORDER BY c.table_name, c.ordinal_position;
