@@ -11,21 +11,24 @@ import (
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/routes"
 
+	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 )
 
-var ProtectedRoutesModule = fx.Module("protectedRoutes",
-	fx.Provide(routes.NewProtectedRoutes),
-	fx.Invoke(func(protectedRoutes *routes.ProtectedRoutes) {
-		protectedRoutes.Setup()
-	}),
-)
-
-var AuthenticationRoutesModule = fx.Module("authenticationRoutes",
-	fx.Provide(routes.NewAuthenticationRoutes),
-	fx.Invoke(func(authenticationRoutes *routes.AuthenticationRoutes) {
-		authenticationRoutes.Setup()
-	}),
+var ApplicationRoutesModule = fx.Module("applicationRoutes",
+	fx.Provide(
+		routes.NewPublicRoutes,
+		routes.NewAuthenticationRoutes,
+		routes.NewProtectedRoutes,
+		func(
+			ginEngine *gin.Engine,
+			publicRoutes *routes.PublicRoutes,
+			authenticationRoutes *routes.AuthenticationRoutes,
+			protectedRoutes *routes.ProtectedRoutes,
+		) *routes.ApplicationRoutes {
+			return routes.NewApplicationRoutes(ginEngine, publicRoutes, authenticationRoutes, protectedRoutes)
+		},
+	),
 )
 
 var UserModule = fx.Module("userFeature",

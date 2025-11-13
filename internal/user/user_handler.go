@@ -1,13 +1,14 @@
 package user
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 type Handler struct {

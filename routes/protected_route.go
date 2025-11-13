@@ -12,7 +12,6 @@ import (
 )
 
 type ProtectedRoutes struct {
-	routerGroup                     *gin.RouterGroup
 	viperConfig                     *viper.Viper
 	userController                  user.Controller
 	nodeController                  node.Controller
@@ -31,10 +30,7 @@ func NewProtectedRoutes(
 	protocolConfigurationController protocolConfiguration.Controller,
 	databaseConnectionController databaseConnection.Controller,
 ) *ProtectedRoutes {
-	//routerGroup.Use(middleware.AuthMiddleware(viperConfig))
-	wrapperRouterGroup := routerGroup.Group("/api")
 	return &ProtectedRoutes{
-		routerGroup: wrapperRouterGroup,
 		viperConfig: viperConfig,
 
 		userController:                  userController,
@@ -45,23 +41,23 @@ func NewProtectedRoutes(
 	}
 }
 
-func (protectedRoutes *ProtectedRoutes) Setup() {
-
-	userRouterGroup := protectedRoutes.routerGroup.Group("users")
+func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
+	//routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig))
+	userRouterGroup := routerGroup.Group("users")
 	userRouterGroup.GET("pagination", protectedRoutes.userController.FindAllUserPagination)
 	userRouterGroup.GET("", protectedRoutes.userController.FindAllUser)
 	userRouterGroup.POST("", protectedRoutes.userController.CreateUser)
 	userRouterGroup.PUT("", protectedRoutes.userController.UpdateUser)
 	userRouterGroup.DELETE("", protectedRoutes.userController.DeleteUser)
 
-	nodeRouterGroup := protectedRoutes.routerGroup.Group("nodes")
+	nodeRouterGroup := routerGroup.Group("nodes")
 	nodeRouterGroup.GET("pagination", protectedRoutes.nodeController.FindAllPagination)
 	nodeRouterGroup.GET("", protectedRoutes.nodeController.FindAll)
 	nodeRouterGroup.POST("", protectedRoutes.nodeController.CreateNode)
 	nodeRouterGroup.PUT("", protectedRoutes.nodeController.UpdateNode)
 	nodeRouterGroup.DELETE("", protectedRoutes.nodeController.DeleteNode)
 
-	pipelineRouterGroup := protectedRoutes.routerGroup.Group("pipelines")
+	pipelineRouterGroup := routerGroup.Group("pipelines")
 	pipelineRouterGroup.GET("pagination", protectedRoutes.pipelineController.FindAllPagination)
 	pipelineRouterGroup.GET("", protectedRoutes.pipelineController.FindAll)
 	pipelineRouterGroup.GET("/:id", protectedRoutes.pipelineController.FindById)
@@ -70,7 +66,7 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	pipelineRouterGroup.PUT("", protectedRoutes.pipelineController.UpdatePipeline)
 	pipelineRouterGroup.DELETE("", protectedRoutes.pipelineController.DeletePipeline)
 
-	protocolConfigurationRouterGroup := protectedRoutes.routerGroup.Group("protocol-configurations")
+	protocolConfigurationRouterGroup := routerGroup.Group("protocol-configurations")
 	protocolConfigurationRouterGroup.GET("pagination", protectedRoutes.protocolConfigurationController.FindAllPagination)
 	protocolConfigurationRouterGroup.GET("", protectedRoutes.protocolConfigurationController.FindAll)
 	protocolConfigurationRouterGroup.GET("/:id", protectedRoutes.protocolConfigurationController.FindById)
@@ -78,7 +74,7 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	protocolConfigurationRouterGroup.PUT("", protectedRoutes.protocolConfigurationController.UpdateProtocolConfiguration)
 	protocolConfigurationRouterGroup.DELETE("", protectedRoutes.protocolConfigurationController.DeleteProtocolConfiguration)
 
-	databaseConnectionRouterGroup := protectedRoutes.routerGroup.Group("database-connections")
+	databaseConnectionRouterGroup := routerGroup.Group("database-connections")
 	databaseConnectionRouterGroup.GET("pagination", protectedRoutes.databaseConnectionController.FindAllPagination)
 	databaseConnectionRouterGroup.GET("", protectedRoutes.databaseConnectionController.FindAll)
 	databaseConnectionRouterGroup.GET("/:id", protectedRoutes.databaseConnectionController.FindById)

@@ -7,6 +7,7 @@ import (
 	"go-intconnect-api/configs"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/middleware"
+	"go-intconnect-api/routes"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -113,9 +114,11 @@ func main() {
 			NewRedisConfig,
 			NewRedisInstance,
 		),
+		injector.ApplicationRoutesModule,
+		fx.Invoke(func(applicationRoutes *routes.ApplicationRoutes) {
+			applicationRoutes.Setup()
+		}),
 		injector.UserModule,
-		injector.AuthenticationRoutesModule,
-		injector.ProtectedRoutesModule,
 		injector.ValidatorModule,
 		injector.NodeModule,
 		injector.PipelineModule,

@@ -7,18 +7,17 @@ import (
 )
 
 type AuthenticationRoutes struct {
-	routerGroup    *gin.RouterGroup
 	userController user.Controller
 }
 
-func NewAuthenticationRoutes(routerGroup *gin.RouterGroup, userController user.Controller,
+func NewAuthenticationRoutes(userController user.Controller,
 ) *AuthenticationRoutes {
 	return &AuthenticationRoutes{
-		routerGroup:    routerGroup.Group("authentication"),
 		userController: userController,
 	}
 }
 
-func (routerGroup *AuthenticationRoutes) Setup() {
-	routerGroup.routerGroup.POST("login", routerGroup.userController.LoginUser)
+func (authenticationRoutes *AuthenticationRoutes) Setup(routerGroup *gin.RouterGroup) {
+	authenticationGroup := routerGroup.Group("authentication")
+	authenticationGroup.POST("login", authenticationRoutes.userController.LoginUser)
 }
