@@ -1,8 +1,6 @@
 package helper
 
 import (
-	"fmt"
-	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"math/rand"
 	"net/http"
@@ -101,12 +99,4 @@ func DecodeFromSource[T any](sourceMapping interface{}, targetMapping T) T {
 	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	err = decoder.Decode(sourceMapping)
 	return targetMapping
-
-}
-
-func DebugPrintArray(arrayOfPointer []*model.PipelineNodeResponse) {
-	for _, pointerElement := range arrayOfPointer {
-		fmt.Println(pointerElement.Config.NodeTempId)
-		fmt.Println(pointerElement.Config.ProtocolConfigurationId)
-	}
 }

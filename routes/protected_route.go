@@ -2,6 +2,7 @@ package routes
 
 import (
 	databaseConnection "go-intconnect-api/internal/database_connection"
+	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/pipeline"
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
@@ -18,10 +19,10 @@ type ProtectedRoutes struct {
 	pipelineController              pipeline.Controller
 	protocolConfigurationController protocolConfiguration.Controller
 	databaseConnectionController    databaseConnection.Controller
+	facilityController              facility.Controller
 }
 
 func NewProtectedRoutes(
-	routerGroup *gin.RouterGroup,
 	viperConfig *viper.Viper,
 
 	userController user.Controller,
@@ -29,6 +30,7 @@ func NewProtectedRoutes(
 	pipelineController pipeline.Controller,
 	protocolConfigurationController protocolConfiguration.Controller,
 	databaseConnectionController databaseConnection.Controller,
+	facilityController facility.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -38,6 +40,7 @@ func NewProtectedRoutes(
 		pipelineController:              pipelineController,
 		protocolConfigurationController: protocolConfigurationController,
 		databaseConnectionController:    databaseConnectionController,
+		facilityController:              facilityController,
 	}
 }
 
@@ -82,5 +85,12 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	databaseConnectionRouterGroup.POST("schema/:id", protectedRoutes.databaseConnectionController.CreateDatabaseSchema)
 	databaseConnectionRouterGroup.PUT("", protectedRoutes.databaseConnectionController.UpdateDatabaseConnection)
 	databaseConnectionRouterGroup.DELETE("", protectedRoutes.databaseConnectionController.DeleteDatabaseConnection)
+
+	facilityRouterGroup := routerGroup.Group("facilities")
+	facilityRouterGroup.GET("pagination", protectedRoutes.facilityController.FindAllPagination)
+	facilityRouterGroup.GET("", protectedRoutes.facilityController.FindAll)
+	facilityRouterGroup.POST("", protectedRoutes.facilityController.CreateFacility)
+	facilityRouterGroup.PUT("", protectedRoutes.facilityController.UpdateFacility)
+	facilityRouterGroup.DELETE("", protectedRoutes.facilityController.DeleteFacility)
 
 }

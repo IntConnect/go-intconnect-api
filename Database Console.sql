@@ -94,7 +94,8 @@ SELECT *
 FROM database_connections;
 SELECT *
 FROM nodes;
-
+SELECT *
+FROM facilities;
 
 DELETE
 FROM pipeline_edges;

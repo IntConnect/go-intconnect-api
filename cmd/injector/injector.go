@@ -2,6 +2,7 @@ package injector
 
 import (
 	databaseConnection "go-intconnect-api/internal/database_connection"
+	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/pipeline"
 	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
@@ -29,6 +30,9 @@ var ApplicationRoutesModule = fx.Module("applicationRoutes",
 			return routes.NewApplicationRoutes(ginEngine, publicRoutes, authenticationRoutes, protectedRoutes)
 		},
 	),
+	fx.Invoke(func(applicationRoutes *routes.ApplicationRoutes) {
+		applicationRoutes.Setup()
+	}),
 )
 
 var UserModule = fx.Module("userFeature",
@@ -63,6 +67,12 @@ var DatabaseConnectionModule = fx.Module("databaseConnectionFeature",
 	fx.Provide(fx.Annotate(databaseConnection.NewRepository, fx.As(new(databaseConnection.Repository)))),
 	fx.Provide(fx.Annotate(databaseConnection.NewService, fx.As(new(databaseConnection.Service)))),
 	fx.Provide(fx.Annotate(databaseConnection.NewHandler, fx.As(new(databaseConnection.Controller)))),
+)
+
+var FacilityModule = fx.Module("facilityFeature",
+	fx.Provide(fx.Annotate(facility.NewRepository, fx.As(new(facility.Repository)))),
+	fx.Provide(fx.Annotate(facility.NewService, fx.As(new(facility.Service)))),
+	fx.Provide(fx.Annotate(facility.NewHandler, fx.As(new(facility.Controller)))),
 )
 
 var PipelineNodeModule = fx.Module("pipelineNodeFeature",

@@ -3,7 +3,7 @@ package trait
 type UserStatus string
 
 const (
-	StatusActive   UserStatus = "ACTIVE"
-	StatusInactive UserStatus = "INACTIVE"
-	StatusBanned   UserStatus = "BANNED"
+	UserStatusActive   UserStatus = "Active"
+	UserStatusInactive UserStatus = "Inactive"
+	UserStatusBanned   UserStatus = "Banned"
 )

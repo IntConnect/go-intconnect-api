@@ -123,7 +123,6 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 				fmt.Printf("ProtocolConfiguration dengan ID %d tidak ditemukan\n", protocolConfigurationId)
 			}
 		}
-		helper.DebugPrintArray(pipelineResponse.PipelineNode)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

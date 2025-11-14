@@ -7,11 +7,12 @@ import (
 	"go-intconnect-api/configs"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/middleware"
-	"go-intconnect-api/routes"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	universalTranslator "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"go.uber.org/fx"
 	"gorm.io/gorm"
@@ -98,7 +99,10 @@ func NewRedisConfig() configs.RedisConfig {
 		Password:  "",
 		Database:  0,
 	}
+}
 
+func NewValidator() (*validator.Validate, universalTranslator.Translator) {
+	return configs.InitializeValidator()
 }
 
 func main() {
@@ -109,15 +113,12 @@ func main() {
 			NewViperConfig,
 			NewDatabaseCredentials,
 			NewDatabaseConnection,
-			configs.InitializeValidator,
+			NewValidator,
 			NewGinEngine,
 			NewRedisConfig,
 			NewRedisInstance,
 		),
 		injector.ApplicationRoutesModule,
-		fx.Invoke(func(applicationRoutes *routes.ApplicationRoutes) {
-			applicationRoutes.Setup()
-		}),
 		injector.UserModule,
 		injector.ValidatorModule,
 		injector.NodeModule,
@@ -126,6 +127,7 @@ func main() {
 		injector.PipelineNodeModule,
 		injector.PipelineConfigurationModule,
 		injector.DatabaseConnectionModule,
+		injector.FacilityModule,
 		// Invoker
 		fx.Invoke(Run),
 	)
