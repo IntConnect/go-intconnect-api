@@ -1,0 +1,2 @@
+DROP TABLE machines_parameters;
+DROP TYPE machine_parameter_label_type_enum;
