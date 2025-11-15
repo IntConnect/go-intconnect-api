@@ -55,17 +55,6 @@ func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}
 	return data, nil
 }
 
-func DecoderConfigMapper[S any, R any](sourceMapper S, resultMapper *R) {
-	decoderConfig := &mapstructure.DecoderConfig{
-		DecodeHook: StringIntoTypeHookFunc,
-		Result:     resultMapper,
-	}
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
-	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	err = decoder.Decode(sourceMapper)
-	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-}
-
 func RandomStringGenerator(length int) (code string) {
 	var randomizer = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
 	var letters = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
@@ -90,7 +79,7 @@ func CheckPointerWrapper[T any](targetChecking *T, renderPayload func()) {
 	}
 }
 
-func DecodeFromSource[T any](sourceMapping interface{}, targetMapping T) T {
+func DecodeFromSource[S any, T any](sourceMapping S, targetMapping T) T {
 	decoderConfig := &mapstructure.DecoderConfig{
 		DecodeHook: StringIntoTypeHookFunc,
 		Result:     &targetMapping,
@@ -99,4 +88,44 @@ func DecodeFromSource[T any](sourceMapping interface{}, targetMapping T) T {
 	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	err = decoder.Decode(sourceMapping)
 	return targetMapping
+}
+
+func MapEntityIntoResponse[S any, R any](
+	entityObject S,
+	renderPayload func(*R),
+) *R {
+	// Alokasikan pointer
+	responseObject := new(R)
+
+	// Decode ke dalam struct R
+	decodedResult := DecodeFromSource[S, R](entityObject, *responseObject)
+
+	// Copy hasil decode ke pointer
+	*responseObject = decodedResult
+
+	// Jalankan custom hook jika ada
+	if renderPayload != nil {
+		renderPayload(responseObject)
+	}
+
+	return responseObject
+}
+
+func MapEntitiesIntoResponses[S any, R any](entityObjects []S) []*R {
+	var responseObjects []*R
+	for _, entityObject := range entityObjects {
+		responseObjects = append(responseObjects, MapEntityIntoResponse[S, R](entityObject, nil))
+	}
+	return responseObjects
+}
+
+func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
+	var entityObject R
+	err := mapstructure.Decode(createRequest, &entityObject)
+	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	return &entityObject
+}
+
+func MapUpdateRequestIntoEntity[S any, R any](updateRequest S, existingEntity *R) {
+	existingEntity = DecodeFromSource[S, *R](updateRequest, existingEntity)
 }

@@ -12,7 +12,7 @@ import (
 
 func MapNodeEntityIntoNodeResponse(nodeEntity *entity.Node) *model.NodeResponse {
 	var nodeResponse *model.NodeResponse
-	nodeResponse = helper.DecodeFromSource[*model.NodeResponse](nodeEntity, nodeResponse)
+	nodeResponse = helper.DecodeFromSource[*entity.Node, *model.NodeResponse](nodeEntity, nodeResponse)
 	nodeResponse.DefaultConfig = nodeEntity.DefaultConfig
 	nodeResponse.AuditableResponse = AuditableEntityIntoEntityResponse(&nodeEntity.Auditable)
 	return nodeResponse
@@ -34,5 +34,5 @@ func MapCreateNodeRequestIntoNodeEntity(createNodeRequest *model.CreateNodeReque
 }
 
 func MapUpdateNodeRequestIntoNodeEntity(updateNodeRequest *model.UpdateNodeRequest, nodeEntity *entity.Node) {
-	helper.DecoderConfigMapper(updateNodeRequest, &nodeEntity)
+	//helper.DecoderConfigMapper(updateNodeRequest, &nodeEntity)
 }

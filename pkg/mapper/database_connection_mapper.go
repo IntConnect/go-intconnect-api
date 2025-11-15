@@ -49,5 +49,5 @@ func MapCreateDatabaseConnectionRequestIntoDatabaseConnectionEntity(createDataba
 }
 
 func MapUpdateDatabaseConnectionRequestIntoDatabaseConnectionEntity(updateDatabaseConnectionRequest *model.UpdateDatabaseConnectionRequest, databaseConnectionEntity *entity.DatabaseConnection) {
-	helper.DecoderConfigMapper(updateDatabaseConnectionRequest, &databaseConnectionEntity)
+	//helper.DecoderConfigMapper(updateDatabaseConnectionRequest, &databaseConnectionEntity)
 }

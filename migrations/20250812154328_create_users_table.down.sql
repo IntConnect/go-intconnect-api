@@ -1,2 +1,2 @@
 DROP TABLE users;
-DROP TYPE status_enum;
+DROP TYPE user_status_enum;

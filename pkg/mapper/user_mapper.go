@@ -1,14 +1,15 @@
 package mapper
 
 import (
-	"github.com/go-viper/mapstructure/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"net/http"
 	"time"
+
+	"github.com/go-viper/mapstructure/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func MapJwtClaimIntoUserClaim(jwtClaim jwt.MapClaims) (*model.JwtClaimRequest, error) {
@@ -50,5 +51,5 @@ func MapCreateUserRequestIntoUserEntity(createUserRequest *model.CreateUserReque
 }
 
 func MapUpdateUserRequestIntoUserEntity(updateUserRequest *model.UpdateUserRequest, userEntity *entity.User) {
-	helper.DecoderConfigMapper(updateUserRequest, &userEntity)
+	//helper.DecoderConfigMapper(updateUserRequest, &userEntity)
 }

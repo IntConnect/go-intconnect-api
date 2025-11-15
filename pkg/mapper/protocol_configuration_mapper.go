@@ -41,5 +41,5 @@ func MapCreateProtocolConfigurationRequestIntoProtocolConfigurationEntity(create
 }
 
 func MapUpdateProtocolConfigurationRequestIntoProtocolConfigurationEntity(updateProtocolConfigurationRequest *model.UpdateProtocolConfigurationRequest, protocolConfigurationEntity *entity.ProtocolConfiguration) {
-	helper.DecoderConfigMapper(updateProtocolConfigurationRequest, &protocolConfigurationEntity)
+	//helper.DecoderConfigMapper(updateProtocolConfigurationRequest, &protocolConfigurationEntity)
 }

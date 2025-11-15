@@ -12,7 +12,7 @@ import (
 
 func MapFacilityEntityIntoFacilityResponse(facilityEntity *entity.Facility) *model.FacilityResponse {
 	var facilityResponse *model.FacilityResponse
-	facilityResponse = helper.DecodeFromSource[*model.FacilityResponse](facilityEntity, facilityResponse)
+	facilityResponse = helper.DecodeFromSource[*entity.Facility, *model.FacilityResponse](facilityEntity, facilityResponse)
 	facilityResponse.AuditableResponse = AuditableEntityIntoEntityResponse(&facilityEntity.Auditable)
 	return facilityResponse
 }
@@ -33,5 +33,5 @@ func MapCreateFacilityRequestIntoFacilityEntity(createFacilityRequest *model.Cre
 }
 
 func MapUpdateFacilityRequestIntoFacilityEntity(updateFacilityRequest *model.UpdateFacilityRequest, facilityEntity *entity.Facility) {
-	helper.DecoderConfigMapper(updateFacilityRequest, &facilityEntity)
+	//helper.DecoderConfigMapper(updateFacilityRequest, &facilityEntity)
 }

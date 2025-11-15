@@ -12,7 +12,7 @@ import (
 
 func MapPipelineEntityIntoPipelineResponse(pipelineEntity *entity.Pipeline) *model.PipelineResponse {
 	var pipelineResponse *model.PipelineResponse
-	pipelineResponse = helper.DecodeFromSource[*model.PipelineResponse](pipelineEntity, pipelineResponse)
+	pipelineResponse = helper.DecodeFromSource[*entity.Pipeline, *model.PipelineResponse](pipelineEntity, pipelineResponse)
 	pipelineResponse.PipelineNode = MapPipelineNodeEntitiesIntoPipelineNodeResponse(pipelineEntity.PipelineNode)
 	pipelineResponse.PipelineEdge = MapPipelineEdgeEntitiesIntoPipelineEdgeResponse(pipelineEntity.PipelineEdge)
 	pipelineResponse.AuditableResponse = AuditableEntityIntoEntityResponse(&pipelineEntity.Auditable)
