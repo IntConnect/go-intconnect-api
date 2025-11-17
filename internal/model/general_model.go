@@ -8,3 +8,7 @@ type AuditableResponse struct {
 	DeletedBy string `json:"deleted_by,omitempty"`
 	DeletedAt string `json:"deleted_at,omitempty"`
 }
+
+type DeleteResourceGeneralRequest struct {
+	Id uint64 `json:"id" validate:"required|number"`
+}

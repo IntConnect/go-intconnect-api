@@ -4,62 +4,10 @@ import (
 	"context"
 	"fmt"
 	"go-intconnect-api/cmd/injector"
-	"go-intconnect-api/configs"
-	"go-intconnect-api/pkg/exception"
-	"go-intconnect-api/pkg/middleware"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	universalTranslator "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
-	"github.com/spf13/viper"
 	"go.uber.org/fx"
-	"gorm.io/gorm"
 )
-
-// --- Provider untuk Viper config ---
-func NewViperConfig() *viper.Viper {
-	viperConfig := viper.New()
-	viperConfig.SetConfigFile(".env")
-	viperConfig.AddConfigPath(".")
-	viperConfig.AutomaticEnv()
-	if err := viperConfig.ReadInConfig(); err != nil {
-		panic(err)
-	}
-	return viperConfig
-}
-
-// --- Provider untuk Database Credentials ---
-func NewDatabaseCredentials(viperConfig *viper.Viper) *configs.DatabaseCredentials {
-	return &configs.DatabaseCredentials{
-		DatabaseHost:     viperConfig.GetString("DATABASE_HOST"),
-		DatabasePort:     viperConfig.GetString("DATABASE_PORT"),
-		DatabaseName:     viperConfig.GetString("DATABASE_NAME"),
-		DatabasePassword: viperConfig.GetString("DATABASE_PASSWORD"),
-		DatabaseUsername: viperConfig.GetString("DATABASE_USERNAME"),
-	}
-}
-
-// --- Provider untuk Gin Engine ---
-func NewGinEngine() (*gin.Engine, *gin.RouterGroup) {
-	gin.SetMode(gin.DebugMode)
-	ginEngine := gin.Default()
-	ginEngine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"*"},
-		AllowHeaders:     []string{"*"},
-		ExposeHeaders:    []string{"*"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-	ginEngine.Use(gin.Recovery())
-	ginEngine.Use(exception.Interceptor())
-	ginEngineRoot := ginEngine.Group("/")
-	ginEngineRoot.Use(middleware.RequestMetaMiddleware())
-
-	return ginEngine, ginEngineRoot
-}
 
 // --- Invoker ---
 func Run(fxLifecycle fx.Lifecycle, ginEngine *gin.Engine) {
@@ -80,48 +28,16 @@ func Run(fxLifecycle fx.Lifecycle, ginEngine *gin.Engine) {
 	})
 }
 
-func NewDatabaseConnection(databaseCredentials *configs.DatabaseCredentials) *gorm.DB {
-	databaseConnection := configs.NewDatabaseConnection(databaseCredentials)
-	return databaseConnection.GetDatabaseConnection()
-}
-
-func NewRedisInstance(redisConfig configs.RedisConfig) *configs.RedisInstance {
-	redisInstance, err := configs.InitRedisInstance(redisConfig)
-	if err != nil {
-		panic(err)
-	}
-	return redisInstance
-}
-
-func NewRedisConfig() configs.RedisConfig {
-	return configs.RedisConfig{
-		IPAddress: "localhost:6379",
-		Password:  "",
-		Database:  0,
-	}
-}
-
-func NewValidator() (*validator.Validate, universalTranslator.Translator) {
-	return configs.InitializeValidator()
-}
-
 func main() {
 
 	fxContainer := fx.New(
 		// Provider
-		fx.Provide(
-			NewViperConfig,
-			NewDatabaseCredentials,
-			NewDatabaseConnection,
-			NewValidator,
-			NewGinEngine,
-			NewRedisConfig,
-			NewRedisInstance,
-		),
+		injector.CoreModule,
 		injector.ApplicationRoutesModule,
 		injector.UserModule,
 		injector.ValidatorModule,
 		injector.NodeModule,
+		injector.RoleModule,
 		injector.PipelineModule,
 		injector.PipelineEdgeModule,
 		injector.PipelineNodeModule,

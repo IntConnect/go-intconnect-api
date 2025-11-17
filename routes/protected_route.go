@@ -6,6 +6,7 @@ import (
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/pipeline"
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
+	"go-intconnect-api/internal/role"
 	"go-intconnect-api/internal/user"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ type ProtectedRoutes struct {
 	protocolConfigurationController protocolConfiguration.Controller
 	databaseConnectionController    databaseConnection.Controller
 	facilityController              facility.Controller
+	roleController                  role.Controller
 }
 
 func NewProtectedRoutes(
@@ -31,6 +33,7 @@ func NewProtectedRoutes(
 	protocolConfigurationController protocolConfiguration.Controller,
 	databaseConnectionController databaseConnection.Controller,
 	facilityController facility.Controller,
+	roleController role.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -41,6 +44,7 @@ func NewProtectedRoutes(
 		protocolConfigurationController: protocolConfigurationController,
 		databaseConnectionController:    databaseConnectionController,
 		facilityController:              facilityController,
+		roleController:                  roleController,
 	}
 }
 
@@ -92,5 +96,12 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	facilityRouterGroup.POST("", protectedRoutes.facilityController.CreateFacility)
 	facilityRouterGroup.PUT("", protectedRoutes.facilityController.UpdateFacility)
 	facilityRouterGroup.DELETE("", protectedRoutes.facilityController.DeleteFacility)
+
+	roleRouterGroup := routerGroup.Group("roles")
+	roleRouterGroup.GET("pagination", protectedRoutes.roleController.FindAllPagination)
+	roleRouterGroup.GET("", protectedRoutes.roleController.FindAll)
+	roleRouterGroup.POST("", protectedRoutes.roleController.CreateRole)
+	roleRouterGroup.PUT("", protectedRoutes.roleController.UpdateRole)
+	roleRouterGroup.DELETE("", protectedRoutes.roleController.DeleteRole)
 
 }

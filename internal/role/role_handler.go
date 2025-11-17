@@ -1,0 +1,70 @@
+package role
+
+import (
+	"go-intconnect-api/internal/model"
+	"go-intconnect-api/pkg/exception"
+	"go-intconnect-api/pkg/helper"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+)
+
+type Handler struct {
+	roleService Service
+	viperConfig *viper.Viper
+}
+
+func NewHandler(roleService Service, viperConfig *viper.Viper) *Handler {
+	return &Handler{
+		roleService: roleService,
+		viperConfig: viperConfig,
+	}
+}
+
+func (roleHandler *Handler) FindAll(ginContext *gin.Context) {
+	roleResponses := roleHandler.roleService.FindAll()
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been fetched", roleResponses))
+}
+
+func (roleHandler *Handler) FindAllPagination(ginContext *gin.Context) {
+	paginationReq := model.PaginationRequest{
+		Page:  1,
+		Size:  10,
+		Sort:  "id",
+		Order: "asc",
+	}
+
+	// Bind query parameters to the struct
+	err := ginContext.ShouldBindQuery(&paginationReq)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	roleResponses := roleHandler.roleService.FindAllPagination(&paginationReq)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been fetched", roleResponses))
+}
+
+func (roleHandler *Handler) CreateRole(ginContext *gin.Context) {
+	var createRoleModel model.CreateRoleRequest
+	err := ginContext.ShouldBindBodyWithJSON(&createRoleModel)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	roleHandler.roleService.Create(ginContext, &createRoleModel)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been created", nil))
+}
+
+func (roleHandler *Handler) UpdateRole(ginContext *gin.Context) {
+	var updateRoleModel model.UpdateRoleRequest
+	err := ginContext.ShouldBindBodyWithJSON(&updateRoleModel)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	roleHandler.roleService.Update(ginContext, &updateRoleModel)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been created", nil))
+}
+
+func (roleHandler *Handler) DeleteRole(ginContext *gin.Context) {
+	var deleteRoleModel model.DeleteResourceGeneralRequest
+	roleId := ginContext.Param("id")
+	parsedRoleId, err := strconv.ParseUint(roleId, 10, 32)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	deleteRoleModel.Id = parsedRoleId
+	roleHandler.roleService.Delete(ginContext, &deleteRoleModel)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))
+}
