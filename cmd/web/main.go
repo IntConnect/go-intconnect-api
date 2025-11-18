@@ -44,6 +44,7 @@ func main() {
 		injector.PipelineConfigurationModule,
 		injector.DatabaseConnectionModule,
 		injector.FacilityModule,
+		injector.PermissionModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

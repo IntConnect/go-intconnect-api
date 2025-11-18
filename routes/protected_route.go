@@ -4,6 +4,7 @@ import (
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/node"
+	"go-intconnect-api/internal/permission"
 	"go-intconnect-api/internal/pipeline"
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	"go-intconnect-api/internal/role"
@@ -22,6 +23,7 @@ type ProtectedRoutes struct {
 	databaseConnectionController    databaseConnection.Controller
 	facilityController              facility.Controller
 	roleController                  role.Controller
+	permissionController            permission.Controller
 }
 
 func NewProtectedRoutes(
@@ -34,6 +36,7 @@ func NewProtectedRoutes(
 	databaseConnectionController databaseConnection.Controller,
 	facilityController facility.Controller,
 	roleController role.Controller,
+	permissionController permission.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -45,6 +48,7 @@ func NewProtectedRoutes(
 		databaseConnectionController:    databaseConnectionController,
 		facilityController:              facilityController,
 		roleController:                  roleController,
+		permissionController:            permissionController,
 	}
 }
 
@@ -103,5 +107,9 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	roleRouterGroup.POST("", protectedRoutes.roleController.CreateRole)
 	roleRouterGroup.PUT("", protectedRoutes.roleController.UpdateRole)
 	roleRouterGroup.DELETE("", protectedRoutes.roleController.DeleteRole)
+
+	permissionRouterGroup := routerGroup.Group("permissions")
+	permissionRouterGroup.GET("pagination", protectedRoutes.permissionController.FindAllPagination)
+	permissionRouterGroup.GET("", protectedRoutes.permissionController.FindAll)
 
 }

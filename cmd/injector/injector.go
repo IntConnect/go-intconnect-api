@@ -5,6 +5,7 @@ import (
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/node"
+	"go-intconnect-api/internal/permission"
 	"go-intconnect-api/internal/pipeline"
 	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
 	pipelineNode "go-intconnect-api/internal/pipeline_node"
@@ -167,6 +168,12 @@ var RoleModule = fx.Module("roleFeature",
 	fx.Provide(fx.Annotate(role.NewRepository, fx.As(new(role.Repository)))),
 	fx.Provide(fx.Annotate(role.NewService, fx.As(new(role.Service)))),
 	fx.Provide(fx.Annotate(role.NewHandler, fx.As(new(role.Controller)))),
+)
+
+var PermissionModule = fx.Module("permissionFeature",
+	fx.Provide(fx.Annotate(permission.NewRepository, fx.As(new(permission.Repository)))),
+	fx.Provide(fx.Annotate(permission.NewService, fx.As(new(permission.Service)))),
+	fx.Provide(fx.Annotate(permission.NewHandler, fx.As(new(permission.Controller)))),
 )
 
 var PipelineNodeModule = fx.Module("pipelineNodeFeature",
