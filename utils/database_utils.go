@@ -27,7 +27,6 @@ func NewDynamicDatabaseConnection(databaseConnectionResponse *model.DatabaseConn
 	case "postgresql":
 		dsn = fmt.Sprintf("host=%s user=%s password=%s databasename=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
 			host, username, password, databaseName, port)
-		fmt.Println(dsn)
 		gormDialector = postgres.Open(dsn)
 	default:
 		return nil, fmt.Errorf("unsupported driver: %s", databaseDriver)

@@ -3,6 +3,7 @@ package user
 import (
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -23,15 +25,17 @@ type ServiceImpl struct {
 	validatorService validator.Service
 	dbConnection     *gorm.DB
 	viperConfig      *viper.Viper
+	loggerInstance   *logrus.Logger
 }
 
 func NewService(userRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper) *ServiceImpl {
+	viperConfig *viper.Viper, loggerInstance *logrus.Logger) *ServiceImpl {
 	return &ServiceImpl{
 		userRepository:   userRepository,
 		validatorService: validatorService,
 		dbConnection:     dbConnection,
 		viperConfig:      viperConfig,
+		loggerInstance:   loggerInstance,
 	}
 }
 
@@ -51,16 +55,20 @@ func (userService *ServiceImpl) FindAll() []*model.UserResponse {
 // Create - Membuat user baru
 func (userService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.UserResponse] {
 	paginationResp := model.PaginationResponse[*model.UserResponse]{}
-	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
-	orderClause := paginationReq.Sort
-	if paginationReq.Order != "" {
-		orderClause += " " + paginationReq.Order
-	}
-	var allUser []*model.UserResponse
+	paginationQuery := helper.BuildPaginationQuery(paginationReq)
+
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		userEntities, totalItems, err := userService.userRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
+		userEntities, totalItems, err := userService.userRepository.FindAllPagination(
+			gormTransaction,
+			paginationQuery.OrderClause,
+			paginationQuery.Offset,
+			paginationQuery.Limit,
+			paginationQuery.SearchQuery,
+		)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
 		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allUser = mapper.MapUserEntitiesIntoUserResponses(userEntities)
+		allUser := mapper.MapUserEntitiesIntoUserResponses(userEntities)
 		paginationResp = model.PaginationResponse[*model.UserResponse]{
 			Data:        allUser,
 			TotalItems:  totalItems,
@@ -75,17 +83,23 @@ func (userService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 }
 
 // Create - Membuat user baru
-func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest) {
+func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest) model.PaginationResponse[*model.UserResponse] {
+	paginationResp := model.PaginationResponse[*model.UserResponse]{}
 	valErr := userService.validatorService.ValidateStruct(createUserRequest)
 	userService.validatorService.ParseValidationError(valErr, *createUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userEntity := mapper.MapCreateUserRequestIntoUserEntity(createUserRequest)
+		userEntity.Status = trait.UserStatusActive
+		// TODO: Change it with logged user
+		userEntity.Auditable = entity.NewAuditable("Administrator")
 		err := userService.userRepository.Create(gormTransaction, userEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
+		paginationRequest := model.NewPaginationRequest()
+		paginationResp = userService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return paginationResp
 }
 
 func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRequest *model.LoginUserRequest) string {

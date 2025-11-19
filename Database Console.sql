@@ -96,6 +96,8 @@ SELECT *
 FROM nodes;
 SELECT *
 FROM facilities;
+SELECT *
+FROM roles;
 
 DELETE
 FROM pipeline_edges;

@@ -48,8 +48,8 @@ func NewRedisConfig() configs.RedisConfig {
 	}
 }
 
-func NewValidator() (*validator.Validate, universalTranslator.Translator) {
-	return configs.InitializeValidator()
+func NewValidator(gormDatabase *gorm.DB) (*validator.Validate, universalTranslator.Translator) {
+	return configs.InitializeValidator(gormDatabase)
 }
 
 // --- Provider untuk Viper config ---
@@ -183,3 +183,5 @@ var PipelineNodeModule = fx.Module("pipelineNodeFeature",
 var PipelineEdgeModule = fx.Module("pipelineFeature",
 	fx.Provide(fx.Annotate(pipelineEdge.NewRepository, fx.As(new(pipelineEdge.Repository)))),
 )
+
+var LoggerModule = fx.Module("loggerFeature", fx.Provide(configs.GetLogger))

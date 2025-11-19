@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"math/rand"
 	"net/http"
@@ -128,4 +129,20 @@ func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
 
 func MapUpdateRequestIntoEntity[S any, R any](updateRequest S, existingEntity *R) {
 	existingEntity = DecodeFromSource[S, *R](updateRequest, existingEntity)
+}
+
+func BuildPaginationQuery(paginationReq *model.PaginationRequest) model.PaginationQuery {
+	offset := (paginationReq.Page - 1) * paginationReq.Size
+
+	orderClause := paginationReq.Sort
+	if paginationReq.Order != "" {
+		orderClause += " " + paginationReq.Order
+	}
+
+	return model.PaginationQuery{
+		Offset:      offset,
+		Limit:       paginationReq.Size,
+		OrderClause: orderClause,
+		SearchQuery: paginationReq.SearchQuery,
+	}
 }

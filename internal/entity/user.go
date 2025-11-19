@@ -3,7 +3,7 @@ package entity
 import "go-intconnect-api/internal/trait"
 
 type User struct {
-	Id       uint64           `gorm:"column:id,primaryKey,autoIncrement"`
+	Id       uint64           `gorm:"column:id;primaryKey;autoIncrement"`
 	Username string           `gorm:"column:username"`
 	Name     string           `gorm:"column:name"`
 	Email    string           `gorm:"column:email"`

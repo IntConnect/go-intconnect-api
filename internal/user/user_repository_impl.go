@@ -2,6 +2,7 @@ package user
 
 import (
 	"go-intconnect-api/internal/entity"
+
 	"gorm.io/gorm"
 )
 
@@ -17,24 +18,43 @@ func (userRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]e
 	return userEntities, err
 }
 
-func (userRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.User, int64, error) {
+func (userRepositoryImpl *RepositoryImpl) FindAllPagination(
+	gormTransaction *gorm.DB,
+	orderClause string,
+	offsetVal, limitPage int,
+	searchQuery string,
+) ([]entity.User, int64, error) {
+
 	var userEntities []entity.User
 	var totalItems int64
 
-	if searchQuery != "" {
-		// Add search condition
-		searchPattern := "%" + searchQuery + "%"
-		gormTransaction = gormTransaction.Where("username LIKE ? OR email LIKE ?  OR password = ?", searchPattern, searchPattern, searchPattern)
+	// Base query
+	rawQuery := gormTransaction.Model(&entity.User{})
 
+	// Search
+	if searchQuery != "" {
+		searchPattern := "%" + searchQuery + "%"
+		rawQuery = rawQuery.Where("username ILIKE ? OR email ILIKE ? OR name ILIKE ?", searchPattern, searchPattern, searchPattern)
 	}
 
-	// Count total items
-	err := gormTransaction.Model(&entity.User{}).
-		Preload("UserGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&userEntities).Error
-	gormTransaction.Model(&entity.User{}).Count(&totalItems)
-	return userEntities, totalItems, err
+	// Count first
+	if err := rawQuery.Count(&totalItems).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Fetch paginated data
+	if err := rawQuery.
+		Preload("UserGroup", func(tx *gorm.DB) *gorm.DB {
+			return tx.Select("id,name")
+		}).
+		Order(orderClause).
+		Offset(offsetVal).
+		Limit(limitPage).
+		Find(&userEntities).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return userEntities, totalItems, nil
 }
 
 func (userRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, userId uint64) (*entity.User, error) {

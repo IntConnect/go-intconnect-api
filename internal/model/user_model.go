@@ -9,6 +9,7 @@ type JwtClaimRequest struct {
 type UserResponse struct {
 	Id        uint64 `json:"id"`
 	Username  string `json:"username"`
+	Name      string `json:"name"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	CreatedAt string `json:"created_at" mapstructure:"-"`
@@ -16,10 +17,11 @@ type UserResponse struct {
 }
 
 type CreateUserRequest struct {
-	Username    string `json:"username" validate:"required"`
-	Email       string `json:"email" validate:"required,email"`
-	Password    string `json:"password" validate:"required"`
-	UserGroupId int    `json:"user_group_id" validate:"required,number"`
+	Username string `json:"username" validate:"required,min=3,max=50,unique=users;username;id"`
+	Name     string `json:"name" validate:"required,min=3,max=100"`
+	Email    string `json:"email" validate:"required,email,min=3,max=100"`
+	Password string `json:"password" validate:"required,min=3,max=100"`
+	RoleId   uint64 `json:"role_id" validate:"required,gte=0"`
 }
 
 type UpdateUserRequest struct {

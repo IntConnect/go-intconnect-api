@@ -29,14 +29,7 @@ func (userHandler *Handler) FindAllUser(ginContext *gin.Context) {
 }
 
 func (userHandler *Handler) FindAllUserPagination(ginContext *gin.Context) {
-	paginationReq := model.PaginationRequest{
-		Page:  1,
-		Size:  10,
-		Sort:  "id",
-		Order: "asc",
-	}
-
-	// Bind query parameters to the struct
+	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userResponses := userHandler.userService.FindAllPagination(&paginationReq)

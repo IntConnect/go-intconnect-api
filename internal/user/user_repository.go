@@ -2,6 +2,7 @@ package user
 
 import (
 	"go-intconnect-api/internal/entity"
+
 	"gorm.io/gorm"
 )
 
