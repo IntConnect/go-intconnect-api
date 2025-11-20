@@ -98,6 +98,8 @@ SELECT *
 FROM facilities;
 SELECT *
 FROM roles;
+SELECT *
+FROM mqtt_brokers;
 
 DELETE
 FROM pipeline_edges;
@@ -107,6 +109,8 @@ DELETE
 FROM pipelines;
 DELETE
 FROM database_connections;
+DELETE
+FROM mqtt_brokers WHERE id = 1;
 
 
 CREATE DATABASE sensors;

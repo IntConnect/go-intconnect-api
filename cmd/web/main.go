@@ -46,6 +46,7 @@ func main() {
 		injector.FacilityModule,
 		injector.PermissionModule,
 		injector.LoggerModule,
+		injector.MqttBrokerModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

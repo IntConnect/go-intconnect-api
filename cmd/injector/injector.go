@@ -4,6 +4,7 @@ import (
 	"go-intconnect-api/configs"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
+	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/permission"
 	"go-intconnect-api/internal/pipeline"
@@ -28,8 +29,8 @@ import (
 )
 
 func NewDatabaseConnection(databaseCredentials *configs.DatabaseCredentials) *gorm.DB {
-	databaseConnection := configs.NewDatabaseConnection(databaseCredentials)
-	return databaseConnection.GetDatabaseConnection()
+	databaseConnectionInstance := configs.NewDatabaseConnection(databaseCredentials)
+	return databaseConnectionInstance.GetDatabaseConnection()
 }
 
 func NewRedisInstance(redisConfig configs.RedisConfig) *configs.RedisInstance {
@@ -185,3 +186,9 @@ var PipelineEdgeModule = fx.Module("pipelineFeature",
 )
 
 var LoggerModule = fx.Module("loggerFeature", fx.Provide(configs.GetLogger))
+
+var MqttBrokerModule = fx.Module("mqttBrokerFeature",
+	fx.Provide(fx.Annotate(mqttBroker.NewRepository, fx.As(new(mqttBroker.Repository)))),
+	fx.Provide(fx.Annotate(mqttBroker.NewService, fx.As(new(mqttBroker.Service)))),
+	fx.Provide(fx.Annotate(mqttBroker.NewHandler, fx.As(new(mqttBroker.Controller)))),
+)
