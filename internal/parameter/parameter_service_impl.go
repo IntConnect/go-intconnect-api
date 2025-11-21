@@ -15,48 +15,48 @@ import (
 )
 
 type ServiceImpl struct {
-	machineRepository Repository
-	validatorService  validator.Service
-	dbConnection      *gorm.DB
-	viperConfig       *viper.Viper
+	parameterRepository Repository
+	validatorService    validator.Service
+	dbConnection        *gorm.DB
+	viperConfig         *viper.Viper
 }
 
-func NewService(machineRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
+func NewService(parameterRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper) *ServiceImpl {
 	return &ServiceImpl{
-		machineRepository: machineRepository,
-		validatorService:  validatorService,
-		dbConnection:      dbConnection,
-		viperConfig:       viperConfig,
+		parameterRepository: parameterRepository,
+		validatorService:    validatorService,
+		dbConnection:        dbConnection,
+		viperConfig:         viperConfig,
 	}
 }
 
-func (machineService *ServiceImpl) FindAll() []*model.MachineResponse {
-	var machineResponsesRequest []*model.MachineResponse
-	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		machineEntities, err := machineService.machineRepository.FindAll(gormTransaction)
+func (parameterService *ServiceImpl) FindAll() []*model.ParameterResponse {
+	var parameterResponsesRequest []*model.ParameterResponse
+	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		parameterEntities, err := parameterService.parameterRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		machineResponsesRequest = helper.MapEntitiesIntoResponses[entity.Machine, model.MachineResponse](machineEntities)
+		parameterResponsesRequest = helper.MapEntitiesIntoResponses[entity.Parameter, model.ParameterResponse](parameterEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return machineResponsesRequest
+	return parameterResponsesRequest
 }
 
-func (machineService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.MachineResponse] {
-	paginationResp := model.PaginationResponse[*model.MachineResponse]{}
+func (parameterService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.ParameterResponse] {
+	paginationResp := model.PaginationResponse[*model.ParameterResponse]{}
 	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
 	orderClause := paginationReq.Sort
 	if paginationReq.Order != "" {
 		orderClause += " " + paginationReq.Order
 	}
-	var allMachine []*model.MachineResponse
-	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		machineEntities, totalItems, err := machineService.machineRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
+	var allParameter []*model.ParameterResponse
+	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		parameterEntities, totalItems, err := parameterService.parameterRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
 		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allMachine = helper.MapEntitiesIntoResponses[entity.Machine, model.MachineResponse](machineEntities)
-		paginationResp = model.PaginationResponse[*model.MachineResponse]{
-			Data:        allMachine,
+		allParameter = helper.MapEntitiesIntoResponses[entity.Parameter, model.ParameterResponse](parameterEntities)
+		paginationResp = model.PaginationResponse[*model.ParameterResponse]{
+			Data:        allParameter,
 			TotalItems:  totalItems,
 			TotalPages:  totalPages,
 			CurrentPage: paginationReq.Page,
@@ -68,13 +68,13 @@ func (machineService *ServiceImpl) FindAllPagination(paginationReq *model.Pagina
 	return paginationResp
 }
 
-// Create - Membuat machine baru
-func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest, modelFile *multipart.FileHeader) {
-	valErr := machineService.validatorService.ValidateStruct(createMachineRequest)
-	machineService.validatorService.ParseValidationError(valErr, *createMachineRequest)
-	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		machineEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineRequest, entity.Machine](createMachineRequest)
-		err := machineService.machineRepository.Create(gormTransaction, machineEntity)
+// Create - Membuat parameter baru
+func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParameterRequest *model.CreateParameterRequest, modelFile *multipart.FileHeader) {
+	valErr := parameterService.validatorService.ValidateStruct(createParameterRequest)
+	parameterService.validatorService.ParseValidationError(valErr, *createParameterRequest)
+	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		parameterEntity := helper.MapCreateRequestIntoEntity[model.CreateParameterRequest, entity.Parameter](createParameterRequest)
+		err := parameterService.parameterRepository.Create(gormTransaction, parameterEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil
@@ -82,25 +82,25 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachineRequest *model.UpdateMachineRequest) {
-	valErr := machineService.validatorService.ValidateStruct(updateMachineRequest)
-	machineService.validatorService.ParseValidationError(valErr, *updateMachineRequest)
-	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		machine, err := machineService.machineRepository.FindById(gormTransaction, updateMachineRequest.Id)
+func (parameterService *ServiceImpl) Update(ginContext *gin.Context, updateParameterRequest *model.UpdateParameterRequest) {
+	valErr := parameterService.validatorService.ValidateStruct(updateParameterRequest)
+	parameterService.validatorService.ParseValidationError(valErr, *updateParameterRequest)
+	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		parameter, err := parameterService.parameterRepository.FindById(gormTransaction, updateParameterRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		helper.MapUpdateRequestIntoEntity(updateMachineRequest, machine)
-		err = machineService.machineRepository.Update(gormTransaction, machine)
+		helper.MapUpdateRequestIntoEntity(updateParameterRequest, parameter)
+		err = parameterService.parameterRepository.Update(gormTransaction, parameter)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (machineService *ServiceImpl) Delete(ginContext *gin.Context, deleteMachineRequest *model.DeleteMachineRequest) {
-	valErr := machineService.validatorService.ValidateStruct(deleteMachineRequest)
-	machineService.validatorService.ParseValidationError(valErr, *deleteMachineRequest)
-	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := machineService.machineRepository.Delete(gormTransaction, deleteMachineRequest.Id)
+func (parameterService *ServiceImpl) Delete(ginContext *gin.Context, deleteParameterRequest *model.DeleteParameterRequest) {
+	valErr := parameterService.validatorService.ValidateStruct(deleteParameterRequest)
+	parameterService.validatorService.ParseValidationError(valErr, *deleteParameterRequest)
+	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		err := parameterService.parameterRepository.Delete(gormTransaction, deleteParameterRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil

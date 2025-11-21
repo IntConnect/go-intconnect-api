@@ -1,7 +1,7 @@
 CREATE TABLE parameters
 (
     id          SERIAL PRIMARY KEY,
-    machine_id  BIGINT       NOT NULL REFERENCES machines (id),
+    machine_id  BIGINT REFERENCES machines (id),
     name        VARCHAR(255) NOT NULL,
     code        VARCHAR(255) NOT NULL,
     unit        VARCHAR(255) NOT NULL,

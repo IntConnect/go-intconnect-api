@@ -12,62 +12,57 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (machineRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Machine, error) {
-	var machineEntities []entity.Machine
-	err := gormTransaction.Find(&machineEntities).Error
-	return machineEntities, err
+func (parameterRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Parameter, error) {
+	var parameterEntities []entity.Parameter
+	err := gormTransaction.Find(&parameterEntities).Error
+	return parameterEntities, err
 }
 
-func (machineRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, machineIds []uint64) ([]entity.Machine, error) {
-	var machineEntities []entity.Machine
-	err := gormTransaction.Where("id IN ?", machineIds).Find(&machineEntities).Error
-	return machineEntities, err
+func (parameterRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, parameterIds []uint64) ([]entity.Parameter, error) {
+	var parameterEntities []entity.Parameter
+	err := gormTransaction.Where("id IN ?", parameterIds).Find(&parameterEntities).Error
+	return parameterEntities, err
 }
 
-func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Machine, int64, error) {
-	var machineEntities []entity.Machine
+func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Parameter, int64, error) {
+	var parameterEntities []entity.Parameter
 	var totalItems int64
 
 	if searchQuery != "" {
 		// Add search condition
 		searchPattern := "%" + searchQuery + "%"
-		gormTransaction = gormTransaction.Where("machinename LIKE ? OR email LIKE ?  OR password = ?", searchPattern, searchPattern, searchPattern)
+		gormTransaction = gormTransaction.Where("parametername LIKE ? OR email LIKE ?  OR password = ?", searchPattern, searchPattern, searchPattern)
 
 	}
 
 	// Count total items
-	err := gormTransaction.Model(&entity.Machine{}).
-		Preload("MachineGroup", func(gormTx *gorm.DB) *gorm.DB {
+	err := gormTransaction.Model(&entity.Parameter{}).
+		Preload("ParameterGroup", func(gormTx *gorm.DB) *gorm.DB {
 			return gormTx.Select("id, name")
-		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&machineEntities).Error
-	gormTransaction.Model(&entity.Machine{}).Count(&totalItems)
-	return machineEntities, totalItems, err
+		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&parameterEntities).Error
+	gormTransaction.Model(&entity.Parameter{}).Count(&totalItems)
+	return parameterEntities, totalItems, err
 }
 
-func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.Machine, error) {
-	var machineEntity entity.Machine
-	err := gormTransaction.Model(&entity.Machine{}).
-		Preload("MachineGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Where("id = ?", machineId).Find(&machineEntity).Error
+func (parameterRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, parameterId uint64) (*entity.Parameter, error) {
+	var parameterEntity entity.Parameter
+	err := gormTransaction.Model(&entity.Parameter{}).Where("id = ?", parameterId).Find(&parameterEntity).Error
 
-	return &machineEntity, err
+	return &parameterEntity, err
 }
 
-func (machineRepositoryImpl *RepositoryImpl) FindByName(pipelineName string) *entity.Machine {
-	//TODO implement me
-	panic("implement me")
+func (parameterRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, parameterEntity *entity.Parameter) error {
+	return gormTransaction.Model(parameterEntity).Create(parameterEntity).Error
 }
 
-func (machineRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineEntity *entity.Machine) error {
-	return gormTransaction.Model(pipelineEntity).Create(pipelineEntity).Error
-
+func (parameterRepositoryImpl *RepositoryImpl) CreateBatch(gormTransaction *gorm.DB, parameterEntity []*entity.Parameter) error {
+	return gormTransaction.Model(parameterEntity).Create(parameterEntity).Error
 }
 
-func (machineRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, machineEntity *entity.Machine) error {
-	return gormTransaction.Model(machineEntity).Save(machineEntity).Error
+func (parameterRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, parameterEntity *entity.Parameter) error {
+	return gormTransaction.Model(parameterEntity).Save(parameterEntity).Error
 }
 
-func (machineRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.Machine{}).Where("id = ?", id).Delete(entity.Machine{}).Error
+func (parameterRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
+	return gormTransaction.Model(entity.Parameter{}).Where("id = ?", id).Delete(entity.Parameter{}).Error
 }

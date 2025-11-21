@@ -1,1 +1,1 @@
-DROP TABLE telemetry;
+DROP TABLE telemetries;

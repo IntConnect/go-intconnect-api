@@ -1,4 +1,4 @@
-CREATE TABLE telemetry
+CREATE TABLE telemetries
 (
     id           SERIAL PRIMARY KEY,
     parameter_id BIGINT NOT NULL REFERENCES parameters (id),

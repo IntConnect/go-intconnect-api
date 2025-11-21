@@ -7,12 +7,11 @@ import (
 )
 
 type Repository interface {
-	FindAll(gormTransaction *gorm.DB) ([]entity.Machine, error)
-	FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Machine, int64, error)
-	FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.Machine, error)
-	FindByName(machineName string) *entity.Machine
-	Create(gormTransaction *gorm.DB, machineEntity *entity.Machine) error
-	Update(gormTransaction *gorm.DB, machineEntity *entity.Machine) error
-	Delete(gormTransaction *gorm.DB, machineId uint64) error
-	FindBatchById(gormTransaction *gorm.DB, machineIds []uint64) ([]entity.Machine, error)
+	FindAll(gormTransaction *gorm.DB) ([]entity.Parameter, error)
+	FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Parameter, int64, error)
+	FindById(gormTransaction *gorm.DB, parameterId uint64) (*entity.Parameter, error)
+	Create(gormTransaction *gorm.DB, parameterEntity *entity.Parameter) error
+	CreateBatch(gormTransaction *gorm.DB, parameterEntity []*entity.Parameter) error
+	Update(gormTransaction *gorm.DB, parameterEntity *entity.Parameter) error
+	Delete(gormTransaction *gorm.DB, parameterId uint64) error
 }

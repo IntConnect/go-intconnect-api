@@ -109,8 +109,7 @@ DELETE
 FROM pipelines;
 DELETE
 FROM database_connections;
-DELETE
-FROM mqtt_brokers WHERE id = 1;
+
 
 
 CREATE DATABASE sensors;
@@ -125,3 +124,12 @@ FROM information_schema.columns c
               ON c.table_name = t.table_name
 WHERE t.table_schema = 'public'
 ORDER BY c.table_name, c.ordinal_position;
+
+SELECT *
+FROM mqtt_topics;
+
+SELECT *
+FROM telemetries;
+
+INSERT INTO mqtt_topics (mqtt_broker_id, name, qos)
+VALUES (1, 'sensor/data', 0);
