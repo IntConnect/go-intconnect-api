@@ -4,6 +4,7 @@ import (
 	"go-intconnect-api/configs"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
+	"go-intconnect-api/internal/machine"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/permission"
@@ -12,6 +13,7 @@ import (
 	pipelineNode "go-intconnect-api/internal/pipeline_node"
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	"go-intconnect-api/internal/role"
+	"go-intconnect-api/internal/storage"
 	"go-intconnect-api/internal/user"
 	validatorService "go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -96,6 +98,15 @@ func NewGinEngine() (*gin.Engine, *gin.RouterGroup) {
 	return ginEngine, ginEngineRoot
 }
 
+func NewStorageManager(viperConfig *viper.Viper) *storage.Manager {
+	storageConfig := configs.NewStorageConfig(viperConfig)
+	storageManager, err := storage.NewStorageManager(storageConfig)
+	if err != nil {
+		panic(err)
+	}
+	return storageManager
+}
+
 var CoreModule = fx.Module("coreModule", fx.Provide(
 	NewViperConfig,
 	NewDatabaseCredentials,
@@ -104,6 +115,7 @@ var CoreModule = fx.Module("coreModule", fx.Provide(
 	NewGinEngine,
 	NewRedisConfig,
 	NewRedisInstance,
+	NewStorageManager,
 ))
 
 var ApplicationRoutesModule = fx.Module("applicationRoutes",
@@ -191,4 +203,10 @@ var MqttBrokerModule = fx.Module("mqttBrokerFeature",
 	fx.Provide(fx.Annotate(mqttBroker.NewRepository, fx.As(new(mqttBroker.Repository)))),
 	fx.Provide(fx.Annotate(mqttBroker.NewService, fx.As(new(mqttBroker.Service)))),
 	fx.Provide(fx.Annotate(mqttBroker.NewHandler, fx.As(new(mqttBroker.Controller)))),
+)
+
+var MachineModule = fx.Module("machineFeature",
+	fx.Provide(fx.Annotate(machine.NewRepository, fx.As(new(machine.Repository)))),
+	fx.Provide(fx.Annotate(machine.NewService, fx.As(new(machine.Service)))),
+	fx.Provide(fx.Annotate(machine.NewHandler, fx.As(new(machine.Controller)))),
 )

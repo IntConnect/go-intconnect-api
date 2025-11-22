@@ -3,6 +3,7 @@ package routes
 import (
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
+	"go-intconnect-api/internal/machine"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/permission"
@@ -26,6 +27,7 @@ type ProtectedRoutes struct {
 	roleController                  role.Controller
 	permissionController            permission.Controller
 	mqttBrokerController            mqttBroker.Controller
+	machineController               machine.Controller
 }
 
 func NewProtectedRoutes(
@@ -40,6 +42,7 @@ func NewProtectedRoutes(
 	roleController role.Controller,
 	permissionController permission.Controller,
 	mqttBrokerController mqttBroker.Controller,
+	machineController machine.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -53,6 +56,7 @@ func NewProtectedRoutes(
 		roleController:                  roleController,
 		permissionController:            permissionController,
 		mqttBrokerController:            mqttBrokerController,
+		machineController:               machineController,
 	}
 }
 
@@ -122,5 +126,12 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	mqttBrokerRouterGroup.POST("", protectedRoutes.mqttBrokerController.CreateMqttBroker)
 	mqttBrokerRouterGroup.PUT("", protectedRoutes.mqttBrokerController.UpdateMqttBroker)
 	mqttBrokerRouterGroup.DELETE("", protectedRoutes.mqttBrokerController.DeleteMqttBroker)
+
+	machineRouterGroup := routerGroup.Group("machines")
+	machineRouterGroup.GET("pagination", protectedRoutes.machineController.FindAllMachinePagination)
+	machineRouterGroup.GET("", protectedRoutes.machineController.FindAllMachine)
+	machineRouterGroup.POST("", protectedRoutes.machineController.CreateMachine)
+	machineRouterGroup.PUT("", protectedRoutes.machineController.UpdateMachine)
+	machineRouterGroup.DELETE("", protectedRoutes.machineController.DeleteMachine)
 
 }

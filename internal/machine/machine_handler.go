@@ -23,20 +23,13 @@ func NewHandler(machineService Service, viperConfig *viper.Viper) *Handler {
 	}
 }
 
-func (machineHandler *Handler) FindAll(ginContext *gin.Context) {
+func (machineHandler *Handler) FindAllMachine(ginContext *gin.Context) {
 	machineResponses := machineHandler.machineService.FindAll()
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Machine has been fetched", machineResponses))
 }
 
-func (machineHandler *Handler) FindAllPagination(ginContext *gin.Context) {
-	paginationReq := model.PaginationRequest{
-		Page:  1,
-		Size:  10,
-		Sort:  "id",
-		Order: "asc",
-	}
-
-	// Bind query parameters to the struct
+func (machineHandler *Handler) FindAllMachinePagination(ginContext *gin.Context) {
+	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	machineResponses := machineHandler.machineService.FindAllPagination(&paginationReq)
@@ -45,11 +38,12 @@ func (machineHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 
 func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 	var createMachineModel model.CreateMachineRequest
+
 	err := ginContext.ShouldBind(&createMachineModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	modelFile, err := ginContext.FormFile("model")
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-
+	createMachineModel.ModelHeader = modelFile
 	machineHandler.machineService.Create(ginContext, &createMachineModel, modelFile)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Machine has been created", nil))
 }

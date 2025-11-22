@@ -1,13 +1,16 @@
 package machine
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/storage"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"math"
 	"mime/multipart"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -15,19 +18,22 @@ import (
 )
 
 type ServiceImpl struct {
-	machineRepository Repository
-	validatorService  validator.Service
-	dbConnection      *gorm.DB
-	viperConfig       *viper.Viper
+	machineRepository   Repository
+	validatorService    validator.Service
+	dbConnection        *gorm.DB
+	viperConfig         *viper.Viper
+	localStorageService *storage.Manager
 }
 
 func NewService(machineRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper) *ServiceImpl {
+	viperConfig *viper.Viper,
+	localStorageService *storage.Manager) *ServiceImpl {
 	return &ServiceImpl{
-		machineRepository: machineRepository,
-		validatorService:  validatorService,
-		dbConnection:      dbConnection,
-		viperConfig:       viperConfig,
+		machineRepository:   machineRepository,
+		validatorService:    validatorService,
+		dbConnection:        dbConnection,
+		viperConfig:         viperConfig,
+		localStorageService: localStorageService,
 	}
 }
 
@@ -76,7 +82,8 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 		machineEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineRequest, entity.Machine](createMachineRequest)
 		err := machineService.machineRepository.Create(gormTransaction, machineEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
+		savedPath, err := machineService.localStorageService.Disk().Put(modelFile, fmt.Sprintf("machines/%d-%s", time.Now().UnixNano(), modelFile.Filename))
+		fmt.Println(savedPath)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
