@@ -8,7 +8,6 @@ type ApplicationRoutes struct {
 	PublicRoutes         *PublicRoutes
 	AuthenticationRoutes *AuthenticationRoutes
 	ProtectedRoutes      *ProtectedRoutes
-	S
 	// Add other route groups here
 }
 
