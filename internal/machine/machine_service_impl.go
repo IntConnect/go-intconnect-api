@@ -79,11 +79,11 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 	valErr := machineService.validatorService.ValidateStruct(createMachineRequest)
 	machineService.validatorService.ParseValidationError(valErr, *createMachineRequest)
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		machineEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineRequest, entity.Machine](createMachineRequest)
-		err := machineService.machineRepository.Create(gormTransaction, machineEntity)
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		savedPath, err := machineService.localStorageService.Disk().Put(modelFile, fmt.Sprintf("machines/%d-%s", time.Now().UnixNano(), modelFile.Filename))
-		fmt.Println(savedPath)
+		machineEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineRequest, entity.Machine](createMachineRequest)
+		machineEntity.ModelPath = savedPath
+		err = machineService.machineRepository.Create(gormTransaction, machineEntity)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
