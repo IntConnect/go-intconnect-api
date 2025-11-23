@@ -7,7 +7,6 @@ import (
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
-	"math"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -47,31 +46,6 @@ func (roleService *ServiceImpl) FindAll() []*model.RoleResponse {
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return roleResponsesRequest
-}
-
-func (roleService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.RoleResponse] {
-	paginationResp := model.PaginationResponse[*model.RoleResponse]{}
-	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
-	orderClause := paginationReq.Sort
-	if paginationReq.Order != "" {
-		orderClause += " " + paginationReq.Order
-	}
-	var allRole []*model.RoleResponse
-	err := roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		roleEntities, totalItems, err := roleService.roleRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
-		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allRole = helper.MapEntitiesIntoResponses[entity.Role, model.RoleResponse](roleEntities)
-		paginationResp = model.PaginationResponse[*model.RoleResponse]{
-			Data:        allRole,
-			TotalItems:  totalItems,
-			TotalPages:  totalPages,
-			CurrentPage: paginationReq.Page,
-		}
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		return nil
-	})
-	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
 }
 
 // Create - Membuat role baru

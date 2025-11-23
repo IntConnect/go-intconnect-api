@@ -110,8 +110,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	facilityRouterGroup.DELETE("", protectedRoutes.facilityController.DeleteFacility)
 
 	roleRouterGroup := routerGroup.Group("roles")
-	roleRouterGroup.GET("pagination", protectedRoutes.roleController.FindAllPagination)
-	roleRouterGroup.GET("", protectedRoutes.roleController.FindAll)
+	roleRouterGroup.GET("", protectedRoutes.roleController.FindAllRole)
 	roleRouterGroup.POST("", protectedRoutes.roleController.CreateRole)
 	roleRouterGroup.PUT("", protectedRoutes.roleController.UpdateRole)
 	roleRouterGroup.DELETE("", protectedRoutes.roleController.DeleteRole)

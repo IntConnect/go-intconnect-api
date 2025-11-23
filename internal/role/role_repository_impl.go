@@ -18,19 +18,6 @@ func (roleRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]e
 	return roleEntities, err
 }
 
-func (roleRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Role, int64, error) {
-	var roleEntities []entity.Role
-	var totalItems int64
-
-	if searchQuery != "" {
-	}
-
-	// Count total items
-	err := gormTransaction.Model(&entity.Role{}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&roleEntities).Error
-	gormTransaction.Model(&entity.Role{}).Count(&totalItems)
-	return roleEntities, totalItems, err
-}
-
 func (roleRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, roleId uint64) (*entity.Role, error) {
 	var roleEntity entity.Role
 	err := gormTransaction.Model(&entity.Role{}).Where("id = ?", roleId).Find(&roleEntity).Error

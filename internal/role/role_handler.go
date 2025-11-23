@@ -23,23 +23,8 @@ func NewHandler(roleService Service, viperConfig *viper.Viper) *Handler {
 	}
 }
 
-func (roleHandler *Handler) FindAll(ginContext *gin.Context) {
+func (roleHandler *Handler) FindAllRole(ginContext *gin.Context) {
 	roleResponses := roleHandler.roleService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been fetched", roleResponses))
-}
-
-func (roleHandler *Handler) FindAllPagination(ginContext *gin.Context) {
-	paginationReq := model.PaginationRequest{
-		Page:  1,
-		Size:  10,
-		Sort:  "id",
-		Order: "asc",
-	}
-
-	// Bind query parameters to the struct
-	err := ginContext.ShouldBindQuery(&paginationReq)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	roleResponses := roleHandler.roleService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been fetched", roleResponses))
 }
 
