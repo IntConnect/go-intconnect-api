@@ -7,7 +7,6 @@ import (
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
-	"math"
 
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
@@ -50,27 +49,42 @@ func (permissionService *ServiceImpl) FindAll() []*model.PermissionResponse {
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return permissionResponsesRequest
 }
-func (permissionService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.PermissionResponse] {
-	paginationResp := model.PaginationResponse[*model.PermissionResponse]{}
-	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
-	orderClause := paginationReq.Sort
-	if paginationReq.Order != "" {
-		orderClause += " " + paginationReq.Order
-	}
-	var allPermission []*model.PermissionResponse
+func (permissionService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.PermissionResponse] {
+	var permissionResponses []*model.PermissionResponse
+	var totalItems int64
+
+	paginationQuery := helper.BuildPaginationQuery(paginationReq)
+
 	err := permissionService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		permissionEntities, totalItems, err := permissionService.permissionRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
-		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allPermission = helper.MapEntitiesIntoResponses[entity.Permission, model.PermissionResponse](permissionEntities)
-		paginationResp = model.PaginationResponse[*model.PermissionResponse]{
-			Data:        allPermission,
-			TotalItems:  totalItems,
-			TotalPages:  totalPages,
-			CurrentPage: paginationReq.Page,
-		}
+		permissionEntities, total, err := permissionService.permissionRepository.FindAllPagination(
+			gormTransaction,
+			paginationQuery.OrderClause,
+			paginationQuery.Offset,
+			paginationQuery.Limit,
+			paginationQuery.SearchQuery,
+		)
+
+		// Check error dari repository
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+		// Map entities ke responses
+		permissionResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Permission, *model.PermissionResponse](
+			permissionEntities,
+			mapper.FuncMapAuditable,
+		)
+
+		totalItems = total
 		return nil
 	})
+
+	// Check error dari transaction
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
+
+	// Construct paginated response
+	return helper.NewPaginatedResponseFromResult(
+		"Permissions fetched successfully",
+		permissionResponses,
+		paginationReq,
+		totalItems,
+	)
 }

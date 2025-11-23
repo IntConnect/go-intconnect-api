@@ -4,18 +4,26 @@ import (
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/helper"
+	"time"
 )
 
 func AuditableEntityIntoEntityResponse(auditableEntity *entity.Auditable) *model.AuditableResponse {
 	var auditableResponse model.AuditableResponse
+
+	// Format ke ISO 8601 (RFC3339)
 	auditableResponse.CreatedBy = auditableEntity.CreatedBy
-	auditableResponse.CreatedAt = auditableEntity.CreatedAt.String()
+	auditableResponse.CreatedAt = auditableEntity.CreatedAt.Format(time.RFC3339)
 	auditableResponse.UpdatedBy = auditableEntity.UpdatedBy
-	auditableResponse.UpdatedAt = auditableEntity.UpdatedAt.String()
+	auditableResponse.UpdatedAt = auditableEntity.UpdatedAt.Format(time.RFC3339)
+
 	helper.CheckPointerWrapper(auditableEntity.DeletedBy, func() {
 		auditableResponse.DeletedBy = *auditableEntity.DeletedBy
 	})
-	auditableResponse.DeletedBy = auditableEntity.DeletedAt.Time.String()
-	return &auditableResponse
 
+	// Jika deletedAt valid, format juga
+	if !auditableEntity.DeletedAt.Time.IsZero() {
+		auditableResponse.DeletedAt = auditableEntity.DeletedAt.Time.Format(time.RFC3339)
+	}
+
+	return &auditableResponse
 }

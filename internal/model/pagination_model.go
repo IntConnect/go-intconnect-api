@@ -22,6 +22,19 @@ type PaginationResponse[T any] struct {
 	CurrentPage int   `json:"currentPage"`
 }
 
+type PaginatedResponse[T any] struct {
+	BaseResponse
+	Data       []T             `json:"data"`
+	Pagination *PaginationMeta `json:"pagination"`
+}
+
+type PaginationMeta struct {
+	CurrentPage int   `json:"current_page"`
+	PageSize    int   `json:"page_size"`
+	TotalPages  int   `json:"total_pages"`
+	TotalItems  int64 `json:"total_items"`
+}
+
 func NewPaginationRequest() PaginationRequest {
 	return PaginationRequest{
 		Page:  1,

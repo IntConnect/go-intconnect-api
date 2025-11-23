@@ -6,5 +6,5 @@ import (
 
 type Service interface {
 	FindAll() []*model.PermissionResponse
-	FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.PermissionResponse]
+	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.PermissionResponse]
 }

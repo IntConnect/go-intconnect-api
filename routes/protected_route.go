@@ -117,8 +117,8 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	roleRouterGroup.DELETE("", protectedRoutes.roleController.DeleteRole)
 
 	permissionRouterGroup := routerGroup.Group("permissions")
-	permissionRouterGroup.GET("pagination", protectedRoutes.permissionController.FindAllPagination)
-	permissionRouterGroup.GET("", protectedRoutes.permissionController.FindAll)
+	permissionRouterGroup.GET("pagination", protectedRoutes.permissionController.FindAllPermissionPagination)
+	permissionRouterGroup.GET("", protectedRoutes.permissionController.FindAllPermission)
 
 	mqttBrokerRouterGroup := routerGroup.Group("mqtt-brokers")
 	mqttBrokerRouterGroup.GET("pagination", protectedRoutes.mqttBrokerController.FindAllMqttBrokerPagination)

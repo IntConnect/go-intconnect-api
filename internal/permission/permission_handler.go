@@ -22,22 +22,15 @@ func NewHandler(permissionService Service, viperConfig *viper.Viper) *Handler {
 	}
 }
 
-func (permissionHandler *Handler) FindAll(ginContext *gin.Context) {
+func (permissionHandler *Handler) FindAllPermission(ginContext *gin.Context) {
 	permissionResponses := permissionHandler.permissionService.FindAll()
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Permission has been fetched", permissionResponses))
 }
 
-func (permissionHandler *Handler) FindAllPagination(ginContext *gin.Context) {
-	paginationReq := model.PaginationRequest{
-		Page:  1,
-		Size:  10,
-		Sort:  "id",
-		Order: "asc",
-	}
-
-	// Bind query parameters to the struct
+func (permissionHandler *Handler) FindAllPermissionPagination(ginContext *gin.Context) {
+	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	permissionResponses := permissionHandler.permissionService.FindAllPagination(&paginationReq)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Permission has been fetched", permissionResponses))
+	paginatedResponse := permissionHandler.permissionService.FindAllPagination(&paginationReq)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
