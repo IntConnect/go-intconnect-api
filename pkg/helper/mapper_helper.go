@@ -52,7 +52,7 @@ func DecodeFromSource[S any, T any](sourceMapping S, targetMapping T) T {
 		Result:     &targetMapping,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
-	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err.Error(), nil))
+	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	err = decoder.Decode(sourceMapping)
 	return targetMapping
 }
@@ -103,7 +103,7 @@ func MapEntityIntoResponse[S any, R any](
 func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
 	var entityObject R
 	err := mapstructure.Decode(createRequest, &entityObject)
-	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err.Error(), nil))
+	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &entityObject
 }
 
