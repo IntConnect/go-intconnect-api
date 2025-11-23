@@ -2,26 +2,15 @@ package helper
 
 import (
 	"fmt"
-	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
-	"math/rand"
 	"net/http"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/go-viper/mapstructure/v2"
 	"gorm.io/gorm"
 )
-
-func CheckErrorOperation(indicatedError error, applicationError *exception.ApplicationError) bool {
-	if indicatedError != nil {
-		panic(applicationError)
-		return true
-	}
-	return false
-}
 
 func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
 	switch to {
@@ -57,37 +46,13 @@ func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}
 	return data, nil
 }
 
-func RandomStringGenerator(length int) (code string) {
-	var randomizer = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
-	var letters = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-
-	c := make([]string, length)
-	for i := range c {
-		numOrAlpha := rand.Intn(2)
-		if numOrAlpha == 0 {
-			c[i] = strconv.Itoa(randomizer.Intn(10))
-		} else {
-			c[i] = string(letters[randomizer.Intn(len(letters))])
-		}
-
-		code = strings.Join(c, "")
-	}
-	return
-}
-
-func CheckPointerWrapper[T any](targetChecking *T, renderPayload func()) {
-	if targetChecking != nil {
-		renderPayload()
-	}
-}
-
 func DecodeFromSource[S any, T any](sourceMapping S, targetMapping T) T {
 	decoderConfig := &mapstructure.DecoderConfig{
 		DecodeHook: StringIntoTypeHookFunc,
 		Result:     &targetMapping,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
-	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err.Error(), nil))
 	err = decoder.Decode(sourceMapping)
 	return targetMapping
 }
@@ -138,26 +103,10 @@ func MapEntityIntoResponse[S any, R any](
 func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
 	var entityObject R
 	err := mapstructure.Decode(createRequest, &entityObject)
-	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err.Error(), nil))
 	return &entityObject
 }
 
 func MapUpdateRequestIntoEntity[S any, R any](updateRequest S, existingEntity *R) {
 	existingEntity = DecodeFromSource[S, *R](updateRequest, existingEntity)
-}
-
-func BuildPaginationQuery(paginationReq *model.PaginationRequest) model.PaginationQuery {
-	offset := (paginationReq.Page - 1) * paginationReq.Size
-
-	orderClause := paginationReq.Sort
-	if paginationReq.Order != "" {
-		orderClause += " " + paginationReq.Order
-	}
-
-	return model.PaginationQuery{
-		Offset:      offset,
-		Limit:       paginationReq.Size,
-		OrderClause: orderClause,
-		SearchQuery: paginationReq.SearchQuery,
-	}
 }
