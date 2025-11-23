@@ -134,5 +134,9 @@ FROM telemetries;
 SELECT *
 FROM machines;
 
+
+SELECT *
+FROM permissions;
+
 INSERT INTO mqtt_topics (mqtt_broker_id, name, qos)
 VALUES (1, 'sensor/data', 0);

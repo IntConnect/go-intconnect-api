@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"math/rand"
@@ -91,35 +92,49 @@ func DecodeFromSource[S any, T any](sourceMapping S, targetMapping T) T {
 	return targetMapping
 }
 
-func MapEntityIntoResponse[S any, R any](
-	entityObject S,
-	renderPayload func(*R),
-) *R {
-	// Alokasikan pointer
-	responseObject := new(R)
-
-	// Decode ke dalam struct R
-	decodedResult := DecodeFromSource[S, R](entityObject, *responseObject)
-
-	// Copy hasil decode ke pointer
-	*responseObject = decodedResult
-
-	// Jalankan custom hook jika ada
-	if renderPayload != nil {
-		renderPayload(responseObject)
-	}
-
-	return responseObject
-}
-
 func MapEntitiesIntoResponses[S any, R any](entityObjects []S) []*R {
 	var responseObjects []*R
 	for _, entityObject := range entityObjects {
-		responseObjects = append(responseObjects, MapEntityIntoResponse[S, R](entityObject, nil))
+		fmt.Println(entityObject)
+		//responseObjects = append(responseObjects, MapEntityIntoResponse[S, R](entityObject, nil))
 	}
 	return responseObjects
 }
 
+// 1. Ubah helper function signature
+func MapEntitiesIntoResponsesWithFunc[S any, R any](
+	entityObjects []S,
+	individualRenderPayload func(S, R), // ✅ Ubah dari func(S, *R) *R
+) []R { // ✅ Return []R bukan []*R
+	var responseObjects []R
+	for _, entityObject := range entityObjects {
+		responseObjects = append(
+			responseObjects,
+			MapEntityIntoResponse[S, R](entityObject, individualRenderPayload),
+		)
+	}
+	return responseObjects
+}
+
+func MapEntityIntoResponse[S any, R any](
+	entityObject S,
+	renderPayload func(S, R),
+) R {
+	var responseObject R
+
+	if reflect.TypeOf(responseObject).Kind() == reflect.Ptr {
+		responseObject = reflect.New(reflect.TypeOf(responseObject).Elem()).Interface().(R)
+	}
+
+	decoded := DecodeFromSource[S, R](entityObject, responseObject)
+	responseObject = decoded
+
+	if renderPayload != nil {
+		renderPayload(entityObject, responseObject)
+	}
+
+	return responseObject
+}
 func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
 	var entityObject R
 	err := mapstructure.Decode(createRequest, &entityObject)

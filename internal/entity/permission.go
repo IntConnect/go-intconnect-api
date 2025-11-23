@@ -8,3 +8,7 @@ type Permission struct {
 	Description string `gorm:"column:description"`
 	Auditable
 }
+
+func (permissionEntity Permission) GetAuditable() *Auditable {
+	return &permissionEntity.Auditable
+}

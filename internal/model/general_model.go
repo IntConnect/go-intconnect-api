@@ -12,3 +12,8 @@ type AuditableResponse struct {
 type DeleteResourceGeneralRequest struct {
 	Id uint64 `json:"id" validate:"required|number"`
 }
+
+type HasAuditableResponse interface {
+	GetAuditableResponse() *AuditableResponse
+	SetAuditableResponse(auditableResponse *AuditableResponse)
+}

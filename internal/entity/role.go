@@ -6,3 +6,7 @@ type Role struct {
 	Description string `gorm:"column:description"`
 	Auditable
 }
+
+func (roleEntity Role) GetAuditable() *Auditable {
+	return &roleEntity.Auditable
+}

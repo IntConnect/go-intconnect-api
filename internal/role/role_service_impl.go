@@ -6,6 +6,7 @@ import (
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
+	"go-intconnect-api/pkg/mapper"
 	"math"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +36,13 @@ func (roleService *ServiceImpl) FindAll() []*model.RoleResponse {
 	err := roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		roleEntities, err := roleService.roleRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		roleResponsesRequest = helper.MapEntitiesIntoResponses[entity.Role, model.RoleResponse](roleEntities)
+		roleResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
+			entity.Role,
+			*model.RoleResponse,
+		](
+			roleEntities,
+			mapper.FuncMapAuditable[entity.Role, *model.RoleResponse],
+		)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

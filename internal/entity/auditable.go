@@ -15,6 +15,10 @@ type Auditable struct {
 	DeletedBy *string        `json:"deleted_by"`
 }
 
+type HasAuditable interface {
+	GetAuditable() *Auditable
+}
+
 func NewAuditable(subject string) Auditable {
 	return Auditable{
 		CreatedAt: time.Now(),

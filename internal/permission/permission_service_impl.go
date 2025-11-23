@@ -6,6 +6,7 @@ import (
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
+	"go-intconnect-api/pkg/mapper"
 	"math"
 
 	"github.com/spf13/viper"
@@ -29,18 +30,26 @@ func NewService(permissionRepository Repository, validatorService validator.Serv
 	}
 }
 
+// 3. Panggil dengan pointer type
 func (permissionService *ServiceImpl) FindAll() []*model.PermissionResponse {
 	var permissionResponsesRequest []*model.PermissionResponse
 	err := permissionService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		permissionEntities, err := permissionService.permissionRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		permissionResponsesRequest = helper.MapEntitiesIntoResponses[entity.Permission, model.PermissionResponse](permissionEntities)
+
+		// ✅ Gunakan *model.PermissionResponse (pointer type)
+		permissionResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
+			entity.Permission,
+			*model.PermissionResponse,
+		](
+			permissionEntities,
+			mapper.FuncMapAuditable[entity.Permission, *model.PermissionResponse],
+		)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return permissionResponsesRequest
 }
-
 func (permissionService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.PermissionResponse] {
 	paginationResp := model.PaginationResponse[*model.PermissionResponse]{}
 	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
