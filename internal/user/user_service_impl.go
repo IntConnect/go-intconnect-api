@@ -8,7 +8,6 @@ import (
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
-	"math"
 	"net/http"
 	"time"
 
@@ -39,26 +38,25 @@ func NewService(userRepository Repository, validatorService validator.Service, d
 	}
 }
 
-// Create - Membuat user baru
 func (userService *ServiceImpl) FindAll() []*model.UserResponse {
 	var allUser []*model.UserResponse
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userResponse, err := userService.userRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allUser = mapper.MapUserEntitiesIntoUserResponses(userResponse)
+		allUser = helper.MapEntitiesIntoResponsesWithFunc[entity.User, *model.UserResponse](userResponse, mapper.FuncMapAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return allUser
 }
 
-// Create - Membuat user baru
-func (userService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.UserResponse] {
-	paginationResp := model.PaginationResponse[*model.UserResponse]{}
+func (userService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.UserResponse] {
 	paginationQuery := helper.BuildPaginationQuery(paginationReq)
+	var userResponses []*model.UserResponse
+	var totalItems int64
 
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		userEntities, totalItems, err := userService.userRepository.FindAllPagination(
+		userEntities, total, err := userService.userRepository.FindAllPagination(
 			gormTransaction,
 			paginationQuery.OrderClause,
 			paginationQuery.Offset,
@@ -67,30 +65,32 @@ func (userService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allUser := mapper.MapUserEntitiesIntoUserResponses(userEntities)
-		paginationResp = model.PaginationResponse[*model.UserResponse]{
-			Data:        allUser,
-			TotalItems:  totalItems,
-			TotalPages:  totalPages,
-			CurrentPage: paginationReq.Page,
-		}
+		userResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.User, *model.UserResponse](
+			userEntities,
+			mapper.FuncMapAuditable,
+		)
+		totalItems = total
+
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
+	return helper.NewPaginatedResponseFromResult(
+		"Permissions fetched successfully",
+		userResponses,
+		paginationReq,
+		totalItems,
+	)
 }
 
 // Create - Membuat user baru
-func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest) model.PaginationResponse[*model.UserResponse] {
-	paginationResp := model.PaginationResponse[*model.UserResponse]{}
+func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest) *model.PaginatedResponse[*model.UserResponse] {
+	var paginationResp *model.PaginatedResponse[*model.UserResponse]
 	valErr := userService.validatorService.ValidateStruct(createUserRequest)
 	userService.validatorService.ParseValidationError(valErr, *createUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userEntity := mapper.MapCreateUserRequestIntoUserEntity(createUserRequest)
 		userEntity.Status = trait.UserStatusActive
-		// TODO: Change it with logged user
 		userEntity.Auditable = entity.NewAuditable("Administrator")
 		err := userService.userRepository.Create(gormTransaction, userEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))

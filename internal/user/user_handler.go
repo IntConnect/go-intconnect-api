@@ -32,8 +32,8 @@ func (userHandler *Handler) FindAllUserPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	userResponses := userHandler.userService.FindAllPagination(&paginationReq)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been fetched", userResponses))
+	paginatedResponse := userHandler.userService.FindAllPagination(&paginationReq)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (userHandler *Handler) LoginUser(ginContext *gin.Context) {

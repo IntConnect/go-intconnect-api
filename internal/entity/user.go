@@ -12,3 +12,7 @@ type User struct {
 	Status   trait.UserStatus `gorm:"column:status"`
 	Auditable
 }
+
+func (userEntity User) GetAuditable() *Auditable {
+	return &userEntity.Auditable
+}

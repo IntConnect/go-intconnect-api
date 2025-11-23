@@ -34,7 +34,7 @@ func (userRepositoryImpl *RepositoryImpl) FindAllPagination(
 	// Search
 	if searchQuery != "" {
 		searchPattern := "%" + searchQuery + "%"
-		rawQuery = rawQuery.Where("username ILIKE ? OR email ILIKE ? OR name ILIKE ?", searchPattern, searchPattern, searchPattern)
+		rawQuery = rawQuery.Where("username ILIKE ? OR name ILIKE ? OR email ILIKE ?", searchPattern, searchPattern, searchPattern)
 	}
 
 	// Count first
@@ -44,9 +44,6 @@ func (userRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
-		Preload("UserGroup", func(tx *gorm.DB) *gorm.DB {
-			return tx.Select("id,name")
-		}).
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).

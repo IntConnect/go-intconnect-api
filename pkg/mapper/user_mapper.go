@@ -6,7 +6,6 @@ import (
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"net/http"
-	"time"
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -29,8 +28,6 @@ func MapUserEntityIntoUserResponse(userEntity *entity.User) *model.UserResponse 
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 
 	err = decoder.Decode(userEntity)
-	userResponse.CreatedAt = userEntity.CreatedAt.Format(time.RFC3339)
-	userResponse.UpdatedAt = userEntity.UpdatedAt.Format(time.RFC3339)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &userResponse
 }

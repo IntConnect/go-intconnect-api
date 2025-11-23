@@ -7,13 +7,11 @@ type JwtClaimRequest struct {
 }
 
 type UserResponse struct {
-	Id        uint64 `json:"id"`
-	Username  string `json:"username"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	CreatedAt string `json:"created_at" mapstructure:"-"`
-	UpdatedAt string `json:"updated_at" mapstructure:"-"`
+	Id                uint64             `json:"id"`
+	Username          string             `json:"username"`
+	Name              string             `json:"name"`
+	Email             string             `json:"email"`
+	AuditableResponse *AuditableResponse `json:"auditable_response"`
 }
 
 type CreateUserRequest struct {
@@ -39,4 +37,12 @@ type DeleteUserRequest struct {
 type LoginUserRequest struct {
 	UserIdentifier string `json:"user_identifier" validate:"required"`
 	Password       string `json:"password" validate:"required"`
+}
+
+func (userResponse *UserResponse) GetAuditableResponse() *AuditableResponse {
+	return userResponse.AuditableResponse
+}
+
+func (userResponse *UserResponse) SetAuditableResponse(auditableResponse *AuditableResponse) {
+	userResponse.AuditableResponse = auditableResponse
 }
