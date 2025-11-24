@@ -289,6 +289,7 @@ func (listenerFluxor *ListenerFluxor) handledTopics(ctxWithCancel context.Contex
 			return
 		case <-topicReloadTicker.C:
 			mqttTopics, err := mqttTopicRepository.FindAll(gormDatabase)
+			fmt.Println(mqttTopics)
 			if err != nil {
 				logrusInstance.WithError(err).Error("Error fetching topics")
 				continue
@@ -376,7 +377,7 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 			listenerFluxor.latestTelemetry[mqttKey] = &entity.Telemetry{
 				ParameterId: parameterEntity.Id,
 				Value:       parsedMqttValue,
-				Timestamp:   mqttPayload.Timestamp,
+				Timestamp:   mqttPayload.Timestamp.Time,
 			}
 
 		} else {
