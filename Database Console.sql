@@ -140,3 +140,6 @@ FROM permissions;
 
 INSERT INTO mqtt_topics (mqtt_broker_id, name, qos)
 VALUES (1, 'sensor/data', 0);
+
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+\dx

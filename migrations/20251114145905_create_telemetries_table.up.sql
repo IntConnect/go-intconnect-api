@@ -1,7 +1,12 @@
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
 CREATE TABLE telemetries
 (
-    id           SERIAL PRIMARY KEY,
-    parameter_id BIGINT NOT NULL REFERENCES parameters (id),
+    id           BIGINT    NOT NULL,
+    parameter_id BIGINT    NOT NULL REFERENCES parameters (id),
     value        FLOAT,
-    timestamp    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+    timestamp    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id, timestamp)
+);
+
+SELECT create_hypertable('telemetries', 'timestamp');
