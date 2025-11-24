@@ -24,26 +24,32 @@ func (machineRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm
 	return machineEntities, err
 }
 
-func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Machine, int64, error) {
+func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(
+	gormTransaction *gorm.DB,
+	orderClause string,
+	offsetVal, limitPage int,
+	searchQuery string,
+) ([]entity.Machine, int64, error) {
 	var machineEntities []entity.Machine
 	var totalItems int64
-
+	rawQuery := gormTransaction.Model(&entity.Machine{})
 	if searchQuery != "" {
-		// Add search condition
 		searchPattern := "%" + searchQuery + "%"
-		gormTransaction = gormTransaction.Where("machinename LIKE ? OR email LIKE ?  OR password = ?", searchPattern, searchPattern, searchPattern)
-
+		rawQuery = rawQuery.Where("name ILIKE ? OR code ILIKE ? OR description ILIKE ?", searchPattern, searchPattern, searchPattern)
+	}
+	if err := rawQuery.Count(&totalItems).Error; err != nil {
+		return nil, 0, err
+	}
+	if err := rawQuery.
+		Order(orderClause).
+		Offset(offsetVal).
+		Limit(limitPage).
+		Find(&machineEntities).Error; err != nil {
+		return nil, 0, err
 	}
 
-	// Count total items
-	err := gormTransaction.Model(&entity.Machine{}).
-		Preload("MachineGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&machineEntities).Error
-	gormTransaction.Model(&entity.Machine{}).Count(&totalItems)
-	return machineEntities, totalItems, err
+	return machineEntities, totalItems, nil
 }
-
 func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.Machine, error) {
 	var machineEntity entity.Machine
 	err := gormTransaction.Model(&entity.Machine{}).

@@ -8,7 +8,7 @@ import (
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
-	"math"
+	"go-intconnect-api/pkg/mapper"
 	"mime/multipart"
 	"time"
 
@@ -42,36 +42,39 @@ func (machineService *ServiceImpl) FindAll() []*model.MachineResponse {
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		machineEntities, err := machineService.machineRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		machineResponsesRequest = helper.MapEntitiesIntoResponses[entity.Machine, model.MachineResponse](machineEntities)
+		machineResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[entity.Machine, *model.MachineResponse](machineEntities, mapper.FuncMapAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return machineResponsesRequest
 }
 
-func (machineService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.MachineResponse] {
-	paginationResp := model.PaginationResponse[*model.MachineResponse]{}
-	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
-	orderClause := paginationReq.Sort
-	if paginationReq.Order != "" {
-		orderClause += " " + paginationReq.Order
-	}
-	var allMachine []*model.MachineResponse
+func (machineService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.MachineResponse] {
+	paginationQuery := helper.BuildPaginationQuery(paginationReq)
+	var machineResponses []*model.MachineResponse
+	var totalItems int64
+
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		machineEntities, totalItems, err := machineService.machineRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
-		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allMachine = helper.MapEntitiesIntoResponses[entity.Machine, model.MachineResponse](machineEntities)
-		paginationResp = model.PaginationResponse[*model.MachineResponse]{
-			Data:        allMachine,
-			TotalItems:  totalItems,
-			TotalPages:  totalPages,
-			CurrentPage: paginationReq.Page,
-		}
+		machineEntities, total, err := machineService.machineRepository.FindAllPagination(gormTransaction, paginationQuery.OrderClause,
+			paginationQuery.Offset,
+			paginationQuery.Limit,
+			paginationQuery.SearchQuery)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		machineResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Machine, *model.MachineResponse](
+			machineEntities,
+			mapper.FuncMapAuditable,
+		)
+		totalItems = total
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
+	return helper.NewPaginatedResponseFromResult(
+		"Machines fetched successfully",
+		machineResponses,
+		paginationReq,
+		totalItems,
+	)
 }
 
 // Create - Membuat machine baru

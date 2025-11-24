@@ -41,3 +41,11 @@ type MachineResponse struct {
 	Metadata           map[string]interface{} `json:"metadata"`
 	*AuditableResponse `json:"auditable"`
 }
+
+func (machineResponse *MachineResponse) GetAuditableResponse() *AuditableResponse {
+	return machineResponse.AuditableResponse
+}
+
+func (machineResponse *MachineResponse) SetAuditableResponse(auditableResponse *AuditableResponse) {
+	machineResponse.AuditableResponse = auditableResponse
+}

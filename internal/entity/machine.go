@@ -14,3 +14,7 @@ type Machine struct {
 	Facility     Facility `gorm:"foreignKey:FacilityId;references:Id"`
 	Auditable
 }
+
+func (machineEntity Machine) GetAuditable() *Auditable {
+	return &machineEntity.Auditable
+}

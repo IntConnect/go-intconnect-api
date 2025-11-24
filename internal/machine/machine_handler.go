@@ -32,8 +32,8 @@ func (machineHandler *Handler) FindAllMachinePagination(ginContext *gin.Context)
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	machineResponses := machineHandler.machineService.FindAllPagination(&paginationReq)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Machine has been fetched", machineResponses))
+	paginatedResponse := machineHandler.machineService.FindAllPagination(&paginationReq)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
