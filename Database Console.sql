@@ -139,7 +139,12 @@ SELECT *
 FROM permissions;
 
 INSERT INTO mqtt_topics (mqtt_broker_id, name, qos)
-VALUES (1, 'sensor/data', 0);
+VALUES (1, 'publish/data/chiller1', 0);
 
 CREATE EXTENSION IF NOT EXISTS timescaledb;
-\dx
+
+SELECT *
+FROM mqtt_brokers;
+
+INSERT INTO mqtt_brokers(host_name, mqtt_port, ws_port, is_active)
+VALUES ('10.175.16.39', '1883', '9001', true)

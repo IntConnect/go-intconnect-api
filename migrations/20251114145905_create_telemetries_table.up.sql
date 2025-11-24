@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 CREATE TABLE telemetries
 (
-    id           BIGINT    NOT NULL,
+    id           BIGSERIAL NOT NULL,
     parameter_id BIGINT    NOT NULL REFERENCES parameters (id),
     value        FLOAT,
     timestamp    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
