@@ -9,7 +9,6 @@ import (
 	"go.uber.org/fx"
 )
 
-// --- Invoker ---
 func Run(fxLifecycle fx.Lifecycle, ginEngine *gin.Engine) {
 	fxLifecycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
@@ -48,6 +47,7 @@ func main() {
 		injector.LoggerModule,
 		injector.MqttBrokerModule,
 		injector.MachineModule,
+		injector.ParameterModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

@@ -7,6 +7,7 @@ import (
 	"go-intconnect-api/internal/machine"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	"go-intconnect-api/internal/node"
+	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/permission"
 	"go-intconnect-api/internal/pipeline"
 	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
@@ -55,7 +56,7 @@ func NewValidator(gormDatabase *gorm.DB) (*validator.Validate, universalTranslat
 	return configs.InitializeValidator(gormDatabase)
 }
 
-// --- Provider untuk Viper config ---
+// NewViperConfig --- Provider untuk Viper config ---
 func NewViperConfig() *viper.Viper {
 	viperConfig := viper.New()
 	viperConfig.SetConfigFile(".env")
@@ -67,7 +68,7 @@ func NewViperConfig() *viper.Viper {
 	return viperConfig
 }
 
-// --- Provider untuk Database Credentials ---
+// NewDatabaseCredentials --- Provider untuk Database Credentials ---
 func NewDatabaseCredentials(viperConfig *viper.Viper) *configs.DatabaseCredentials {
 	return &configs.DatabaseCredentials{
 		DatabaseHost:     viperConfig.GetString("DATABASE_HOST"),
@@ -78,7 +79,7 @@ func NewDatabaseCredentials(viperConfig *viper.Viper) *configs.DatabaseCredentia
 	}
 }
 
-// --- Provider untuk Gin Engine ---
+// NewGinEngine --- Provider untuk Gin Engine ---
 func NewGinEngine() (*gin.Engine, *gin.RouterGroup) {
 	gin.SetMode(gin.DebugMode)
 	ginEngine := gin.Default()
@@ -209,4 +210,10 @@ var MachineModule = fx.Module("machineFeature",
 	fx.Provide(fx.Annotate(machine.NewRepository, fx.As(new(machine.Repository)))),
 	fx.Provide(fx.Annotate(machine.NewService, fx.As(new(machine.Service)))),
 	fx.Provide(fx.Annotate(machine.NewHandler, fx.As(new(machine.Controller)))),
+)
+
+var ParameterModule = fx.Module("parameterFeature",
+	fx.Provide(fx.Annotate(parameter.NewRepository, fx.As(new(parameter.Repository)))),
+	fx.Provide(fx.Annotate(parameter.NewService, fx.As(new(parameter.Service)))),
+	fx.Provide(fx.Annotate(parameter.NewHandler, fx.As(new(parameter.Controller)))),
 )

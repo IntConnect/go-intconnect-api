@@ -38,3 +38,11 @@ type UpdateParameterRequest struct {
 type DeleteParameterRequest struct {
 	Id uint64 `json:"id" validate:"required,number"`
 }
+
+func (parameterResponse *ParameterResponse) GetAuditableResponse() *AuditableResponse {
+	return parameterResponse.AuditableResponse
+}
+
+func (parameterResponse *ParameterResponse) SetAuditableResponse(auditableResponse *AuditableResponse) {
+	parameterResponse.AuditableResponse = auditableResponse
+}

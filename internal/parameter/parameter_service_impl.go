@@ -6,6 +6,7 @@ import (
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
+	"go-intconnect-api/pkg/mapper"
 	"math"
 	"mime/multipart"
 
@@ -36,7 +37,13 @@ func (parameterService *ServiceImpl) FindAll() []*model.ParameterResponse {
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntities, err := parameterService.parameterRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		parameterResponsesRequest = helper.MapEntitiesIntoResponses[entity.Parameter, model.ParameterResponse](parameterEntities)
+		parameterResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
+			entity.Parameter,
+			*model.ParameterResponse,
+		](
+			parameterEntities,
+			mapper.FuncMapAuditable[entity.Parameter, *model.ParameterResponse],
+		)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

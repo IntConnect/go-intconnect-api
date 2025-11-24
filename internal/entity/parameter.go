@@ -12,3 +12,7 @@ type Parameter struct {
 	Machine     *Machine `gorm:"foreignKey:MachineId;references:Id"`
 	Auditable
 }
+
+func (parameterEntity Parameter) GetAuditable() *Auditable {
+	return &parameterEntity.Auditable
+}

@@ -29,14 +29,12 @@ func NewService(permissionRepository Repository, validatorService validator.Serv
 	}
 }
 
-// 3. Panggil dengan pointer type
 func (permissionService *ServiceImpl) FindAll() []*model.PermissionResponse {
 	var permissionResponsesRequest []*model.PermissionResponse
 	err := permissionService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		permissionEntities, err := permissionService.permissionRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		// ✅ Gunakan *model.PermissionResponse (pointer type)
 		permissionResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
 			entity.Permission,
 			*model.PermissionResponse,

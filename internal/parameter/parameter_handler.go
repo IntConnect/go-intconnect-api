@@ -23,12 +23,12 @@ func NewHandler(parameterService Service, viperConfig *viper.Viper) *Handler {
 	}
 }
 
-func (parameterHandler *Handler) FindAll(ginContext *gin.Context) {
+func (parameterHandler *Handler) FindAllParameter(ginContext *gin.Context) {
 	parameterResponses := parameterHandler.parameterService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been fetched", parameterResponses))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameters has been fetched", parameterResponses))
 }
 
-func (parameterHandler *Handler) FindAllPagination(ginContext *gin.Context) {
+func (parameterHandler *Handler) FindAllParameterPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))

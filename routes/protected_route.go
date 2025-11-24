@@ -6,6 +6,7 @@ import (
 	"go-intconnect-api/internal/machine"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	"go-intconnect-api/internal/node"
+	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/permission"
 	"go-intconnect-api/internal/pipeline"
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
@@ -28,6 +29,7 @@ type ProtectedRoutes struct {
 	permissionController            permission.Controller
 	mqttBrokerController            mqttBroker.Controller
 	machineController               machine.Controller
+	parameterController             parameter.Controller
 }
 
 func NewProtectedRoutes(
@@ -43,6 +45,7 @@ func NewProtectedRoutes(
 	permissionController permission.Controller,
 	mqttBrokerController mqttBroker.Controller,
 	machineController machine.Controller,
+	parameterController parameter.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -57,6 +60,7 @@ func NewProtectedRoutes(
 		permissionController:            permissionController,
 		mqttBrokerController:            mqttBrokerController,
 		machineController:               machineController,
+		parameterController:             parameterController,
 	}
 }
 
@@ -132,5 +136,12 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	machineRouterGroup.POST("", protectedRoutes.machineController.CreateMachine)
 	machineRouterGroup.PUT("", protectedRoutes.machineController.UpdateMachine)
 	machineRouterGroup.DELETE("", protectedRoutes.machineController.DeleteMachine)
+
+	parameterRouterGroup := routerGroup.Group("parameters")
+	parameterRouterGroup.GET("pagination", protectedRoutes.parameterController.FindAllParameterPagination)
+	parameterRouterGroup.GET("", protectedRoutes.parameterController.FindAllParameter)
+	parameterRouterGroup.POST("", protectedRoutes.parameterController.CreateParameter)
+	parameterRouterGroup.PUT("", protectedRoutes.parameterController.UpdateParameter)
+	parameterRouterGroup.DELETE("", protectedRoutes.parameterController.DeleteParameter)
 
 }
