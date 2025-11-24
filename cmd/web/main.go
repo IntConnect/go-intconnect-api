@@ -14,7 +14,7 @@ func Run(fxLifecycle fx.Lifecycle, ginEngine *gin.Engine) {
 		OnStart: func(ctx context.Context) error {
 			fmt.Println("Starting server...")
 			go func() {
-				if err := ginEngine.Run(":8080"); err != nil {
+				if err := ginEngine.Run(":8081"); err != nil {
 					panic(err)
 				}
 			}()
