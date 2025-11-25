@@ -6,15 +6,18 @@ import (
 	"go-intconnect-api/cmd/injector"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"go.uber.org/fx"
 )
 
-func Run(fxLifecycle fx.Lifecycle, ginEngine *gin.Engine) {
+func Run(fxLifecycle fx.Lifecycle, ginEngine *gin.Engine, viperConfig *viper.Viper) {
+	webPort := viperConfig.GetString("API_PORT")
 	fxLifecycle.Append(fx.Hook{
+
 		OnStart: func(ctx context.Context) error {
 			fmt.Println("Starting server...")
 			go func() {
-				if err := ginEngine.Run(":8081"); err != nil {
+				if err := ginEngine.Run(fmt.Sprintf(":%s", webPort)); err != nil {
 					panic(err)
 				}
 			}()

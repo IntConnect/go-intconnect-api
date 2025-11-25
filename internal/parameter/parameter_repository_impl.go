@@ -24,26 +24,41 @@ func (parameterRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *go
 	return parameterEntities, err
 }
 
-func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Parameter, int64, error) {
+func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(
+	gormTransaction *gorm.DB,
+	orderClause string,
+	offsetVal, limitPage int,
+	searchQuery string,
+) ([]entity.Parameter, int64, error) {
+
 	var parameterEntities []entity.Parameter
 	var totalItems int64
 
-	if searchQuery != "" {
-		// Add search condition
-		searchPattern := "%" + searchQuery + "%"
-		gormTransaction = gormTransaction.Where("parametername LIKE ? OR email LIKE ?  OR password = ?", searchPattern, searchPattern, searchPattern)
+	// Base query
+	rawQuery := gormTransaction.Model(&entity.Parameter{})
 
+	// Search
+	if searchQuery != "" {
+		searchPattern := "%" + searchQuery + "%"
+		rawQuery = rawQuery.Where("name ILIKE ? OR code ILIKE ? OR unit ILIKE ? OR min_value ILIKE ? OR max_value ILIKE ? OR description ILIKE ?", searchPattern, searchPattern, searchPattern, searchPattern, searchPattern)
 	}
 
-	// Count total items
-	err := gormTransaction.Model(&entity.Parameter{}).
-		Preload("ParameterGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&parameterEntities).Error
-	gormTransaction.Model(&entity.Parameter{}).Count(&totalItems)
-	return parameterEntities, totalItems, err
-}
+	// Count first
+	if err := rawQuery.Count(&totalItems).Error; err != nil {
+		return nil, 0, err
+	}
 
+	// Fetch paginated data
+	if err := rawQuery.
+		Order(orderClause).
+		Offset(offsetVal).
+		Limit(limitPage).
+		Find(&parameterEntities).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return parameterEntities, totalItems, nil
+}
 func (parameterRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, parameterId uint64) (*entity.Parameter, error) {
 	var parameterEntity entity.Parameter
 	err := gormTransaction.Model(&entity.Parameter{}).Where("id = ?", parameterId).Find(&parameterEntity).Error

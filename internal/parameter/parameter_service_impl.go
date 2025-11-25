@@ -7,8 +7,6 @@ import (
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
-	"math"
-	"mime/multipart"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -50,43 +48,50 @@ func (parameterService *ServiceImpl) FindAll() []*model.ParameterResponse {
 	return parameterResponsesRequest
 }
 
-func (parameterService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.ParameterResponse] {
-	paginationResp := model.PaginationResponse[*model.ParameterResponse]{}
-	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
-	orderClause := paginationReq.Sort
-	if paginationReq.Order != "" {
-		orderClause += " " + paginationReq.Order
-	}
-	var allParameter []*model.ParameterResponse
+func (parameterService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.ParameterResponse] {
+	paginationQuery := helper.BuildPaginationQuery(paginationReq)
+	var parameterResponses []*model.ParameterResponse
+	var totalItems int64
+
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		parameterEntities, totalItems, err := parameterService.parameterRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
-		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allParameter = helper.MapEntitiesIntoResponses[entity.Parameter, model.ParameterResponse](parameterEntities)
-		paginationResp = model.PaginationResponse[*model.ParameterResponse]{
-			Data:        allParameter,
-			TotalItems:  totalItems,
-			TotalPages:  totalPages,
-			CurrentPage: paginationReq.Page,
-		}
+		parameterEntities, total, err := parameterService.parameterRepository.FindAllPagination(
+			gormTransaction,
+			paginationQuery.OrderClause,
+			paginationQuery.Offset,
+			paginationQuery.Limit,
+			paginationQuery.SearchQuery)
+		parameterResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Parameter, *model.ParameterResponse](
+			parameterEntities,
+			mapper.FuncMapAuditable,
+		)
+		totalItems = total
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
+	return helper.NewPaginatedResponseFromResult(
+		"Parameters fetched successfully",
+		parameterResponses,
+		paginationReq,
+		totalItems,
+	)
 }
 
 // Create - Membuat parameter baru
-func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParameterRequest *model.CreateParameterRequest, modelFile *multipart.FileHeader) {
+func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParameterRequest *model.CreateParameterRequest) *model.PaginatedResponse[*model.ParameterResponse] {
+	var parameterResponses *model.PaginatedResponse[*model.ParameterResponse]
 	valErr := parameterService.validatorService.ValidateStruct(createParameterRequest)
 	parameterService.validatorService.ParseValidationError(valErr, *createParameterRequest)
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntity := helper.MapCreateRequestIntoEntity[model.CreateParameterRequest, entity.Parameter](createParameterRequest)
 		err := parameterService.parameterRepository.Create(gormTransaction, parameterEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
+		var paginationReq *model.PaginationRequest
+		parameterResponses = parameterService.FindAllPagination(paginationReq)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return parameterResponses
 }
 
 func (parameterService *ServiceImpl) Update(ginContext *gin.Context, updateParameterRequest *model.UpdateParameterRequest) {
@@ -103,7 +108,7 @@ func (parameterService *ServiceImpl) Update(ginContext *gin.Context, updateParam
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (parameterService *ServiceImpl) Delete(ginContext *gin.Context, deleteParameterRequest *model.DeleteParameterRequest) {
+func (parameterService *ServiceImpl) Delete(ginContext *gin.Context, deleteParameterRequest *model.DeleteResourceGeneralRequest) {
 	valErr := parameterService.validatorService.ValidateStruct(deleteParameterRequest)
 	parameterService.validatorService.ParseValidationError(valErr, *deleteParameterRequest)
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
