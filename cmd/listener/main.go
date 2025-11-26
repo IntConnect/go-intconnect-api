@@ -249,7 +249,7 @@ func (listenerFluxor *ListenerFluxor) resubscribeTopics(ctx context.Context) err
 	}
 
 	if token := listenerFluxor.mqttClient.SubscribeMultiple(listenerFluxorResp.SubscribeMultiple, func(client mqtt.Client, message mqtt.Message) {
-		listenerFluxor.onMessageReceived(message)
+		listenerFluxor.onMessageReceived(message, listenerFluxorResp.TopicParameter)
 	}); token.Wait() && token.Error() != nil {
 		return token.Error()
 	}
@@ -289,7 +289,6 @@ func (listenerFluxor *ListenerFluxor) handledTopics(ctxWithCancel context.Contex
 			return
 		case <-topicReloadTicker.C:
 			mqttTopics, err := mqttTopicRepository.FindAll(gormDatabase)
-			fmt.Println(mqttTopics)
 			if err != nil {
 				logrusInstance.WithError(err).Error("Error fetching topics")
 				continue
@@ -304,7 +303,7 @@ func (listenerFluxor *ListenerFluxor) handledTopics(ctxWithCancel context.Contex
 				}
 				if mqttClient != nil {
 					if token := mqttClient.SubscribeMultiple(updatedTopics.SubscribeMultiple, func(mqttClient mqtt.Client, mqttMessage mqtt.Message) {
-						listenerFluxor.onMessageReceived(mqttMessage)
+						listenerFluxor.onMessageReceived(mqttMessage, updatedTopics.TopicParameter)
 					}); token.Wait() && token.Error() != nil {
 						logrusInstance.WithError(token.Error()).Error("Error subscribing to updated topics")
 					} else {
@@ -317,7 +316,7 @@ func (listenerFluxor *ListenerFluxor) handledTopics(ctxWithCancel context.Contex
 	}
 }
 
-func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message) {
+func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message, topicParameter model.TopicParameter) {
 	rawMqttPayload := string(mqttMessage.Payload())
 	var mqttPayload model.MqttPayload
 	err := json.Unmarshal([]byte(rawMqttPayload), &mqttPayload)
@@ -327,7 +326,10 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 	}
 	listenerFluxor.telemetryMutex.Lock()
 	defer listenerFluxor.telemetryMutex.Unlock()
-
+	detailMqttTopic, isExists := topicParameter[mqttMessage.Topic()]
+	if !isExists {
+		return
+	}
 	var newParameters []*entity.Parameter
 	for mqttKey, _ := range mqttPayload.MqttInnerPayload {
 		listenerFluxor.rwMutex.RLock()
@@ -341,6 +343,8 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 				MinValue:    0,
 				MaxValue:    0,
 				Description: "",
+				MqttTopicId: detailMqttTopic["mqtt_topic_id"],
+				MachineId:   detailMqttTopic["machine_id"],
 			})
 		}
 	}
@@ -474,13 +478,17 @@ func converterMqttTopicsToListenerResponse(mqttTopicEntities []entity.MqttTopic)
 			QoS = byte(mqttTopicEntity.QoS)
 		}
 		mqttTopicListenerResponse.SubscribeMultiple[mqttTopicEntity.Name] = QoS
+		mqttTopicListenerResponse.TopicParameter[mqttTopicEntity.Name] = map[string]uint64{
+			"mqtt_topic_id": mqttTopicEntity.Id,
+			"machine_id":    mqttTopicEntity.MachineId,
+		}
 	}
 	return mqttTopicListenerResponse
 }
 
 func (listenerFluxor *ListenerFluxor) StartSnapshotSaver(ctx context.Context) {
 	go func() {
-		snapshotTicker := time.NewTicker(1 * time.Minute)
+		snapshotTicker := time.NewTicker(5 * time.Second)
 		defer snapshotTicker.Stop()
 
 		for {
