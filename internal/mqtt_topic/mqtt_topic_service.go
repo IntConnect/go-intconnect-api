@@ -7,10 +7,9 @@ import (
 )
 
 type Service interface {
-	FindAll() []*model.UserResponse
-	FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.UserResponse]
-	HandleLogin(ginContext *gin.Context, loginUserRequest *model.LoginUserRequest) string
-	Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest) model.PaginationResponse[*model.UserResponse]
-	Update(ginContext *gin.Context, updateUserRequest *model.UpdateUserRequest)
-	Delete(ginContext *gin.Context, deleteUserRequest *model.DeleteUserRequest)
+	FindAll() []*model.MqttTopicResponse
+	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.MqttTopicResponse]
+	Create(ginContext *gin.Context, createMqttTopicRequest *model.CreateMqttTopicRequest) *model.PaginatedResponse[*model.MqttTopicResponse]
+	Update(ginContext *gin.Context, updateMqttTopicRequest *model.UpdateMqttTopicRequest)
+	Delete(ginContext *gin.Context, deleteMqttTopicRequest *model.DeleteResourceGeneralRequest)
 }

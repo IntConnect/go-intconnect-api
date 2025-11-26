@@ -8,3 +8,7 @@ type MqttTopic struct {
 	MqttBroker   MqttBroker `gorm:"foreignKey:MqttBrokerId"`
 	Auditable
 }
+
+func (mqttTopicEntity MqttTopic) GetAuditable() *Auditable {
+	return &mqttTopicEntity.Auditable
+}

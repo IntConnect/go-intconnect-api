@@ -6,7 +6,7 @@ import (
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
-	"math"
+	"go-intconnect-api/pkg/mapper"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -47,38 +47,41 @@ func (mqttTopicService *ServiceImpl) FindAll() []*model.MqttTopicResponse {
 }
 
 // Create - Membuat mqttTopic baru
-func (mqttTopicService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.MqttTopicResponse] {
-	paginationResp := model.PaginationResponse[*model.MqttTopicResponse]{}
+func (mqttTopicService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.MqttTopicResponse] {
 	paginationQuery := helper.BuildPaginationQuery(paginationReq)
+	var mqttTopicResponses []*model.MqttTopicResponse
+	var totalItems int64
 
 	err := mqttTopicService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		mqttTopicEntities, totalItems, err := mqttTopicService.mqttTopicRepository.FindAllPagination(
+		mqttTopicEntities, total, err := mqttTopicService.mqttTopicRepository.FindAllPagination(
 			gormTransaction,
 			paginationQuery.OrderClause,
 			paginationQuery.Offset,
 			paginationQuery.Limit,
 			paginationQuery.SearchQuery,
 		)
+		mqttTopicResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.MqttTopic, *model.MqttTopicResponse](
+			mqttTopicEntities,
+			mapper.FuncMapAuditable,
+		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		totalItems = total
 
-		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allMqttTopic := helper.MapEntitiesIntoResponses[entity.MqttTopic, model.MqttTopicResponse](mqttTopicEntities)
-		paginationResp = model.PaginationResponse[*model.MqttTopicResponse]{
-			Data:        allMqttTopic,
-			TotalItems:  totalItems,
-			TotalPages:  totalPages,
-			CurrentPage: paginationReq.Page,
-		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
+	return helper.NewPaginatedResponseFromResult(
+		"Mqtt topic fetched successfully",
+		mqttTopicResponses,
+		paginationReq,
+		totalItems,
+	)
 }
 
 // Create - Membuat mqttTopic baru
-func (mqttTopicService *ServiceImpl) Create(ginContext *gin.Context, createMqttTopicRequest *model.CreateMqttTopicRequest) model.PaginationResponse[*model.MqttTopicResponse] {
-	paginationResp := model.PaginationResponse[*model.MqttTopicResponse]{}
+func (mqttTopicService *ServiceImpl) Create(ginContext *gin.Context, createMqttTopicRequest *model.CreateMqttTopicRequest) *model.PaginatedResponse[*model.MqttTopicResponse] {
+	var paginatedResp *model.PaginatedResponse[*model.MqttTopicResponse]
 	valErr := mqttTopicService.validatorService.ValidateStruct(createMqttTopicRequest)
 	mqttTopicService.validatorService.ParseValidationError(valErr, *createMqttTopicRequest)
 	err := mqttTopicService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -87,11 +90,11 @@ func (mqttTopicService *ServiceImpl) Create(ginContext *gin.Context, createMqttT
 		err := mqttTopicService.mqttTopicRepository.Create(gormTransaction, mqttTopicEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		paginationRequest := model.NewPaginationRequest()
-		paginationResp = mqttTopicService.FindAllPagination(&paginationRequest)
+		paginatedResp = mqttTopicService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
+	return paginatedResp
 }
 
 func (mqttTopicService *ServiceImpl) Update(ginContext *gin.Context, updateMqttTopicRequest *model.UpdateMqttTopicRequest) {

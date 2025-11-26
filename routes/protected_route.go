@@ -5,6 +5,7 @@ import (
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
+	mqttTopic "go-intconnect-api/internal/mqtt_topic"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/permission"
@@ -30,6 +31,7 @@ type ProtectedRoutes struct {
 	mqttBrokerController            mqttBroker.Controller
 	machineController               machine.Controller
 	parameterController             parameter.Controller
+	mqttTopicController             mqttTopic.Controller
 }
 
 func NewProtectedRoutes(
@@ -46,6 +48,7 @@ func NewProtectedRoutes(
 	mqttBrokerController mqttBroker.Controller,
 	machineController machine.Controller,
 	parameterController parameter.Controller,
+	mqttTopicController mqttTopic.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -61,6 +64,7 @@ func NewProtectedRoutes(
 		mqttBrokerController:            mqttBrokerController,
 		machineController:               machineController,
 		parameterController:             parameterController,
+		mqttTopicController:             mqttTopicController,
 	}
 }
 
@@ -143,5 +147,12 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	parameterRouterGroup.POST("", protectedRoutes.parameterController.CreateParameter)
 	parameterRouterGroup.PUT("", protectedRoutes.parameterController.UpdateParameter)
 	parameterRouterGroup.DELETE("", protectedRoutes.parameterController.DeleteParameter)
+
+	mqttTopicGroup := routerGroup.Group("mqtt-topics")
+	mqttTopicGroup.GET("pagination", protectedRoutes.mqttTopicController.FindAllMqttTopicPagination)
+	mqttTopicGroup.GET("", protectedRoutes.mqttTopicController.FindAllMqttTopic)
+	mqttTopicGroup.POST("", protectedRoutes.mqttTopicController.CreateMqttTopic)
+	mqttTopicGroup.PUT("", protectedRoutes.mqttTopicController.UpdateMqttTopic)
+	mqttTopicGroup.DELETE("", protectedRoutes.mqttTopicController.DeleteMqttTopic)
 
 }
