@@ -5,7 +5,9 @@ import (
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
+	machineDocument "go-intconnect-api/internal/machine_document"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
+	mqttTopic "go-intconnect-api/internal/mqtt_topic"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/permission"
@@ -216,4 +218,14 @@ var ParameterModule = fx.Module("parameterFeature",
 	fx.Provide(fx.Annotate(parameter.NewRepository, fx.As(new(parameter.Repository)))),
 	fx.Provide(fx.Annotate(parameter.NewService, fx.As(new(parameter.Service)))),
 	fx.Provide(fx.Annotate(parameter.NewHandler, fx.As(new(parameter.Controller)))),
+)
+
+var MqttTopicModule = fx.Module("mqttTopicFeature",
+	fx.Provide(fx.Annotate(mqttTopic.NewRepository, fx.As(new(mqttTopic.Repository)))),
+	fx.Provide(fx.Annotate(mqttTopic.NewService, fx.As(new(mqttTopic.Service)))),
+	fx.Provide(fx.Annotate(mqttTopic.NewHandler, fx.As(new(mqttTopic.Controller)))),
+)
+
+var MachineDocumentModule = fx.Module("machineDocumentFeature",
+	fx.Provide(fx.Annotate(machineDocument.NewRepository, fx.As(new(machineDocument.Repository)))),
 )

@@ -8,7 +8,7 @@ import (
 )
 
 type Service interface {
-	Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest, modelFile *multipart.FileHeader)
+	Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest, modelFile *multipart.FileHeader, thumbnailFile *multipart.FileHeader)
 	FindAll() []*model.MachineResponse
 	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.MachineResponse]
 	Update(ginContext *gin.Context, updateMachineRequest *model.UpdateMachineRequest)

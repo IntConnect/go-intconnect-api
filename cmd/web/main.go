@@ -51,6 +51,8 @@ func main() {
 		injector.MqttBrokerModule,
 		injector.MachineModule,
 		injector.ParameterModule,
+		injector.MachineDocumentModule,
+		injector.MqttTopicModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

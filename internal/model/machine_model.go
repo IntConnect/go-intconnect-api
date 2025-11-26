@@ -3,15 +3,18 @@ package model
 import "mime/multipart"
 
 type CreateMachineRequest struct {
-	FacilityId   uint64                `form:"facility_id"`
-	Name         string                `form:"name"`
-	Code         string                `form:"code"`
-	Description  string                `form:"description"`
-	ModelOffsetX float32               `form:"model_offset_x"`
-	ModelOffsetY float32               `form:"model_offset_y"`
-	ModelOffsetZ float32               `form:"model_offset_z"`
-	ModelScale   float32               `form:"model_scale"`
-	ModelHeader  *multipart.FileHeader `form:"model_header" validate:"required,requiredFile,maxSize=2,fileExtension=.glb"`
+	FacilityId       uint64                         `form:"facility_id" validate:"required,exists=facilities;id"`
+	MqttTopicId      uint64                         `form:"mqtt_topic_id"`
+	Name             string                         `form:"name"`
+	Code             string                         `form:"code"`
+	Description      string                         `form:"description"`
+	ModelOffsetX     float32                        `form:"model_offset_x"`
+	ModelOffsetY     float32                        `form:"model_offset_y"`
+	ModelOffsetZ     float32                        `form:"model_offset_z"`
+	ModelScale       float32                        `form:"model_scale"`
+	ModelHeader      *multipart.FileHeader          `form:"model_header" validate:"required,requiredFile,fileExtension=.glb"`
+	ThumbnailHeader  *multipart.FileHeader          `form:"thumbnail_header" validate:"required,requiredFile,fileExtension=.png .jpg"`
+	MachineDocuments []CreateMachineDocumentRequest `form:"machine_documents" validate:"dive"`
 }
 
 type UpdateMachineRequest struct {

@@ -111,6 +111,12 @@ func registerTranslations(validate *validator.Validate, trans ut.Translator) {
 				return fmt.Sprintf("%s must be a valid datetime (YYYY-MM-DD HH:mm)", formatFieldName(fe.Field()))
 			},
 		},
+		{
+			tag: "exists",
+			message: func(fe validator.FieldError) string {
+				return fmt.Sprintf("%s must refer to an existing record", formatFieldName(fe.Field()))
+			},
+		},
 	}
 
 	for _, tr := range translations {
