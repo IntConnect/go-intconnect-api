@@ -35,6 +35,7 @@ func InitializeValidator(dbConnection *gorm.DB) (*validator.Validate, ut.Transla
 	validate.RegisterValidation("weakPassword", weakPasswordValidator)
 	validate.RegisterValidation("decimalValue", decimalValueValidator)
 	validate.RegisterValidation("unique", uniqueValidator(dbConnection))
+	validate.RegisterValidation("exists", existsValidator(dbConnection))
 	validate.RegisterValidation("date", dateValidator("2006-01-02"))
 	validate.RegisterValidation("datetime", dateValidator("2006-01-02 15:04"))
 
@@ -149,6 +150,20 @@ func uniqueValidator(db *gorm.DB) validator.Func {
 		return count == 0
 	}
 }
+func existsValidator(db *gorm.DB) validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		val := fl.Field().Uint()
+		params := strings.Split(fl.Param(), ";")
+		if len(params) < 1 {
+			return false
+		}
+		tableName, columnName := params[0], params[1]
+
+		var count int64
+		db.Table(tableName).Where(fmt.Sprintf("%s = ?", columnName), val).Count(&count)
+		return count != 0
+	}
+}
 
 func dateValidator(format string) validator.Func {
 	return func(fl validator.FieldLevel) bool {
@@ -238,13 +253,4 @@ func formatFieldName(field string) string {
 		return ""
 	}
 	return strings.ToLower(field[:1]) + field[1:]
-}
-
-func FormatConstraintMessage(constraint string) string {
-	parts := strings.Split(constraint, "_")
-	if len(parts) < 2 {
-		return "Data already exists"
-	}
-	column := strings.Title(strings.ReplaceAll(parts[1], "-", " "))
-	return fmt.Sprintf("%s already exists", column)
 }
