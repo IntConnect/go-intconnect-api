@@ -135,21 +135,38 @@ SELECT *
 FROM machines;
 
 
-SELECT *
-FROM permissions;
-
-INSERT INTO mqtt_topics (mqtt_broker_id, name, qos)
-VALUES (1, 'publish/data/chiller1', 0);
 
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 SELECT *
 FROM mqtt_brokers;
-
 SELECT *
 FROM mqtt_topics;
-
+INSERT INTO mqtt_topics (mqtt_broker_id, name, qos)
+VALUES (1, 'sensor/data', 0);
 SELECT *
 FROM parameters;
 INSERT INTO mqtt_brokers(host_name, mqtt_port, ws_port, is_active)
 VALUES ('10.175.16.39', '1883', '9001', true)
+SELECT *
+FROM parameters;
+
+
+CREATE TABLE telemetries
+(
+    id           BIGSERIAL NOT NULL,
+    parameter_id BIGINT    NOT NULL REFERENCES parameters (id),
+    value        FLOAT,
+    timestamp    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id, timestamp)
+);
+
+SELECT create_hypertable(
+               'telemetries',
+               'timestamp',
+               'id',
+               number_partitions => 1
+       );
+
+
+DROP TABLE telemetries;

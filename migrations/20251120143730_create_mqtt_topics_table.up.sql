@@ -1,6 +1,7 @@
 CREATE TABLE mqtt_topics
 (
     id             SERIAL PRIMARY KEY NOT NULL,
+    machine_id     BIGINT             NOT NULL REFERENCES machines (id),
     mqtt_broker_id BIGINT             NOT NULL REFERENCES mqtt_brokers (id),
     name           VARCHAR(255)       NOT NULL,
     qos            INT                NOT NULL DEFAULT 0,
