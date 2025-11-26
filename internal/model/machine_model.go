@@ -4,7 +4,6 @@ import "mime/multipart"
 
 type CreateMachineRequest struct {
 	FacilityId       uint64                         `form:"facility_id" validate:"required,exists=facilities;id"`
-	MqttTopicId      uint64                         `form:"mqtt_topic_id"`
 	Name             string                         `form:"name"`
 	Code             string                         `form:"code"`
 	Description      string                         `form:"description"`
