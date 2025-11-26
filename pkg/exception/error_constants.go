@@ -13,3 +13,7 @@ const (
 	ErrBadRequest          = "Bad Request"
 	ErrNotFound            = "Not Found"
 )
+
+const (
+	ErrSavingResources = "Error saving resources"
+)
