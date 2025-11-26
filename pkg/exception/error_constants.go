@@ -15,5 +15,6 @@ const (
 )
 
 const (
-	ErrSavingResources = "Error saving resources"
+	ErrSavingResources      = "Error saving resources"
+	ErrSomeResourceNotFound = "Some resources not found"
 )
