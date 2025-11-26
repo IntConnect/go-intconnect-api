@@ -1,0 +1,25 @@
+CREATE TABLE parameters
+(
+    id            SERIAL PRIMARY KEY,
+    machine_id    BIGINT REFERENCES machines (id)    NOT NULL,
+    mqtt_topic_id BIGINT REFERENCES mqtt_topics (id) NOT NULL,
+    name          VARCHAR(255)                       NOT NULL,
+    code          VARCHAR(255)                       NOT NULL,
+    unit          VARCHAR(255)                       NOT NULL,
+    min_value     FLOAT,
+    max_value     FLOAT,
+    description   TEXT,
+    position_x    FLOAT                              NOT NULL,
+    position_y    FLOAT                              NOT NULL,
+    position_z    FLOAT                              NOT NULL,
+    rotation_x    FLOAT                              NOT NULL,
+    rotation_y    FLOAT                              NOT NULL,
+    rotation_z    FLOAT                              NOT NULL,
+    is_display    BOOLEAN   DEFAULT TRUE             NOT NULL,
+    created_by    VARCHAR(255),
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by    VARCHAR(255),
+    deleted_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_by    VARCHAR(255)
+)

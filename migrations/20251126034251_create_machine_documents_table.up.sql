@@ -1,13 +1,11 @@
-CREATE TABLE parameters
+CREATE TABLE machine_documents
 (
-    id          SERIAL PRIMARY KEY,
-    machine_id  BIGINT REFERENCES machines (id),
-    name        VARCHAR(255) NOT NULL,
+    id          SERIAL       NOT NULL,
+    machine_id  BIGINT       NOT NULL REFERENCES machines (id),
     code        VARCHAR(255) NOT NULL,
-    unit        VARCHAR(255) NOT NULL,
-    min_value   FLOAT,
-    max_value   FLOAT,
-    description TEXT,
+    name        VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    file_path   VARCHAR(255) NOT NULL,
     created_by  VARCHAR(255),
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
