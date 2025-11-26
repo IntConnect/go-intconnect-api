@@ -53,6 +53,7 @@ func main() {
 		injector.ParameterModule,
 		injector.MachineDocumentModule,
 		injector.MqttTopicModule,
+		injector.ReportDocumentTemplateModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

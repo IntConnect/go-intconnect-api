@@ -15,6 +15,7 @@ import (
 	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
 	pipelineNode "go-intconnect-api/internal/pipeline_node"
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
+	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
 	"go-intconnect-api/internal/storage"
 	"go-intconnect-api/internal/user"
@@ -228,4 +229,10 @@ var MqttTopicModule = fx.Module("mqttTopicFeature",
 
 var MachineDocumentModule = fx.Module("machineDocumentFeature",
 	fx.Provide(fx.Annotate(machineDocument.NewRepository, fx.As(new(machineDocument.Repository)))),
+)
+
+var ReportDocumentTemplateModule = fx.Module("reportDocumentTemplateFeature",
+	fx.Provide(fx.Annotate(reportDocumentTemplate.NewRepository, fx.As(new(reportDocumentTemplate.Repository)))),
+	fx.Provide(fx.Annotate(reportDocumentTemplate.NewService, fx.As(new(reportDocumentTemplate.Service)))),
+	fx.Provide(fx.Annotate(reportDocumentTemplate.NewHandler, fx.As(new(reportDocumentTemplate.Controller)))),
 )
