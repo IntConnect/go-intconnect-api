@@ -18,8 +18,8 @@ func (parameterRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB)
 	return parameterEntities, err
 }
 
-func (parameterRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, parameterIds []uint64) ([]entity.Parameter, error) {
-	var parameterEntities []entity.Parameter
+func (parameterRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, parameterIds []uint64) ([]*entity.Parameter, error) {
+	var parameterEntities []*entity.Parameter
 	err := gormTransaction.Where("id IN ?", parameterIds).Find(&parameterEntities).Error
 	return parameterEntities, err
 }

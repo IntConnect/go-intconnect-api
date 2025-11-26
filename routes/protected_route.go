@@ -11,6 +11,7 @@ import (
 	"go-intconnect-api/internal/permission"
 	"go-intconnect-api/internal/pipeline"
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
+	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
 	"go-intconnect-api/internal/user"
 
@@ -19,19 +20,20 @@ import (
 )
 
 type ProtectedRoutes struct {
-	viperConfig                     *viper.Viper
-	userController                  user.Controller
-	nodeController                  node.Controller
-	pipelineController              pipeline.Controller
-	protocolConfigurationController protocolConfiguration.Controller
-	databaseConnectionController    databaseConnection.Controller
-	facilityController              facility.Controller
-	roleController                  role.Controller
-	permissionController            permission.Controller
-	mqttBrokerController            mqttBroker.Controller
-	machineController               machine.Controller
-	parameterController             parameter.Controller
-	mqttTopicController             mqttTopic.Controller
+	viperConfig                      *viper.Viper
+	userController                   user.Controller
+	nodeController                   node.Controller
+	pipelineController               pipeline.Controller
+	protocolConfigurationController  protocolConfiguration.Controller
+	databaseConnectionController     databaseConnection.Controller
+	facilityController               facility.Controller
+	roleController                   role.Controller
+	permissionController             permission.Controller
+	mqttBrokerController             mqttBroker.Controller
+	machineController                machine.Controller
+	parameterController              parameter.Controller
+	mqttTopicController              mqttTopic.Controller
+	reportDocumentTemplateController reportDocumentTemplate.Controller
 }
 
 func NewProtectedRoutes(
@@ -48,23 +50,24 @@ func NewProtectedRoutes(
 	mqttBrokerController mqttBroker.Controller,
 	machineController machine.Controller,
 	parameterController parameter.Controller,
-	mqttTopicController mqttTopic.Controller,
+	mqttTopicController mqttTopic.Controller, reportDocumentTemplateController reportDocumentTemplate.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
 
-		userController:                  userController,
-		nodeController:                  nodeController,
-		pipelineController:              pipelineController,
-		protocolConfigurationController: protocolConfigurationController,
-		databaseConnectionController:    databaseConnectionController,
-		facilityController:              facilityController,
-		roleController:                  roleController,
-		permissionController:            permissionController,
-		mqttBrokerController:            mqttBrokerController,
-		machineController:               machineController,
-		parameterController:             parameterController,
-		mqttTopicController:             mqttTopicController,
+		userController:                   userController,
+		nodeController:                   nodeController,
+		pipelineController:               pipelineController,
+		protocolConfigurationController:  protocolConfigurationController,
+		databaseConnectionController:     databaseConnectionController,
+		facilityController:               facilityController,
+		roleController:                   roleController,
+		permissionController:             permissionController,
+		mqttBrokerController:             mqttBrokerController,
+		machineController:                machineController,
+		parameterController:              parameterController,
+		mqttTopicController:              mqttTopicController,
+		reportDocumentTemplateController: reportDocumentTemplateController,
 	}
 }
 
@@ -154,5 +157,12 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	mqttTopicGroup.POST("", protectedRoutes.mqttTopicController.CreateMqttTopic)
 	mqttTopicGroup.PUT("", protectedRoutes.mqttTopicController.UpdateMqttTopic)
 	mqttTopicGroup.DELETE("", protectedRoutes.mqttTopicController.DeleteMqttTopic)
+
+	reportDocumentTemplateGroup := routerGroup.Group("report-document-templates")
+	reportDocumentTemplateGroup.GET("pagination", protectedRoutes.reportDocumentTemplateController.FindAllReportDocumentTemplatePagination)
+	reportDocumentTemplateGroup.GET("", protectedRoutes.reportDocumentTemplateController.FindAllReportDocumentTemplate)
+	reportDocumentTemplateGroup.POST("", protectedRoutes.reportDocumentTemplateController.CreateReportDocumentTemplate)
+	reportDocumentTemplateGroup.PUT("", protectedRoutes.reportDocumentTemplateController.UpdateReportDocumentTemplate)
+	reportDocumentTemplateGroup.DELETE("", protectedRoutes.reportDocumentTemplateController.DeleteReportDocumentTemplate)
 
 }
