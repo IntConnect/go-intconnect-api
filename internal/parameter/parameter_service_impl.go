@@ -52,7 +52,6 @@ func (parameterService *ServiceImpl) FindAllPagination(paginationReq *model.Pagi
 	paginationQuery := helper.BuildPaginationQuery(paginationReq)
 	var parameterResponses []*model.ParameterResponse
 	var totalItems int64
-
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntities, total, err := parameterService.parameterRepository.FindAllPagination(
 			gormTransaction,
@@ -86,8 +85,8 @@ func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParam
 		parameterEntity := helper.MapCreateRequestIntoEntity[model.CreateParameterRequest, entity.Parameter](createParameterRequest)
 		err := parameterService.parameterRepository.Create(gormTransaction, parameterEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		var paginationReq *model.PaginationRequest
-		parameterResponses = parameterService.FindAllPagination(paginationReq)
+		paginationRequest := model.NewPaginationRequest()
+		parameterResponses = parameterService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

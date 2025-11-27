@@ -40,8 +40,8 @@ func (parameterHandler *Handler) CreateParameter(ginContext *gin.Context) {
 	var createParameterModel model.CreateParameterRequest
 	err := ginContext.ShouldBindJSON(&createParameterModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	parameterHandler.parameterService.Create(ginContext, &createParameterModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been created", nil))
+	paginatedResponse := parameterHandler.parameterService.Create(ginContext, &createParameterModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (parameterHandler *Handler) UpdateParameter(ginContext *gin.Context) {

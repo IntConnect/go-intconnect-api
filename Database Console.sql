@@ -147,9 +147,14 @@ VALUES (1, 'sensor/data', 0);
 SELECT *
 FROM parameters;
 INSERT INTO mqtt_brokers(host_name, mqtt_port, ws_port, is_active)
-VALUES ('10.175.16.39', '1883', '9001', true)
+VALUES ('10.175.16.39', '1883', '9001', true);
+
 SELECT *
 FROM parameters;
+SELECT *
+FROM report_document_templates;
+SELECT *
+FROM report_document_templates_parameters;
 
 
 CREATE TABLE telemetries
