@@ -11,7 +11,7 @@ type ReportDocumentTemplateResponse struct {
 type CreateReportDocumentTemplateRequest struct {
 	Name        string   `json:"name" validate:"required,min=3,max=255"`
 	Code        string   `json:"code" validate:"required,min=3,max=255"`
-	ParameterId []uint64 `json:"parameter_id" validate:"required,min=1	"`
+	ParameterId []uint64 `json:"parameter_id" validate:"required,min=1,dive,number,gt=0"`
 }
 
 type UpdateReportDocumentTemplateRequest struct {
