@@ -2,6 +2,7 @@ package injector
 
 import (
 	"go-intconnect-api/configs"
+	auditLog "go-intconnect-api/internal/audit_log"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
@@ -235,4 +236,10 @@ var ReportDocumentTemplateModule = fx.Module("reportDocumentTemplateFeature",
 	fx.Provide(fx.Annotate(reportDocumentTemplate.NewRepository, fx.As(new(reportDocumentTemplate.Repository)))),
 	fx.Provide(fx.Annotate(reportDocumentTemplate.NewService, fx.As(new(reportDocumentTemplate.Service)))),
 	fx.Provide(fx.Annotate(reportDocumentTemplate.NewHandler, fx.As(new(reportDocumentTemplate.Controller)))),
+)
+
+var AuditLogModule = fx.Module("auditLogFeature",
+	fx.Provide(fx.Annotate(auditLog.NewRepository, fx.As(new(auditLog.Repository)))),
+	fx.Provide(fx.Annotate(auditLog.NewService, fx.As(new(auditLog.Service)))),
+	fx.Provide(fx.Annotate(auditLog.NewHandler, fx.As(new(auditLog.Controller)))),
 )
