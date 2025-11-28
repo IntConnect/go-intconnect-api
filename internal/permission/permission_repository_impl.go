@@ -41,3 +41,10 @@ func (permissionRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.D
 
 	return &permissionEntity, err
 }
+
+func (permissionRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, permissionIds []uint64) ([]*entity.Permission, error) {
+	var permissionEntity []*entity.Permission
+	err := gormTransaction.Model(&entity.Permission{}).Where("id IN ?", permissionIds).Find(&permissionEntity).Error
+
+	return permissionEntity, err
+}
