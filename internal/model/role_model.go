@@ -1,8 +1,9 @@
 package model
 
 type CreateRoleRequest struct {
-	Name        string `json:"name" validate:"required,min=3,max=50"`
-	Description string `json:"description" validate:""`
+	Name          string   `json:"name" validate:"required,min=3,max=50"`
+	Description   string   `json:"description" validate:""`
+	PermissionIds []uint64 `json:"permission_id" validate:"required,dive,number,gt=0"`
 }
 
 type UpdateRoleRequest struct {

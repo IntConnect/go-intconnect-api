@@ -35,5 +35,5 @@ func (roleRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, roleE
 }
 
 func (roleRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.Role{}).Where("id = ?", id).Delete(entity.Role{}).Error
+	return gormTransaction.Model(&entity.Role{}).Where("id = ?", id).Delete(&entity.Role{}).Error
 }

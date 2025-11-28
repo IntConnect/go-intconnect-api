@@ -46,10 +46,12 @@ func (roleHandler *Handler) UpdateRole(ginContext *gin.Context) {
 
 func (roleHandler *Handler) DeleteRole(ginContext *gin.Context) {
 	var deleteRoleModel model.DeleteResourceGeneralRequest
+	err := ginContext.ShouldBindBodyWithJSON(&deleteRoleModel)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	roleId := ginContext.Param("id")
 	parsedRoleId, err := strconv.ParseUint(roleId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	deleteRoleModel.Id = parsedRoleId
 	roleHandler.roleService.Delete(ginContext, &deleteRoleModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been deleted", nil))
 }
