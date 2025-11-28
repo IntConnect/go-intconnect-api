@@ -14,6 +14,7 @@ import (
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
 	"go-intconnect-api/internal/user"
+	"go-intconnect-api/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -72,7 +73,7 @@ func NewProtectedRoutes(
 }
 
 func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
-	//routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig))
+	routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig))
 	userRouterGroup := routerGroup.Group("users")
 	userRouterGroup.GET("pagination", protectedRoutes.userController.FindAllUserPagination)
 	userRouterGroup.GET("", protectedRoutes.userController.FindAllUser)
@@ -124,7 +125,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	roleRouterGroup.GET("", protectedRoutes.roleController.FindAllRole)
 	roleRouterGroup.POST("", protectedRoutes.roleController.CreateRole)
 	roleRouterGroup.PUT("", protectedRoutes.roleController.UpdateRole)
-	roleRouterGroup.DELETE("", protectedRoutes.roleController.DeleteRole)
+	roleRouterGroup.DELETE("/:id", protectedRoutes.roleController.DeleteRole)
 
 	permissionRouterGroup := routerGroup.Group("permissions")
 	permissionRouterGroup.GET("pagination", protectedRoutes.permissionController.FindAllPermissionPagination)
