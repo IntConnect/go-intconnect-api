@@ -132,9 +132,10 @@ SELECT *
 FROM telemetries;
 
 SELECT *
-FROM machines;
+FROM audit_logs;
 
-
+SELECT *
+FROM permissions;
 
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
