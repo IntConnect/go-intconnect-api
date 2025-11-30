@@ -7,17 +7,18 @@ import (
 )
 
 type AuditLog struct {
-	Id          uint64                 `gorm:"primaryKey;autoIncrement"`
-	UserId      uint64                 `gorm:"column:id"`
-	Action      string                 `gorm:"column:action"`
-	Feature     string                 `gorm:"column:feature"`
-	Description string                 `gorm:"column:description"`
-	Before      map[string]interface{} `gorm:"-:all"`
-	After       map[string]interface{} `gorm:"-:all"`
-	BeforeRaw   []byte                 `gorm:"column:before;type:jsonb"`
-	AfterRaw    []byte                 `gorm:"column:after;type:jsonb"`
-	IpAddress   string                 `gorm:"column:ip_address"`
-	Auditable
+	Id              uint64                 `gorm:"column:id;primaryKey;autoIncrement"`
+	UserId          uint64                 `gorm:"column:user_id"`
+	Action          string                 `gorm:"column:action"`
+	Feature         string                 `gorm:"column:feature"`
+	Description     string                 `gorm:"column:description"`
+	Before          map[string]interface{} `gorm:"-:all"`
+	After           map[string]interface{} `gorm:"-:all"`
+	BeforeRaw       []byte                 `gorm:"column:before;type:jsonb"`
+	AfterRaw        []byte                 `gorm:"column:after;type:jsonb"`
+	IpAddress       string                 `gorm:"column:ip_address"`
+	User            User                   `gorm:"foreignKey:UserId;references:Id"`
+	SimpleAuditable SimpleAuditable        `gorm:"embedded"`
 }
 
 func (auditLogEntity *AuditLog) AfterFind(gormTransaction *gorm.DB) (err error) {
@@ -39,6 +40,7 @@ func (auditLogEntity *AuditLog) BeforeSave(gormTransaction *gorm.DB) (err error)
 	return nil
 }
 
-func (auditLogEntity AuditLog) GetAuditable() *Auditable {
-	return &auditLogEntity.Auditable
+func (auditLogEntity AuditLog) GetSimpleAuditable() *SimpleAuditable {
+	return &auditLogEntity.SimpleAuditable
+
 }

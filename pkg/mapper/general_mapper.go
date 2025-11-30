@@ -13,3 +13,12 @@ func FuncMapAuditable[S entity.HasAuditable, R model.HasAuditableResponse](
 		AuditableEntityIntoEntityResponse(entityObject.GetAuditable()),
 	)
 }
+
+func FuncMapSimpleAuditable[S entity.HasSimpleAuditable, R model.HasSimpleAuditableResponse](
+	entityObject S,
+	responseObject R,
+) {
+	responseObject.SetSimpleAuditableResponse(
+		SimpleAuditableEntityIntoSimpleEntityResponse(entityObject.GetSimpleAuditable()),
+	)
+}

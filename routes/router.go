@@ -1,6 +1,10 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"go-intconnect-api/pkg/middleware"
+
+	"github.com/gin-gonic/gin"
+)
 
 // ApplicationRoutes holds all route groups
 type ApplicationRoutes struct {
@@ -17,6 +21,7 @@ func NewApplicationRoutes(
 	authenticationRoutes *AuthenticationRoutes,
 	protectedRoutes *ProtectedRoutes) *ApplicationRoutes {
 	parentRouterGroup := ginEngine.Group("/api/")
+	parentRouterGroup.Use(middleware.RequestMetaMiddleware())
 	return &ApplicationRoutes{
 		RouterGroup:          parentRouterGroup,
 		PublicRoutes:         publicRoutes,

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	auditLog "go-intconnect-api/internal/audit_log"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
@@ -35,6 +36,7 @@ type ProtectedRoutes struct {
 	parameterController              parameter.Controller
 	mqttTopicController              mqttTopic.Controller
 	reportDocumentTemplateController reportDocumentTemplate.Controller
+	auditLogController               auditLog.Controller
 }
 
 func NewProtectedRoutes(
@@ -52,6 +54,7 @@ func NewProtectedRoutes(
 	machineController machine.Controller,
 	parameterController parameter.Controller,
 	mqttTopicController mqttTopic.Controller, reportDocumentTemplateController reportDocumentTemplate.Controller,
+	auditLogController auditLog.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -69,6 +72,7 @@ func NewProtectedRoutes(
 		parameterController:              parameterController,
 		mqttTopicController:              mqttTopicController,
 		reportDocumentTemplateController: reportDocumentTemplateController,
+		auditLogController:               auditLogController,
 	}
 }
 
@@ -166,4 +170,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	reportDocumentTemplateGroup.PUT("", protectedRoutes.reportDocumentTemplateController.UpdateReportDocumentTemplate)
 	reportDocumentTemplateGroup.DELETE("", protectedRoutes.reportDocumentTemplateController.DeleteReportDocumentTemplate)
 
+	auditLogRouterGroup := routerGroup.Group("audit-logs")
+	auditLogRouterGroup.GET("pagination", protectedRoutes.auditLogController.FindAllAuditLogPagination)
+	auditLogRouterGroup.GET("", protectedRoutes.auditLogController.FindAllAuditLog)
 }

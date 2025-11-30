@@ -80,6 +80,8 @@ SELECT *
 FROM users;
 SELECT *
 FROM nodes;
+SELECT *
+FROM audit_logs;
 
 INSERT INTO users (id, username, email, password)
 VALUES (1, 'admin', 'admin@gmail.com', '$2a$12$TyWbaQx6LLW8Ik0ZNjCkbeYcKr96XtaTBsJn8uTxmWM/2FRD5AIPG')
@@ -109,6 +111,8 @@ DELETE
 FROM pipelines;
 DELETE
 FROM database_connections;
+DELETE
+FROM audit_logs;
 
 
 

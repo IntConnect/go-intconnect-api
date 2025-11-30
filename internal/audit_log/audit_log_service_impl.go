@@ -1,6 +1,7 @@
 package audit_log
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
@@ -38,7 +39,7 @@ func (auditLogService *ServiceImpl) FindAll() []*model.AuditLogResponse {
 	err := auditLogService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		auditLogResponse, err := auditLogService.auditLogRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allAuditLog = helper.MapEntitiesIntoResponsesWithFunc[entity.AuditLog, *model.AuditLogResponse](auditLogResponse, mapper.FuncMapAuditable)
+		allAuditLog = helper.MapEntitiesIntoResponsesWithFunc[entity.AuditLog, *model.AuditLogResponse](auditLogResponse, mapper.FuncMapSimpleAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -59,10 +60,10 @@ func (auditLogService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 			paginationQuery.SearchQuery,
 		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
+		fmt.Println(auditLogEntities)
 		auditLogResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.AuditLog, *model.AuditLogResponse](
 			auditLogEntities,
-			mapper.FuncMapAuditable,
+			mapper.FuncMapSimpleAuditable,
 		)
 		totalItems = total
 
@@ -85,6 +86,7 @@ func (auditLogService *ServiceImpl) Create(ginContext *gin.Context, createAuditL
 	auditLogService.validatorService.ParseValidationError(valErr, *createAuditLogRequest)
 	err := auditLogService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		auditLogEntity := helper.MapCreateRequestIntoEntity[model.CreateAuditLogRequest, entity.AuditLog](createAuditLogRequest)
+		auditLogEntity.SimpleAuditable = entity.NewSimpleAuditable(model.AUDIT_LOG_ACTOR_SYSTEM)
 		err := auditLogService.auditLogRepository.Create(gormTransaction, auditLogEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		paginationRequest := model.NewPaginationRequest()

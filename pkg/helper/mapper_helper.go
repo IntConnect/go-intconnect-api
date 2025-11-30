@@ -13,6 +13,7 @@ import (
 )
 
 func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
+
 	switch to {
 	case reflect.TypeOf(uint64(0)):
 		if str, ok := data.(string); ok {

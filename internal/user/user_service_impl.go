@@ -1,6 +1,7 @@
 package user
 
 import (
+	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/trait"
@@ -21,6 +22,7 @@ import (
 
 type ServiceImpl struct {
 	userRepository   Repository
+	auditLogService  auditLog.Service
 	validatorService validator.Service
 	dbConnection     *gorm.DB
 	viperConfig      *viper.Viper
@@ -28,13 +30,16 @@ type ServiceImpl struct {
 }
 
 func NewService(userRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper, loggerInstance *logrus.Logger) *ServiceImpl {
+	viperConfig *viper.Viper, loggerInstance *logrus.Logger,
+	auditLogService auditLog.Service,
+) *ServiceImpl {
 	return &ServiceImpl{
 		userRepository:   userRepository,
 		validatorService: validatorService,
 		dbConnection:     dbConnection,
 		viperConfig:      viperConfig,
 		loggerInstance:   loggerInstance,
+		auditLogService:  auditLogService,
 	}
 }
 
@@ -89,7 +94,7 @@ func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserReques
 	valErr := userService.validatorService.ValidateStruct(createUserRequest)
 	userService.validatorService.ParseValidationError(valErr, *createUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		userEntity := mapper.MapCreateUserRequestIntoUserEntity(createUserRequest)
+		userEntity := helper.MapCreateRequestIntoEntity[model.CreateUserRequest, entity.User](createUserRequest)
 		userEntity.Status = trait.UserStatusActive
 		userEntity.Auditable = entity.NewAuditable("Administrator")
 		err := userService.userRepository.Create(gormTransaction, userEntity)
@@ -103,6 +108,7 @@ func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserReques
 }
 
 func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRequest *model.LoginUserRequest) string {
+	ipAddress, _ := ginContext.Get("ipAddress")
 	err := userService.validatorService.ValidateStruct(loginUserRequest)
 	userService.validatorService.ParseValidationError(err, *loginUserRequest)
 	var tokenString string
@@ -124,11 +130,18 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 		tokenString, err = tokenInstance.SignedString([]byte(userService.viperConfig.GetString("JWT_SECRET")))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
 		if claims, ok := tokenInstance.Claims.(jwt.MapClaims); ok && tokenInstance.Valid {
-			userJwtClaim, err := mapper.MapJwtClaimIntoUserClaim(claims)
-			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+			userJwtClaim := helper.MapCreateRequestIntoEntity[jwt.MapClaims, *model.JwtClaimRequest](&claims)
 			ginContext.Set("claims", userJwtClaim)
 		}
-
+		userService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
+			UserId:      userEntity.Id,
+			Action:      model.AUDIT_LOG_LOGIN,
+			Feature:     model.AUDIT_LOG_FEATURE_USER,
+			Description: "",
+			Before:      nil,
+			After:       nil,
+			IpAddress:   ipAddress.(string),
+		})
 		return nil
 	})
 	return tokenString

@@ -9,9 +9,5 @@ CREATE TABLE audit_logs
     after       JSONB     DEFAULT '{}'::jsonb,
     ip_address  VARCHAR(255) NOT NULL,
     created_by  VARCHAR(255),
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_by  VARCHAR(255),
-    deleted_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_by  VARCHAR(255)
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )

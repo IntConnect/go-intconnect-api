@@ -44,6 +44,7 @@ func (auditLogRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
+		Preload("User").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).

@@ -27,3 +27,13 @@ func AuditableEntityIntoEntityResponse(auditableEntity *entity.Auditable) *model
 
 	return &auditableResponse
 }
+
+func SimpleAuditableEntityIntoSimpleEntityResponse(simpleAuditableEntity *entity.SimpleAuditable) *model.SimpleAuditableResponse {
+	var simpleAuditableResponse model.SimpleAuditableResponse
+
+	// Format ke ISO 8601 (RFC3339)
+	simpleAuditableResponse.CreatedBy = simpleAuditableEntity.CreatedBy
+	simpleAuditableResponse.CreatedAt = simpleAuditableEntity.CreatedAt.Format(time.RFC3339)
+
+	return &simpleAuditableResponse
+}

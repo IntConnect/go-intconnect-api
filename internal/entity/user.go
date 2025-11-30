@@ -11,7 +11,7 @@ type User struct {
 	Password   string           `gorm:"column:password"`
 	AvatarPath string           `gorm:"column:avatar_path"`
 	Status     trait.UserStatus `gorm:"column:status"`
-	Role       Role             `gorm:"foreignKey:RoleId;references:Id"`
+	Role       *Role            `gorm:"foreignKey:RoleId;references:Id"`
 	Auditable
 }
 

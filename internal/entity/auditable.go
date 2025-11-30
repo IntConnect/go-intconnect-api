@@ -43,3 +43,19 @@ func DeleteAuditable(subject string) Auditable {
 		DeletedBy: &subject,
 	}
 }
+
+type SimpleAuditable struct {
+	CreatedAt time.Time `gorm:"<-:create" json:"created_at"`
+	CreatedBy string    `gorm:"<-:create" json:"created_by"`
+}
+
+type HasSimpleAuditable interface {
+	GetSimpleAuditable() *SimpleAuditable
+}
+
+func NewSimpleAuditable(subject string) SimpleAuditable {
+	return SimpleAuditable{
+		CreatedAt: time.Now(),
+		CreatedBy: subject,
+	}
+}
