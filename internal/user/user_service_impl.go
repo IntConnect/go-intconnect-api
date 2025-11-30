@@ -76,7 +76,7 @@ func (userService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return helper.NewPaginatedResponseFromResult(
-		"Permissions fetched successfully",
+		"Users fetched successfully",
 		userResponses,
 		paginationReq,
 		totalItems,
@@ -134,28 +134,35 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 	return tokenString
 }
 
-func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserRequest *model.UpdateUserRequest) {
+func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserRequest *model.UpdateUserRequest) *model.PaginatedResponse[*model.UserResponse] {
+	var paginationResp *model.PaginatedResponse[*model.UserResponse]
 	valErr := userService.validatorService.ValidateStruct(updateUserRequest)
 	userService.validatorService.ParseValidationError(valErr, *updateUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		user, err := userService.userRepository.FindById(gormTransaction, updateUserRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mapper.MapUpdateUserRequestIntoUserEntity(updateUserRequest, user)
+		helper.MapUpdateRequestIntoEntity(updateUserRequest, user)
 		err = userService.userRepository.Update(gormTransaction, user)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		paginationRequest := model.NewPaginationRequest()
+		paginationResp = userService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return paginationResp
 }
 
-func (userService *ServiceImpl) Delete(ginContext *gin.Context, deleteUserRequest *model.DeleteUserRequest) {
+func (userService *ServiceImpl) Delete(ginContext *gin.Context, deleteUserRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.UserResponse] {
+	var paginationResp *model.PaginatedResponse[*model.UserResponse]
 	valErr := userService.validatorService.ValidateStruct(deleteUserRequest)
 	userService.validatorService.ParseValidationError(valErr, *deleteUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		err := userService.userRepository.Delete(gormTransaction, deleteUserRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
+		paginationRequest := model.NewPaginationRequest()
+		paginationResp = userService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return paginationResp
 }

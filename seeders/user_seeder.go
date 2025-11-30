@@ -31,13 +31,14 @@ func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
 		}
 
 		userEntity := entity.User{
-			Username:  username,
-			Name:      fullName,
-			Email:     email,
-			Password:  string(hashedPassword),
-			Avatar:    "",
-			Status:    trait.UserStatusActive,
-			Auditable: entity.NewAuditable("Seeder"),
+			Username:   username,
+			Name:       fullName,
+			Email:      email,
+			Password:   string(hashedPassword),
+			AvatarPath: "",
+			RoleId:     1,
+			Status:     trait.UserStatusActive,
+			Auditable:  entity.NewAuditable("Seeder"),
 		}
 
 		// Insert into DB

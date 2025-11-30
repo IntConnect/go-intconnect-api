@@ -96,7 +96,7 @@ func registerTranslations(validate *validator.Validate, trans ut.Translator) {
 		{
 			tag: "unique",
 			message: func(fe validator.FieldError) string {
-				return fmt.Sprintf("%s must contain unique values", formatFieldName(fe.Field()))
+				return fmt.Sprintf("%s must contain unique values", fe.Field())
 			},
 		},
 		{
@@ -140,22 +140,39 @@ func uniqueValidator(db *gorm.DB) validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		val := fl.Field().String()
 		params := strings.Split(fl.Param(), ";")
-		if len(params) < 3 {
+		if len(params) < 2 { // minimal tableName dan columnName
 			return false
 		}
-		tableName, columnName, pkField := params[0], params[1], params[2]
 
-		parent := fl.Parent()
-		pkVal := parent.FieldByName(pkField)
-		if !pkVal.IsValid() {
-			return false
+		tableName := params[0]
+		columnName := params[1]
+
+		var pkField string
+		var pkVal interface{}
+		if len(params) >= 3 {
+			pkField = params[2]
+			parent := fl.Parent()
+			if parent.IsValid() {
+				field := parent.FieldByName(pkField)
+				if field.IsValid() {
+					pkVal = field.Interface()
+				}
+			}
 		}
 
 		var count int64
-		db.Table(tableName).Where(fmt.Sprintf("%s = ? AND %s <> ?", columnName, pkField), val, pkVal.Interface()).Count(&count)
+		query := db.Table(tableName).Where(fmt.Sprintf("%s = ?", columnName), val)
+
+		// Jika pkField & pkVal valid, tambahkan kondisi exclude record yang sama
+		if pkField != "" && pkVal != nil {
+			query = query.Where(fmt.Sprintf("%s <> ?", pkField), pkVal)
+		}
+
+		query.Count(&count)
 		return count == 0
 	}
 }
+
 func existsValidator(db *gorm.DB) validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		val := fl.Field().Uint()
@@ -164,7 +181,6 @@ func existsValidator(db *gorm.DB) validator.Func {
 			return false
 		}
 		tableName, columnName := params[0], params[1]
-
 		var count int64
 		db.Table(tableName).Where(fmt.Sprintf("%s = ?", columnName), val).Count(&count)
 		return count != 0

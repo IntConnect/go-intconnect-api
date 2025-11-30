@@ -7,7 +7,7 @@ import (
 
 func FuncMapAuditable[S entity.HasAuditable, R model.HasAuditableResponse](
 	entityObject S,
-	responseObject R, // ✅ R sudah pointer type
+	responseObject R,
 ) {
 	responseObject.SetAuditableResponse(
 		AuditableEntityIntoEntityResponse(entityObject.GetAuditable()),

@@ -78,8 +78,8 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	userRouterGroup.GET("pagination", protectedRoutes.userController.FindAllUserPagination)
 	userRouterGroup.GET("", protectedRoutes.userController.FindAllUser)
 	userRouterGroup.POST("", protectedRoutes.userController.CreateUser)
-	userRouterGroup.PUT("", protectedRoutes.userController.UpdateUser)
-	userRouterGroup.DELETE("", protectedRoutes.userController.DeleteUser)
+	userRouterGroup.PUT("/:id", protectedRoutes.userController.UpdateUser)
+	userRouterGroup.DELETE("/:id", protectedRoutes.userController.DeleteUser)
 
 	nodeRouterGroup := routerGroup.Group("nodes")
 	nodeRouterGroup.GET("pagination", protectedRoutes.nodeController.FindAllPagination)

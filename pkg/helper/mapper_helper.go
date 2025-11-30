@@ -66,16 +66,15 @@ func MapEntitiesIntoResponses[S any, R any](entityObjects []S) []*R {
 	return responseObjects
 }
 
-// 1. Ubah helper function signature
 func MapEntitiesIntoResponsesWithFunc[S any, R any](
 	entityObjects []S,
-	individualRenderPayload func(S, R), // ✅ Ubah dari func(S, *R) *R
-) []R { // ✅ Return []R bukan []*R
+	renderPayloads ...func(S, R),
+) []R {
 	var responseObjects []R
 	for _, entityObject := range entityObjects {
 		responseObjects = append(
 			responseObjects,
-			MapEntityIntoResponse[S, R](entityObject, individualRenderPayload),
+			MapEntityIntoResponse[S, R](entityObject, renderPayloads...),
 		)
 	}
 	return responseObjects
@@ -83,7 +82,7 @@ func MapEntitiesIntoResponsesWithFunc[S any, R any](
 
 func MapEntityIntoResponse[S any, R any](
 	entityObject S,
-	renderPayload func(S, R),
+	renderPayloads ...func(S, R),
 ) R {
 	var responseObject R
 
@@ -94,16 +93,17 @@ func MapEntityIntoResponse[S any, R any](
 	decoded := DecodeFromSource[S, R](entityObject, responseObject)
 	responseObject = decoded
 
-	if renderPayload != nil {
-		renderPayload(entityObject, responseObject)
+	if renderPayloads != nil {
+		for _, renderPayload := range renderPayloads {
+			renderPayload(entityObject, responseObject)
+		}
 	}
 
 	return responseObject
 }
 func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
 	var entityObject R
-	err := mapstructure.Decode(createRequest, &entityObject)
-	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	DecodeFromSource[*S, *R](createRequest, &entityObject)
 	return &entityObject
 }
 

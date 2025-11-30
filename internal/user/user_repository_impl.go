@@ -14,7 +14,7 @@ func NewRepository() *RepositoryImpl {
 
 func (userRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.User, error) {
 	var userEntities []entity.User
-	err := gormTransaction.Find(&userEntities).Error
+	err := gormTransaction.Preload("Role").Find(&userEntities).Error
 	return userEntities, err
 }
 
@@ -44,9 +44,11 @@ func (userRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
+		Preload("Role").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).
+		Where("deleted_at IS NULL").
 		Find(&userEntities).Error; err != nil {
 		return nil, 0, err
 	}
@@ -57,7 +59,7 @@ func (userRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (userRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, userId uint64) (*entity.User, error) {
 	var userEntity entity.User
 	err := gormTransaction.Model(&entity.User{}).
-		Preload("UserGroup", func(gormTx *gorm.DB) *gorm.DB {
+		Preload("Role", func(gormTx *gorm.DB) *gorm.DB {
 			return gormTx.Select("id, name")
 		}).Where("id = ?", userId).Find(&userEntity).Error
 
@@ -79,5 +81,5 @@ func (userRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, userE
 }
 
 func (userRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.User{}).Where("id = ?", id).Delete(entity.User{}).Error
+	return gormTransaction.Model(entity.User{}).Where("id = ?", id).Delete(&entity.User{}).Error
 }

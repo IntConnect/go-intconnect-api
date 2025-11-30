@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -50,26 +51,31 @@ func (userHandler *Handler) CreateUser(ginContext *gin.Context) {
 	var createUserModel model.CreateUserRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createUserModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	userHandler.userService.Create(ginContext, &createUserModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been created", nil))
+	paginatedResponse := userHandler.userService.Create(ginContext, &createUserModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (userHandler *Handler) UpdateUser(ginContext *gin.Context) {
 	var updateUserModel model.UpdateUserRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateUserModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	userHandler.userService.Update(ginContext, &updateUserModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been created", nil))
+	userId := ginContext.Param("id")
+	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	updateUserModel.Id = parsedUserId
+	paginatedResponse := userHandler.userService.Update(ginContext, &updateUserModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (userHandler *Handler) DeleteUser(ginContext *gin.Context) {
-	var deleteUserModel model.DeleteUserRequest
+	var deleteUserModel model.DeleteResourceGeneralRequest
 	err := ginContext.ShouldBindBodyWithJSON(&deleteUserModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	userId := ginContext.Param("id")
-	parsedUserId, err := strconv.ParseUint(userId, 10, 32)
+	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteUserModel.Id = parsedUserId
-	userHandler.userService.Delete(ginContext, &deleteUserModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))
+	fmt.Println(deleteUserModel)
+	paginatedResponse := userHandler.userService.Delete(ginContext, &deleteUserModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }

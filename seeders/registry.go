@@ -8,6 +8,7 @@ import (
 var SeederRegistry = map[string]Seeder{
 	"PermissionSeeder": &PermissionSeeder{},
 	"UserSeeder":       &UserSeeder{},
+	"RoleSeeder":       &RoleSeeder{},
 }
 
 // Ambil seeder dari nama

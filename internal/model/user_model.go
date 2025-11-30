@@ -1,5 +1,7 @@
 package model
 
+import "go-intconnect-api/internal/trait"
+
 type JwtClaimRequest struct {
 	Email    *string `json:"email" mapstructure:"email"`
 	Username *string `json:"username" mapstructure:"username"`
@@ -11,27 +13,27 @@ type UserResponse struct {
 	Username          string             `json:"username"`
 	Name              string             `json:"name"`
 	Email             string             `json:"email"`
+	AvatarPath        string             `json:"avatar_path"`
+	Status            trait.UserStatus   `json:"status"`
+	RoleResponse      RoleResponse       `json:"role" mapstructure:"role"`
 	AuditableResponse *AuditableResponse `json:"auditable_response"`
 }
 
 type CreateUserRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50,unique=users;username;id"`
+	Username string `json:"username" validate:"required,min=3,max=50,unique=users;username"`
 	Name     string `json:"name" validate:"required,min=3,max=100"`
-	Email    string `json:"email" validate:"required,email,min=3,max=100"`
-	Password string `json:"password" validate:"required,min=3,max=100"`
+	Email    string `json:"email" validate:"required,email,min=3,max=100,unique=users;email"`
+	Password string `json:"password" validate:"required,min=3,max=100,weakPassword"`
 	RoleId   uint64 `json:"role_id" validate:"required,gte=0"`
 }
 
 type UpdateUserRequest struct {
-	Id          uint64 `json:"id" validate:"required,number"`
-	Username    string `json:"username" validate:"required"`
-	Email       string `json:"email" validate:"required,email"`
-	Password    string `json:"password" validate:"required"`
-	UserGroupId int    `json:"user_group_id" validate:"required,number"`
-}
-
-type DeleteUserRequest struct {
-	Id uint64 `json:"id" validate:"required,number"`
+	Id       uint64 `json:"-" validate:"required,gte=0"`
+	Username string `json:"username" validate:"required,min=3,max=50,unique=users;username;Id"`
+	Name     string `json:"name" validate:"required,min=3,max=100"`
+	Email    string `json:"email" validate:"required,email,min=3,max=100,unique=users;email;Id"`
+	Password string `json:"password,omitempty" validate:"omitempty,min=3,max=100,weakPassword"`
+	RoleId   uint64 `json:"role_id" validate:"required,gte=0"`
 }
 
 type LoginUserRequest struct {
