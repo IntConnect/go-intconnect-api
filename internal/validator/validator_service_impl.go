@@ -41,14 +41,15 @@ func (validatorService *ServiceImpl) ParseValidationError(validationError error,
 		reflectType := reflect.TypeOf(dtoStruct)
 
 		for _, fieldError := range validationError.(validator.ValidationErrors) {
-			field := fieldError.StructField() // Nama field struct
+			fieldJSON := getJSONFieldName(reflectType, fieldError.StructField())
+			fieldName := fieldError.StructField()
 			translatedMessage := fieldError.Translate(validatorService.engTranslator)
 
 			// Hapus nama field dari pesan error
-			cleanMessage := strings.Replace(translatedMessage, field, getPropertyFieldName(reflectType, field), 1)
+			cleanMessage := strings.Replace(translatedMessage, fieldName, getPropertyFieldName(reflectType, fieldName), 1)
 			cleanMessage = strings.TrimSpace(cleanMessage) // Hilangkan spasi berlebih
 
-			parsedMap[field] = cleanMessage
+			parsedMap[fieldJSON] = cleanMessage
 		}
 		panic(exception.NewApplicationErrorSpecific(http.StatusBadRequest, exception.StatusValidationError, exception.MsgValidationError, parsedMap))
 	}
@@ -77,4 +78,24 @@ func getPropertyFieldName(t reflect.Type, fieldName string) string {
 func splitCamelCase(s string) string {
 	re := regexp.MustCompile(`([a-z])([A-Z])`)
 	return re.ReplaceAllString(s, "$1 $2")
+}
+
+func getJSONFieldName(structType reflect.Type, fieldName string) string {
+	if structType.Kind() == reflect.Ptr {
+		structType = structType.Elem()
+	}
+
+	field, found := structType.FieldByName(fieldName)
+	if !found {
+		return fieldName // fallback ke nama field struct
+	}
+
+	jsonTag := field.Tag.Get("json")
+	if jsonTag == "" {
+		return fieldName
+	}
+
+	// json tag bisa seperti "username,omitempty", ambil sebelum koma
+	parts := strings.Split(jsonTag, ",")
+	return parts[0]
 }
