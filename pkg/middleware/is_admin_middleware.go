@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"errors"
-	"github.com/gin-gonic/gin"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 // RBACMiddleware mengecek apakah user memiliki permission yang dibutuhkan
@@ -23,13 +23,13 @@ func IsAdminMiddleware() gin.HandlerFunc {
 		// Konversi claims ke struct userJwtClaim
 		userClaim, ok := claims.(*model.JwtClaimRequest)
 		if !ok {
-			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusForbidden, "Invalid token claim", errors.New("invalid token claims")))
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusForbidden, "Invalid token claim"))
 			return
 		}
 
 		// Cek apakah user memiliki permission yang sesuai
 		if userClaim.Role != "Admin" {
-			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusForbidden, "Forbidden", errors.New("forbidden")))
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusForbidden, "Forbidden"))
 			return
 		}
 

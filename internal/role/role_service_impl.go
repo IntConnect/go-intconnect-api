@@ -65,7 +65,7 @@ func (roleService *ServiceImpl) Create(ginContext *gin.Context, createRoleReques
 		roleEntity := helper.MapCreateRequestIntoEntity[model.CreateRoleRequest, entity.Role](createRoleRequest)
 		permissionIds, err := roleService.permissionRepository.FindBatchById(gormTransaction, createRoleRequest.PermissionIds)
 		if len(permissionIds) != len(createRoleRequest.PermissionIds) {
-			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = roleService.roleRepository.Create(gormTransaction, roleEntity)

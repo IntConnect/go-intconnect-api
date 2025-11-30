@@ -2,51 +2,60 @@ package helper
 
 import "go-intconnect-api/internal/model"
 
-func WriteSuccess(message string, data interface{}) model.ResponseContractModel {
+func WriteSuccess(message string, entry interface{}) model.ResponseContractModel {
 	return model.ResponseContractModel{
 		Status:  true,
 		Message: message,
-		Data:    &data,
+		Data:    &entry,
+		Error:   nil,
 	}
 }
 
-func NewSuccessResponse[T any](message string, data T) *model.SuccessResponse[T] {
-	return &model.SuccessResponse[T]{
-		BaseResponse: model.BaseResponse{
-			Success: true,
-			Message: message,
-		},
-		Data: data,
+func NewSuccessResponse[T any](message string, entry T) *model.ResponseContract[T] {
+	return &model.ResponseContract[T]{
+		Success: true,
+		Message: message,
+		Entry:   &entry,
+		Error:   nil,
 	}
 }
 
-func NewErrorResponse(message string, errorDetail *model.ErrorDetail) *model.ErrorResponse {
-	return &model.ErrorResponse{
-		BaseResponse: model.BaseResponse{
-			Success: false,
-			Message: message,
-		},
-		Error: errorDetail,
+func NewSuccessResponseWithEntries[T any](message string, entries []T) *model.ResponseContract[T] {
+	return &model.ResponseContract[T]{
+		Success: true,
+		Message: message,
+		Entry:   nil,
+		Entries: entries,
+		Error:   nil,
+	}
+}
+
+func NewErrorResponse(message string, errorDetail *model.ErrorDetail) *model.ResponseContract[any] {
+	return &model.ResponseContract[any]{
+		Success: false,
+		Message: message,
+		Entry:   nil,
+		Entries: nil,
+		Error:   errorDetail,
 	}
 }
 
 func NewPaginatedResponse[T any](
 	message string,
-	data []T,
+	entries []T,
 	currentPage, pageSize int,
 	totalItems int64,
-) *model.PaginatedResponse[T] {
+) *model.ResponseContract[T] {
 	totalPages := int(totalItems) / pageSize
 	if int(totalItems)%pageSize != 0 {
 		totalPages++
 	}
 
-	return &model.PaginatedResponse[T]{
-		BaseResponse: model.BaseResponse{
-			Success: true,
-			Message: message,
-		},
-		Data: data,
+	return &model.ResponseContract[T]{
+		Success: true,
+		Message: message,
+		Entries: entries,
+		Entry:   nil,
 		Pagination: &model.PaginationMeta{
 			CurrentPage: currentPage,
 			PageSize:    pageSize,
@@ -59,15 +68,23 @@ func NewPaginatedResponse[T any](
 // NewPaginatedResponseFromResult helper untuk membuat paginated response dari result query
 func NewPaginatedResponseFromResult[T any](
 	message string,
-	data []T,
+	entries []T,
 	paginationReq *model.PaginationRequest,
 	totalItems int64,
-) *model.PaginatedResponse[T] {
+) *model.ResponseContract[T] {
 	return NewPaginatedResponse(
 		message,
-		data,
+		entries,
 		paginationReq.Page,
 		paginationReq.Size,
 		totalItems,
 	)
+}
+
+func NewErrorDetail(conventionStatusCode string, errorMessage string, detailsError map[string]interface{}) *model.ErrorDetail {
+	return &model.ErrorDetail{
+		Code:    conventionStatusCode,
+		Message: errorMessage,
+		Details: detailsError,
+	}
 }

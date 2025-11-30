@@ -35,7 +35,7 @@ type DeleteUserRequest struct {
 }
 
 type LoginUserRequest struct {
-	UserIdentifier string `json:"user_identifier" validate:"required"`
+	UserIdentifier string `json:"user_identifier" validate:"required,min=3,max=100"`
 	Password       string `json:"password" validate:"required"`
 }
 

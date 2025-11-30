@@ -1,11 +1,11 @@
 package middleware
 
 import (
-	"errors"
+	"go-intconnect-api/pkg/exception"
+
 	"github.com/didip/tollbooth/v7"
 	"github.com/didip/tollbooth/v7/limiter"
 	"github.com/gin-gonic/gin"
-	"go-intconnect-api/pkg/exception"
 )
 
 func RateLimitMiddleware(limiters ...*limiter.Limiter) gin.HandlerFunc {
@@ -13,7 +13,7 @@ func RateLimitMiddleware(limiters ...*limiter.Limiter) gin.HandlerFunc {
 		for _, lmt := range limiters {
 			httpError := tollbooth.LimitByRequest(lmt, ctx.Writer, ctx.Request)
 			if httpError != nil {
-				ctx.AbortWithStatusJSON(httpError.StatusCode, exception.NewApplicationError(httpError.StatusCode, httpError.Message, errors.New("rate limit exceeded")))
+				ctx.AbortWithStatusJSON(httpError.StatusCode, exception.NewApplicationError(httpError.StatusCode, httpError.Message))
 				return
 			}
 		}

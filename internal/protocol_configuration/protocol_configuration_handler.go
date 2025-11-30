@@ -31,7 +31,7 @@ func (protocolConfigurationHandler *Handler) FindAll(ginContext *gin.Context) {
 func (protocolConfigurationHandler *Handler) FindById(ginContext *gin.Context) {
 	protocolConfigurationId := ginContext.Param("id")
 	parsedProtocolConfigurationId, err := strconv.ParseUint(protocolConfigurationId, 10, 64)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, "Supplied param not valid", nil))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, "Supplied param not valid"))
 	protocolConfigurationResponses := protocolConfigurationHandler.protocolConfigurationService.FindById(ginContext, parsedProtocolConfigurationId)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ProtocolConfiguration has been fetched", protocolConfigurationResponses))
 }
@@ -46,7 +46,7 @@ func (protocolConfigurationHandler *Handler) FindAllPagination(ginContext *gin.C
 
 	// Bind query parameters to the struct
 	err := ginContext.ShouldBindQuery(&paginationReq)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	protocolConfigurationResponses := protocolConfigurationHandler.protocolConfigurationService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ProtocolConfiguration has been fetched", protocolConfigurationResponses))
 }
@@ -54,7 +54,7 @@ func (protocolConfigurationHandler *Handler) FindAllPagination(ginContext *gin.C
 func (protocolConfigurationHandler *Handler) CreateProtocolConfiguration(ginContext *gin.Context) {
 	var createProtocolConfigurationModel model.CreateProtocolConfigurationRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createProtocolConfigurationModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	protocolConfigurationResponses := protocolConfigurationHandler.protocolConfigurationService.Create(ginContext, &createProtocolConfigurationModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ProtocolConfiguration has been created", protocolConfigurationResponses))
 }
@@ -62,7 +62,7 @@ func (protocolConfigurationHandler *Handler) CreateProtocolConfiguration(ginCont
 func (protocolConfigurationHandler *Handler) UpdateProtocolConfiguration(ginContext *gin.Context) {
 	var updateProtocolConfigurationModel model.UpdateProtocolConfigurationRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateProtocolConfigurationModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	protocolConfigurationHandler.protocolConfigurationService.Update(ginContext, &updateProtocolConfigurationModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ProtocolConfiguration has been created", nil))
 }
@@ -71,7 +71,7 @@ func (protocolConfigurationHandler *Handler) DeleteProtocolConfiguration(ginCont
 	var deleteBomModel model.DeleteProtocolConfigurationRequest
 	currencyId := ginContext.Param("id")
 	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteBomModel.Id = parsedBomId
 	protocolConfigurationHandler.protocolConfigurationService.Delete(ginContext, &deleteBomModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))

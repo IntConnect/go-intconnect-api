@@ -31,7 +31,7 @@ func (DatabaseConnectionHandler *Handler) FindAll(ginContext *gin.Context) {
 func (DatabaseConnectionHandler *Handler) FindById(ginContext *gin.Context) {
 	DatabaseConnectionId := ginContext.Param("id")
 	parsedDatabaseConnectionId, err := strconv.ParseUint(DatabaseConnectionId, 10, 64)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, "Supplied param not valid", nil))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, "Supplied param not valid"))
 	DatabaseConnectionResponses := DatabaseConnectionHandler.DatabaseConnectionService.FindById(ginContext, parsedDatabaseConnectionId)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("DatabaseConnection has been fetched", DatabaseConnectionResponses))
 }
@@ -46,7 +46,7 @@ func (DatabaseConnectionHandler *Handler) FindAllPagination(ginContext *gin.Cont
 
 	// Bind query parameters to the struct
 	err := ginContext.ShouldBindQuery(&paginationReq)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	DatabaseConnectionResponses := DatabaseConnectionHandler.DatabaseConnectionService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("DatabaseConnection has been fetched", DatabaseConnectionResponses))
 }
@@ -54,7 +54,7 @@ func (DatabaseConnectionHandler *Handler) FindAllPagination(ginContext *gin.Cont
 func (DatabaseConnectionHandler *Handler) CreateDatabaseConnection(ginContext *gin.Context) {
 	var createDatabaseConnectionModel model.CreateDatabaseConnectionRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createDatabaseConnectionModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	DatabaseConnectionResponses := DatabaseConnectionHandler.DatabaseConnectionService.Create(ginContext, &createDatabaseConnectionModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("DatabaseConnection has been created", DatabaseConnectionResponses))
 }
@@ -62,7 +62,7 @@ func (DatabaseConnectionHandler *Handler) CreateDatabaseConnection(ginContext *g
 func (DatabaseConnectionHandler *Handler) CreateDatabaseSchema(ginContext *gin.Context) {
 	var createDatabaseSchemaRequest model.CreateDatabaseSchemaRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createDatabaseSchemaRequest)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	DatabaseConnectionHandler.DatabaseConnectionService.CreateSchema(ginContext, &createDatabaseSchemaRequest)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("DatabaseConnection has been created", nil))
 }
@@ -70,7 +70,7 @@ func (DatabaseConnectionHandler *Handler) CreateDatabaseSchema(ginContext *gin.C
 func (DatabaseConnectionHandler *Handler) UpdateDatabaseConnection(ginContext *gin.Context) {
 	var updateDatabaseConnectionModel model.UpdateDatabaseConnectionRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateDatabaseConnectionModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	DatabaseConnectionHandler.DatabaseConnectionService.Update(ginContext, &updateDatabaseConnectionModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("DatabaseConnection has been created", nil))
 }
@@ -79,7 +79,7 @@ func (DatabaseConnectionHandler *Handler) DeleteDatabaseConnection(ginContext *g
 	var deleteBomModel model.DeleteDatabaseConnectionRequest
 	currencyId := ginContext.Param("id")
 	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteBomModel.Id = parsedBomId
 	DatabaseConnectionHandler.DatabaseConnectionService.Delete(ginContext, &deleteBomModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))

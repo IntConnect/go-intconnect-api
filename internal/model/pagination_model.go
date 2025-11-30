@@ -1,5 +1,7 @@
 package model
 
+type PaginatedResponse[T any] = ResponseContract[T]
+
 type PaginationRequest struct {
 	Page        int    `form:"page,default=1"`
 	Size        int    `form:"size,default=10"`
@@ -20,12 +22,6 @@ type PaginationResponse[T any] struct {
 	TotalItems  int64 `json:"totalItems"`
 	TotalPages  int   `json:"totalPages"`
 	CurrentPage int   `json:"currentPage"`
-}
-
-type PaginatedResponse[T any] struct {
-	BaseResponse
-	Data       []T             `json:"data"`
-	Pagination *PaginationMeta `json:"pagination"`
 }
 
 type PaginationMeta struct {

@@ -28,7 +28,7 @@ func MapFacilityEntitiesIntoFacilityResponses(facilityEntities []entity.Facility
 func MapCreateFacilityRequestIntoFacilityEntity(createFacilityRequest *model.CreateFacilityRequest) *entity.Facility {
 	var facilityEntity entity.Facility
 	err := mapstructure.Decode(createFacilityRequest, &facilityEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &facilityEntity
 }
 

@@ -17,11 +17,11 @@ func MapProtocolConfigurationEntityIntoProtocolConfigurationResponse(protocolCon
 		Result:     &protocolConfigurationResponse,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 
 	protocolConfigurationResponse.AuditableResponse = AuditableEntityIntoEntityResponse(&protocolConfigurationEntity.Auditable)
 	err = decoder.Decode(protocolConfigurationEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &protocolConfigurationResponse
 }
 
@@ -36,7 +36,7 @@ func MapProtocolConfigurationEntitiesIntoProtocolConfigurationResponses(protocol
 func MapCreateProtocolConfigurationRequestIntoProtocolConfigurationEntity(createProtocolConfigurationRequest *model.CreateProtocolConfigurationRequest) *entity.ProtocolConfiguration {
 	var protocolConfigurationEntity entity.ProtocolConfiguration
 	err := mapstructure.Decode(createProtocolConfigurationRequest, &protocolConfigurationEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &protocolConfigurationEntity
 }
 

@@ -37,7 +37,6 @@ func ParseGormError(err error, customMessage ...string) *ApplicationError {
 	return NewApplicationError(
 		http.StatusInternalServerError,
 		getMessage(override, "Database error occurred"),
-		err,
 	)
 }
 
@@ -58,12 +57,12 @@ func parseGormBuiltinError(err error, override string) *ApplicationError {
 		{gorm.ErrUnsupportedDriver, http.StatusInternalServerError, "Unsupported database driver"},
 	}
 
-	for _, m := range maps {
-		if errors.Is(err, m.match) {
+	for _, mapElement := range maps {
+		if errors.Is(err, mapElement.match) {
 			return &ApplicationError{
-				Message:    getMessage(override, m.defaultMsg),
-				StatusCode: m.statusCode,
-				rawError:   err,
+				Message:              getMessage(override, mapElement.defaultMsg),
+				HttpStatusCode:       mapElement.statusCode,
+				ConventionStatusCode: StatusDatabaseError,
 			}
 		}
 	}
@@ -123,18 +122,19 @@ func parsePostgresError(pgErr *pgconn.PgError, override string) *ApplicationErro
 	for _, m := range maps {
 		if pgErr.Code == m.code {
 			return &ApplicationError{
-				Message:    getMessage(override, m.generator(pgErr)),
-				StatusCode: m.statusCode,
-				rawError:   pgErr,
+				HttpStatusCode:       0,
+				ConventionStatusCode: StatusDatabaseError,
+				Message:              getMessage(override, m.generator(pgErr)),
+				Details:              nil,
 			}
 		}
 	}
 
 	// Fallback
 	return &ApplicationError{
-		Message:    getMessage(override, "Database error occurred"),
-		StatusCode: http.StatusInternalServerError,
-		rawError:   pgErr,
+		Message:              getMessage(override, "Database error occurred"),
+		HttpStatusCode:       http.StatusInternalServerError,
+		ConventionStatusCode: StatusDatabaseError,
 	}
 }
 
@@ -191,7 +191,6 @@ func autoFKMessage(pgErr *pgconn.PgError) string {
 	return fmt.Sprintf("%s is not valid", formatColumnName(col))
 }
 
-// 🔥 Format nama kolom menjadi human readable
 func formatColumnName(col string) string {
 	if col == "" {
 		return ""

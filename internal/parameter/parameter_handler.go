@@ -31,7 +31,7 @@ func (parameterHandler *Handler) FindAllParameter(ginContext *gin.Context) {
 func (parameterHandler *Handler) FindAllParameterPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	paginatedResponse := parameterHandler.parameterService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
@@ -39,7 +39,7 @@ func (parameterHandler *Handler) FindAllParameterPagination(ginContext *gin.Cont
 func (parameterHandler *Handler) CreateParameter(ginContext *gin.Context) {
 	var createParameterModel model.CreateParameterRequest
 	err := ginContext.ShouldBindJSON(&createParameterModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	paginatedResponse := parameterHandler.parameterService.Create(ginContext, &createParameterModel)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
@@ -47,7 +47,7 @@ func (parameterHandler *Handler) CreateParameter(ginContext *gin.Context) {
 func (parameterHandler *Handler) UpdateParameter(ginContext *gin.Context) {
 	var updateParameterModel model.UpdateParameterRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateParameterModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	parameterHandler.parameterService.Update(ginContext, &updateParameterModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been created", nil))
 }
@@ -56,7 +56,7 @@ func (parameterHandler *Handler) DeleteParameter(ginContext *gin.Context) {
 	var deleteParameterModel model.DeleteResourceGeneralRequest
 	parameterId := ginContext.Param("id")
 	parsedParameterId, err := strconv.ParseUint(parameterId, 10, 32)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteParameterModel.Id = parsedParameterId
 	parameterHandler.parameterService.Delete(ginContext, &deleteParameterModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been deleted", nil))

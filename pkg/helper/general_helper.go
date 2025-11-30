@@ -33,7 +33,7 @@ func ExtractIndexedFiles(
 ) ([]*multipart.FileHeader, error) {
 
 	multipartForm, err := ginContext.MultipartForm()
-	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrPayloadInvalid))
 	fileHeadersArray := make([]*multipart.FileHeader, expectedLen)
 
 	for key, fileHeaders := range multipartForm.File {
@@ -58,11 +58,15 @@ func ExtractIndexedFiles(
 func ExtractJwtClaimFromContext(ginContext *gin.Context) *model.JwtClaimRequest {
 	claims, exists := ginContext.Get("claims")
 	if !exists {
-		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusUnauthorized, exception.ErrUnauthorized, nil))
+		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusUnauthorized, exception.ErrUnauthorized))
 	}
 	userClaim, ok := claims.(*model.JwtClaimRequest)
 	if !ok {
-		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusUnauthorized, exception.ErrUnauthorized, nil))
+		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusUnauthorized, exception.ErrUnauthorized))
 	}
 	return userClaim
+}
+
+func TakePointer[T any](value T) *T {
+	return &value
 }

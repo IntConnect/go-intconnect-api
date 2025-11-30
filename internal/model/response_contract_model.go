@@ -1,10 +1,11 @@
 package model
 
+// ResponseContractModel Old response contract
 type ResponseContractModel struct {
-	Status  bool         `json:"status"`
-	Message string       `json:"message"`
-	Data    *interface{} `json:"data,omitempty"`
-	Error   *interface{} `json:"error,omitempty"`
+	Status  bool        `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+	Error   interface{} `json:"error"`
 }
 
 func NewResponseContractModel(statusResp bool, messageResp string, dataResp *interface{}, Error *interface{}) *ResponseContractModel {
@@ -16,26 +17,18 @@ func NewResponseContractModel(statusResp bool, messageResp string, dataResp *int
 	}
 }
 
-// BaseResponse adalah struktur dasar untuk semua response
-type BaseResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-}
-
-// SuccessResponse untuk response sukses dengan data
-type SuccessResponse[T any] struct {
-	BaseResponse
-	Data T `json:"data"`
-}
-
-type ErrorResponse struct {
-	BaseResponse
-	Error *ErrorDetail `json:"error,omitempty"`
+type ResponseContract[T any] struct {
+	Success    bool            `json:"success"`
+	Message    string          `json:"message"`
+	Entry      *T              `json:"entry"`
+	Entries    []T             `json:"entries"`
+	Error      *ErrorDetail    `json:"error"`
+	Pagination *PaginationMeta `json:"pagination"`
 }
 
 // ErrorDetail berisi detail error
 type ErrorDetail struct {
 	Code    string                 `json:"code"`
 	Message string                 `json:"message"`
-	Details map[string]interface{} `json:"details,omitempty"`
+	Details map[string]interface{} `json:"details"`
 }

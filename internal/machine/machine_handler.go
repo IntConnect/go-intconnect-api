@@ -35,7 +35,7 @@ func (machineHandler *Handler) FindAllMachine(ginContext *gin.Context) {
 func (machineHandler *Handler) FindAllMachinePagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	paginatedResponse := machineHandler.machineService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
@@ -43,19 +43,19 @@ func (machineHandler *Handler) FindAllMachinePagination(ginContext *gin.Context)
 func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 	var createMachineModel model.CreateMachineRequest
 	err := ginContext.Request.ParseMultipartForm(32 << 20) // 32MB maxMemory
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	err = machineHandler.formDecoder.Decode(&createMachineModel, ginContext.Request.PostForm)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	modelFile, err := ginContext.FormFile("model")
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	fmt.Println(1)
 	thumbnailFile, err := ginContext.FormFile("thumbnail")
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	fmt.Println(2)
 	createMachineModel.ModelHeader = modelFile
 	createMachineModel.ThumbnailHeader = thumbnailFile
 	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents[", "].document_file", len(createMachineModel.MachineDocuments))
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	for i, machineDocument := range createMachineModel.MachineDocuments {
 
 		machineDocument.DocumentFile = extractIndexedFiles[i]
@@ -68,7 +68,7 @@ func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 func (machineHandler *Handler) UpdateMachine(ginContext *gin.Context) {
 	var updateMachineModel model.UpdateMachineRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateMachineModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	machineHandler.machineService.Update(ginContext, &updateMachineModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Machine has been created", nil))
 }
@@ -77,7 +77,7 @@ func (machineHandler *Handler) DeleteMachine(ginContext *gin.Context) {
 	var deleteBomModel model.DeleteMachineRequest
 	currencyId := ginContext.Param("id")
 	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteBomModel.Id = parsedBomId
 	machineHandler.machineService.Delete(ginContext, &deleteBomModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))

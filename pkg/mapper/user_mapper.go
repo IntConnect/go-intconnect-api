@@ -14,7 +14,7 @@ import (
 func MapJwtClaimIntoUserClaim(jwtClaim jwt.MapClaims) (*model.JwtClaimRequest, error) {
 	var userClaim model.JwtClaimRequest
 	err := mapstructure.Decode(jwtClaim, &userClaim)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &userClaim, nil
 }
 
@@ -25,10 +25,10 @@ func MapUserEntityIntoUserResponse(userEntity *entity.User) *model.UserResponse 
 		Result:     &userResponse,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 
 	err = decoder.Decode(userEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &userResponse
 }
 
@@ -43,7 +43,7 @@ func MapUserEntitiesIntoUserResponses(userEntities []entity.User) []*model.UserR
 func MapCreateUserRequestIntoUserEntity(createUserRequest *model.CreateUserRequest) *entity.User {
 	var userEntity entity.User
 	err := mapstructure.Decode(createUserRequest, &userEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &userEntity
 }
 

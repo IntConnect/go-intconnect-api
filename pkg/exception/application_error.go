@@ -3,38 +3,38 @@ package exception
 import "fmt"
 
 type ApplicationError struct {
-	StatusCode int         `json:"status_code"`
-	Message    string      `json:"message"`
-	Trace      interface{} `json:"trace"`
-	rawError   error
+	HttpStatusCode       int                    `json:"status_code"`
+	ConventionStatusCode string                 `json:"convention_status_code"`
+	Message              string                 `json:"message"`
+	Details              map[string]interface{} `json:"details"`
 }
 
 func (applicationError *ApplicationError) Error() string {
-	return fmt.Sprintf("Error %d: %s", applicationError.StatusCode, applicationError.Message)
+	return fmt.Sprintf("Error %d-%d: %s", applicationError.HttpStatusCode, applicationError.ConventionStatusCode, applicationError.Message)
 }
 
-func NewApplicationError(statusCode int, message string, rawError error) *ApplicationError {
+func NewApplicationError(statusCode int, message string) *ApplicationError {
 	return &ApplicationError{
-		StatusCode: statusCode,
-		rawError:   rawError,
-		Message:    message,
+		HttpStatusCode: statusCode,
+		Message:        message,
 	}
 }
 
-func NewApplicationErrorWithTracing(statusCode int, message string, rawError error, traceError interface{}) *ApplicationError {
+func NewApplicationErrorWithDetails(statusCode int, message string, details map[string]interface{}) *ApplicationError {
 	return &ApplicationError{
-		StatusCode: statusCode,
-		rawError:   rawError,
-		Message:    message,
-		Trace:      traceError,
+		HttpStatusCode: statusCode,
+		Message:        message,
+		Details:        details,
 	}
 }
 
-func (applicationError *ApplicationError) GetRawError() error {
-	if applicationError == nil || applicationError.rawError == nil {
-		return nil
+func NewApplicationErrorSpecific(statusCode int, conventionStatusCode string, message string, details map[string]interface{}) *ApplicationError {
+	return &ApplicationError{
+		HttpStatusCode:       statusCode,
+		ConventionStatusCode: conventionStatusCode,
+		Message:              message,
+		Details:              details,
 	}
-	return applicationError.rawError
 }
 
 func ThrowApplicationError(applicationError *ApplicationError) {

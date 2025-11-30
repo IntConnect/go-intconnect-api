@@ -30,7 +30,7 @@ func (auditLogHandler *Handler) FindAllAuditLog(ginContext *gin.Context) {
 func (auditLogHandler *Handler) FindAllAuditLogPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	paginatedResponse := auditLogHandler.auditLogService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }

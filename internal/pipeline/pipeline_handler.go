@@ -40,7 +40,7 @@ func (pipelineHandler *Handler) FindById(ginContext *gin.Context) {
 func (pipelineHandler *Handler) RunPipeline(ginContext *gin.Context) {
 	pipelineId := ginContext.Param("id")
 	parsedPipelineId, err := strconv.ParseUint(pipelineId, 10, 64)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, "Supplied param not valid", nil))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, "Supplied param not valid"))
 	pipelineResponses := pipelineHandler.pipelineService.RunPipeline(ginContext, parsedPipelineId)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Pipeline has been fetched", pipelineResponses))
 }
@@ -55,7 +55,7 @@ func (pipelineHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 
 	// Bind query parameters to the struct
 	err := ginContext.ShouldBindQuery(&paginationReq)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	pipelineResponses := pipelineHandler.pipelineService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Pipeline has been fetched", pipelineResponses))
 }
@@ -63,7 +63,7 @@ func (pipelineHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 func (pipelineHandler *Handler) CreatePipeline(ginContext *gin.Context) {
 	var createPipelineModel model.CreatePipelineRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createPipelineModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	pipelineHandler.pipelineService.Create(ginContext, &createPipelineModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Pipeline has been created", nil))
 }
@@ -71,7 +71,7 @@ func (pipelineHandler *Handler) CreatePipeline(ginContext *gin.Context) {
 func (pipelineHandler *Handler) UpdatePipeline(ginContext *gin.Context) {
 	var updatePipelineModel model.UpdatePipelineRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updatePipelineModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	pipelineHandler.pipelineService.Update(ginContext, &updatePipelineModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Pipeline has been created", nil))
 }
@@ -80,7 +80,7 @@ func (pipelineHandler *Handler) DeletePipeline(ginContext *gin.Context) {
 	var deletePipelineModel model.DeletePipelineRequest
 	currencyId := ginContext.Param("id")
 	parsedPipelineId, err := strconv.ParseUint(currencyId, 10, 32)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deletePipelineModel.ID = parsedPipelineId
 	pipelineHandler.pipelineService.Delete(ginContext, &deletePipelineModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Pipeline has been updated", nil))

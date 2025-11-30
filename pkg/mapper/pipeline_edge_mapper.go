@@ -21,7 +21,7 @@ func MapCreatePipelineEdgeRequestsIntoPipelineEdgeEntities(createPipelineEdgeReq
 func MapCreatePipelineEdgeRequestIntoPipelineEdgeEntity(createPipelineEdgeRequest model.CreatePipelineEdgeRequest) *entity.PipelineEdge {
 	var pipelineEdgeEntity entity.PipelineEdge
 	err := mapstructure.Decode(createPipelineEdgeRequest, &pipelineEdgeEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	pipelineEdgeEntity.Data = createPipelineEdgeRequest.Data
 	return &pipelineEdgeEntity
 }
@@ -37,7 +37,7 @@ func MapPipelineEdgeEntitiesIntoPipelineEdgeResponse(pipelineEdgeEntities []*ent
 func MapPipelineEdgeEntityIntoPipelineEdgeResponse(pipelineEdgeEntity *entity.PipelineEdge) *model.PipelineEdgeResponse {
 	var pipelineEdgeResponse model.PipelineEdgeResponse
 	err := mapstructure.Decode(pipelineEdgeEntity, &pipelineEdgeResponse)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 
 	return &pipelineEdgeResponse
 }

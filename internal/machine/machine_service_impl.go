@@ -89,9 +89,9 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 	machineService.validatorService.ParseValidationError(valErr, *createMachineRequest)
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		modelPath, err := machineService.localStorageService.Disk().Put(modelFile, fmt.Sprintf("machines/models/%d-%s", time.Now().UnixNano(), modelFile.Filename))
-		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources, err))
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 		thumbnailPath, err := machineService.localStorageService.Disk().Put(thumbnailFile, fmt.Sprintf("machines/thumbnails/%d-%s", time.Now().UnixNano(), thumbnailFile.Filename))
-		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources, err))
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 		machineEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineRequest, entity.Machine](createMachineRequest)
 		machineEntity.ModelPath = modelPath
 		machineEntity.ThumbnailPath = thumbnailPath
@@ -101,7 +101,7 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 		for _, createMachineDocumentRequest := range createMachineRequest.MachineDocuments {
 			machineDocumentEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineDocumentRequest, entity.MachineDocument](&createMachineDocumentRequest)
 			machineDocumentFilePath, err := machineService.localStorageService.Disk().Put(createMachineDocumentRequest.DocumentFile, fmt.Sprintf("machines/documents/%d-%s", time.Now().UnixNano(), createMachineDocumentRequest.DocumentFile.Filename))
-			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources, err))
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 			machineDocumentEntity.FilePath = machineDocumentFilePath
 			machineDocumentEntity.MachineId = machineEntity.Id
 			machineDocumentEntities = append(machineDocumentEntities, machineDocumentEntity)

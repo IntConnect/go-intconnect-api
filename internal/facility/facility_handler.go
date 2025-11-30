@@ -38,7 +38,7 @@ func (facilityHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 
 	// Bind query parameters to the struct
 	err := ginContext.ShouldBindQuery(&paginationReq)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	facilityResponses := facilityHandler.facilityService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Facility has been fetched", facilityResponses))
 }
@@ -46,7 +46,7 @@ func (facilityHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 func (facilityHandler *Handler) CreateFacility(ginContext *gin.Context) {
 	var createFacilityModel model.CreateFacilityRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createFacilityModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	facilityHandler.facilityService.Create(ginContext, &createFacilityModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Facility has been created", nil))
 }
@@ -54,7 +54,7 @@ func (facilityHandler *Handler) CreateFacility(ginContext *gin.Context) {
 func (facilityHandler *Handler) UpdateFacility(ginContext *gin.Context) {
 	var updateFacilityModel model.UpdateFacilityRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateFacilityModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	facilityHandler.facilityService.Update(ginContext, &updateFacilityModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Facility has been created", nil))
 }
@@ -63,7 +63,7 @@ func (facilityHandler *Handler) DeleteFacility(ginContext *gin.Context) {
 	var deleteBomModel model.DeleteFacilityRequest
 	currencyId := ginContext.Param("id")
 	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteBomModel.Id = parsedBomId
 	facilityHandler.facilityService.Delete(ginContext, &deleteBomModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))

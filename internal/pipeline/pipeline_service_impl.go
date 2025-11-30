@@ -103,7 +103,7 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 		protocolConfigurations, err := pipelineService.protocolConfigurationRepository.FindAllByIds(gormTransaction, protocolConfigurationIds)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if len(protocolConfigurationIds) != len(protocolConfigurations) {
-			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "Some protocol configuration not found", nil))
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "Some protocol configuration not found"))
 		}
 		protocolConfigMap := make(map[uint64]model.ProtocolConfigurationResponse)
 		for _, protocolConfigurationEntity := range protocolConfigurations {

@@ -31,7 +31,7 @@ func MapPipelineEntitiesIntoPipelineResponses(pipelineEntities []*entity.Pipelin
 func MapCreatePipelineRequestIntoPipelineEntity(createPipelineRequest *model.CreatePipelineRequest) *entity.Pipeline {
 	var pipelineEntity entity.Pipeline
 	err := mapstructure.Decode(createPipelineRequest, &pipelineEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	pipelineEntity.PipelineNode = MapCreatePipelineNodeRequestsIntoPipelineNodeEntities(createPipelineRequest.Nodes)
 	pipelineEntity.PipelineEdge = MapCreatePipelineEdgeRequestsIntoPipelineEdgeEntities(createPipelineRequest.Edges)
 	pipelineEntity.Config = createPipelineRequest.Config
@@ -41,7 +41,7 @@ func MapCreatePipelineRequestIntoPipelineEntity(createPipelineRequest *model.Cre
 func MapUpdatePipelineRequestIntoPipelineEntity(createPipelineRequest *model.UpdatePipelineRequest) *entity.Pipeline {
 	var pipelineEntity entity.Pipeline
 	err := mapstructure.Decode(createPipelineRequest, &pipelineEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	pipelineEntity.PipelineNode = MapCreatePipelineNodeRequestsIntoPipelineNodeEntities(createPipelineRequest.Nodes)
 	pipelineEntity.PipelineEdge = MapCreatePipelineEdgeRequestsIntoPipelineEdgeEntities(createPipelineRequest.Edges)
 	pipelineEntity.Config = createPipelineRequest.Config

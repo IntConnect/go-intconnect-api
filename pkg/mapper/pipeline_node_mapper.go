@@ -21,7 +21,7 @@ func MapCreatePipelineNodeRequestsIntoPipelineNodeEntities(createPipelineNodeReq
 func MapCreatePipelineNodeRequestIntoPipelineNodeEntity(createPipelineNodeRequest model.CreatePipelineNodeRequest) *entity.PipelineNode {
 	var pipelineNodeEntity entity.PipelineNode
 	err := mapstructure.Decode(createPipelineNodeRequest, &pipelineNodeEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	pipelineNodeEntity.Config = createPipelineNodeRequest.Config
 	return &pipelineNodeEntity
 }
@@ -37,7 +37,7 @@ func MapPipelineNodeEntitiesIntoPipelineNodeResponse(pipelineNodeEntities []*ent
 func MapPipelineNodeEntityIntoPipelineNodeResponse(pipelineNodeEntity *entity.PipelineNode) *model.PipelineNodeResponse {
 	var pipelineNodeResponse model.PipelineNodeResponse
 	err := mapstructure.Decode(pipelineNodeEntity, &pipelineNodeResponse)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	pipelineNodeResponse.Config = MapPipelineNodeConfigEntityIntoPipelineNodeConfigResponse(pipelineNodeEntity.Config)
 	pipelineNodeResponse.Appearance = MapPipelineNodeAppearanceEntityIntoPipelineNodeAppearanceResponse(pipelineNodeEntity.Appearance)
 	pipelineNodeResponse.NodeResponse = MapNodeEntityIntoNodeResponse(&pipelineNodeEntity.Node)
@@ -47,13 +47,13 @@ func MapPipelineNodeEntityIntoPipelineNodeResponse(pipelineNodeEntity *entity.Pi
 func MapPipelineNodeConfigEntityIntoPipelineNodeConfigResponse(pipelineNodeConfig map[string]interface{}) *model.PipelineNodeConfig {
 	var parsedPipelineNodeConfig *model.PipelineNodeConfig
 	err := mapstructure.Decode(pipelineNodeConfig, &parsedPipelineNodeConfig)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return parsedPipelineNodeConfig
 }
 
 func MapPipelineNodeAppearanceEntityIntoPipelineNodeAppearanceResponse(pipelineNodeAppearance map[string]interface{}) *model.PipelineNodeAppearance {
 	var parsedPipelineNodeAppearance *model.PipelineNodeAppearance
 	err := mapstructure.Decode(pipelineNodeAppearance, &parsedPipelineNodeAppearance)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return parsedPipelineNodeAppearance
 }

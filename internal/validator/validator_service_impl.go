@@ -38,19 +38,19 @@ func (validatorService *ServiceImpl) ValidateVar(target interface{}, validatorTa
 func (validatorService *ServiceImpl) ParseValidationError(validationError error, dtoStruct interface{}) {
 	if validationError != nil {
 		parsedMap := make(map[string]interface{})
-		t := reflect.TypeOf(dtoStruct)
+		reflectType := reflect.TypeOf(dtoStruct)
 
 		for _, fieldError := range validationError.(validator.ValidationErrors) {
 			field := fieldError.StructField() // Nama field struct
 			translatedMessage := fieldError.Translate(validatorService.engTranslator)
 
 			// Hapus nama field dari pesan error
-			cleanMessage := strings.Replace(translatedMessage, field, getPropertyFieldName(t, field), 1)
+			cleanMessage := strings.Replace(translatedMessage, field, getPropertyFieldName(reflectType, field), 1)
 			cleanMessage = strings.TrimSpace(cleanMessage) // Hilangkan spasi berlebih
 
 			parsedMap[field] = cleanMessage
 		}
-		panic(exception.NewApplicationErrorWithTracing(http.StatusBadRequest, exception.ErrBadRequest, validationError, parsedMap))
+		panic(exception.NewApplicationErrorSpecific(http.StatusBadRequest, exception.StatusValidationError, exception.MsgValidationError, parsedMap))
 	}
 }
 

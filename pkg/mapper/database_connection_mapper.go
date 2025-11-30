@@ -17,10 +17,10 @@ func MapDatabaseConnectionEntityIntoDatabaseConnectionResponse(databaseConnectio
 		Result:     &databaseConnectionResponse,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 
 	err = decoder.Decode(databaseConnectionEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	databaseConnectionResponse.AuditableResponse = AuditableEntityIntoEntityResponse(&databaseConnectionEntity.Auditable)
 	databaseConnectionResponse.Config = MapDatabaseConnectionConfigIntoDatabaseConnectionConfigResponse(databaseConnectionEntity.Config)
 	return &databaseConnectionResponse
@@ -29,7 +29,7 @@ func MapDatabaseConnectionEntityIntoDatabaseConnectionResponse(databaseConnectio
 func MapDatabaseConnectionConfigIntoDatabaseConnectionConfigResponse(databaseConnectionConfig map[string]interface{}) *model.DatabaseConnectionConfigResponse {
 	var databaseConnectionEntity model.DatabaseConnectionConfigResponse
 	err := mapstructure.Decode(databaseConnectionConfig, &databaseConnectionEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &databaseConnectionEntity
 }
 
@@ -44,7 +44,7 @@ func MapDatabaseConnectionEntitiesIntoDatabaseConnectionResponses(databaseConnec
 func MapCreateDatabaseConnectionRequestIntoDatabaseConnectionEntity(createDatabaseConnectionRequest *model.CreateDatabaseConnectionRequest) *entity.DatabaseConnection {
 	var databaseConnectionEntity entity.DatabaseConnection
 	err := mapstructure.Decode(createDatabaseConnectionRequest, &databaseConnectionEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &databaseConnectionEntity
 }
 

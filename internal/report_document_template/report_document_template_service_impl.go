@@ -93,7 +93,7 @@ func (reportDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Context
 		reportDocumentTemplateEntity.Auditable = entity.NewAuditable("Administrator")
 		parameterEntities, err := reportDocumentTemplateService.parameterRepository.FindBatchById(gormTransaction, createReportDocumentTemplateRequest.ParameterId)
 		if len(parameterEntities) != len(createReportDocumentTemplateRequest.ParameterId) {
-			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrSomeResourceNotFound, err))
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrSomeResourceNotFound))
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		reportDocumentTemplateEntity.Parameter = parameterEntities

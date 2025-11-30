@@ -31,7 +31,7 @@ func (roleHandler *Handler) FindAllRole(ginContext *gin.Context) {
 func (roleHandler *Handler) CreateRole(ginContext *gin.Context) {
 	var createRoleModel model.CreateRoleRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createRoleModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	roleHandler.roleService.Create(ginContext, &createRoleModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been created", nil))
 }
@@ -39,7 +39,7 @@ func (roleHandler *Handler) CreateRole(ginContext *gin.Context) {
 func (roleHandler *Handler) UpdateRole(ginContext *gin.Context) {
 	var updateRoleModel model.UpdateRoleRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateRoleModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	roleHandler.roleService.Update(ginContext, &updateRoleModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been created", nil))
 }
@@ -47,10 +47,10 @@ func (roleHandler *Handler) UpdateRole(ginContext *gin.Context) {
 func (roleHandler *Handler) DeleteRole(ginContext *gin.Context) {
 	var deleteRoleModel model.DeleteResourceGeneralRequest
 	err := ginContext.ShouldBindBodyWithJSON(&deleteRoleModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	roleId := ginContext.Param("id")
 	parsedRoleId, err := strconv.ParseUint(roleId, 10, 32)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteRoleModel.Id = parsedRoleId
 	roleHandler.roleService.Delete(ginContext, &deleteRoleModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been deleted", nil))

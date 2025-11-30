@@ -29,7 +29,7 @@ func MapNodeEntitiesIntoNodeResponses(nodeEntities []entity.Node) []*model.NodeR
 func MapCreateNodeRequestIntoNodeEntity(createNodeRequest *model.CreateNodeRequest) *entity.Node {
 	var nodeEntity entity.Node
 	err := mapstructure.Decode(createNodeRequest, &nodeEntity)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	return &nodeEntity
 }
 

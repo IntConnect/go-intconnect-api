@@ -104,7 +104,7 @@ func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserReques
 
 func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRequest *model.LoginUserRequest) string {
 	err := userService.validatorService.ValidateStruct(loginUserRequest)
-	userService.validatorService.ParseValidationError(err, loginUserRequest)
+	userService.validatorService.ParseValidationError(err, *loginUserRequest)
 	var tokenString string
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userEntity entity.User
@@ -112,10 +112,9 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 			Where("email = ?", loginUserRequest.UserIdentifier).
 			Or("username = ?", loginUserRequest.UserIdentifier).
 			First(&userEntity).Error
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		if err = bcrypt.CompareHashAndPassword([]byte(userEntity.Password), []byte(loginUserRequest.Password)); err != nil {
-			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "User credentials invalid", err))
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "User credentials invalid"))
 		}
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"email":    userEntity.Email,
@@ -123,10 +122,10 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 			"exp":      time.Now().Add(time.Hour * 72).Unix(),
 		})
 		tokenString, err = tokenInstance.SignedString([]byte(userService.viperConfig.GetString("JWT_SECRET")))
-		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
 		if claims, ok := tokenInstance.Claims.(jwt.MapClaims); ok && tokenInstance.Valid {
 			userJwtClaim, err := mapper.MapJwtClaimIntoUserClaim(claims)
-			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest, err))
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 			ginContext.Set("claims", userJwtClaim)
 		}
 
