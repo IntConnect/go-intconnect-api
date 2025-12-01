@@ -25,31 +25,41 @@ func NewHandler(mqttTopicService Service, viperConfig *viper.Viper) *Handler {
 
 func (mqttTopicHandler *Handler) FindAllMqttTopic(ginContext *gin.Context) {
 	mqttTopicResponses := mqttTopicHandler.mqttTopicService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MqttTopic has been fetched", mqttTopicResponses))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MQTT Topic has been fetched", mqttTopicResponses))
 }
 
 func (mqttTopicHandler *Handler) FindAllMqttTopicPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	mqttTopicResponses := mqttTopicHandler.mqttTopicService.FindAllPagination(&paginationReq)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MqttTopic has been fetched", mqttTopicResponses))
+	paginatedResponse := mqttTopicHandler.mqttTopicService.FindAllPagination(&paginationReq)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (mqttTopicHandler *Handler) CreateMqttTopic(ginContext *gin.Context) {
 	var createMqttTopicModel model.CreateMqttTopicRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createMqttTopicModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	mqttTopicHandler.mqttTopicService.Create(ginContext, &createMqttTopicModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MqttTopic has been created", nil))
+	paginatedResponse := mqttTopicHandler.mqttTopicService.Create(ginContext, &createMqttTopicModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
+}
+
+func (mqttTopicHandler *Handler) FindDependencyMqttTopic(ginContext *gin.Context) {
+	mqttTopicDependency := mqttTopicHandler.mqttTopicService.FindDependency()
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse(model.RESPONSE_SUCCESS, mqttTopicDependency))
+
 }
 
 func (mqttTopicHandler *Handler) UpdateMqttTopic(ginContext *gin.Context) {
 	var updateMqttTopicModel model.UpdateMqttTopicRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateMqttTopicModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	mqttTopicId := ginContext.Param("id")
+	parsedMqttTopicId, err := strconv.ParseUint(mqttTopicId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	updateMqttTopicModel.Id = parsedMqttTopicId
 	mqttTopicHandler.mqttTopicService.Update(ginContext, &updateMqttTopicModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MqttTopic has been created", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MQTT Topic has been created", nil))
 }
 
 func (mqttTopicHandler *Handler) DeleteMqttTopic(ginContext *gin.Context) {
@@ -59,5 +69,5 @@ func (mqttTopicHandler *Handler) DeleteMqttTopic(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteMqttTopicModel.Id = parsedMqttTopicId
 	mqttTopicHandler.mqttTopicService.Delete(ginContext, &deleteMqttTopicModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MqttTopic has been updated", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MQTT Topic has been updated", nil))
 }

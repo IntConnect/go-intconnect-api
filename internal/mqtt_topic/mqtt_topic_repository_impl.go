@@ -44,6 +44,8 @@ func (mqttTopicRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
+		Preload("MqttBroker").
+		Preload("Machine").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).

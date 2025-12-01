@@ -84,20 +84,19 @@ func MapEntityIntoResponse[S any, R any](
 	renderPayloads ...func(S, R),
 ) R {
 	var responseObject R
-
 	if reflect.TypeOf(responseObject).Kind() == reflect.Ptr {
 		responseObject = reflect.New(reflect.TypeOf(responseObject).Elem()).Interface().(R)
 	}
-
 	decoded := DecodeFromSource[S, R](entityObject, responseObject)
 	responseObject = decoded
-
-	if renderPayloads != nil {
+	if len(renderPayloads) > 0 {
 		for _, renderPayload := range renderPayloads {
+			if renderPayload == nil { // <-- cegah panic
+				continue
+			}
 			renderPayload(entityObject, responseObject)
 		}
 	}
-
 	return responseObject
 }
 func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {

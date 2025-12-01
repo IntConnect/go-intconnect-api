@@ -1,8 +1,11 @@
 package mqtt_topic
 
 import (
+	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
+	"go-intconnect-api/internal/machine"
 	"go-intconnect-api/internal/model"
+	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -16,6 +19,7 @@ import (
 
 type ServiceImpl struct {
 	mqttTopicRepository Repository
+	auditLogService     auditLog.Service
 	validatorService    validator.Service
 	dbConnection        *gorm.DB
 	viperConfig         *viper.Viper
@@ -23,13 +27,17 @@ type ServiceImpl struct {
 }
 
 func NewService(mqttTopicRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper, loggerInstance *logrus.Logger) *ServiceImpl {
+	viperConfig *viper.Viper, loggerInstance *logrus.Logger,
+	auditLogService auditLog.Service,
+	machineRepository machine.Repository, mqttBrokerRepository mqttBroker.Repository,
+) *ServiceImpl {
 	return &ServiceImpl{
 		mqttTopicRepository: mqttTopicRepository,
 		validatorService:    validatorService,
 		dbConnection:        dbConnection,
 		viperConfig:         viperConfig,
 		loggerInstance:      loggerInstance,
+		auditLogService:     auditLogService,
 	}
 }
 
@@ -44,6 +52,23 @@ func (mqttTopicService *ServiceImpl) FindAll() []*model.MqttTopicResponse {
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return allMqttTopic
+}
+
+func (mqttTopicService *ServiceImpl) FindDependency() *model.MqttTopicDependency {
+	var mqttTopicDependency = &model.MqttTopicDependency{}
+	err := mqttTopicService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var machineEntities []entity.Machine
+		var mqttBrokerEntities []entity.MqttBroker
+		err := gormTransaction.Find(&machineEntities).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		err = gormTransaction.Find(&mqttBrokerEntities).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		mqttTopicDependency.MachineResponses = helper.MapEntitiesIntoResponses[entity.Machine, model.MachineResponse](machineEntities)
+		mqttTopicDependency.MqttBrokerResponses = helper.MapEntitiesIntoResponses[entity.MqttBroker, model.MqttBrokerResponse](mqttBrokerEntities)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return mqttTopicDependency
 }
 
 // Create - Membuat mqttTopic baru
@@ -89,15 +114,16 @@ func (mqttTopicService *ServiceImpl) Create(ginContext *gin.Context, createMqttT
 		mqttTopicEntity.Auditable = entity.NewAuditable("Administrator")
 		err := mqttTopicService.mqttTopicRepository.Create(gormTransaction, mqttTopicEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginatedResp = mqttTopicService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginatedResp = mqttTopicService.FindAllPagination(&paginationRequest)
 	return paginatedResp
 }
 
-func (mqttTopicService *ServiceImpl) Update(ginContext *gin.Context, updateMqttTopicRequest *model.UpdateMqttTopicRequest) {
+func (mqttTopicService *ServiceImpl) Update(ginContext *gin.Context, updateMqttTopicRequest *model.UpdateMqttTopicRequest) *model.PaginatedResponse[*model.MqttTopicResponse] {
+	var paginatedResp *model.PaginatedResponse[*model.MqttTopicResponse]
 	valErr := mqttTopicService.validatorService.ValidateStruct(updateMqttTopicRequest)
 	mqttTopicService.validatorService.ParseValidationError(valErr, *updateMqttTopicRequest)
 	err := mqttTopicService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -109,9 +135,13 @@ func (mqttTopicService *ServiceImpl) Update(ginContext *gin.Context, updateMqttT
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginatedResp = mqttTopicService.FindAllPagination(&paginationRequest)
+	return paginatedResp
 }
 
-func (mqttTopicService *ServiceImpl) Delete(ginContext *gin.Context, deleteMqttTopicRequest *model.DeleteResourceGeneralRequest) {
+func (mqttTopicService *ServiceImpl) Delete(ginContext *gin.Context, deleteMqttTopicRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.MqttTopicResponse] {
+	var paginatedResp *model.PaginatedResponse[*model.MqttTopicResponse]
 	valErr := mqttTopicService.validatorService.ValidateStruct(deleteMqttTopicRequest)
 	mqttTopicService.validatorService.ParseValidationError(valErr, *deleteMqttTopicRequest)
 	err := mqttTopicService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -121,4 +151,7 @@ func (mqttTopicService *ServiceImpl) Delete(ginContext *gin.Context, deleteMqttT
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginatedResp = mqttTopicService.FindAllPagination(&paginationRequest)
+	return paginatedResp
 }

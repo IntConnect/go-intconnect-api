@@ -32,3 +32,7 @@ type ErrorDetail struct {
 	Message string                 `json:"message"`
 	Details map[string]interface{} `json:"details"`
 }
+
+const (
+	RESPONSE_SUCCESS = "Success"
+)

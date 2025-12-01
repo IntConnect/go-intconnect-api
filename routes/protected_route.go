@@ -159,6 +159,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	mqttTopicGroup := routerGroup.Group("mqtt-topics")
 	mqttTopicGroup.GET("pagination", protectedRoutes.mqttTopicController.FindAllMqttTopicPagination)
 	mqttTopicGroup.GET("", protectedRoutes.mqttTopicController.FindAllMqttTopic)
+	mqttTopicGroup.GET("create", protectedRoutes.mqttTopicController.FindDependencyMqttTopic)
 	mqttTopicGroup.POST("", protectedRoutes.mqttTopicController.CreateMqttTopic)
 	mqttTopicGroup.PUT("", protectedRoutes.mqttTopicController.UpdateMqttTopic)
 	mqttTopicGroup.DELETE("", protectedRoutes.mqttTopicController.DeleteMqttTopic)
