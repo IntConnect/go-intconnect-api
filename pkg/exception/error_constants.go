@@ -64,18 +64,18 @@ const (
 // Convention Status Code
 // Custom API status codes for standardized error handling
 const (
-	StatusSuccess            = "0"  // Success operation
-	StatusValidationError    = "1"  // Validation error (input validation failed)
-	StatusAuthError          = "2"  // Authentication/Authorization error
-	StatusNotFoundError      = "3"  // Resource not found
-	StatusDuplicateError     = "4"  // Duplicate resource/entry
-	StatusDatabaseError      = "5"  // Database operation error
-	StatusBusinessLogicError = "6"  // Business logic error
-	StatusExternalError      = "7"  // External service error
-	StatusInternalError      = "8"  // Internal server error
-	StatusRateLimitError     = "9"  // Rate limit exceeded
-	StatusTimeoutError       = "10" // Request timeout
-	StatusMaintenanceMode    = "11" // Service in maintenance mode
+	StatusSuccess            = "1"  // Success operation
+	StatusValidationError    = "2"  // Validation error (input validation failed)
+	StatusAuthError          = "3"  // Authentication/Authorization error
+	StatusNotFoundError      = "4"  // Resource not found
+	StatusDuplicateError     = "5"  // Duplicate resource/entry
+	StatusDatabaseError      = "6"  // Database operation error
+	StatusBusinessLogicError = "7"  // Business logic error
+	StatusExternalError      = "8"  // External service error
+	StatusInternalError      = "9"  // Internal server error
+	StatusRateLimitError     = "10" // Rate limit exceeded
+	StatusTimeoutError       = "11" // Request timeout
+	StatusMaintenanceMode    = "12" // Service in maintenance mode
 )
 
 // Convention Status Code Messages
