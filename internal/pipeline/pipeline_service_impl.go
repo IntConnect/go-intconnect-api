@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -120,7 +121,7 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 				pipelineNodeResponse.Config.ProtocolConfigurationResponse = protocolConfigurationResponse
 			} else {
 				// kalau tidak ditemukan, bisa log atau skip
-				fmt.Printf("ProtocolConfiguration dengan ID %d tidak ditemukan\n", protocolConfigurationId)
+				logrus.Debug("ProtocolConfiguration dengan ID %d tidak ditemukan\n", protocolConfigurationId)
 			}
 		}
 		return nil
@@ -130,17 +131,17 @@ func (pipelineService *ServiceImpl) RunPipeline(ginContext *gin.Context, pipelin
 	if pipelineService.redisInstance != nil && pipelineResponse != nil {
 		payload, err := json.Marshal(pipelineResponse)
 		if err != nil {
-			fmt.Printf("❌ Failed to marshal pipeline response: %v\n", err)
+			logrus.Debug("❌ Failed to marshal pipeline response: %v\n", err)
 		} else {
 			topic := fmt.Sprintf("pipeline")
 			if err := pipelineService.redisInstance.Publish(topic, string(payload)); err != nil {
-				fmt.Printf("❌ Failed to publish pipeline to Redis: %v\n", err)
+				logrus.Debug("❌ Failed to publish pipeline to Redis: %v\n", err)
 			} else {
-				fmt.Printf("📢 Published pipeline Id %d to topic '%s'\n", pipelineResponse.Id, topic)
+				logrus.Debug("📢 Published pipeline Id %d to topic '%s'\n", pipelineResponse.Id, topic)
 			}
 		}
 	} else {
-		fmt.Println("⚠️ Redis instance or pipeline response is nil, skipping publish")
+		logrus.Debug("⚠️ Redis instance or pipeline response is nil, skipping publish")
 	}
 	return pipelineResponse
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/sirupsen/logrus"
 )
 
 type RedisConfig struct {
@@ -47,6 +48,6 @@ func (redisInstance *RedisInstance) Publish(topic string, message string) error 
 		return fmt.Errorf("failed to publish message to topic '%s': %w", topic, err)
 	}
 
-	fmt.Printf("📢 Published message to Redis topic '%s'\n", topic)
+	logrus.Debug("📢 Published message to Redis topic '%s'\n", topic)
 	return nil
 }

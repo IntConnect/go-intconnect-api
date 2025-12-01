@@ -32,7 +32,6 @@ func (permissionSeeder *PermissionSeeder) Run(gormDatabase *gorm.DB) error {
 			return err
 		}
 
-		fmt.Println("Inserted permission:", permissionEntity.Code)
 	}
 
 	return nil

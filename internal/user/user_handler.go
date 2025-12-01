@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -75,7 +74,6 @@ func (userHandler *Handler) DeleteUser(ginContext *gin.Context) {
 	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteUserModel.Id = parsedUserId
-	fmt.Println(deleteUserModel)
 	paginatedResponse := userHandler.userService.Delete(ginContext, &deleteUserModel)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }

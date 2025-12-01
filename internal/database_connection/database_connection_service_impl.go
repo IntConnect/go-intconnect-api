@@ -45,7 +45,6 @@ func (databaseConnectionService *ServiceImpl) FindAll() []*model.DatabaseConnect
 
 		for _, dbConn := range allDatabaseConnection {
 			dynamicDB, err := utils.NewDynamicDatabaseConnection(dbConn)
-			fmt.Println(dynamicDB, err)
 			if err != nil {
 				log.Printf("❌ Failed to connect to %s: %v", dbConn.Name, err)
 				continue
@@ -66,7 +65,6 @@ func (databaseConnectionService *ServiceImpl) FindAll() []*model.DatabaseConnect
 					WHERE t.table_schema = 'public'
 					ORDER BY c.table_name, c.ordinal_position;
 				`).Rows()
-				fmt.Println(rows.Next(), err)
 				if err != nil {
 					log.Println("❌ Error fetching PostgreSQL schema:", err)
 					continue
@@ -80,7 +78,6 @@ func (databaseConnectionService *ServiceImpl) FindAll() []*model.DatabaseConnect
 						log.Println("⚠️ Scan error:", err)
 						continue
 					}
-					fmt.Println(col)
 					schemas[col.TableName] = append(schemas[col.TableName], col)
 				}
 

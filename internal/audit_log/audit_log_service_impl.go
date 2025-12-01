@@ -1,7 +1,6 @@
 package audit_log
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
@@ -60,7 +59,6 @@ func (auditLogService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 			paginationQuery.SearchQuery,
 		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		fmt.Println(auditLogEntities)
 		auditLogResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.AuditLog, *model.AuditLogResponse](
 			auditLogEntities,
 			mapper.FuncMapSimpleAuditable,

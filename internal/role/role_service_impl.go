@@ -1,7 +1,6 @@
 package role
 
 import (
-	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -92,13 +91,12 @@ func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleReques
 
 func (roleService *ServiceImpl) Delete(ginContext *gin.Context, deleteRoleRequest *model.DeleteResourceGeneralRequest) {
 	userClaim := helper.ExtractJwtClaimFromContext(ginContext)
-	fmt.Println(userClaim)
 	valErr := roleService.validatorService.ValidateStruct(deleteRoleRequest)
 	roleService.validatorService.ParseValidationError(valErr, *deleteRoleRequest)
 	err := roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		err := roleService.roleRepository.Delete(gormTransaction, deleteRoleRequest.Id)
 		roleService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
-			UserId:      0,
+			UserId:      userClaim.Id,
 			Action:      "",
 			Feature:     "",
 			Description: "",

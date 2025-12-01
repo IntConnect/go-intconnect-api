@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"go-intconnect-api/cmd/injector"
 	"go-intconnect-api/seeders"
 	"log"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -39,11 +39,11 @@ func main() {
 			log.Println(err)
 			continue
 		}
-		fmt.Println("Running seeder:", name)
+		logrus.Debug("Running seeder:", name)
 		if err := s.Run(gormInstance); err != nil {
 			log.Println("Seeder failed:", err)
 		} else {
-			fmt.Println("Seeder completed:", name)
+			logrus.Debug("Seeder completed:", name)
 		}
 	}
 }

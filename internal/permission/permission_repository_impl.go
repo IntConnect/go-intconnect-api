@@ -1,7 +1,6 @@
 package permission
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 
 	"gorm.io/gorm"
@@ -27,7 +26,6 @@ func (permissionRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransactio
 		searchPattern := "%" + searchQuery + "%"
 		gormTransaction = gormTransaction.Where("code ILIKE ? OR name ILIKE ? OR category ILIKE ? OR description ILIKE ?", searchPattern, searchPattern, searchPattern, searchPattern)
 	}
-	fmt.Println(orderClause, offsetVal, limitPage, searchQuery)
 
 	// Count total items
 	err := gormTransaction.Model(&entity.Permission{}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&permissionEntities).Error

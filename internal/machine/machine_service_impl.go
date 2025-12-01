@@ -97,7 +97,6 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 		machineEntity.ThumbnailPath = thumbnailPath
 		err = machineService.machineRepository.Create(gormTransaction, machineEntity)
 		var machineDocumentEntities []*entity.MachineDocument
-		fmt.Println(createMachineRequest.MachineDocuments)
 		for _, createMachineDocumentRequest := range createMachineRequest.MachineDocuments {
 			machineDocumentEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineDocumentRequest, entity.MachineDocument](&createMachineDocumentRequest)
 			machineDocumentFilePath, err := machineService.localStorageService.Disk().Put(createMachineDocumentRequest.DocumentFile, fmt.Sprintf("machines/documents/%d-%s", time.Now().UnixNano(), createMachineDocumentRequest.DocumentFile.Filename))

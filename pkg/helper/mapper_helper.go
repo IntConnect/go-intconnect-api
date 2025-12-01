@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"go-intconnect-api/pkg/exception"
 	"net/http"
 	"reflect"
@@ -58,11 +57,10 @@ func DecodeFromSource[S any, T any](sourceMapping S, targetMapping T) T {
 	return targetMapping
 }
 
-func MapEntitiesIntoResponses[S any, R any](entityObjects []S) []*R {
-	var responseObjects []*R
+func MapEntitiesIntoResponses[S any, R any](entityObjects []S) []R {
+	var responseObjects []R
 	for _, entityObject := range entityObjects {
-		fmt.Println(entityObject)
-		//responseObjects = append(responseObjects, MapEntityIntoResponse[S, R](entityObject, nil))
+		responseObjects = append(responseObjects, MapEntityIntoResponse[S, R](entityObject, nil))
 	}
 	return responseObjects
 }

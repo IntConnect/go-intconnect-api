@@ -160,6 +160,8 @@ SELECT *
 FROM report_document_templates;
 SELECT *
 FROM report_document_templates_parameters;
+DELETE
+FROM mqtt_brokers;
 
 
 CREATE TABLE telemetries

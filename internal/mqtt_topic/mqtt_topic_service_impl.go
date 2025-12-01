@@ -39,7 +39,7 @@ func (mqttTopicService *ServiceImpl) FindAll() []*model.MqttTopicResponse {
 	err := mqttTopicService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		mqttTopicResponse, err := mqttTopicService.mqttTopicRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allMqttTopic = helper.MapEntitiesIntoResponses[entity.MqttTopic, model.MqttTopicResponse](mqttTopicResponse)
+		allMqttTopic = helper.MapEntitiesIntoResponses[entity.MqttTopic, *model.MqttTopicResponse](mqttTopicResponse)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

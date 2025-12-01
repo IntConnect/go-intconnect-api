@@ -1,7 +1,6 @@
 package machine
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -48,10 +47,8 @@ func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	modelFile, err := ginContext.FormFile("model")
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	fmt.Println(1)
 	thumbnailFile, err := ginContext.FormFile("thumbnail")
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	fmt.Println(2)
 	createMachineModel.ModelHeader = modelFile
 	createMachineModel.ThumbnailHeader = thumbnailFile
 	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents[", "].document_file", len(createMachineModel.MachineDocuments))

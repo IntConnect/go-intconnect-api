@@ -1,7 +1,6 @@
 package mqtt_broker
 
 import (
-	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -40,7 +39,7 @@ func (mqttBrokerService *ServiceImpl) FindAll() []*model.MqttBrokerResponse {
 	err := mqttBrokerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		mqttBrokerEntities, err := mqttBrokerService.mqttBrokerRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mqttBrokerResponsesRequest = helper.MapEntitiesIntoResponses[entity.MqttBroker, model.MqttBrokerResponse](mqttBrokerEntities)
+		mqttBrokerResponsesRequest = helper.MapEntitiesIntoResponses[entity.MqttBroker, *model.MqttBrokerResponse](mqttBrokerEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -110,7 +109,6 @@ func (mqttBrokerService *ServiceImpl) Create(ginContext *gin.Context, createMqtt
 func (mqttBrokerService *ServiceImpl) Update(ginContext *gin.Context, updateMqttBrokerRequest *model.UpdateMqttBrokerRequest) *model.PaginatedResponse[*model.MqttBrokerResponse] {
 	var paginationResp *model.PaginatedResponse[*model.MqttBrokerResponse]
 	valErr := mqttBrokerService.validatorService.ValidateStruct(updateMqttBrokerRequest)
-	fmt.Println(valErr)
 	mqttBrokerService.validatorService.ParseValidationError(valErr, *updateMqttBrokerRequest)
 	err := mqttBrokerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		mqttBroker, err := mqttBrokerService.mqttBrokerRepository.FindById(gormTransaction, updateMqttBrokerRequest.Id)

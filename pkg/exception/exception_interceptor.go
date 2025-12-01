@@ -1,19 +1,18 @@
 package exception
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func Interceptor() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		defer func() {
 			if occurredError := recover(); occurredError != nil {
-				fmt.Println("panic occurred", occurredError)
-				fmt.Println(occurredError)
+				logrus.Debug("panic occurred", occurredError)
 				// Check if it's our custom error
 				if clientError, ok := occurredError.(*ApplicationError); ok {
 					ginContext.AbortWithStatusJSON(
