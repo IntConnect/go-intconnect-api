@@ -13,6 +13,7 @@ func Interceptor() gin.HandlerFunc {
 		defer func() {
 			if occurredError := recover(); occurredError != nil {
 				fmt.Println("panic occurred", occurredError)
+				fmt.Println(occurredError)
 				// Check if it's our custom error
 				if clientError, ok := occurredError.(*ApplicationError); ok {
 					ginContext.AbortWithStatusJSON(

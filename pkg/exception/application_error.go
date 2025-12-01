@@ -10,7 +10,7 @@ type ApplicationError struct {
 }
 
 func (applicationError *ApplicationError) Error() string {
-	return fmt.Sprintf("Error %d-%d: %s", applicationError.HttpStatusCode, applicationError.ConventionStatusCode, applicationError.Message)
+	return fmt.Sprintf("Error %d-%s: %s", applicationError.HttpStatusCode, applicationError.ConventionStatusCode, applicationError.Message)
 }
 
 func NewApplicationError(statusCode int, message string) *ApplicationError {

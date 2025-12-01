@@ -56,15 +56,25 @@ func ExtractIndexedFiles(
 }
 
 func ExtractJwtClaimFromContext(ginContext *gin.Context) *model.JwtClaimRequest {
-	claims, exists := ginContext.Get("claims")
-	if !exists {
+	jwtClaims, isExists := ginContext.Get("claims")
+	if !isExists {
 		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusUnauthorized, exception.ErrUnauthorized))
 	}
-	userClaim, ok := claims.(*model.JwtClaimRequest)
-	if !ok {
+	userClaim, isValid := jwtClaims.(*model.JwtClaimRequest)
+	if !isValid {
 		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusUnauthorized, exception.ErrUnauthorized))
 	}
+
 	return userClaim
+}
+
+func ExtractRequestMeta(ginContext *gin.Context) (string, string) {
+	ipAddress, isIpAddressExists := ginContext.Get("ipAddress")
+	userAgent, isUserAgentExists := ginContext.Get("userAgent")
+	if isUserAgentExists && isIpAddressExists {
+		return ipAddress.(string), userAgent.(string)
+	}
+	return "", ""
 }
 
 func TakePointer[T any](value T) *T {

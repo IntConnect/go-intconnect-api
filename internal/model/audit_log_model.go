@@ -1,13 +1,13 @@
 package model
 
 type CreateAuditLogRequest struct {
-	UserId      uint64                 `json:"user_id"`
-	Action      string                 `json:"action"`
-	Feature     string                 `json:"feature"`
-	Description string                 `json:"description"`
-	Before      map[string]interface{} `json:"before"`
-	After       map[string]interface{} `json:"after"`
-	IpAddress   string                 `json:"ip_address"`
+	UserId      uint64 `json:"user_id"`
+	Action      string `json:"action"`
+	Feature     string `json:"feature"`
+	Description string `json:"description"`
+	Before      any    `json:"before"`
+	After       any    `json:"after"`
+	IpAddress   string `json:"ip_address"`
 }
 
 type AuditLogResponse struct {
@@ -39,7 +39,8 @@ const (
 )
 
 const (
-	AUDIT_LOG_FEATURE_USER = "USER"
+	AUDIT_LOG_FEATURE_USER        = "USER"
+	AUDIT_LOG_FEATURE_MQTT_BROKER = "MQTT_BROKER"
 )
 
 const (

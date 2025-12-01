@@ -10,3 +10,7 @@ type MqttBroker struct {
 	IsActive bool   `gorm:"column:is_active"`
 	Auditable
 }
+
+func (mqttBrokerEntity MqttBroker) GetAuditable() *Auditable {
+	return &mqttBrokerEntity.Auditable
+}

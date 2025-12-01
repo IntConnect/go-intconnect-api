@@ -40,8 +40,8 @@ func (mqttBrokerHandler *Handler) CreateMqttBroker(ginContext *gin.Context) {
 	var createMqttBrokerModel model.CreateMqttBrokerRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createMqttBrokerModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	mqttBrokerHandler.mqttBrokerService.Create(ginContext, &createMqttBrokerModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MqttBroker has been created", nil))
+	paginatedResponse := mqttBrokerHandler.mqttBrokerService.Create(ginContext, &createMqttBrokerModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (mqttBrokerHandler *Handler) UpdateMqttBroker(ginContext *gin.Context) {

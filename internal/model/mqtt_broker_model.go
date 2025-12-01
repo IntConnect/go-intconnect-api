@@ -1,14 +1,14 @@
 package model
 
 type MqttBrokerResponse struct {
-	Id       uint64 `json:"id"`
-	HostName string `json:"host_name"`
-	MqttPort int    `json:"mqtt_port"`
-	WsPort   int    `json:"ws_port"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	IsActive bool   `json:"is_active"`
-	AuditableResponse
+	Id                uint64             `json:"id"`
+	HostName          string             `json:"host_name"`
+	MqttPort          int                `json:"mqtt_port"`
+	WsPort            int                `json:"ws_port"`
+	Username          string             `json:"username"`
+	Password          string             `json:"password"`
+	IsActive          bool               `json:"is_active"`
+	AuditableResponse *AuditableResponse `json:"auditable"`
 }
 
 type CreateMqttBrokerRequest struct {
@@ -28,4 +28,12 @@ type UpdateMqttBrokerRequest struct {
 	Username string `gorm:"json:username"`
 	Password string `gorm:"json:password"`
 	IsActive bool   `gorm:"json:is_active"`
+}
+
+func (mqttBrokerResponse *MqttBrokerResponse) GetAuditableResponse() *AuditableResponse {
+	return mqttBrokerResponse.AuditableResponse
+}
+
+func (mqttBrokerResponse *MqttBrokerResponse) SetAuditableResponse(auditableResponse *AuditableResponse) {
+	mqttBrokerResponse.AuditableResponse = auditableResponse
 }

@@ -122,10 +122,15 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 		if err = bcrypt.CompareHashAndPassword([]byte(userEntity.Password), []byte(loginUserRequest.Password)); err != nil {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "User credentials invalid"))
 		}
+		jwtHour := userService.viperConfig.GetInt64("JWT_HOUR")
+		if jwtHour == 0 {
+			jwtHour = 72
+		}
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"id":       userEntity.Id,
 			"email":    userEntity.Email,
 			"username": userEntity.Username,
-			"exp":      time.Now().Add(time.Hour * 72).Unix(),
+			"exp":      time.Now().Add(time.Hour * time.Duration(jwtHour)).Unix(),
 		})
 		tokenString, err = tokenInstance.SignedString([]byte(userService.viperConfig.GetString("JWT_SECRET")))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
