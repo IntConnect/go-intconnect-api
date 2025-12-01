@@ -139,8 +139,8 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	mqttBrokerRouterGroup.GET("pagination", protectedRoutes.mqttBrokerController.FindAllMqttBrokerPagination)
 	mqttBrokerRouterGroup.GET("", protectedRoutes.mqttBrokerController.FindAllMqttBroker)
 	mqttBrokerRouterGroup.POST("", protectedRoutes.mqttBrokerController.CreateMqttBroker)
-	mqttBrokerRouterGroup.PUT("", protectedRoutes.mqttBrokerController.UpdateMqttBroker)
-	mqttBrokerRouterGroup.DELETE("", protectedRoutes.mqttBrokerController.DeleteMqttBroker)
+	mqttBrokerRouterGroup.PUT("/:id", protectedRoutes.mqttBrokerController.UpdateMqttBroker)
+	mqttBrokerRouterGroup.DELETE("/:id", protectedRoutes.mqttBrokerController.DeleteMqttBroker)
 
 	machineRouterGroup := routerGroup.Group("machines")
 	machineRouterGroup.GET("pagination", protectedRoutes.machineController.FindAllMachinePagination)

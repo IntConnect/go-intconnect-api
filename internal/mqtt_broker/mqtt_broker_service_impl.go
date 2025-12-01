@@ -1,6 +1,7 @@
 package mqtt_broker
 
 import (
+	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -89,8 +90,6 @@ func (mqttBrokerService *ServiceImpl) Create(ginContext *gin.Context, createMqtt
 		mqttBrokerEntity := helper.MapCreateRequestIntoEntity[model.CreateMqttBrokerRequest, entity.MqttBroker](createMqttBrokerRequest)
 		err := mqttBrokerService.mqttBrokerRepository.Create(gormTransaction, mqttBrokerEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginationResp = mqttBrokerService.FindAllPagination(&paginationRequest)
 		mqttBrokerService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
 			UserId:      jwtClaims.Id,
 			Action:      model.AUDIT_LOG_CREATE,
@@ -103,12 +102,15 @@ func (mqttBrokerService *ServiceImpl) Create(ginContext *gin.Context, createMqtt
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = mqttBrokerService.FindAllPagination(&paginationRequest)
 	return paginationResp
 }
 
 func (mqttBrokerService *ServiceImpl) Update(ginContext *gin.Context, updateMqttBrokerRequest *model.UpdateMqttBrokerRequest) *model.PaginatedResponse[*model.MqttBrokerResponse] {
 	var paginationResp *model.PaginatedResponse[*model.MqttBrokerResponse]
 	valErr := mqttBrokerService.validatorService.ValidateStruct(updateMqttBrokerRequest)
+	fmt.Println(valErr)
 	mqttBrokerService.validatorService.ParseValidationError(valErr, *updateMqttBrokerRequest)
 	err := mqttBrokerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		mqttBroker, err := mqttBrokerService.mqttBrokerRepository.FindById(gormTransaction, updateMqttBrokerRequest.Id)
@@ -116,17 +118,19 @@ func (mqttBrokerService *ServiceImpl) Update(ginContext *gin.Context, updateMqtt
 		helper.MapUpdateRequestIntoEntity(updateMqttBrokerRequest, mqttBroker)
 		err = mqttBrokerService.mqttBrokerRepository.Update(gormTransaction, mqttBroker)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginationResp = mqttBrokerService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = mqttBrokerService.FindAllPagination(&paginationRequest)
 	return paginationResp
 }
 
 func (mqttBrokerService *ServiceImpl) Delete(ginContext *gin.Context, deleteMqttBrokerRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.MqttBrokerResponse] {
-	var paginationResp *model.PaginatedResponse[*model.MqttBrokerResponse]
+	jwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
+	ipAddress, _ := helper.ExtractRequestMeta(ginContext)
 
+	var paginationResp *model.PaginatedResponse[*model.MqttBrokerResponse]
 	valErr := mqttBrokerService.validatorService.ValidateStruct(deleteMqttBrokerRequest)
 	mqttBrokerService.validatorService.ParseValidationError(valErr, *deleteMqttBrokerRequest)
 	err := mqttBrokerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -134,9 +138,20 @@ func (mqttBrokerService *ServiceImpl) Delete(ginContext *gin.Context, deleteMqtt
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		paginationRequest := model.NewPaginationRequest()
 		paginationResp = mqttBrokerService.FindAllPagination(&paginationRequest)
-
+		mqttBrokerService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
+			UserId:      jwtClaims.Id,
+			Action:      model.AUDIT_LOG_DELETE,
+			Feature:     model.AUDIT_LOG_FEATURE_MQTT_BROKER,
+			Description: deleteMqttBrokerRequest.Reason,
+			Before:      "",
+			After:       "",
+			IpAddress:   ipAddress,
+		})
 		return nil
 	})
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = mqttBrokerService.FindAllPagination(&paginationRequest)
+
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return paginationResp
 }

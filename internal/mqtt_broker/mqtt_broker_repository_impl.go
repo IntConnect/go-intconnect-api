@@ -57,9 +57,7 @@ func (mqttBrokerRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (mqttBrokerRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, mqttBrokerId uint64) (*entity.MqttBroker, error) {
 	var mqttBrokerEntity entity.MqttBroker
 	err := gormTransaction.Model(&entity.MqttBroker{}).
-		Preload("MqttBrokerGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Where("id = ?", mqttBrokerId).Find(&mqttBrokerEntity).Error
+		Where("id = ?", mqttBrokerId).Find(&mqttBrokerEntity).Error
 
 	return &mqttBrokerEntity, err
 }
@@ -74,5 +72,5 @@ func (mqttBrokerRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB,
 }
 
 func (mqttBrokerRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.MqttBroker{}).Where("id = ?", id).Delete(entity.MqttBroker{}).Error
+	return gormTransaction.Model(entity.MqttBroker{}).Where("id = ?", id).Delete(&entity.MqttBroker{}).Error
 }

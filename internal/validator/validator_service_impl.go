@@ -9,6 +9,7 @@ import (
 
 	universalTranslator "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"github.com/sirupsen/logrus"
 )
 
 type ServiceImpl struct {
@@ -51,6 +52,7 @@ func (validatorService *ServiceImpl) ParseValidationError(validationError error,
 
 			parsedMap[fieldJSON] = cleanMessage
 		}
+		logrus.Debug(parsedMap)
 		panic(exception.NewApplicationErrorSpecific(http.StatusBadRequest, exception.StatusValidationError, exception.MsgValidationError, parsedMap))
 	}
 }

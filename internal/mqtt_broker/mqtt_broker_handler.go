@@ -32,8 +32,8 @@ func (mqttBrokerHandler *Handler) FindAllMqttBrokerPagination(ginContext *gin.Co
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	mqttBrokerResponses := mqttBrokerHandler.mqttBrokerService.FindAllPagination(&paginationReq)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MqttBroker has been fetched", mqttBrokerResponses))
+	paginatedResponse := mqttBrokerHandler.mqttBrokerService.FindAllPagination(&paginationReq)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (mqttBrokerHandler *Handler) CreateMqttBroker(ginContext *gin.Context) {
@@ -48,8 +48,12 @@ func (mqttBrokerHandler *Handler) UpdateMqttBroker(ginContext *gin.Context) {
 	var updateMqttBrokerModel model.UpdateMqttBrokerRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateMqttBrokerModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	mqttBrokerHandler.mqttBrokerService.Update(ginContext, &updateMqttBrokerModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MqttBroker has been created", nil))
+	mqttBrokerId := ginContext.Param("id")
+	parsedMqttBrokerId, err := strconv.ParseUint(mqttBrokerId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	updateMqttBrokerModel.Id = parsedMqttBrokerId
+	paginatedResponse := mqttBrokerHandler.mqttBrokerService.Update(ginContext, &updateMqttBrokerModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (mqttBrokerHandler *Handler) DeleteMqttBroker(ginContext *gin.Context) {
@@ -61,6 +65,6 @@ func (mqttBrokerHandler *Handler) DeleteMqttBroker(ginContext *gin.Context) {
 	err = ginContext.ShouldBindBodyWithJSON(&deleteMqttBrokerModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteMqttBrokerModel.Id = parsedMqttBrokerId
-	mqttBrokerHandler.mqttBrokerService.Delete(ginContext, &deleteMqttBrokerModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))
+	paginatedResponse := mqttBrokerHandler.mqttBrokerService.Delete(ginContext, &deleteMqttBrokerModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
