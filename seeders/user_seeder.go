@@ -1,12 +1,9 @@
 package seeders
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/trait"
-	"strings"
 
-	"github.com/jaswdr/faker/v2"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -14,40 +11,66 @@ import (
 type UserSeeder struct{}
 
 func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
-	fakerInstance := faker.New()
-	for i := 0; i < 10; i++ {
-		// Generate fake data
-		fullName := fakerInstance.Person().Name()
-		firstName := fakerInstance.Person().FirstName()
-		lastName := fakerInstance.Person().LastName()
+	gormDatabase.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
 
-		username := fmt.Sprintf("%s_%s", strings.ToLower(firstName), strings.ToLower(lastName))
-		email := fakerInstance.Internet().Email()
+	gormDatabase.Model(&entity.User{}).Create(&entity.User{
+		RoleId:     1,
+		Username:   "admin",
+		Name:       "Administrator",
+		Email:      "admin@gmail.com",
+		Password:   string(hashedPassword),
+		AvatarPath: "",
+		Status:     trait.UserStatusActive,
+		Auditable:  entity.NewAuditable("Administrator"),
+	})
+	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("mngr"), bcrypt.DefaultCost)
 
-		// Hash default password "password123"
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
-		if err != nil {
-			return err
-		}
+	gormDatabase.Model(&entity.User{}).Create(&entity.User{
+		RoleId:     2,
+		Username:   "mngr",
+		Name:       "Manager",
+		Email:      "mngr@gmail.com",
+		Password:   string(hashedPassword),
+		AvatarPath: "",
+		Status:     trait.UserStatusActive,
+		Auditable:  entity.NewAuditable("Administrator"),
+	})
+	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("spv"), bcrypt.DefaultCost)
 
-		userEntity := entity.User{
-			Username:   username,
-			Name:       fullName,
-			Email:      email,
-			Password:   string(hashedPassword),
-			AvatarPath: "",
-			RoleId:     1,
-			Status:     trait.UserStatusActive,
-			Auditable:  entity.NewAuditable("Seeder"),
-		}
+	gormDatabase.Model(&entity.User{}).Create(&entity.User{
+		RoleId:     3,
+		Username:   "spv",
+		Name:       "Supervisor",
+		Email:      "supervisor@gmail.com",
+		Password:   string(hashedPassword),
+		AvatarPath: "",
+		Status:     trait.UserStatusActive,
+		Auditable:  entity.NewAuditable("Administrator"),
+	})
+	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("mtn"), bcrypt.DefaultCost)
 
-		// Insert into DB
-		if err := gormDatabase.Create(&userEntity).Error; err != nil {
-			return err
-		}
+	gormDatabase.Model(&entity.User{}).Create(&entity.User{
+		RoleId:     4,
+		Username:   "mtn",
+		Name:       "Maintenance",
+		Email:      "maintenance@gmail.com",
+		Password:   string(hashedPassword),
+		AvatarPath: "",
+		Status:     trait.UserStatusActive,
+		Auditable:  entity.NewAuditable("Administrator"),
+	})
+	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("oprt"), bcrypt.DefaultCost)
 
-		fmt.Printf("Inserted user: %s (%s)\n", userEntity.Name, userEntity.Email)
-	}
-
+	gormDatabase.Model(&entity.User{}).Create(&entity.User{
+		RoleId:     5,
+		Username:   "oprt",
+		Name:       "Operator",
+		Email:      "operator@gmail.com",
+		Password:   string(hashedPassword),
+		AvatarPath: "",
+		Status:     trait.UserStatusActive,
+		Auditable:  entity.NewAuditable("Administrator"),
+	})
 	return nil
 }
