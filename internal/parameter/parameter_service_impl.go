@@ -48,6 +48,23 @@ func (parameterService *ServiceImpl) FindAll() []*model.ParameterResponse {
 	return parameterResponsesRequest
 }
 
+func (parameterService *ServiceImpl) FindDependencyParameter() *model.ParameterDependency {
+	var parameterDependency = &model.ParameterDependency{}
+	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var machineEntities []entity.Machine
+		var mqttTopicEntities []entity.MqttTopic
+		err := gormTransaction.Find(&machineEntities).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		err = gormTransaction.Find(&mqttTopicEntities).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		parameterDependency.MachineResponses = helper.MapEntitiesIntoResponses[entity.Machine, model.MachineResponse](machineEntities)
+		parameterDependency.MqttTopicResponses = helper.MapEntitiesIntoResponses[entity.MqttTopic, model.MqttTopicResponse](mqttTopicEntities)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return parameterDependency
+}
+
 func (parameterService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.ParameterResponse] {
 	paginationQuery := helper.BuildPaginationQuery(paginationReq)
 	var parameterResponses []*model.ParameterResponse

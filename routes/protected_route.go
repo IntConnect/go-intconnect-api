@@ -152,6 +152,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	parameterRouterGroup := routerGroup.Group("parameters")
 	parameterRouterGroup.GET("pagination", protectedRoutes.parameterController.FindAllParameterPagination)
 	parameterRouterGroup.GET("", protectedRoutes.parameterController.FindAllParameter)
+	parameterRouterGroup.GET("/create", protectedRoutes.parameterController.FindDependencyParameter)
 	parameterRouterGroup.POST("", protectedRoutes.parameterController.CreateParameter)
 	parameterRouterGroup.PUT("", protectedRoutes.parameterController.UpdateParameter)
 	parameterRouterGroup.DELETE("", protectedRoutes.parameterController.DeleteParameter)

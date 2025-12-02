@@ -12,4 +12,5 @@ type Service interface {
 	Create(ginContext *gin.Context, createParameterRequest *model.CreateParameterRequest) *model.PaginatedResponse[*model.ParameterResponse]
 	Update(ginContext *gin.Context, updateParameterRequest *model.UpdateParameterRequest)
 	Delete(ginContext *gin.Context, deleteParameterRequest *model.DeleteResourceGeneralRequest)
+	FindDependencyParameter() *model.ParameterDependency
 }

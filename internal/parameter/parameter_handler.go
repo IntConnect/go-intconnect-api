@@ -28,6 +28,11 @@ func (parameterHandler *Handler) FindAllParameter(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameters has been fetched", parameterResponses))
 }
 
+func (parameterHandler *Handler) FindDependencyParameter(ginContext *gin.Context) {
+	parameterResponses := parameterHandler.parameterService.FindDependencyParameter()
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Parameters has been fetched", parameterResponses))
+}
+
 func (parameterHandler *Handler) FindAllParameterPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
