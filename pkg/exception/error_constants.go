@@ -34,8 +34,7 @@ const (
 
 	// Authentication & Authorization
 	ErrInvalidCredentials     = "Invalid credentials"
-	ErrTokenExpired           = "Token has expired"
-	ErrTokenInvalid           = "Invalid token"
+	ErrTokenExpiredOrInvalid  = "Token expired or invalid"
 	ErrInsufficientPermission = "Insufficient permission"
 	ErrAccountLocked          = "Account is locked"
 	ErrAccountNotActivated    = "Account is not activated"

@@ -24,7 +24,7 @@ func NewHandler(roleService Service, viperConfig *viper.Viper) *Handler {
 }
 
 func (roleHandler *Handler) FindAllRole(ginContext *gin.Context) {
-	roleResponses := roleHandler.roleService.FindAll()
+	roleResponses := roleHandler.roleService.FindAll(ginContext)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been fetched", roleResponses))
 }
 

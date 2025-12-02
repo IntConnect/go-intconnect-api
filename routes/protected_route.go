@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
@@ -37,6 +38,7 @@ type ProtectedRoutes struct {
 	mqttTopicController              mqttTopic.Controller
 	reportDocumentTemplateController reportDocumentTemplate.Controller
 	auditLogController               auditLog.Controller
+	redisInstance                    *configs.RedisInstance
 }
 
 func NewProtectedRoutes(
@@ -55,6 +57,8 @@ func NewProtectedRoutes(
 	parameterController parameter.Controller,
 	mqttTopicController mqttTopic.Controller, reportDocumentTemplateController reportDocumentTemplate.Controller,
 	auditLogController auditLog.Controller,
+	redisInstance *configs.RedisInstance,
+
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -73,11 +77,12 @@ func NewProtectedRoutes(
 		mqttTopicController:              mqttTopicController,
 		reportDocumentTemplateController: reportDocumentTemplateController,
 		auditLogController:               auditLogController,
+		redisInstance:                    redisInstance,
 	}
 }
 
 func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
-	routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig))
+	routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig, protectedRoutes.redisInstance))
 	userRouterGroup := routerGroup.Group("users")
 	userRouterGroup.GET("pagination", protectedRoutes.userController.FindAllUserPagination)
 	userRouterGroup.GET("", protectedRoutes.userController.FindAllUser)

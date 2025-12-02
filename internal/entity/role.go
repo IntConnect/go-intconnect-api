@@ -1,9 +1,10 @@
 package entity
 
 type Role struct {
-	Id          uint64 `gorm:"column:id;primaryKey;autoIncrement"`
-	Name        string `gorm:"column:name"`
-	Description string `gorm:"column:description"`
+	Id          uint64       `gorm:"column:id;primaryKey;autoIncrement"`
+	Name        string       `gorm:"column:name"`
+	Description string       `gorm:"column:description"`
+	Permissions []Permission `gorm:"many2many:roles_permissions;joinForeignKey:RoleId;joinReferences:PermissionId"`
 	Auditable
 }
 

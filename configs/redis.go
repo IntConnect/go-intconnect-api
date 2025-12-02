@@ -15,7 +15,7 @@ type RedisConfig struct {
 }
 
 type RedisInstance struct {
-	redisClient  *redis.Client
+	RedisClient  *redis.Client
 	redisContext context.Context
 }
 
@@ -33,17 +33,17 @@ func InitRedisInstance(redisConfig RedisConfig) (*RedisInstance, error) {
 	}
 
 	return &RedisInstance{
-		redisClient:  redisDatabase,
+		RedisClient:  redisDatabase,
 		redisContext: redisContext,
 	}, nil
 }
 
 func (redisInstance *RedisInstance) Publish(topic string, message string) error {
-	if redisInstance.redisClient == nil {
+	if redisInstance.RedisClient == nil {
 		return fmt.Errorf("redis client is not initialized")
 	}
 
-	err := redisInstance.redisClient.Publish(redisInstance.redisContext, topic, message).Err()
+	err := redisInstance.RedisClient.Publish(redisInstance.redisContext, topic, message).Err()
 	if err != nil {
 		return fmt.Errorf("failed to publish message to topic '%s': %w", topic, err)
 	}

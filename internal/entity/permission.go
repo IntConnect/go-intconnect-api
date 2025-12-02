@@ -6,6 +6,7 @@ type Permission struct {
 	Name        string `gorm:"column:name"`
 	Category    string `gorm:"column:category"`
 	Description string `gorm:"column:description"`
+	Roles       []Role `gorm:"many2many:roles_permissions;joinForeignKey:PermissionId;joinReferences:RoleId"`
 	Auditable
 }
 

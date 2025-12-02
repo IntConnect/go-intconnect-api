@@ -27,7 +27,8 @@ type ServiceImpl struct {
 
 func NewService(roleRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper, permissionRepository permission.Repository,
-	auditLogService auditLog.Service) *ServiceImpl {
+	auditLogService auditLog.Service,
+) *ServiceImpl {
 	return &ServiceImpl{
 		roleRepository:       roleRepository,
 		validatorService:     validatorService,
@@ -38,11 +39,24 @@ func NewService(roleRepository Repository, validatorService validator.Service, d
 	}
 }
 
-func (roleService *ServiceImpl) FindAll() []*model.RoleResponse {
+func (roleService *ServiceImpl) FindAll(ginContext *gin.Context) []*model.RoleResponse {
 	var roleResponsesRequest []*model.RoleResponse
-	err := roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		roleEntities, err := roleService.roleRepository.FindAll(gormTransaction)
+	backgroundContext := ginContext.Request.Context()
+	roleEntities, err := roleService.roleRepository.FindAllCache(backgroundContext)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
+	if roleEntities != nil && len(roleEntities) > 0 {
+		roleResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
+			entity.Role,
+			*model.RoleResponse,
+		](roleEntities, mapper.FuncMapAuditable)
+		return roleResponsesRequest
+	}
+	err = roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+
+		roleEntities, err = roleService.roleRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		err = roleService.roleRepository.SetAll(backgroundContext, roleEntities)
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
 		roleResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
 			entity.Role,
 			*model.RoleResponse,
@@ -69,10 +83,11 @@ func (roleService *ServiceImpl) Create(ginContext *gin.Context, createRoleReques
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = roleService.roleRepository.Create(gormTransaction, roleEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	backgroundContext := ginContext.Request.Context()
+	_ = roleService.roleRepository.DeleteAll(backgroundContext)
 }
 
 func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleRequest *model.UpdateRoleRequest) {
@@ -87,6 +102,8 @@ func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleReques
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	backgroundContext := ginContext.Request.Context()
+	_ = roleService.roleRepository.DeleteAll(backgroundContext)
 }
 
 func (roleService *ServiceImpl) Delete(ginContext *gin.Context, deleteRoleRequest *model.DeleteResourceGeneralRequest) {
@@ -108,4 +125,6 @@ func (roleService *ServiceImpl) Delete(ginContext *gin.Context, deleteRoleReques
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	backgroundContext := ginContext.Request.Context()
+	_ = roleService.roleRepository.DeleteAll(backgroundContext)
 }

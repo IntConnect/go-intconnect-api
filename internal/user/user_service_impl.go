@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -27,11 +29,13 @@ type ServiceImpl struct {
 	dbConnection     *gorm.DB
 	viperConfig      *viper.Viper
 	loggerInstance   *logrus.Logger
+	redisInstance    *configs.RedisInstance
 }
 
 func NewService(userRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper, loggerInstance *logrus.Logger,
 	auditLogService auditLog.Service,
+	redisInstance *configs.RedisInstance,
 ) *ServiceImpl {
 	return &ServiceImpl{
 		userRepository:   userRepository,
@@ -40,6 +44,7 @@ func NewService(userRepository Repository, validatorService validator.Service, d
 		viperConfig:      viperConfig,
 		loggerInstance:   loggerInstance,
 		auditLogService:  auditLogService,
+		redisInstance:    redisInstance,
 	}
 }
 
@@ -138,6 +143,14 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 			userJwtClaim := helper.MapCreateRequestIntoEntity[jwt.MapClaims, *model.JwtClaimRequest](&claims)
 			ginContext.Set("claims", userJwtClaim)
 		}
+		redisKey := fmt.Sprintf("auth:token:%d", userEntity.Id)
+		err = userService.redisInstance.RedisClient.Set(
+			ginContext.Request.Context(),
+			redisKey,
+			tokenString,
+			time.Hour*time.Duration(jwtHour),
+		).Err()
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
 		userService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
 			UserId:      userEntity.Id,
 			Action:      model.AUDIT_LOG_LOGIN,
