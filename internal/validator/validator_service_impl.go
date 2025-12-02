@@ -94,7 +94,10 @@ func getJSONFieldName(structType reflect.Type, fieldName string) string {
 
 	jsonTag := field.Tag.Get("json")
 	if jsonTag == "" {
-		return fieldName
+		jsonTag = field.Tag.Get("form")
+		if jsonTag == "" {
+			return fieldName
+		}
 	}
 
 	// json tag bisa seperti "username,omitempty", ambil sebelum koma

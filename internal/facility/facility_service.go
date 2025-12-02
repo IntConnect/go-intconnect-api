@@ -7,9 +7,9 @@ import (
 )
 
 type Service interface {
-	Create(ginContext *gin.Context, createFacilityRequest *model.CreateFacilityRequest)
 	FindAll() []*model.FacilityResponse
-	FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.FacilityResponse]
-	Update(ginContext *gin.Context, updateFacilityRequest *model.UpdateFacilityRequest)
-	Delete(ginContext *gin.Context, deleteFacilityRequest *model.DeleteFacilityRequest)
+	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.FacilityResponse]
+	Create(ginContext *gin.Context, createFacilityRequest *model.CreateFacilityRequest) *model.PaginatedResponse[*model.FacilityResponse]
+	Update(ginContext *gin.Context, updateFacilityRequest *model.UpdateFacilityRequest) *model.PaginatedResponse[*model.FacilityResponse]
+	Delete(ginContext *gin.Context, deleteFacilityRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.FacilityResponse]
 }

@@ -24,26 +24,41 @@ func (facilityRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gor
 	return facilityEntities, err
 }
 
-func (facilityRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Facility, int64, error) {
+func (facilityRepositoryImpl *RepositoryImpl) FindAllPagination(
+	gormTransaction *gorm.DB,
+	orderClause string,
+	offsetVal, limitPage int,
+	searchQuery string,
+) ([]entity.Facility, int64, error) {
+
 	var facilityEntities []entity.Facility
 	var totalItems int64
 
-	if searchQuery != "" {
-		// Add search condition
-		searchPattern := "%" + searchQuery + "%"
-		gormTransaction = gormTransaction.Where("facilityname LIKE ? OR email LIKE ?  OR password = ?", searchPattern, searchPattern, searchPattern)
+	// Base query
+	rawQuery := gormTransaction.Model(&entity.Facility{})
 
+	// Search
+	if searchQuery != "" {
+		searchPattern := "%" + searchQuery + "%"
+		rawQuery = rawQuery.Where("name ILIKE ? OR code ILIKE ? OR description ILIKE ? OR location ILIKE ?", searchPattern, searchPattern, searchPattern, searchPattern)
 	}
 
-	// Count total items
-	err := gormTransaction.Model(&entity.Facility{}).
-		Preload("FacilityGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Order(orderClause).Offset(offsetVal).Limit(limitPage).Find(&facilityEntities).Error
-	gormTransaction.Model(&entity.Facility{}).Count(&totalItems)
-	return facilityEntities, totalItems, err
-}
+	// Count first
+	if err := rawQuery.Count(&totalItems).Error; err != nil {
+		return nil, 0, err
+	}
 
+	// Fetch paginated data
+	if err := rawQuery.Order(orderClause).
+		Offset(offsetVal).
+		Limit(limitPage).
+		Where("deleted_at IS NULL").
+		Find(&facilityEntities).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return facilityEntities, totalItems, nil
+}
 func (facilityRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, facilityId uint64) (*entity.Facility, error) {
 	var facilityEntity entity.Facility
 	err := gormTransaction.Model(&entity.Facility{}).

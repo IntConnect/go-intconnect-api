@@ -1,12 +1,17 @@
 package facility
 
 import (
+	"fmt"
+	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/storage"
+	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
-	"math"
+	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -14,19 +19,22 @@ import (
 )
 
 type ServiceImpl struct {
-	facilityRepository Repository
-	validatorService   validator.Service
-	dbConnection       *gorm.DB
-	viperConfig        *viper.Viper
+	facilityRepository  Repository
+	validatorService    validator.Service
+	dbConnection        *gorm.DB
+	viperConfig         *viper.Viper
+	localStorageService *storage.Manager
 }
 
 func NewService(facilityRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper) *ServiceImpl {
+	viperConfig *viper.Viper,
+	localStorageService *storage.Manager) *ServiceImpl {
 	return &ServiceImpl{
-		facilityRepository: facilityRepository,
-		validatorService:   validatorService,
-		dbConnection:       dbConnection,
-		viperConfig:        viperConfig,
+		facilityRepository:  facilityRepository,
+		validatorService:    validatorService,
+		dbConnection:        dbConnection,
+		viperConfig:         viperConfig,
+		localStorageService: localStorageService,
 	}
 }
 
@@ -42,46 +50,63 @@ func (facilityService *ServiceImpl) FindAll() []*model.FacilityResponse {
 	return facilityResponsesRequest
 }
 
-func (facilityService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) model.PaginationResponse[*model.FacilityResponse] {
-	paginationResp := model.PaginationResponse[*model.FacilityResponse]{}
-	offsetVal := (paginationReq.Page - 1) * paginationReq.Size
-	orderClause := paginationReq.Sort
-	if paginationReq.Order != "" {
-		orderClause += " " + paginationReq.Order
-	}
-	var allFacility []*model.FacilityResponse
+func (facilityService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.FacilityResponse] {
+	paginationQuery := helper.BuildPaginationQuery(paginationReq)
+	var facilityResponses []*model.FacilityResponse
+	var totalItems int64
+
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		facilityEntities, totalItems, err := facilityService.facilityRepository.FindAllPagination(gormTransaction, orderClause, offsetVal, paginationReq.Size, paginationReq.SearchQuery)
-		totalPages := int(math.Ceil(float64(totalItems) / float64(paginationReq.Size)))
-		allFacility = mapper.MapFacilityEntitiesIntoFacilityResponses(facilityEntities)
-		paginationResp = model.PaginationResponse[*model.FacilityResponse]{
-			Data:        allFacility,
-			TotalItems:  totalItems,
-			TotalPages:  totalPages,
-			CurrentPage: paginationReq.Page,
-		}
+		facilityEntities, total, err := facilityService.facilityRepository.FindAllPagination(
+			gormTransaction,
+			paginationQuery.OrderClause,
+			paginationQuery.Offset,
+			paginationQuery.Limit,
+			paginationQuery.SearchQuery,
+		)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+		facilityResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Facility, *model.FacilityResponse](
+			facilityEntities,
+			mapper.FuncMapAuditable,
+		)
+		totalItems = total
+
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
+	return helper.NewPaginatedResponseFromResult(
+		"Facilities fetched successfully",
+		facilityResponses,
+		paginationReq,
+		totalItems,
+	)
 }
 
 // Create - Membuat facility baru
-func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacilityRequest *model.CreateFacilityRequest) {
+func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacilityRequest *model.CreateFacilityRequest) *model.PaginatedResponse[*model.FacilityResponse] {
+	var paginationResp *model.PaginatedResponse[*model.FacilityResponse]
 	valErr := facilityService.validatorService.ValidateStruct(createFacilityRequest)
 	facilityService.validatorService.ParseValidationError(valErr, *createFacilityRequest)
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		facilityEntity := mapper.MapCreateFacilityRequestIntoFacilityEntity(createFacilityRequest)
+		facilityEntity := helper.MapCreateRequestIntoEntity[model.CreateFacilityRequest, entity.Facility](createFacilityRequest)
+		facilityEntity.Status = trait.FacilityStatusActive
 		err := facilityService.facilityRepository.Create(gormTransaction, facilityEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		thumbnailPath, err := facilityService.localStorageService.Disk().Put(createFacilityRequest.ThumbnailHeader, fmt.Sprintf("facilities/thumbnails/%d-%s", time.Now().UnixNano(), createFacilityRequest.ThumbnailHeader.Filename))
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+		facilityEntity.ThumbnailPath = thumbnailPath
 
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = facilityService.FindAllPagination(&paginationRequest)
+	return paginationResp
 }
 
-func (facilityService *ServiceImpl) Update(ginContext *gin.Context, updateFacilityRequest *model.UpdateFacilityRequest) {
+func (facilityService *ServiceImpl) Update(ginContext *gin.Context, updateFacilityRequest *model.UpdateFacilityRequest) *model.PaginatedResponse[*model.FacilityResponse] {
+	var paginationResp *model.PaginatedResponse[*model.FacilityResponse]
 	valErr := facilityService.validatorService.ValidateStruct(updateFacilityRequest)
 	facilityService.validatorService.ParseValidationError(valErr, *updateFacilityRequest)
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -93,9 +118,13 @@ func (facilityService *ServiceImpl) Update(ginContext *gin.Context, updateFacili
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = facilityService.FindAllPagination(&paginationRequest)
+	return paginationResp
 }
 
-func (facilityService *ServiceImpl) Delete(ginContext *gin.Context, deleteFacilityRequest *model.DeleteFacilityRequest) {
+func (facilityService *ServiceImpl) Delete(ginContext *gin.Context, deleteFacilityRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.FacilityResponse] {
+	var paginationResp *model.PaginatedResponse[*model.FacilityResponse]
 	valErr := facilityService.validatorService.ValidateStruct(deleteFacilityRequest)
 	facilityService.validatorService.ParseValidationError(valErr, *deleteFacilityRequest)
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -105,4 +134,7 @@ func (facilityService *ServiceImpl) Delete(ginContext *gin.Context, deleteFacili
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = facilityService.FindAllPagination(&paginationRequest)
+	return paginationResp
 }
