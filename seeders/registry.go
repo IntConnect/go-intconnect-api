@@ -6,9 +6,10 @@ import (
 
 // Map nama seeder → struct
 var SeederRegistry = map[string]Seeder{
-	"PermissionSeeder": &PermissionSeeder{},
-	"UserSeeder":       &UserSeeder{},
-	"RoleSeeder":       &RoleSeeder{},
+	"PermissionSeeder":     &PermissionSeeder{},
+	"UserSeeder":           &UserSeeder{},
+	"RoleSeeder":           &RoleSeeder{},
+	"RolePermissionSeeder": &RolePermissionSeeder{},
 }
 
 // Ambil seeder dari nama

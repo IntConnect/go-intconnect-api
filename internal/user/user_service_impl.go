@@ -120,6 +120,7 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userEntity entity.User
 		err = gormTransaction.
+			Preload("Role").
 			Where("email = ?", loginUserRequest.UserIdentifier).
 			Or("username = ?", loginUserRequest.UserIdentifier).
 			First(&userEntity).Error
@@ -132,10 +133,13 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 			jwtHour = 72
 		}
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"id":       userEntity.Id,
-			"email":    userEntity.Email,
-			"username": userEntity.Username,
-			"exp":      time.Now().Add(time.Hour * time.Duration(jwtHour)).Unix(),
+			"id":        userEntity.Id,
+			"email":     userEntity.Email,
+			"username":  userEntity.Username,
+			"name":      userEntity.Name,
+			"role_id":   userEntity.RoleId,
+			"role_name": userEntity.Role.Name,
+			"exp":       time.Now().Add(time.Hour * time.Duration(jwtHour)).Unix(),
 		})
 		tokenString, err = tokenInstance.SignedString([]byte(userService.viperConfig.GetString("JWT_SECRET")))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))

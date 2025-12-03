@@ -55,7 +55,11 @@ func (roleService *ServiceImpl) FindAll(ginContext *gin.Context) []*model.RoleRe
 
 		roleEntities, err = roleService.roleRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		err = roleService.roleRepository.SetAll(backgroundContext, roleEntities)
+		err = roleService.roleRepository.SetAllCache(backgroundContext, roleEntities)
+		for _, roleEntity := range roleEntities {
+			err = roleService.roleRepository.SetByIdCache(ginContext.Request.Context(), roleEntity.Id, &roleEntity)
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
+		}
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
 		roleResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
 			entity.Role,
@@ -72,6 +76,7 @@ func (roleService *ServiceImpl) FindAll(ginContext *gin.Context) []*model.RoleRe
 
 // Create - Membuat role baru
 func (roleService *ServiceImpl) Create(ginContext *gin.Context, createRoleRequest *model.CreateRoleRequest) {
+	var processedId uint64
 	valErr := roleService.validatorService.ValidateStruct(createRoleRequest)
 	roleService.validatorService.ParseValidationError(valErr, *createRoleRequest)
 	err := roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -82,31 +87,40 @@ func (roleService *ServiceImpl) Create(ginContext *gin.Context, createRoleReques
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = roleService.roleRepository.Create(gormTransaction, roleEntity)
+		processedId = roleEntity.Id
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	backgroundContext := ginContext.Request.Context()
-	_ = roleService.roleRepository.DeleteAll(backgroundContext)
+
+	_ = roleService.roleRepository.DeleteByIdCache(backgroundContext, processedId)
+	_ = roleService.roleRepository.DeleteAllCache(backgroundContext)
 }
 
 func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleRequest *model.UpdateRoleRequest) {
+	var processedId uint64
+
 	valErr := roleService.validatorService.ValidateStruct(updateRoleRequest)
 	roleService.validatorService.ParseValidationError(valErr, *updateRoleRequest)
 	err := roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		role, err := roleService.roleRepository.FindById(gormTransaction, updateRoleRequest.Id)
+		roleEntity, err := roleService.roleRepository.FindById(gormTransaction, updateRoleRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		helper.MapUpdateRequestIntoEntity[*model.UpdateRoleRequest, entity.Role](updateRoleRequest, role)
-		err = roleService.roleRepository.Update(gormTransaction, role)
+		helper.MapUpdateRequestIntoEntity[*model.UpdateRoleRequest, entity.Role](updateRoleRequest, roleEntity)
+		err = roleService.roleRepository.Update(gormTransaction, roleEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		processedId = roleEntity.Id
+
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	backgroundContext := ginContext.Request.Context()
-	_ = roleService.roleRepository.DeleteAll(backgroundContext)
+	_ = roleService.roleRepository.DeleteByIdCache(backgroundContext, processedId)
+	_ = roleService.roleRepository.DeleteAllCache(backgroundContext)
 }
 
 func (roleService *ServiceImpl) Delete(ginContext *gin.Context, deleteRoleRequest *model.DeleteResourceGeneralRequest) {
+	var processedId uint64
 	userClaim := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := roleService.validatorService.ValidateStruct(deleteRoleRequest)
 	roleService.validatorService.ParseValidationError(valErr, *deleteRoleRequest)
@@ -114,17 +128,46 @@ func (roleService *ServiceImpl) Delete(ginContext *gin.Context, deleteRoleReques
 		err := roleService.roleRepository.Delete(gormTransaction, deleteRoleRequest.Id)
 		roleService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
 			UserId:      userClaim.Id,
-			Action:      "",
-			Feature:     "",
-			Description: "",
+			Action:      model.AUDIT_LOG_DELETE,
+			Feature:     model.AUDIT_LOG_FEATURE_ROLE,
+			Description: deleteRoleRequest.Reason,
 			Before:      nil,
 			After:       nil,
 			IpAddress:   "",
 		})
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		processedId = deleteRoleRequest.Id
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	backgroundContext := ginContext.Request.Context()
-	_ = roleService.roleRepository.DeleteAll(backgroundContext)
+	_ = roleService.roleRepository.DeleteByIdCache(backgroundContext, processedId)
+	_ = roleService.roleRepository.DeleteAllCache(backgroundContext)
+}
+
+func (roleService *ServiceImpl) FindById(ginContext *gin.Context, roleId uint64) *model.RoleResponse {
+	var roleResponse *model.RoleResponse
+	backgroundContext := ginContext.Request.Context()
+	err := roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		roleEntity, err := roleService.roleRepository.FindRoleCacheById(backgroundContext, roleId)
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
+		if roleEntity != nil {
+			roleResponse = helper.MapEntityIntoResponse[
+				*entity.Role,
+				*model.RoleResponse,
+			](roleEntity, mapper.FuncMapAuditable)
+			return nil
+		}
+		roleEntity, err = roleService.roleRepository.FindById(gormTransaction, roleId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		roleResponse = helper.MapEntityIntoResponse[
+			*entity.Role,
+			*model.RoleResponse,
+		](roleEntity, mapper.FuncMapAuditable)
+		err = roleService.roleRepository.SetByIdCache(backgroundContext, roleId, roleEntity)
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return roleResponse
 }

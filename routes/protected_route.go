@@ -31,6 +31,7 @@ type ProtectedRoutes struct {
 	databaseConnectionController     databaseConnection.Controller
 	facilityController               facility.Controller
 	roleController                   role.Controller
+	roleService                      role.Service
 	permissionController             permission.Controller
 	mqttBrokerController             mqttBroker.Controller
 	machineController                machine.Controller
@@ -58,6 +59,7 @@ func NewProtectedRoutes(
 	mqttTopicController mqttTopic.Controller, reportDocumentTemplateController reportDocumentTemplate.Controller,
 	auditLogController auditLog.Controller,
 	redisInstance *configs.RedisInstance,
+	roleService role.Service,
 
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
@@ -78,17 +80,18 @@ func NewProtectedRoutes(
 		reportDocumentTemplateController: reportDocumentTemplateController,
 		auditLogController:               auditLogController,
 		redisInstance:                    redisInstance,
+		roleService:                      roleService,
 	}
 }
 
 func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
-	routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig, protectedRoutes.redisInstance))
+	routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig, protectedRoutes.redisInstance, protectedRoutes.roleService))
 	userRouterGroup := routerGroup.Group("users")
-	userRouterGroup.GET("pagination", protectedRoutes.userController.FindAllUserPagination)
-	userRouterGroup.GET("", protectedRoutes.userController.FindAllUser)
-	userRouterGroup.POST("", protectedRoutes.userController.CreateUser)
-	userRouterGroup.PUT("/:id", protectedRoutes.userController.UpdateUser)
-	userRouterGroup.DELETE("/:id", protectedRoutes.userController.DeleteUser)
+	userRouterGroup.GET("pagination", protectedRoutes.userController.FindAllUserPagination, middleware.HasPermission("USER_VIEW"))
+	userRouterGroup.GET("", protectedRoutes.userController.FindAllUser, middleware.HasPermission("USER_VIEW"))
+	userRouterGroup.POST("", protectedRoutes.userController.CreateUser, middleware.HasPermission("USER_CREATE"))
+	userRouterGroup.PUT("/:id", protectedRoutes.userController.UpdateUser, middleware.HasPermission("USER_UPDATE"))
+	userRouterGroup.DELETE("/:id", protectedRoutes.userController.DeleteUser, middleware.HasPermission("USER_DELETE"))
 
 	nodeRouterGroup := routerGroup.Group("nodes")
 	nodeRouterGroup.GET("pagination", protectedRoutes.nodeController.FindAllPagination)
@@ -99,7 +102,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 
 	pipelineRouterGroup := routerGroup.Group("pipelines")
 	pipelineRouterGroup.GET("pagination", protectedRoutes.pipelineController.FindAllPagination)
-	pipelineRouterGroup.GET("", protectedRoutes.pipelineController.FindAll)
+	pipelineRouterGroup.GET("", protectedRoutes.pipelineController.FindAll, middleware.HasPermission("PIPELINE_VIEW"))
 	pipelineRouterGroup.GET("/:id", protectedRoutes.pipelineController.FindById)
 	pipelineRouterGroup.POST("", protectedRoutes.pipelineController.CreatePipeline)
 	pipelineRouterGroup.GET("/run/:id", protectedRoutes.pipelineController.RunPipeline)

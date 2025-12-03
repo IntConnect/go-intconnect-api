@@ -13,10 +13,11 @@ type UpdateRoleRequest struct {
 }
 
 type RoleResponse struct {
-	Id                uint64             `json:"id" `
-	Name              string             `json:"name" `
-	Description       string             `json:"description"`
-	AuditableResponse *AuditableResponse `json:"auditable_response"`
+	Id                uint64               `json:"id" `
+	Name              string               `json:"name" `
+	Description       string               `json:"description"`
+	Permissions       []PermissionResponse `json:"permissions"`
+	AuditableResponse *AuditableResponse   `json:"auditable_response"`
 }
 
 func (roleResponse *RoleResponse) GetAuditableResponse() *AuditableResponse {

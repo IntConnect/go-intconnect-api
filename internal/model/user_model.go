@@ -3,12 +3,13 @@ package model
 import "go-intconnect-api/internal/trait"
 
 type JwtClaimRequest struct {
-	Id         uint64 `json:"id"`
-	Email      string `json:"email"`
-	Username   string `json:"username"`
-	Name       string `json:"name"`
-	Permission string `json:"permission"`
-	Role       string `json:"role"`
+	Id          uint64   `json:"id"`
+	Email       string   `json:"email"`
+	Username    string   `json:"username"`
+	Name        string   `json:"name"`
+	Permissions []string `json:"-"`
+	RoleId      uint64   `json:"role_id" mapstructure:"role_id"`
+	RoleName    string   `json:"role_name" mapstructure:"role_name"`
 }
 
 type UserResponse struct {

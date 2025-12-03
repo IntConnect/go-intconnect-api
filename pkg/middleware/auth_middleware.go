@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-intconnect-api/configs"
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/role"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"net/http"
@@ -16,7 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func AuthMiddleware(viperConfig *viper.Viper, redisConfig *configs.RedisInstance) gin.HandlerFunc {
+func AuthMiddleware(viperConfig *viper.Viper, redisConfig *configs.RedisInstance, roleService role.Service) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		// 1. Ambil token dari header
 		authHeader := ginContext.GetHeader("Authorization")
@@ -56,7 +57,6 @@ func AuthMiddleware(viperConfig *viper.Viper, redisConfig *configs.RedisInstance
 		userId := int64(claims["id"].(float64)) // asumsi "id" selalu ada
 		redisKey := fmt.Sprintf("auth:token:%d", userId)
 		cachedToken, err := redisConfig.RedisClient.Get(context.Background(), redisKey).Result()
-		fmt.Println(err, cachedToken, redisKey, userId)
 		if err == redis.Nil || cachedToken != tokenString {
 			ginContext.JSON(http.StatusUnauthorized, helper.NewErrorResponse("", helper.NewErrorDetail(
 				exception.StatusAuthError, exception.ErrTokenExpiredOrInvalid, nil)))
@@ -72,8 +72,13 @@ func AuthMiddleware(viperConfig *viper.Viper, redisConfig *configs.RedisInstance
 
 		// 4. Set claims di context
 		userJwtClaim := helper.MapCreateRequestIntoEntity[jwt.MapClaims, model.JwtClaimRequest](&claims)
+		roleResponse := roleService.FindById(ginContext, userJwtClaim.RoleId)
+		var permissionCodes []string
+		for _, permissions := range roleResponse.Permissions {
+			permissionCodes = append(permissionCodes, permissions.Code)
+		}
+		userJwtClaim.Permissions = permissionCodes
 		ginContext.Set("claims", userJwtClaim)
-
 		ginContext.Next()
 	}
 }

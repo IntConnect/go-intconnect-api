@@ -81,12 +81,6 @@ FROM users;
 SELECT *
 FROM nodes;
 SELECT *
-FROM audit_logs;
-
-INSERT INTO users (id, username, email, password)
-VALUES (1, 'admin', 'admin@gmail.com', '$2a$12$TyWbaQx6LLW8Ik0ZNjCkbeYcKr96XtaTBsJn8uTxmWM/2FRD5AIPG')
-
-SELECT *
 FROM pipelines;
 SELECT *
 FROM pipeline_nodes;
@@ -102,6 +96,10 @@ SELECT *
 FROM roles;
 SELECT *
 FROM mqtt_brokers;
+SELECT *
+FROM permissions;
+SELECT *
+FROM roles_permissions;
 
 DELETE
 FROM pipeline_edges;
