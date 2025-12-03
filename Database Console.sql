@@ -110,6 +110,8 @@ SELECT *
 FROM roles_permissions;
 SELECT *
 FROM report_document_templates;
+SELECT *
+FROM machines;
 
 DELETE
 FROM pipeline_edges;

@@ -28,7 +28,7 @@ func NewHandler(facilityService Service, viperConfig *viper.Viper) *Handler {
 
 func (facilityHandler *Handler) FindAll(ginContext *gin.Context) {
 	facilityResponses := facilityHandler.facilityService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Facility has been fetched", facilityResponses))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Facility has been fetched", facilityResponses))
 }
 
 func (facilityHandler *Handler) FindAllPagination(ginContext *gin.Context) {

@@ -11,8 +11,8 @@ type CreateMachineRequest struct {
 	ModelOffsetY     float32                        `form:"model_offset_y"`
 	ModelOffsetZ     float32                        `form:"model_offset_z"`
 	ModelScale       float32                        `form:"model_scale"`
-	ModelHeader      *multipart.FileHeader          `form:"model_header" validate:"required,requiredFile,fileExtension=.glb"`
-	ThumbnailHeader  *multipart.FileHeader          `form:"thumbnail_header" validate:"required,requiredFile,fileExtension=.png .jpg"`
+	Model            *multipart.FileHeader          `form:"model" validate:"required,requiredFile,fileExtension=.glb"`
+	Thumbnail        *multipart.FileHeader          `form:"thumbnail" validate:"required,requiredFile,fileExtension=.png .jpg"`
 	MachineDocuments []CreateMachineDocumentRequest `form:"machine_documents" validate:"dive"`
 }
 
@@ -33,15 +33,19 @@ type DeleteMachineRequest struct {
 }
 
 type MachineResponse struct {
-	Id                 uint64                 `json:"id"`
-	Name               string                 `json:"name"`
-	Code               string                 `json:"code"`
-	Description        string                 `json:"description"`
-	Location           string                 `json:"location"`
-	Status             string                 `json:"status"`
-	ThumbnailUrl       string                 `json:"thumbnail_url"`
-	Metadata           map[string]interface{} `json:"metadata"`
-	*AuditableResponse `json:"auditable"`
+	Id                uint64             `json:"id;"`
+	FacilityId        uint64             `json:"facility_id"`
+	Name              string             `json:"name"`
+	Code              string             `json:"code"`
+	Description       string             `json:"description"`
+	ModelOffsetX      float32            `json:"model_offset_x"`
+	ModelOffsetY      float32            `json:"model_offset_y"`
+	ModelOffsetZ      float32            `json:"model_offset_z"`
+	ModelScale        float32            `json:"model_scale"`
+	ThumbnailPath     string             `json:"thumbnail_path"`
+	ModelPath         string             `json:"model_path"`
+	Facility          *FacilityResponse  `json:"facility" mapstructure:"facility"`
+	AuditableResponse *AuditableResponse `json:"auditable" mapstructure:"auditable"`
 }
 
 func (machineResponse *MachineResponse) GetAuditableResponse() *AuditableResponse {

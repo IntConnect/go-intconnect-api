@@ -41,6 +41,7 @@ func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(
 		return nil, 0, err
 	}
 	if err := rawQuery.
+		Preload("Facility").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).

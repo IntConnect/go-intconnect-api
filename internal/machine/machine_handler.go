@@ -40,25 +40,25 @@ func (machineHandler *Handler) FindAllMachinePagination(ginContext *gin.Context)
 }
 
 func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
+
 	var createMachineModel model.CreateMachineRequest
 	err := ginContext.Request.ParseMultipartForm(32 << 20) // 32MB maxMemory
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	err = machineHandler.formDecoder.Decode(&createMachineModel, ginContext.Request.PostForm)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	modelFile, err := ginContext.FormFile("model")
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	thumbnailFile, err := ginContext.FormFile("thumbnail")
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	createMachineModel.ModelHeader = modelFile
-	createMachineModel.ThumbnailHeader = thumbnailFile
+	modelFile, _ := ginContext.FormFile("model")
+	thumbnailFile, _ := ginContext.FormFile("thumbnail")
+	createMachineModel.Model = modelFile
+	createMachineModel.Thumbnail = thumbnailFile
 	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents[", "].document_file", len(createMachineModel.MachineDocuments))
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	for i, machineDocument := range createMachineModel.MachineDocuments {
-
 		machineDocument.DocumentFile = extractIndexedFiles[i]
 		createMachineModel.MachineDocuments[i] = machineDocument
 	}
-	machineHandler.machineService.Create(ginContext, &createMachineModel, modelFile, thumbnailFile)
+	if len(createMachineModel.MachineDocuments) > 0 {
+		machineHandler.machineService.Create(ginContext, &createMachineModel)
+	}
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Machine has been created", nil))
 }
 
