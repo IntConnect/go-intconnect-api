@@ -76,7 +76,7 @@ func (reportDocumentTemplateService *ServiceImpl) FindAllPagination(paginationRe
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return helper.NewPaginatedResponseFromResult(
-		"Permissions fetched successfully",
+		"Report document templates fetched successfully",
 		reportDocumentTemplateResponses,
 		paginationReq,
 		totalItems,
@@ -85,25 +85,25 @@ func (reportDocumentTemplateService *ServiceImpl) FindAllPagination(paginationRe
 
 // Create - Membuat reportDocumentTemplate baru
 func (reportDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Context, createReportDocumentTemplateRequest *model.CreateReportDocumentTemplateRequest) *model.PaginatedResponse[*model.ReportDocumentTemplateResponse] {
-	var paginationResp *model.PaginatedResponse[*model.ReportDocumentTemplateResponse]
 	valErr := reportDocumentTemplateService.validatorService.ValidateStruct(createReportDocumentTemplateRequest)
 	reportDocumentTemplateService.validatorService.ParseValidationError(valErr, *createReportDocumentTemplateRequest)
 	err := reportDocumentTemplateService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		reportDocumentTemplateEntity := helper.MapCreateRequestIntoEntity[model.CreateReportDocumentTemplateRequest, entity.ReportDocumentTemplate](createReportDocumentTemplateRequest)
 		reportDocumentTemplateEntity.Auditable = entity.NewAuditable("Administrator")
-		parameterEntities, err := reportDocumentTemplateService.parameterRepository.FindBatchById(gormTransaction, createReportDocumentTemplateRequest.ParameterId)
-		if len(parameterEntities) != len(createReportDocumentTemplateRequest.ParameterId) {
+		parameterEntities, err := reportDocumentTemplateService.parameterRepository.FindBatchById(gormTransaction, createReportDocumentTemplateRequest.ParameterIds)
+		if len(parameterEntities) != len(createReportDocumentTemplateRequest.ParameterIds) {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrSomeResourceNotFound))
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		reportDocumentTemplateEntity.Parameter = parameterEntities
+		reportDocumentTemplateEntity.Parameters = parameterEntities
 		err = reportDocumentTemplateService.reportDocumentTemplateRepository.Create(gormTransaction, reportDocumentTemplateEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginationResp = reportDocumentTemplateService.FindAllPagination(&paginationRequest)
+
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp := reportDocumentTemplateService.FindAllPagination(&paginationRequest)
 	return paginationResp
 }
 

@@ -10,6 +10,8 @@ var SeederRegistry = map[string]Seeder{
 	"UserSeeder":           &UserSeeder{},
 	"RoleSeeder":           &RoleSeeder{},
 	"RolePermissionSeeder": &RolePermissionSeeder{},
+	"MqttBrokerSeeder":     &MqttBrokerSeeder{},
+	"MqttTopicSeeder":      &MqttTopicSeeder{},
 }
 
 // Ambil seeder dari nama

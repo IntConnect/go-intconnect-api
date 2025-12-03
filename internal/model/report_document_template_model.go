@@ -1,17 +1,18 @@
 package model
 
 type ReportDocumentTemplateResponse struct {
-	Id                uint64              `json:"id"`
-	Name              string              `json:"name" validate:"required,min=3,max=255"`
-	Code              string              `json:"code" validate:"required,min=3,max=255"`
-	ParameterResponse []ParameterResponse `json:"parameters"`
-	AuditableResponse *AuditableResponse  `json:"auditable"`
+	Id                uint64               `json:"id"`
+	Name              string               `json:"name" validate:"required,min=3,max=255"`
+	Code              string               `json:"code" validate:"required,min=3,max=255"`
+	DocumentVersion   int                  `json:"document_version"`
+	ParameterResponse []*ParameterResponse `json:"parameters" mapstructure:"parameters"`
+	AuditableResponse *AuditableResponse   `json:"auditable"`
 }
 
 type CreateReportDocumentTemplateRequest struct {
-	Name        string   `json:"name" validate:"required,min=3,max=255"`
-	Code        string   `json:"code" validate:"required,min=3,max=255"`
-	ParameterId []uint64 `json:"parameter_id" validate:"required,min=1,dive,number,gt=0"`
+	Name         string   `json:"name" validate:"required,min=3,max=255"`
+	Code         string   `json:"code" validate:"required,min=3,max=255"`
+	ParameterIds []uint64 `json:"parameter_ids" validate:"required,min=1,dive,number,gt=0"`
 }
 
 type UpdateReportDocumentTemplateRequest struct {

@@ -25,7 +25,7 @@ func NewHandler(parameterService Service, viperConfig *viper.Viper) *Handler {
 
 func (parameterHandler *Handler) FindAllParameter(ginContext *gin.Context) {
 	parameterResponses := parameterHandler.parameterService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameters has been fetched", parameterResponses))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Parameters has been fetched", parameterResponses))
 }
 
 func (parameterHandler *Handler) FindDependencyParameter(ginContext *gin.Context) {

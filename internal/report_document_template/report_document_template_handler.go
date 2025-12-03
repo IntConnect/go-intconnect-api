@@ -25,7 +25,7 @@ func NewHandler(reportDocumentTemplateService Service, viperConfig *viper.Viper)
 
 func (reportDocumentTemplateHandler *Handler) FindAllReportDocumentTemplate(ginContext *gin.Context) {
 	reportDocumentTemplateResponses := reportDocumentTemplateHandler.reportDocumentTemplateService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Report document template has been fetched", reportDocumentTemplateResponses))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Report document template has been fetched", reportDocumentTemplateResponses))
 }
 
 func (reportDocumentTemplateHandler *Handler) FindAllReportDocumentTemplatePagination(ginContext *gin.Context) {
@@ -40,8 +40,8 @@ func (reportDocumentTemplateHandler *Handler) CreateReportDocumentTemplate(ginCo
 	var createReportDocumentTemplateModel model.CreateReportDocumentTemplateRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createReportDocumentTemplateModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	reportDocumentTemplateHandler.reportDocumentTemplateService.Create(ginContext, &createReportDocumentTemplateModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ReportDocumentTemplate has been created", nil))
+	paginatedRes := reportDocumentTemplateHandler.reportDocumentTemplateService.Create(ginContext, &createReportDocumentTemplateModel)
+	ginContext.JSON(http.StatusOK, paginatedRes)
 }
 
 func (reportDocumentTemplateHandler *Handler) UpdateReportDocumentTemplate(ginContext *gin.Context) {

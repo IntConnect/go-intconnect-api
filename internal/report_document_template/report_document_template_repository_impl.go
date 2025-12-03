@@ -44,6 +44,7 @@ func (reportDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
+		Preload("Parameters").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).

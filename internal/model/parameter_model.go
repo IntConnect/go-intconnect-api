@@ -9,7 +9,7 @@ type ParameterResponse struct {
 	MinValue          float32            `json:"min_value"`
 	MaxValue          float32            `json:"max_value"`
 	Description       string             `json:"description"`
-	MachineResponse   MachineResponse    `json:"machine_response" mapstructure:"-"`
+	MachineResponse   *MachineResponse   `json:"machine_response" mapstructure:"-"`
 	AuditableResponse *AuditableResponse `json:"auditable_response" mapstructure:"-"`
 }
 
