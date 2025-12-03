@@ -52,7 +52,7 @@ func (validatorService *ServiceImpl) ParseValidationError(validationError error,
 
 			parsedMap[fieldJSON] = cleanMessage
 		}
-		logrus.Debug(parsedMap)
+		logrus.Infoln(parsedMap)
 		panic(exception.NewApplicationErrorSpecific(http.StatusBadRequest, exception.StatusValidationError, exception.MsgValidationError, parsedMap))
 	}
 }

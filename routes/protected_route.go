@@ -131,8 +131,8 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	facilityRouterGroup.GET("pagination", protectedRoutes.facilityController.FindAllPagination)
 	facilityRouterGroup.GET("", protectedRoutes.facilityController.FindAll)
 	facilityRouterGroup.POST("", protectedRoutes.facilityController.CreateFacility)
-	facilityRouterGroup.PUT("", protectedRoutes.facilityController.UpdateFacility)
-	facilityRouterGroup.DELETE("", protectedRoutes.facilityController.DeleteFacility)
+	facilityRouterGroup.PUT("/:id", protectedRoutes.facilityController.UpdateFacility)
+	facilityRouterGroup.DELETE("/:id", protectedRoutes.facilityController.DeleteFacility)
 
 	roleRouterGroup := routerGroup.Group("roles")
 	roleRouterGroup.GET("", protectedRoutes.roleController.FindAllRole)

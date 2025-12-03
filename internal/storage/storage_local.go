@@ -32,7 +32,7 @@ func (localStorage *LocalStorage) Put(fileHeader *multipart.FileHeader, path str
 	defer dst.Close()
 
 	_, err = io.Copy(dst, src)
-	return fullPath, err
+	return path, err
 }
 
 func (localStorage *LocalStorage) Delete(path string) error {

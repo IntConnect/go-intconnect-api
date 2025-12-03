@@ -1,7 +1,6 @@
 package facility
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -43,34 +42,39 @@ func (facilityHandler *Handler) FindAllPagination(ginContext *gin.Context) {
 func (facilityHandler *Handler) CreateFacility(ginContext *gin.Context) {
 	var createFacilityModel model.CreateFacilityRequest
 	err := ginContext.Request.ParseMultipartForm(32 << 20) // 32MB maxMemory
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	err = facilityHandler.formDecoder.Decode(&createFacilityModel, ginContext.Request.PostForm)
-	fmt.Println(2)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	thumbnailFile, err := ginContext.FormFile("thumbnail")
-	fmt.Println(3, err)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	createFacilityModel.ThumbnailHeader = thumbnailFile
-
+	createFacilityModel.Thumbnail = thumbnailFile
 	paginatedResponse := facilityHandler.facilityService.Create(ginContext, &createFacilityModel)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (facilityHandler *Handler) UpdateFacility(ginContext *gin.Context) {
 	var updateFacilityModel model.UpdateFacilityRequest
-	err := ginContext.ShouldBindBodyWithJSON(&updateFacilityModel)
+	err := ginContext.Request.ParseMultipartForm(32 << 20) // 32MB maxMemory
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	facilityHandler.facilityService.Update(ginContext, &updateFacilityModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Facility has been created", nil))
+	err = facilityHandler.formDecoder.Decode(&updateFacilityModel, ginContext.Request.PostForm)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	thumbnailFile, _ := ginContext.FormFile("thumbnail")
+	updateFacilityModel.Thumbnail = thumbnailFile
+	facilityId := ginContext.Param("id")
+	parsedFacilityId, err := strconv.ParseUint(facilityId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	updateFacilityModel.Id = parsedFacilityId
+	paginatedResponse := facilityHandler.facilityService.Update(ginContext, &updateFacilityModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (facilityHandler *Handler) DeleteFacility(ginContext *gin.Context) {
 	var deleteFacilityModel model.DeleteResourceGeneralRequest
+	err := ginContext.ShouldBindBodyWithJSON(&deleteFacilityModel)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	facilityId := ginContext.Param("id")
-	parsedFacilityId, err := strconv.ParseUint(facilityId, 10, 32)
+	parsedFacilityId, err := strconv.ParseUint(facilityId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteFacilityModel.Id = parsedFacilityId
-	facilityHandler.facilityService.Delete(ginContext, &deleteFacilityModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))
+	paginatedResponse := facilityHandler.facilityService.Delete(ginContext, &deleteFacilityModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }

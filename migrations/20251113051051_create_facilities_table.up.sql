@@ -5,7 +5,7 @@ CREATE TABLE facilities
 (
     id             SERIAL PRIMARY KEY,
     name           VARCHAR(255)         NOT NULL,
-    code           VARCHAR(255)         NOT NULL,
+    code           VARCHAR(255)         NOT NULL UNIQUE,
     description    TEXT,
     location       VARCHAR(255),
     status         facility_status_enum NOT NULL,

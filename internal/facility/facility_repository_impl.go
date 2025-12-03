@@ -61,10 +61,7 @@ func (facilityRepositoryImpl *RepositoryImpl) FindAllPagination(
 }
 func (facilityRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, facilityId uint64) (*entity.Facility, error) {
 	var facilityEntity entity.Facility
-	err := gormTransaction.Model(&entity.Facility{}).
-		Preload("FacilityGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Where("id = ?", facilityId).Find(&facilityEntity).Error
+	err := gormTransaction.Model(&entity.Facility{}).Where("id = ?", facilityId).Find(&facilityEntity).Error
 
 	return &facilityEntity, err
 }
@@ -84,5 +81,5 @@ func (facilityRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, f
 }
 
 func (facilityRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.Facility{}).Where("id = ?", id).Delete(entity.Facility{}).Error
+	return gormTransaction.Model(entity.Facility{}).Where("id = ?", id).Delete(&entity.Facility{}).Error
 }
