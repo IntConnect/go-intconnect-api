@@ -93,6 +93,18 @@ func (userService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 	)
 }
 
+func (userService *ServiceImpl) FindById(ginContext *gin.Context, userId uint64) *model.UserResponse {
+	var userResponse *model.UserResponse
+	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		userEntity, err := userService.userRepository.FindById(gormTransaction, userId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		userResponse = helper.MapEntityIntoResponse[*entity.User, *model.UserResponse](userEntity, mapper.FuncMapAuditable)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return userResponse
+}
+
 // Create - Membuat user baru
 func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest) *model.PaginatedResponse[*model.UserResponse] {
 	var paginationResp *model.PaginatedResponse[*model.UserResponse]

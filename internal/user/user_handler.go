@@ -28,6 +28,14 @@ func (userHandler *Handler) FindAllUser(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User has been fetched", userResponses))
 }
 
+func (userHandler *Handler) FindById(ginContext *gin.Context) {
+	userId := ginContext.Param("id")
+	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
+	userResponse := userHandler.userService.FindById(ginContext, parsedUserId)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("User fetched successfully", userResponse))
+}
+
 func (userHandler *Handler) FindAllUserPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
