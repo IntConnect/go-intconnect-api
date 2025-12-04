@@ -8,6 +8,7 @@ type CreateAuditLogRequest struct {
 	Before      any    `json:"before"`
 	After       any    `json:"after"`
 	IpAddress   string `json:"ip_address"`
+	UserAgent   string `json:"user_agent"`
 }
 
 type AuditLogResponse struct {
@@ -19,6 +20,7 @@ type AuditLogResponse struct {
 	Before                  map[string]interface{}   `json:"before"`
 	After                   map[string]interface{}   `json:"after"`
 	IpAddress               string                   `json:"ip_address"`
+	UserAgent               string                   `json:"user_agent"`
 	UserResponse            *UserResponse            `json:"user,omitempty" mapstructure:"user"`
 	SimpleAuditableResponse *SimpleAuditableResponse `json:"auditable"`
 }
@@ -44,6 +46,7 @@ const (
 	AUDIT_LOG_FEATURE_MQTT_BROKER = "MQTT_BROKER"
 	AUDIT_LOG_FEATURE_FACILITY    = "FACILITY"
 	AUDIT_LOG_FEATURE_MACHINE     = "MACHINE"
+	AUDIT_LOG_FEATURE_SMTP_SERVER = "SMTP_SERVER"
 )
 
 const (

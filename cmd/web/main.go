@@ -56,6 +56,7 @@ func main() {
 		injector.MqttTopicModule,
 		injector.ReportDocumentTemplateModule,
 		injector.AuditLogModule,
+		injector.SmtpServerModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

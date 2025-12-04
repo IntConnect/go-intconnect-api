@@ -18,6 +18,7 @@ import (
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
+	smtpServer "go-intconnect-api/internal/smtp_server"
 	"go-intconnect-api/internal/storage"
 	"go-intconnect-api/internal/user"
 	validatorService "go-intconnect-api/internal/validator"
@@ -242,4 +243,10 @@ var AuditLogModule = fx.Module("auditLogFeature",
 	fx.Provide(fx.Annotate(auditLog.NewRepository, fx.As(new(auditLog.Repository)))),
 	fx.Provide(fx.Annotate(auditLog.NewService, fx.As(new(auditLog.Service)))),
 	fx.Provide(fx.Annotate(auditLog.NewHandler, fx.As(new(auditLog.Controller)))),
+)
+
+var SmtpServerModule = fx.Module("smtpServerFeature",
+	fx.Provide(fx.Annotate(smtpServer.NewRepository, fx.As(new(smtpServer.Repository)))),
+	fx.Provide(fx.Annotate(smtpServer.NewService, fx.As(new(smtpServer.Service)))),
+	fx.Provide(fx.Annotate(smtpServer.NewHandler, fx.As(new(smtpServer.Controller)))),
 )

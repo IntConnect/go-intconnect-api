@@ -15,6 +15,7 @@ import (
 	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
+	smtpServer "go-intconnect-api/internal/smtp_server"
 	"go-intconnect-api/internal/user"
 	"go-intconnect-api/pkg/middleware"
 
@@ -40,6 +41,7 @@ type ProtectedRoutes struct {
 	reportDocumentTemplateController reportDocumentTemplate.Controller
 	auditLogController               auditLog.Controller
 	redisInstance                    *configs.RedisInstance
+	smtpServerController             smtpServer.Controller
 }
 
 func NewProtectedRoutes(
@@ -60,7 +62,7 @@ func NewProtectedRoutes(
 	auditLogController auditLog.Controller,
 	redisInstance *configs.RedisInstance,
 	roleService role.Service,
-
+	smtpServerController smtpServer.Controller,
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -81,6 +83,7 @@ func NewProtectedRoutes(
 		auditLogController:               auditLogController,
 		redisInstance:                    redisInstance,
 		roleService:                      roleService,
+		smtpServerController:             smtpServerController,
 	}
 }
 
@@ -166,22 +169,30 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	parameterRouterGroup.PUT("", protectedRoutes.parameterController.UpdateParameter)
 	parameterRouterGroup.DELETE("", protectedRoutes.parameterController.DeleteParameter)
 
-	mqttTopicGroup := routerGroup.Group("mqtt-topics")
-	mqttTopicGroup.GET("pagination", protectedRoutes.mqttTopicController.FindAllMqttTopicPagination)
-	mqttTopicGroup.GET("", protectedRoutes.mqttTopicController.FindAllMqttTopic)
-	mqttTopicGroup.GET("create", protectedRoutes.mqttTopicController.FindDependencyMqttTopic)
-	mqttTopicGroup.POST("", protectedRoutes.mqttTopicController.CreateMqttTopic)
-	mqttTopicGroup.PUT("", protectedRoutes.mqttTopicController.UpdateMqttTopic)
-	mqttTopicGroup.DELETE("", protectedRoutes.mqttTopicController.DeleteMqttTopic)
+	mqttTopicRouterGroup := routerGroup.Group("mqtt-topics")
+	mqttTopicRouterGroup.GET("pagination", protectedRoutes.mqttTopicController.FindAllMqttTopicPagination)
+	mqttTopicRouterGroup.GET("", protectedRoutes.mqttTopicController.FindAllMqttTopic)
+	mqttTopicRouterGroup.GET("create", protectedRoutes.mqttTopicController.FindDependencyMqttTopic)
+	mqttTopicRouterGroup.POST("", protectedRoutes.mqttTopicController.CreateMqttTopic)
+	mqttTopicRouterGroup.PUT("", protectedRoutes.mqttTopicController.UpdateMqttTopic)
+	mqttTopicRouterGroup.DELETE("", protectedRoutes.mqttTopicController.DeleteMqttTopic)
 
-	reportDocumentTemplateGroup := routerGroup.Group("report-document-templates")
-	reportDocumentTemplateGroup.GET("pagination", protectedRoutes.reportDocumentTemplateController.FindAllReportDocumentTemplatePagination)
-	reportDocumentTemplateGroup.GET("", protectedRoutes.reportDocumentTemplateController.FindAllReportDocumentTemplate)
-	reportDocumentTemplateGroup.POST("", protectedRoutes.reportDocumentTemplateController.CreateReportDocumentTemplate)
-	reportDocumentTemplateGroup.PUT("", protectedRoutes.reportDocumentTemplateController.UpdateReportDocumentTemplate)
-	reportDocumentTemplateGroup.DELETE("", protectedRoutes.reportDocumentTemplateController.DeleteReportDocumentTemplate)
+	reportDocumentTemplateRouterGroup := routerGroup.Group("report-document-templates")
+	reportDocumentTemplateRouterGroup.GET("pagination", protectedRoutes.reportDocumentTemplateController.FindAllReportDocumentTemplatePagination)
+	reportDocumentTemplateRouterGroup.GET("", protectedRoutes.reportDocumentTemplateController.FindAllReportDocumentTemplate)
+	reportDocumentTemplateRouterGroup.POST("", protectedRoutes.reportDocumentTemplateController.CreateReportDocumentTemplate)
+	reportDocumentTemplateRouterGroup.PUT("", protectedRoutes.reportDocumentTemplateController.UpdateReportDocumentTemplate)
+	reportDocumentTemplateRouterGroup.DELETE("", protectedRoutes.reportDocumentTemplateController.DeleteReportDocumentTemplate)
 
 	auditLogRouterGroup := routerGroup.Group("audit-logs")
 	auditLogRouterGroup.GET("pagination", protectedRoutes.auditLogController.FindAllAuditLogPagination)
 	auditLogRouterGroup.GET("", protectedRoutes.auditLogController.FindAllAuditLog)
+
+	smtpServerRouterGroup := routerGroup.Group("smtp-servers")
+	smtpServerRouterGroup.GET("pagination", protectedRoutes.smtpServerController.FindAllSmtpServerPagination)
+	smtpServerRouterGroup.GET("", protectedRoutes.smtpServerController.FindAllSmtpServer)
+	smtpServerRouterGroup.POST("", protectedRoutes.smtpServerController.CreateSmtpServer)
+	smtpServerRouterGroup.PUT("/:id", protectedRoutes.smtpServerController.UpdateSmtpServer)
+	smtpServerRouterGroup.DELETE("", protectedRoutes.smtpServerController.DeleteSmtpServer)
+
 }

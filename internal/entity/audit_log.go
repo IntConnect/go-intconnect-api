@@ -17,6 +17,7 @@ type AuditLog struct {
 	BeforeRaw       []byte                 `gorm:"column:before;type:jsonb"`
 	AfterRaw        []byte                 `gorm:"column:after;type:jsonb"`
 	IpAddress       string                 `gorm:"column:ip_address"`
+	UserAgent       string                 `gorm:"column:user_agent"`
 	User            User                   `gorm:"foreignKey:UserId;references:Id"`
 	SimpleAuditable SimpleAuditable        `gorm:"embedded"`
 }
