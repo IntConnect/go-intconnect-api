@@ -19,6 +19,7 @@ type CreateSmtpServerRequest struct {
 	Password    string `json:"password" validate:"required,min=1,max=100"`
 	MailAddress string `json:"mail_address" validate:"required,min=1,max=100"`
 	MailName    string `json:"mail_name" validate:"required,min=1,max=100"`
+	IsActive    bool   `json:"is_active"`
 }
 
 type UpdateSmtpServerRequest struct {
@@ -29,6 +30,7 @@ type UpdateSmtpServerRequest struct {
 	Password    string `json:"password" validate:"required,min=1,max=100"`
 	MailAddress string `json:"mail_address" validate:"required,min=1,max=100"`
 	MailName    string `json:"mail_name" validate:"required,min=1,max=100"`
+	IsActive    bool   `json:"is_active"`
 }
 
 func (smtpServerResponse *SmtpServerResponse) GetAuditableResponse() *AuditableResponse {

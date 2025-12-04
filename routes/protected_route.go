@@ -193,6 +193,6 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	smtpServerRouterGroup.GET("", protectedRoutes.smtpServerController.FindAllSmtpServer)
 	smtpServerRouterGroup.POST("", protectedRoutes.smtpServerController.CreateSmtpServer)
 	smtpServerRouterGroup.PUT("/:id", protectedRoutes.smtpServerController.UpdateSmtpServer)
-	smtpServerRouterGroup.DELETE("", protectedRoutes.smtpServerController.DeleteSmtpServer)
+	smtpServerRouterGroup.DELETE("/:id", protectedRoutes.smtpServerController.DeleteSmtpServer)
 
 }

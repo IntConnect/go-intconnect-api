@@ -8,7 +8,7 @@ type SmtpServer struct {
 	Password    string    `gorm:"column:password"`
 	MailAddress string    `gorm:"column:mail_address"`
 	MailName    string    `gorm:"column:mail_name"`
-	IsActive    bool      `gorm:"column:is_active;default:true"`
+	IsActive    bool      `gorm:"column:is_active;"`
 	Auditable   Auditable `gorm:"embedded"`
 }
 
