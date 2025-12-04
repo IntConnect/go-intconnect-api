@@ -118,7 +118,6 @@ func (facilityService *ServiceImpl) Update(
 	var paginationResp *model.PaginatedResponse[*model.FacilityResponse]
 
 	valErr := facilityService.validatorService.ValidateStruct(updateFacilityRequest)
-	fmt.Println(valErr)
 	facilityService.validatorService.ParseValidationError(valErr, *updateFacilityRequest)
 
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -136,7 +135,6 @@ func (facilityService *ServiceImpl) Update(
 			// 3a. Hapus file lama jika ada
 			if facility.ThumbnailPath != "" {
 				_ = facilityService.localStorageService.Disk().Delete(facility.ThumbnailPath)
-				fmt.Println(err)
 			}
 
 			// 3b. Simpan file baru

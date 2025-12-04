@@ -17,7 +17,7 @@ type CreateMqttBrokerRequest struct {
 	WsPort   string `json:"ws_port" validate:"required,min=1,max=5"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	IsActive bool   `json:"is_active" validate:"required"`
+	IsActive bool   `json:"is_active"`
 }
 
 type UpdateMqttBrokerRequest struct {
@@ -27,7 +27,7 @@ type UpdateMqttBrokerRequest struct {
 	WsPort   string `json:"ws_port" validate:"required,min=1,max=5"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	IsActive bool   `json:"is_active" validate:"required"`
+	IsActive bool   `json:"is_active"`
 }
 
 func (mqttBrokerResponse *MqttBrokerResponse) GetAuditableResponse() *AuditableResponse {

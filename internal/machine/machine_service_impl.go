@@ -94,9 +94,7 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 	machineService.validatorService.ParseValidationError(valErr, *createMachineRequest)
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		modelPath, err := machineService.localStorageService.Disk().Put(createMachineRequest.Model, fmt.Sprintf("machines/models/%d-%s", time.Now().UnixNano(), createMachineRequest.Model.Filename))
-		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
-		fmt.Println(err)
 		thumbnailPath, err := machineService.localStorageService.Disk().Put(createMachineRequest.Thumbnail, fmt.Sprintf("machines/thumbnails/%d-%s", time.Now().UnixNano(), createMachineRequest.Thumbnail.Filename))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 		machineEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineRequest, entity.Machine](createMachineRequest)

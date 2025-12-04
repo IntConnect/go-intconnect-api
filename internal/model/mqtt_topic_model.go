@@ -2,10 +2,12 @@ package model
 
 type MqttTopicResponse struct {
 	Id                 uint64             `json:"id"`
+	MachineId          uint64             `json:"machine_id"`
+	MqttBrokerId       uint64             `json:"mqtt_broker_id"`
 	Name               string             `json:"name"`
 	QoS                int                `json:"qos"`
 	MqttBrokerResponse MqttBrokerResponse `json:"mqtt_broker" mapstructure:"MqttBroker"`
-	MachineResponse    MachineResponse    `json:"machine" mapstructure:"machine"`
+	MachineResponse    MachineResponse    `json:"machine" mapstructure:"Machine"`
 	AuditableResponse  *AuditableResponse `json:"auditable"`
 }
 

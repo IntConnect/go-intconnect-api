@@ -33,7 +33,7 @@ type DeleteMachineRequest struct {
 }
 
 type MachineResponse struct {
-	Id                uint64             `json:"id;"`
+	Id                uint64             `json:"id"`
 	FacilityId        uint64             `json:"facility_id"`
 	Name              string             `json:"name"`
 	Code              string             `json:"code"`

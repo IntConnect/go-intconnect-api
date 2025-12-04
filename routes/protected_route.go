@@ -174,7 +174,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	mqttTopicRouterGroup.GET("", protectedRoutes.mqttTopicController.FindAllMqttTopic)
 	mqttTopicRouterGroup.GET("create", protectedRoutes.mqttTopicController.FindDependencyMqttTopic)
 	mqttTopicRouterGroup.POST("", protectedRoutes.mqttTopicController.CreateMqttTopic)
-	mqttTopicRouterGroup.PUT("", protectedRoutes.mqttTopicController.UpdateMqttTopic)
+	mqttTopicRouterGroup.PUT("/:id", protectedRoutes.mqttTopicController.UpdateMqttTopic)
 	mqttTopicRouterGroup.DELETE("", protectedRoutes.mqttTopicController.DeleteMqttTopic)
 
 	reportDocumentTemplateRouterGroup := routerGroup.Group("report-document-templates")

@@ -58,8 +58,8 @@ func (mqttTopicHandler *Handler) UpdateMqttTopic(ginContext *gin.Context) {
 	parsedMqttTopicId, err := strconv.ParseUint(mqttTopicId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	updateMqttTopicModel.Id = parsedMqttTopicId
-	mqttTopicHandler.mqttTopicService.Update(ginContext, &updateMqttTopicModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MQTT Topic has been created", nil))
+	paginatedResponse := mqttTopicHandler.mqttTopicService.Update(ginContext, &updateMqttTopicModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (mqttTopicHandler *Handler) DeleteMqttTopic(ginContext *gin.Context) {
@@ -68,6 +68,6 @@ func (mqttTopicHandler *Handler) DeleteMqttTopic(ginContext *gin.Context) {
 	parsedMqttTopicId, err := strconv.ParseUint(mqttTopicId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteMqttTopicModel.Id = parsedMqttTopicId
-	mqttTopicHandler.mqttTopicService.Delete(ginContext, &deleteMqttTopicModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("MQTT Topic has been updated", nil))
+	paginatedResponse := mqttTopicHandler.mqttTopicService.Delete(ginContext, &deleteMqttTopicModel)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
