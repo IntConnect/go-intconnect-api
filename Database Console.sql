@@ -166,6 +166,7 @@ SELECT *
 FROM report_document_templates;
 SELECT *
 FROM report_document_templates_parameters;
+SELECT * FROM modbus_servers;
 
 
 

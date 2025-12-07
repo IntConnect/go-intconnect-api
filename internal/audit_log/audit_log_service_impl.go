@@ -9,7 +9,6 @@ import (
 	"go-intconnect-api/pkg/mapper"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -19,17 +18,15 @@ type ServiceImpl struct {
 	validatorService   validator.Service
 	dbConnection       *gorm.DB
 	viperConfig        *viper.Viper
-	loggerInstance     *logrus.Logger
 }
 
 func NewService(auditLogRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper, loggerInstance *logrus.Logger) *ServiceImpl {
+	viperConfig *viper.Viper) *ServiceImpl {
 	return &ServiceImpl{
 		auditLogRepository: auditLogRepository,
 		validatorService:   validatorService,
 		dbConnection:       dbConnection,
 		viperConfig:        viperConfig,
-		loggerInstance:     loggerInstance,
 	}
 }
 
@@ -78,8 +75,7 @@ func (auditLogService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 }
 
 // Create - Membuat auditLog baru
-func (auditLogService *ServiceImpl) Create(ginContext *gin.Context, createAuditLogRequest *model.CreateAuditLogRequest) *model.PaginatedResponse[*model.AuditLogResponse] {
-	var paginationResp *model.PaginatedResponse[*model.AuditLogResponse]
+func (auditLogService *ServiceImpl) Create(ginContext *gin.Context, createAuditLogRequest *model.CreateAuditLogRequest) {
 	valErr := auditLogService.validatorService.ValidateStruct(createAuditLogRequest)
 	auditLogService.validatorService.ParseValidationError(valErr, *createAuditLogRequest)
 	err := auditLogService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -87,10 +83,40 @@ func (auditLogService *ServiceImpl) Create(ginContext *gin.Context, createAuditL
 		auditLogEntity.SimpleAuditable = entity.NewSimpleAuditable(model.AUDIT_LOG_ACTOR_SYSTEM)
 		err := auditLogService.auditLogRepository.Create(gormTransaction, auditLogEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginationResp = auditLogService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return paginationResp
+}
+
+func (auditLogService *ServiceImpl) Record(
+	ginContext *gin.Context,
+	actionType string,
+	featureType string,
+	beforeEntity interface{},
+	afterEntity interface{},
+	description string,
+) error {
+	userJwtClaims, ipAddress, userAgent := helper.ExtractRequestData(ginContext)
+
+	createAuditLogRequest := &model.CreateAuditLogRequest{
+		UserId:      userJwtClaims.Id,
+		Action:      actionType,
+		Feature:     featureType,
+		Description: description,
+		Before:      beforeEntity,
+		After:       afterEntity,
+		IpAddress:   ipAddress,
+		UserAgent:   userAgent,
+	}
+
+	valErr := auditLogService.validatorService.ValidateStruct(createAuditLogRequest)
+	auditLogService.validatorService.ParseValidationError(valErr, *createAuditLogRequest)
+
+	err := auditLogService.dbConnection.Transaction(func(tx *gorm.DB) error {
+		auditLogEntity := helper.MapCreateRequestIntoEntity[model.CreateAuditLogRequest, entity.AuditLog](createAuditLogRequest)
+		auditLogEntity.SimpleAuditable = entity.NewSimpleAuditable(model.AUDIT_LOG_ACTOR_SYSTEM)
+
+		return auditLogService.auditLogRepository.Create(tx, auditLogEntity)
+	})
+	return err
 }

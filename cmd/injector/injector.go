@@ -7,6 +7,7 @@ import (
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
 	machineDocument "go-intconnect-api/internal/machine_document"
+	modbusServer "go-intconnect-api/internal/modbus_server"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	mqttTopic "go-intconnect-api/internal/mqtt_topic"
 	"go-intconnect-api/internal/node"
@@ -249,4 +250,10 @@ var SmtpServerModule = fx.Module("smtpServerFeature",
 	fx.Provide(fx.Annotate(smtpServer.NewRepository, fx.As(new(smtpServer.Repository)))),
 	fx.Provide(fx.Annotate(smtpServer.NewService, fx.As(new(smtpServer.Service)))),
 	fx.Provide(fx.Annotate(smtpServer.NewHandler, fx.As(new(smtpServer.Controller)))),
+)
+
+var ModbusServerModule = fx.Module("modbusServerFeature",
+	fx.Provide(fx.Annotate(modbusServer.NewRepository, fx.As(new(modbusServer.Repository)))),
+	fx.Provide(fx.Annotate(modbusServer.NewService, fx.As(new(modbusServer.Service)))),
+	fx.Provide(fx.Annotate(modbusServer.NewHandler, fx.As(new(modbusServer.Controller)))),
 )

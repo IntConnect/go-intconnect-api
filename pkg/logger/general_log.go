@@ -1,37 +1,50 @@
 package logger
 
 import (
-	"log"
 	"os"
-)
+	"sync"
 
-const (
-	Reset  = "\033[0m"
-	Red    = "\033[31m"
-	Yellow = "\033[33m"
-	Blue   = "\033[34m"
+	"github.com/sirupsen/logrus"
 )
 
 var (
-	infoLogger    = log.New(os.Stdout, Blue+"[INFO] "+Reset, log.Ldate|log.Ltime)
-	warningLogger = log.New(os.Stdout, Yellow+"[WARNING] "+Reset, log.Ldate|log.Ltime)
-	errorLogger   = log.New(os.Stderr, Red+"[ERROR] "+Reset, log.Ldate|log.Ltime)
-	panicLogger   = log.New(os.Stderr, Red+"[PANIC] "+Reset, log.Ldate|log.Ltime)
+	instance *logrus.Logger
+	once     sync.Once
 )
 
-func Info(msg string, args ...interface{}) {
-	infoLogger.Printf(msg, args...)
+func Get() *logrus.Logger {
+	once.Do(func() {
+		instance = logrus.New()
+
+		isDev := os.Getenv("APP_ENV") != "production"
+
+		if isDev {
+			instance.SetFormatter(&logrus.TextFormatter{
+				DisableColors:   false,
+				FullTimestamp:   true,
+				TimestampFormat: "2006-01-02 15:04:05",
+			})
+			instance.SetOutput(os.Stdout)
+			instance.SetLevel(logrus.DebugLevel)
+		} else {
+			instance.SetFormatter(&logrus.JSONFormatter{
+				TimestampFormat: "2006-01-02T15:04:05Z07:00",
+			})
+		}
+	})
+	return instance
 }
 
-func Warning(msg string, args ...interface{}) {
-	warningLogger.Printf(msg, args...)
+// Shortcuts
+func Info(args ...interface{})         { Get().Info(args...) }
+func Infof(f string, a ...interface{}) { Get().Infof(f, a...) }
+func Debug(args ...interface{})        { Get().Debug(args...) }
+func Error(args ...interface{})        { Get().Error(args...) }
+
+func WithFields(fields map[string]interface{}) *logrus.Entry {
+	return Get().WithFields(logrus.Fields(fields))
 }
 
-func Error(msg string, args ...interface{}) {
-	errorLogger.Printf(msg, args...)
-}
-
-func PanicError(msg string, args ...interface{}) {
-	panicLogger.Printf(msg, args...)
-	panic("something went wrong, check panic log")
+func WithError(err error) *logrus.Entry {
+	return Get().WithError(err)
 }

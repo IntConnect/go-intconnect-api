@@ -3,6 +3,7 @@ package helper
 import (
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
+	"go-intconnect-api/pkg/logger"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 
 func CheckErrorOperation(indicatedError error, applicationError *exception.ApplicationError) bool {
 	if indicatedError != nil {
+		logger.Debug(indicatedError)
 		panic(applicationError)
 		return true
 	}
@@ -75,6 +77,12 @@ func ExtractRequestMeta(ginContext *gin.Context) (string, string) {
 		return ipAddress.(string), userAgent.(string)
 	}
 	return "", ""
+}
+
+func ExtractRequestData(ginContext *gin.Context) (*model.JwtClaimRequest, string, string) {
+	userJwtClaims := ExtractJwtClaimFromContext(ginContext)
+	ipAddress, userAgent := ExtractRequestMeta(ginContext)
+	return userJwtClaims, ipAddress, userAgent
 }
 
 func TakePointer[T any](value T) *T {

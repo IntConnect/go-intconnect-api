@@ -6,6 +6,7 @@ import (
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
+	modbusServer "go-intconnect-api/internal/modbus_server"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	mqttTopic "go-intconnect-api/internal/mqtt_topic"
 	"go-intconnect-api/internal/node"
@@ -25,6 +26,7 @@ import (
 
 type ProtectedRoutes struct {
 	viperConfig                      *viper.Viper
+	redisInstance                    *configs.RedisInstance
 	userController                   user.Controller
 	nodeController                   node.Controller
 	pipelineController               pipeline.Controller
@@ -32,7 +34,6 @@ type ProtectedRoutes struct {
 	databaseConnectionController     databaseConnection.Controller
 	facilityController               facility.Controller
 	roleController                   role.Controller
-	roleService                      role.Service
 	permissionController             permission.Controller
 	mqttBrokerController             mqttBroker.Controller
 	machineController                machine.Controller
@@ -40,12 +41,15 @@ type ProtectedRoutes struct {
 	mqttTopicController              mqttTopic.Controller
 	reportDocumentTemplateController reportDocumentTemplate.Controller
 	auditLogController               auditLog.Controller
-	redisInstance                    *configs.RedisInstance
 	smtpServerController             smtpServer.Controller
+	modbusServerController           modbusServer.Controller
+
+	roleService role.Service
 }
 
 func NewProtectedRoutes(
 	viperConfig *viper.Viper,
+	redisInstance *configs.RedisInstance,
 
 	userController user.Controller,
 	nodeController node.Controller,
@@ -60,9 +64,11 @@ func NewProtectedRoutes(
 	parameterController parameter.Controller,
 	mqttTopicController mqttTopic.Controller, reportDocumentTemplateController reportDocumentTemplate.Controller,
 	auditLogController auditLog.Controller,
-	redisInstance *configs.RedisInstance,
-	roleService role.Service,
 	smtpServerController smtpServer.Controller,
+	modbusServerController modbusServer.Controller,
+
+	roleService role.Service,
+
 ) *ProtectedRoutes {
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
@@ -84,6 +90,7 @@ func NewProtectedRoutes(
 		redisInstance:                    redisInstance,
 		roleService:                      roleService,
 		smtpServerController:             smtpServerController,
+		modbusServerController:           modbusServerController,
 	}
 }
 
@@ -194,5 +201,12 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	smtpServerRouterGroup.POST("", protectedRoutes.smtpServerController.CreateSmtpServer)
 	smtpServerRouterGroup.PUT("/:id", protectedRoutes.smtpServerController.UpdateSmtpServer)
 	smtpServerRouterGroup.DELETE("/:id", protectedRoutes.smtpServerController.DeleteSmtpServer)
+
+	modbusServerRouterGroup := routerGroup.Group("modbus-servers")
+	modbusServerRouterGroup.GET("pagination", protectedRoutes.modbusServerController.FindAllModbusServerPagination)
+	modbusServerRouterGroup.GET("", protectedRoutes.modbusServerController.FindAllModbusServer)
+	modbusServerRouterGroup.POST("", protectedRoutes.modbusServerController.CreateModbusServer)
+	modbusServerRouterGroup.PUT("/:id", protectedRoutes.modbusServerController.UpdateModbusServer)
+	modbusServerRouterGroup.DELETE("/:id", protectedRoutes.modbusServerController.DeleteModbusServer)
 
 }

@@ -57,6 +57,7 @@ func main() {
 		injector.ReportDocumentTemplateModule,
 		injector.AuditLogModule,
 		injector.SmtpServerModule,
+		injector.ModbusServerModule,
 		// Invoker
 		fx.Invoke(Run),
 	)
