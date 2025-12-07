@@ -90,12 +90,12 @@ func NewProtectedRoutes(
 func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig, protectedRoutes.redisInstance, protectedRoutes.roleService))
 	userRouterGroup := routerGroup.Group("users")
-	userRouterGroup.GET("pagination", protectedRoutes.userController.FindAllUserPagination, middleware.HasPermission("USER_VIEW"))
-	userRouterGroup.GET("", protectedRoutes.userController.FindAllUser, middleware.HasPermission("USER_VIEW"))
-	userRouterGroup.GET("/:id", protectedRoutes.userController.FindById, middleware.HasPermission("USER_VIEW"))
-	userRouterGroup.POST("", protectedRoutes.userController.CreateUser, middleware.HasPermission("USER_CREATE"))
-	userRouterGroup.PUT("/:id", protectedRoutes.userController.UpdateUser, middleware.HasPermission("USER_UPDATE"))
-	userRouterGroup.DELETE("/:id", protectedRoutes.userController.DeleteUser, middleware.HasPermission("USER_DELETE"))
+	userRouterGroup.GET("pagination", middleware.HasPermission("USER_VIEW"), protectedRoutes.userController.FindAllUserPagination)
+	userRouterGroup.GET("", middleware.HasPermission("USER_VIEW"), protectedRoutes.userController.FindAllUser)
+	userRouterGroup.GET("/:id", middleware.HasPermission("USER_VIEW"), protectedRoutes.userController.FindById)
+	userRouterGroup.POST("", middleware.HasPermission("USER_CREATE"), protectedRoutes.userController.CreateUser)
+	userRouterGroup.PUT("/:id", middleware.HasPermission("USER_UPDATE"), protectedRoutes.userController.UpdateUser)
+	userRouterGroup.DELETE("/:id", middleware.HasPermission("USER_DELETE"), protectedRoutes.userController.DeleteUser)
 
 	nodeRouterGroup := routerGroup.Group("nodes")
 	nodeRouterGroup.GET("pagination", protectedRoutes.nodeController.FindAllPagination)
@@ -140,7 +140,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	roleRouterGroup := routerGroup.Group("roles")
 	roleRouterGroup.GET("", protectedRoutes.roleController.FindAllRole)
 	roleRouterGroup.POST("", protectedRoutes.roleController.CreateRole)
-	roleRouterGroup.PUT("", protectedRoutes.roleController.UpdateRole)
+	roleRouterGroup.PUT("/:id", protectedRoutes.roleController.UpdateRole)
 	roleRouterGroup.DELETE("/:id", protectedRoutes.roleController.DeleteRole)
 
 	permissionRouterGroup := routerGroup.Group("permissions")

@@ -1,6 +1,7 @@
 package role
 
 import (
+	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -75,14 +76,14 @@ func (roleService *ServiceImpl) FindAll(ginContext *gin.Context) []*model.RoleRe
 }
 
 // Create - Membuat role baru
-func (roleService *ServiceImpl) Create(ginContext *gin.Context, createRoleRequest *model.CreateRoleRequest) {
+func (roleService *ServiceImpl) Create(ginContext *gin.Context, createRoleRequest *model.CreateRoleRequest) []*model.RoleResponse {
 	var processedId uint64
 	valErr := roleService.validatorService.ValidateStruct(createRoleRequest)
 	roleService.validatorService.ParseValidationError(valErr, *createRoleRequest)
 	err := roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		roleEntity := helper.MapCreateRequestIntoEntity[model.CreateRoleRequest, entity.Role](createRoleRequest)
-		permissionIds, err := roleService.permissionRepository.FindBatchById(gormTransaction, createRoleRequest.PermissionIds)
-		if len(permissionIds) != len(createRoleRequest.PermissionIds) {
+		permissionEntities, err := roleService.permissionRepository.FindBatchById(gormTransaction, createRoleRequest.PermissionIds)
+		if len(permissionEntities) != len(createRoleRequest.PermissionIds) {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -96,9 +97,10 @@ func (roleService *ServiceImpl) Create(ginContext *gin.Context, createRoleReques
 
 	_ = roleService.roleRepository.DeleteByIdCache(backgroundContext, processedId)
 	_ = roleService.roleRepository.DeleteAllCache(backgroundContext)
+	return roleService.FindAll(ginContext)
 }
 
-func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleRequest *model.UpdateRoleRequest) {
+func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleRequest *model.UpdateRoleRequest) []*model.RoleResponse {
 	var processedId uint64
 
 	valErr := roleService.validatorService.ValidateStruct(updateRoleRequest)
@@ -108,8 +110,14 @@ func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleReques
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		helper.MapUpdateRequestIntoEntity[*model.UpdateRoleRequest, entity.Role](updateRoleRequest, roleEntity)
 		err = roleService.roleRepository.Update(gormTransaction, roleEntity)
+		permissionEntities, err := roleService.permissionRepository.FindBatchById(gormTransaction, updateRoleRequest.PermissionIds)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		processedId = roleEntity.Id
+		if len(permissionEntities) != len(updateRoleRequest.PermissionIds) {
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+		}
+		fmt.Println(permissionEntities)
+		err = gormTransaction.Model(roleEntity).Association("Permissions").Replace(permissionEntities)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil
 	})
@@ -117,9 +125,10 @@ func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleReques
 	backgroundContext := ginContext.Request.Context()
 	_ = roleService.roleRepository.DeleteByIdCache(backgroundContext, processedId)
 	_ = roleService.roleRepository.DeleteAllCache(backgroundContext)
+	return roleService.FindAll(ginContext)
 }
 
-func (roleService *ServiceImpl) Delete(ginContext *gin.Context, deleteRoleRequest *model.DeleteResourceGeneralRequest) {
+func (roleService *ServiceImpl) Delete(ginContext *gin.Context, deleteRoleRequest *model.DeleteResourceGeneralRequest) []*model.RoleResponse {
 	var processedId uint64
 	userClaim := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := roleService.validatorService.ValidateStruct(deleteRoleRequest)
@@ -143,6 +152,7 @@ func (roleService *ServiceImpl) Delete(ginContext *gin.Context, deleteRoleReques
 	backgroundContext := ginContext.Request.Context()
 	_ = roleService.roleRepository.DeleteByIdCache(backgroundContext, processedId)
 	_ = roleService.roleRepository.DeleteAllCache(backgroundContext)
+	return roleService.FindAll(ginContext)
 }
 
 func (roleService *ServiceImpl) FindById(ginContext *gin.Context, roleId uint64) *model.RoleResponse {

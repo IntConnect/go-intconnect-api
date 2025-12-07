@@ -53,6 +53,7 @@ func (roleRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipel
 }
 
 func (roleRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, roleEntity *entity.Role) error {
+
 	return gormTransaction.Model(roleEntity).Save(roleEntity).Error
 }
 

@@ -24,7 +24,7 @@ func NewHandler(permissionService Service, viperConfig *viper.Viper) *Handler {
 
 func (permissionHandler *Handler) FindAllPermission(ginContext *gin.Context) {
 	permissionResponses := permissionHandler.permissionService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Permission has been fetched", permissionResponses))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Permission has been fetched", permissionResponses))
 }
 
 func (permissionHandler *Handler) FindAllPermissionPagination(ginContext *gin.Context) {

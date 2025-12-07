@@ -25,23 +25,23 @@ func NewHandler(roleService Service, viperConfig *viper.Viper) *Handler {
 
 func (roleHandler *Handler) FindAllRole(ginContext *gin.Context) {
 	roleResponses := roleHandler.roleService.FindAll(ginContext)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been fetched", roleResponses))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Role has been fetched", roleResponses))
 }
 
 func (roleHandler *Handler) CreateRole(ginContext *gin.Context) {
 	var createRoleModel model.CreateRoleRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createRoleModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	roleHandler.roleService.Create(ginContext, &createRoleModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been created", nil))
+	roleResponses := roleHandler.roleService.Create(ginContext, &createRoleModel)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Role has been created", roleResponses))
 }
 
 func (roleHandler *Handler) UpdateRole(ginContext *gin.Context) {
 	var updateRoleModel model.UpdateRoleRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateRoleModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	roleHandler.roleService.Update(ginContext, &updateRoleModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been created", nil))
+	paginatedResponses := roleHandler.roleService.Update(ginContext, &updateRoleModel)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Role has been created", paginatedResponses))
 }
 
 func (roleHandler *Handler) DeleteRole(ginContext *gin.Context) {
@@ -52,6 +52,6 @@ func (roleHandler *Handler) DeleteRole(ginContext *gin.Context) {
 	parsedRoleId, err := strconv.ParseUint(roleId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteRoleModel.Id = parsedRoleId
-	roleHandler.roleService.Delete(ginContext, &deleteRoleModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Role has been deleted", nil))
+	paginatedResponses := roleHandler.roleService.Delete(ginContext, &deleteRoleModel)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Role has been deleted", paginatedResponses))
 }

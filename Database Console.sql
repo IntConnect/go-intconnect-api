@@ -123,6 +123,8 @@ DELETE
 FROM database_connections;
 DELETE
 FROM audit_logs;
+DELETE
+FROM permissions;
 
 
 
@@ -164,7 +166,6 @@ SELECT *
 FROM report_document_templates;
 SELECT *
 FROM report_document_templates_parameters;
-DELETE
-FROM mqtt_brokers;
+
 
 

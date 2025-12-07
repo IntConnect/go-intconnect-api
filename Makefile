@@ -21,6 +21,9 @@ migrate-force:
 migrate-create:
 	migrate create -ext sql -dir migrations/ create_$(name)_table
 
+migrate-alter:
+	migrate alter -ext sql -dir migrations/ alter_$(name)_table
+
 inject:
 	wire gen ./cmd/injection/injector.go
 

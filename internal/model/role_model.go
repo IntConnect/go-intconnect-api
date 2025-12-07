@@ -7,9 +7,10 @@ type CreateRoleRequest struct {
 }
 
 type UpdateRoleRequest struct {
-	Id          uint64 `json:"id" validate:"required|number"`
-	Name        string `json:"name" validate:"required|min:3|max:50"`
-	Description string `json:"description" validate:""`
+	Id            uint64   `json:"id" validate:"required,number"`
+	Name          string   `json:"name" validate:"required,min=3,max=50"`
+	Description   string   `json:"description" validate:""`
+	PermissionIds []uint64 `json:"permission_ids" validate:"required,dive,number,gt=0"`
 }
 
 type RoleResponse struct {
