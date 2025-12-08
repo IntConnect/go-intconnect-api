@@ -204,8 +204,6 @@ var PipelineEdgeModule = fx.Module("pipelineFeature",
 	fx.Provide(fx.Annotate(pipelineEdge.NewRepository, fx.As(new(pipelineEdge.Repository)))),
 )
 
-var LoggerModule = fx.Module("loggerFeature", fx.Provide(configs.GetLogger))
-
 var MqttBrokerModule = fx.Module("mqttBrokerFeature",
 	fx.Provide(fx.Annotate(mqttBroker.NewRepository, fx.As(new(mqttBroker.Repository)))),
 	fx.Provide(fx.Annotate(mqttBroker.NewService, fx.As(new(mqttBroker.Service)))),

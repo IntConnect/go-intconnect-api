@@ -40,7 +40,10 @@ func Info(args ...interface{})         { Get().Info(args...) }
 func Infof(f string, a ...interface{}) { Get().Infof(f, a...) }
 func Debug(args ...interface{})        { Get().Debug(args...) }
 func Error(args ...interface{})        { Get().Error(args...) }
-
+func Warn(args ...interface{})         { Get().Warn(args...) }
+func WithField(key string, value interface{}) *logrus.Entry {
+	return Get().WithField(key, value)
+}
 func WithFields(fields map[string]interface{}) *logrus.Entry {
 	return Get().WithFields(logrus.Fields(fields))
 }
