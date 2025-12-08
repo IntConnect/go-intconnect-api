@@ -138,6 +138,7 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 			First(&userEntity).Error
 
 		if err = bcrypt.CompareHashAndPassword([]byte(userEntity.Password), []byte(loginUserRequest.Password)); err != nil {
+			fmt.Println(err)
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "User credentials invalid"))
 		}
 		jwtHour := userService.viperConfig.GetInt64("JWT_HOUR")
@@ -153,6 +154,7 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 			"role_name": userEntity.Role.Name,
 			"exp":       time.Now().Add(time.Hour * time.Duration(jwtHour)).Unix(),
 		})
+		fmt.Println(1)
 		tokenString, err = tokenInstance.SignedString([]byte(userService.viperConfig.GetString("JWT_SECRET")))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
 		if claims, ok := tokenInstance.Claims.(jwt.MapClaims); ok && tokenInstance.Valid {
@@ -197,6 +199,31 @@ func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserReques
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return paginationResp
+}
+
+func (userService *ServiceImpl) UpdateProfile(ginContext *gin.Context, updateUserProfileRequest *model.UpdateUserProfileRequest) string {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
+	updateUserProfileRequest.Id = userJwtClaims.Id
+	valErr := userService.validatorService.ValidateStruct(updateUserProfileRequest)
+	var user *entity.User
+	userService.validatorService.ParseValidationError(valErr, *updateUserProfileRequest)
+	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var err error
+		user, err = userService.userRepository.FindById(gormTransaction, updateUserProfileRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		helper.MapUpdateRequestIntoEntity(updateUserProfileRequest, user)
+		if updateUserProfileRequest.Password != nil {
+			user.Password, _ = helper.HashPassword(*updateUserProfileRequest.Password)
+		}
+		err = userService.userRepository.Update(gormTransaction, user)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return userService.HandleLogin(ginContext, &model.LoginUserRequest{
+		UserIdentifier: user.Email,
+		Password:       updateUserProfileRequest.CurrentPassword,
+	})
 }
 
 func (userService *ServiceImpl) Delete(ginContext *gin.Context, deleteUserRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.UserResponse] {

@@ -2,6 +2,8 @@ package configs
 
 import (
 	"fmt"
+	"go-intconnect-api/internal/entity"
+	"go-intconnect-api/internal/model"
 	"mime/multipart"
 	"regexp"
 	"strconv"
@@ -12,6 +14,7 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	engTranslation "github.com/go-playground/validator/v10/translations/en"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -38,6 +41,7 @@ func InitializeValidator(dbConnection *gorm.DB) (*validator.Validate, ut.Transla
 	validate.RegisterValidation("exists", existsValidator(dbConnection))
 	validate.RegisterValidation("date", dateValidator("2006-01-02"))
 	validate.RegisterValidation("datetime", dateValidator("2006-01-02 15:04"))
+	validate.RegisterValidation("matchPassword", matchPasswordValidator(dbConnection))
 
 	// ======================
 	// Register translations
@@ -115,6 +119,12 @@ func registerTranslations(validate *validator.Validate, trans ut.Translator) {
 			tag: "exists",
 			message: func(fe validator.FieldError) string {
 				return fmt.Sprintf("%s must refer to an existing record", formatFieldName(fe.Field()))
+			},
+		},
+		{
+			tag: "matchPassword",
+			message: func(fe validator.FieldError) string {
+				return fmt.Sprintf("%s is incorrect", formatFieldName(fe.Field()))
 			},
 		},
 	}
@@ -265,6 +275,31 @@ func weakPasswordValidator(fl validator.FieldLevel) bool {
 		return false
 	}
 	return true
+}
+
+func matchPasswordValidator(dbConnection *gorm.DB) validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		currentPassword := fl.Field().String()
+
+		// ambil struct req sebagai interface
+		requestModel, isValid := fl.Top().Interface().(model.HasId)
+		if !isValid {
+			return false // struct tidak mendukung HasId
+		}
+
+		// ambil user dari DB menggunakan ID
+		var user entity.User
+		if err := dbConnection.First(&user, requestModel.GetId()).Error; err != nil {
+			return false
+		}
+
+		// compare currentPassword == actualPassword (hashed)
+		if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(currentPassword)) != nil {
+			return false
+		}
+
+		return true
+	}
 }
 
 // ======================

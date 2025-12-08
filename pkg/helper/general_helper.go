@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func CheckErrorOperation(indicatedError error, applicationError *exception.ApplicationError) bool {
@@ -83,6 +84,11 @@ func ExtractRequestData(ginContext *gin.Context) (*model.JwtClaimRequest, string
 	userJwtClaims := ExtractJwtClaimFromContext(ginContext)
 	ipAddress, userAgent := ExtractRequestMeta(ginContext)
 	return userJwtClaims, ipAddress, userAgent
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
 }
 
 func TakePointer[T any](value T) *T {

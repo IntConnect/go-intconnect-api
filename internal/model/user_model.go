@@ -1,6 +1,9 @@
 package model
 
-import "go-intconnect-api/internal/trait"
+import (
+	"go-intconnect-api/internal/trait"
+	"mime/multipart"
+)
 
 type JwtClaimRequest struct {
 	Id          uint64   `json:"id"`
@@ -38,6 +41,20 @@ type UpdateUserRequest struct {
 	Email    string `json:"email" validate:"required,email,min=3,max=100,unique=users;email;Id"`
 	Password string `json:"password,omitempty" validate:"omitempty,min=3,max=100,weakPassword"`
 	RoleId   uint64 `json:"role_id" validate:"required,gte=0"`
+}
+
+type UpdateUserProfileRequest struct {
+	Id              uint64                `form:"-" validate:"required,gte=0"`
+	Username        string                `form:"username" validate:"required,min=3,max=50,unique=users;username;Id"`
+	Name            string                `form:"name" validate:"required,min=3,max=100"`
+	Email           string                `form:"email" validate:"required,email,min=3,max=100,unique=users;email;Id"`
+	CurrentPassword string                `form:"current_password" validate:"required,min=3,max=100,matchPassword"`
+	Password        *string               `form:"password,omitempty" validate:"omitempty,min=3,max=100,weakPassword"`
+	Avatar          *multipart.FileHeader `form:"avatar" validate:"omitempty,fileExtension=.png .jpg"`
+}
+
+func (updateUserProfileRequest *UpdateUserProfileRequest) GetId() uint64 {
+	return updateUserProfileRequest.Id
 }
 
 type LoginUserRequest struct {

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -8,11 +9,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/form"
 	"github.com/spf13/viper"
 )
 
 type Handler struct {
 	userService Service
+	formDecoder *form.Decoder
 	viperConfig *viper.Viper
 }
 
@@ -20,6 +23,7 @@ func NewHandler(userService Service, viperConfig *viper.Viper) *Handler {
 	return &Handler{
 		userService: userService,
 		viperConfig: viperConfig,
+		formDecoder: form.NewDecoder(),
 	}
 }
 
@@ -72,6 +76,22 @@ func (userHandler *Handler) UpdateUser(ginContext *gin.Context) {
 	updateUserModel.Id = parsedUserId
 	paginatedResponse := userHandler.userService.Update(ginContext, &updateUserModel)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
+}
+
+func (userHandler *Handler) UpdateProfile(ginContext *gin.Context) {
+	var updateUserProfileRequest model.UpdateUserProfileRequest
+	err := ginContext.Request.ParseMultipartForm(20 << 20) // 32MB maxMemory
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	err = userHandler.formDecoder.Decode(&updateUserProfileRequest, ginContext.Request.PostForm)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	avatarFile, _ := ginContext.FormFile("avatar")
+	updateUserProfileRequest.Avatar = avatarFile
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	newGeneratedToken := userHandler.userService.UpdateProfile(ginContext, &updateUserProfileRequest)
+	fmt.Println(newGeneratedToken)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Update profile success", gin.H{
+		"token": newGeneratedToken,
+	}))
 }
 
 func (userHandler *Handler) DeleteUser(ginContext *gin.Context) {
