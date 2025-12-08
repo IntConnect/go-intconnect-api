@@ -11,7 +11,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -22,18 +21,16 @@ type ServiceImpl struct {
 	validatorService                 validator.Service
 	dbConnection                     *gorm.DB
 	viperConfig                      *viper.Viper
-	loggerInstance                   *logrus.Logger
 }
 
 func NewService(reportDocumentTemplateRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper, loggerInstance *logrus.Logger,
+	viperConfig *viper.Viper,
 	parameterRepository parameter.Repository) *ServiceImpl {
 	return &ServiceImpl{
 		reportDocumentTemplateRepository: reportDocumentTemplateRepository,
 		validatorService:                 validatorService,
 		dbConnection:                     dbConnection,
 		viperConfig:                      viperConfig,
-		loggerInstance:                   loggerInstance,
 		parameterRepository:              parameterRepository,
 	}
 }

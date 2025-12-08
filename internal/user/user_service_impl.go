@@ -16,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -28,12 +27,11 @@ type ServiceImpl struct {
 	validatorService validator.Service
 	dbConnection     *gorm.DB
 	viperConfig      *viper.Viper
-	loggerInstance   *logrus.Logger
 	redisInstance    *configs.RedisInstance
 }
 
 func NewService(userRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper, loggerInstance *logrus.Logger,
+	viperConfig *viper.Viper,
 	auditLogService auditLog.Service,
 	redisInstance *configs.RedisInstance,
 ) *ServiceImpl {
@@ -42,7 +40,6 @@ func NewService(userRepository Repository, validatorService validator.Service, d
 		validatorService: validatorService,
 		dbConnection:     dbConnection,
 		viperConfig:      viperConfig,
-		loggerInstance:   loggerInstance,
 		auditLogService:  auditLogService,
 		redisInstance:    redisInstance,
 	}

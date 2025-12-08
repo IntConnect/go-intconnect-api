@@ -5,5 +5,4 @@ CREATE TABLE parameter_operations
     value        FLOAT,
     sequence     INT,
     parameter_id BIGINT             NOT NULL REFERENCES parameters (id)
-
 )

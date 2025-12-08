@@ -3,7 +3,6 @@ package modbus_server
 import (
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
-	"go-intconnect-api/internal/machine"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -11,7 +10,6 @@ import (
 	"go-intconnect-api/pkg/mapper"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -22,20 +20,17 @@ type ServiceImpl struct {
 	validatorService       validator.Service
 	dbConnection           *gorm.DB
 	viperConfig            *viper.Viper
-	loggerInstance         *logrus.Logger
 }
 
 func NewService(modbusServerRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper, loggerInstance *logrus.Logger,
+	viperConfig *viper.Viper,
 	auditLogService auditLog.Service,
-	machineRepository machine.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
 		modbusServerRepository: modbusServerRepository,
 		validatorService:       validatorService,
 		dbConnection:           dbConnection,
 		viperConfig:            viperConfig,
-		loggerInstance:         loggerInstance,
 		auditLogService:        auditLogService,
 	}
 }

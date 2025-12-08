@@ -3,16 +3,13 @@ package mqtt_topic
 import (
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
-	"go-intconnect-api/internal/machine"
 	"go-intconnect-api/internal/model"
-	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -23,20 +20,17 @@ type ServiceImpl struct {
 	validatorService    validator.Service
 	dbConnection        *gorm.DB
 	viperConfig         *viper.Viper
-	loggerInstance      *logrus.Logger
 }
 
 func NewService(mqttTopicRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper, loggerInstance *logrus.Logger,
+	viperConfig *viper.Viper,
 	auditLogService auditLog.Service,
-	machineRepository machine.Repository, mqttBrokerRepository mqttBroker.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
 		mqttTopicRepository: mqttTopicRepository,
 		validatorService:    validatorService,
 		dbConnection:        dbConnection,
 		viperConfig:         viperConfig,
-		loggerInstance:      loggerInstance,
 		auditLogService:     auditLogService,
 	}
 }
