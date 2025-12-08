@@ -175,7 +175,8 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	parameterRouterGroup.GET("", protectedRoutes.parameterController.FindAllParameter)
 	parameterRouterGroup.GET("/create", protectedRoutes.parameterController.FindDependencyParameter)
 	parameterRouterGroup.POST("", protectedRoutes.parameterController.CreateParameter)
-	parameterRouterGroup.PUT("", protectedRoutes.parameterController.UpdateParameter)
+	parameterRouterGroup.PUT("/:id", protectedRoutes.parameterController.UpdateParameter)
+	parameterRouterGroup.PUT("operation/:id", protectedRoutes.parameterController.UpdateParameterOperation)
 	parameterRouterGroup.DELETE("", protectedRoutes.parameterController.DeleteParameter)
 
 	mqttTopicRouterGroup := routerGroup.Group("mqtt-topics")

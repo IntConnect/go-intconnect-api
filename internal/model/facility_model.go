@@ -12,7 +12,7 @@ type CreateFacilityRequest struct {
 }
 
 type UpdateFacilityRequest struct {
-	Id          uint64                 `json:"-" validate:"required,gt=1"`
+	Id          uint64                 `json:"-" validate:"required,gte=1"`
 	Name        string                 `form:"name" validate:"required,min=3,max=100"`
 	Code        string                 `form:"code" validate:"required,min=3,max=100,unique=facilities;code;Id"`
 	Description string                 `form:"description" validate:"omitempty,min=3,max=100"`

@@ -57,6 +57,14 @@ func (parameterHandler *Handler) UpdateParameter(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been created", nil))
 }
 
+func (parameterHandler *Handler) UpdateParameterOperation(ginContext *gin.Context) {
+	var manageParameterOperationModel model.ManageParameterOperationRequest
+	err := ginContext.ShouldBindBodyWithJSON(&manageParameterOperationModel)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	paginatedRes := parameterHandler.parameterService.UpdateOperation(ginContext, &manageParameterOperationModel)
+	ginContext.JSON(http.StatusOK, paginatedRes)
+}
+
 func (parameterHandler *Handler) DeleteParameter(ginContext *gin.Context) {
 	var deleteParameterModel model.DeleteResourceGeneralRequest
 	parameterId := ginContext.Param("id")

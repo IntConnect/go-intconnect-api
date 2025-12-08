@@ -20,8 +20,8 @@ type Parameter struct {
 	Machine                 Machine                   `gorm:"foreignKey:MachineId;references:Id"`
 	MqttTopic               MqttTopic                 `gorm:"foreignKey:MqttTopicId;references:Id"`
 	ReportDocumentTemplates []*ReportDocumentTemplate `gorm:"many2many:report_document_templates_parameters;joinForeignKey:ParameterID;joinReferences:ReportDocumentTemplateID"`
-
-	Auditable `gorm:"embedded"`
+	ParameterOperation      []*ParameterOperation     `gorm:"foreignKey:ParameterID;references:Id"`
+	Auditable               `gorm:"embedded"`
 }
 
 func (parameterEntity Parameter) GetAuditable() *Auditable {

@@ -124,6 +124,29 @@ func (parameterService *ServiceImpl) Update(ginContext *gin.Context, updateParam
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
+func (parameterService *ServiceImpl) UpdateOperation(ginContext *gin.Context, updateParameterRequest *model.ManageParameterOperationRequest) *model.PaginatedResponse[*model.ParameterResponse] {
+	valErr := parameterService.validatorService.ValidateStruct(updateParameterRequest)
+	parameterService.validatorService.ParseValidationError(valErr, *updateParameterRequest)
+	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		parameterEntity, err := parameterService.parameterRepository.FindById(gormTransaction, updateParameterRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		var parameterOperationEntities []*entity.ParameterOperation
+		for _, parameterOperation := range updateParameterRequest.ParameterOperations {
+			parameterOperationEntity := helper.MapCreateRequestIntoEntity[model.ParameterOperationRequest, entity.ParameterOperation](parameterOperation)
+			parameterOperationEntities = append(parameterOperationEntities, parameterOperationEntity)
+		}
+		parameterEntity.ParameterOperation = parameterOperationEntities
+		err = parameterService.parameterRepository.Update(gormTransaction, parameterEntity)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	var paginatedResp *model.PaginatedResponse[*model.ParameterResponse]
+	paginationRequest := model.NewPaginationRequest()
+	paginatedResp = parameterService.FindAllPagination(&paginationRequest)
+	return paginatedResp
+}
+
 func (parameterService *ServiceImpl) Delete(ginContext *gin.Context, deleteParameterRequest *model.DeleteResourceGeneralRequest) {
 	valErr := parameterService.validatorService.ValidateStruct(deleteParameterRequest)
 	parameterService.validatorService.ParseValidationError(valErr, *deleteParameterRequest)

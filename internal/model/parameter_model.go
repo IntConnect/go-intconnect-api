@@ -46,6 +46,17 @@ type UpdateParameterRequest struct {
 	Description string  `json:"description,omitempty"`
 }
 
+type ManageParameterOperationRequest struct {
+	Id                  uint64                       `json:"id" validate:"required,number"`
+	ParameterOperations []*ParameterOperationRequest `json:"parameter_operations" validate:"required,dive,min=1"`
+}
+
+type ParameterOperationRequest struct {
+	Type     string  `json:"type" validate:"required,oneof=ADDITION SUBTRACTION MULTIPLICATION DIVISION"`
+	Value    float32 `json:"value" validate:"required,number"`
+	Sequence int     `json:"sequence" validate:"required,number"`
+}
+
 func (parameterResponse *ParameterResponse) GetAuditableResponse() *AuditableResponse {
 	return parameterResponse.AuditableResponse
 }
