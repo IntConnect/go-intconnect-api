@@ -488,7 +488,7 @@ func converterMqttTopicsToListenerResponse(mqttTopicEntities []entity.MqttTopic)
 
 func (listenerFluxor *ListenerFluxor) StartSnapshotSaver(ctx context.Context) {
 	go func() {
-		snapshotTicker := time.NewTicker(5 * time.Second)
+		snapshotTicker := time.NewTicker(1 * time.Minute)
 		defer snapshotTicker.Stop()
 
 		for {
