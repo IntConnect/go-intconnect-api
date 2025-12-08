@@ -48,7 +48,6 @@ func main() {
 		injector.DatabaseConnectionModule,
 		injector.FacilityModule,
 		injector.PermissionModule,
-		injector.LoggerModule,
 		injector.MqttBrokerModule,
 		injector.MachineModule,
 		injector.ParameterModule,
