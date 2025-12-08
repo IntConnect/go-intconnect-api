@@ -50,7 +50,7 @@ func (machineHandler *Handler) FindMachineById(ginContext *gin.Context) {
 func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 
 	var createMachineModel model.CreateMachineRequest
-	err := ginContext.Request.ParseMultipartForm(32 << 20) // 32MB maxMemory
+	err := ginContext.Request.ParseMultipartForm(500 << 20) // 32MB maxMemory
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	err = machineHandler.formDecoder.Decode(&createMachineModel, ginContext.Request.PostForm)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
