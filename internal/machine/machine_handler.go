@@ -39,6 +39,14 @@ func (machineHandler *Handler) FindAllMachinePagination(ginContext *gin.Context)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
+func (machineHandler *Handler) FindMachineById(ginContext *gin.Context) {
+	machineId := ginContext.Param("id")
+	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
+	machineResponse := machineHandler.machineService.FindById(ginContext, parsedMachineId)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Machine has been fetched", machineResponse))
+}
+
 func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 
 	var createMachineModel model.CreateMachineRequest
@@ -56,9 +64,8 @@ func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 		machineDocument.DocumentFile = extractIndexedFiles[i]
 		createMachineModel.MachineDocuments[i] = machineDocument
 	}
-	if len(createMachineModel.MachineDocuments) > 0 {
-		machineHandler.machineService.Create(ginContext, &createMachineModel)
-	}
+
+	machineHandler.machineService.Create(ginContext, &createMachineModel)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Machine has been created", nil))
 }
 

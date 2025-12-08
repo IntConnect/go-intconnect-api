@@ -86,6 +86,18 @@ func (machineService *ServiceImpl) FindAllPagination(paginationReq *model.Pagina
 	)
 }
 
+func (machineService *ServiceImpl) FindById(ginContext *gin.Context, machineId uint64) *model.MachineResponse {
+	var machineResponseRequest *model.MachineResponse
+	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		machineEntity, err := machineService.machineRepository.FindById(gormTransaction, machineId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		machineResponseRequest = helper.MapEntityIntoResponse[*entity.Machine, *model.MachineResponse](machineEntity, mapper.FuncMapAuditable)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return machineResponseRequest
+}
+
 // Create - Membuat machine baru
 func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest) *model.PaginatedResponse[*model.MachineResponse] {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)

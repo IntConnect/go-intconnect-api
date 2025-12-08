@@ -53,17 +53,9 @@ func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(
 }
 func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.Machine, error) {
 	var machineEntity entity.Machine
-	err := gormTransaction.Model(&entity.Machine{}).
-		Preload("MachineGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Where("id = ?", machineId).Find(&machineEntity).Error
+	err := gormTransaction.Model(&entity.Machine{}).Where("id = ?", machineId).Find(&machineEntity).Error
 
 	return &machineEntity, err
-}
-
-func (machineRepositoryImpl *RepositoryImpl) FindByName(pipelineName string) *entity.Machine {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (machineRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineEntity *entity.Machine) error {
