@@ -41,6 +41,14 @@ func (parameterHandler *Handler) FindAllParameterPagination(ginContext *gin.Cont
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
+func (parameterHandler *Handler) FindByIdParameter(ginContext *gin.Context) {
+	parameterId := ginContext.Param("id")
+	parsedParameterId, err := strconv.ParseUint(parameterId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	parameterResponses := parameterHandler.parameterService.FindById(ginContext, parsedParameterId)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Parameters has been fetched", parameterResponses))
+}
+
 func (parameterHandler *Handler) CreateParameter(ginContext *gin.Context) {
 	var createParameterModel model.CreateParameterRequest
 	err := ginContext.ShouldBindJSON(&createParameterModel)

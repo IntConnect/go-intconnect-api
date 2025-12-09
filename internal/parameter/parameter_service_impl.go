@@ -36,11 +36,11 @@ func (parameterService *ServiceImpl) FindAll() []*model.ParameterResponse {
 		parameterEntities, err := parameterService.parameterRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		parameterResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
-			entity.Parameter,
+			*entity.Parameter,
 			*model.ParameterResponse,
 		](
 			parameterEntities,
-			mapper.FuncMapAuditable[entity.Parameter, *model.ParameterResponse],
+			mapper.FuncMapAuditable[*entity.Parameter, *model.ParameterResponse],
 		)
 		return nil
 	})
@@ -76,7 +76,7 @@ func (parameterService *ServiceImpl) FindAllPagination(paginationReq *model.Pagi
 			paginationQuery.Offset,
 			paginationQuery.Limit,
 			paginationQuery.SearchQuery)
-		parameterResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Parameter, *model.ParameterResponse](
+		parameterResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.Parameter, *model.ParameterResponse](
 			parameterEntities,
 			mapper.FuncMapAuditable,
 		)
@@ -91,6 +91,24 @@ func (parameterService *ServiceImpl) FindAllPagination(paginationReq *model.Pagi
 		paginationReq,
 		totalItems,
 	)
+}
+
+func (parameterService *ServiceImpl) FindById(ginContext *gin.Context, parameterId uint64) *model.ParameterResponse {
+	var parameterResponse *model.ParameterResponse
+	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		parameterEntity, err := parameterService.parameterRepository.FindById(gormTransaction, parameterId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		parameterResponse = helper.MapEntityIntoResponse[
+			*entity.Parameter,
+			*model.ParameterResponse,
+		](
+			parameterEntity,
+			mapper.FuncMapAuditable[*entity.Parameter, *model.ParameterResponse],
+		)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return parameterResponse
 }
 
 // Create - Membuat parameter baru

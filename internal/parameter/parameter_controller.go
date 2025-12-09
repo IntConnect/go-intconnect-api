@@ -4,6 +4,7 @@ import "github.com/gin-gonic/gin"
 
 type Controller interface {
 	FindAllParameter(ginContext *gin.Context)
+	FindByIdParameter(ginContext *gin.Context)
 	FindDependencyParameter(context *gin.Context)
 	FindAllParameterPagination(ginContext *gin.Context)
 	CreateParameter(ginContext *gin.Context)

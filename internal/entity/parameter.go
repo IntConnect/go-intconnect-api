@@ -24,6 +24,6 @@ type Parameter struct {
 	Auditable               `gorm:"embedded"`
 }
 
-func (parameterEntity Parameter) GetAuditable() *Auditable {
+func (parameterEntity *Parameter) GetAuditable() *Auditable {
 	return &parameterEntity.Auditable
 }

@@ -2,13 +2,20 @@ package model
 
 type ParameterResponse struct {
 	Id                uint64             `json:"id"`
-	MachineId         *uint64            `json:"machine_id"`
+	MachineId         uint64             `json:"machine_id"`
+	MqttTopicId       uint64             `json:"mqtt_topic_id"`
 	Name              string             `json:"name"`
 	Code              string             `json:"code"`
 	Unit              string             `json:"unit"`
 	MinValue          float32            `json:"min_value"`
 	MaxValue          float32            `json:"max_value"`
 	Description       string             `json:"description"`
+	PositionX         float32            `json:"position_x"`
+	PositionY         float32            `json:"position_y"`
+	PositionZ         float32            `json:"position_z"`
+	RotationX         float32            `json:"rotation_x"`
+	RotationY         float32            `json:"rotation_y"`
+	RotationZ         float32            `json:"rotation_z"`
 	MachineResponse   *MachineResponse   `json:"machine_response" mapstructure:"-"`
 	AuditableResponse *AuditableResponse `json:"auditable_response" mapstructure:"-"`
 }
