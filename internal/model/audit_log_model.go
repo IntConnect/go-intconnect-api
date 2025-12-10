@@ -7,6 +7,7 @@ type CreateAuditLogRequest struct {
 	Description string `json:"description"`
 	Before      any    `json:"before"`
 	After       any    `json:"after"`
+	Relations   any    `json:"relations"`
 	IpAddress   string `json:"ip_address"`
 	UserAgent   string `json:"user_agent"`
 }
@@ -25,6 +26,13 @@ type AuditLogResponse struct {
 	SimpleAuditableResponse *SimpleAuditableResponse `json:"auditable"`
 }
 
+type AuditLogPayload struct {
+	Before      interface{}
+	After       interface{}
+	Relations   map[string]interface{}
+	Description string
+}
+
 func (auditLogResponse *AuditLogResponse) GetSimpleAuditableResponse() *SimpleAuditableResponse {
 	return auditLogResponse.SimpleAuditableResponse
 }
@@ -41,13 +49,14 @@ const (
 )
 
 const (
-	AUDIT_LOG_FEATURE_USER          = "USER"
-	AUDIT_LOG_FEATURE_ROLE          = "ROLE"
-	AUDIT_LOG_FEATURE_MQTT_BROKER   = "MQTT_BROKER"
-	AUDIT_LOG_FEATURE_FACILITY      = "FACILITY"
-	AUDIT_LOG_FEATURE_MACHINE       = "MACHINE"
-	AUDIT_LOG_FEATURE_SMTP_SERVER   = "SMTP_SERVER"
-	AUDIT_LOG_FEATURE_MODBUS_SERVER = "MODBUS_SERVER"
+	AUDIT_LOG_FEATURE_USER                     = "USER"
+	AUDIT_LOG_FEATURE_ROLE                     = "ROLE"
+	AUDIT_LOG_FEATURE_MQTT_BROKER              = "MQTT_BROKER"
+	AUDIT_LOG_FEATURE_FACILITY                 = "FACILITY"
+	AUDIT_LOG_FEATURE_MACHINE                  = "MACHINE"
+	AUDIT_LOG_FEATURE_SMTP_SERVER              = "SMTP_SERVER"
+	AUDIT_LOG_FEATURE_MODBUS_SERVER            = "MODBUS_SERVER"
+	AUDIT_LOG_FEATURE_REPORT_DOCUMENT_TEMPLATE = "REPORT_DOCUMENT_TEMPLATE"
 )
 
 const (

@@ -192,8 +192,8 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	reportDocumentTemplateRouterGroup.GET("pagination", protectedRoutes.reportDocumentTemplateController.FindAllReportDocumentTemplatePagination)
 	reportDocumentTemplateRouterGroup.GET("", protectedRoutes.reportDocumentTemplateController.FindAllReportDocumentTemplate)
 	reportDocumentTemplateRouterGroup.POST("", protectedRoutes.reportDocumentTemplateController.CreateReportDocumentTemplate)
-	reportDocumentTemplateRouterGroup.PUT("", protectedRoutes.reportDocumentTemplateController.UpdateReportDocumentTemplate)
-	reportDocumentTemplateRouterGroup.DELETE("", protectedRoutes.reportDocumentTemplateController.DeleteReportDocumentTemplate)
+	reportDocumentTemplateRouterGroup.PUT("/:id", protectedRoutes.reportDocumentTemplateController.UpdateReportDocumentTemplate)
+	reportDocumentTemplateRouterGroup.DELETE("/:id", protectedRoutes.reportDocumentTemplateController.DeleteReportDocumentTemplate)
 
 	auditLogRouterGroup := routerGroup.Group("audit-logs")
 	auditLogRouterGroup.GET("pagination", protectedRoutes.auditLogController.FindAllAuditLogPagination)

@@ -27,3 +27,7 @@ type Parameter struct {
 func (parameterEntity *Parameter) GetAuditable() *Auditable {
 	return &parameterEntity.Auditable
 }
+
+func (parameterEntity *Parameter) GetId() uint64 {
+	return parameterEntity.Id
+}

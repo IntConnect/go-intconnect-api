@@ -16,10 +16,10 @@ type CreateReportDocumentTemplateRequest struct {
 }
 
 type UpdateReportDocumentTemplateRequest struct {
-	Id          uint64   `json:"id" validate:"required,number,gt=0,exists=report_document_templates;id"`
-	Name        string   `json:"name" validate:"required,min=3,max=255"`
-	Code        string   `json:"code" validate:"required,min=3,max=255"`
-	ParameterId []uint64 `json:"parameter_id" validate:"required,min=1,dive,exists=parameters;id"`
+	Id           uint64   `json:"-" validate:"required,number,gt=0,exists=report_document_templates;id"`
+	Name         string   `json:"name" validate:"required,min=3,max=255"`
+	Code         string   `json:"code" validate:"required,min=3,max=255"`
+	ParameterIds []uint64 `json:"parameter_ids" validate:"required,min=1,dive,exists=parameters;id"`
 }
 
 func (reportDocumentTemplateResponse *ReportDocumentTemplateResponse) GetAuditableResponse() *AuditableResponse {

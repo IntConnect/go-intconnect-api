@@ -3,7 +3,7 @@ package configs
 import (
 	"fmt"
 	"go-intconnect-api/internal/entity"
-	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/trait"
 	"mime/multipart"
 	"regexp"
 	"strconv"
@@ -282,7 +282,7 @@ func matchPasswordValidator(dbConnection *gorm.DB) validator.Func {
 		currentPassword := fl.Field().String()
 
 		// ambil struct req sebagai interface
-		requestModel, isValid := fl.Top().Interface().(model.HasId)
+		requestModel, isValid := fl.Top().Interface().(trait.HasId)
 		if !isValid {
 			return false // struct tidak mendukung HasId
 		}

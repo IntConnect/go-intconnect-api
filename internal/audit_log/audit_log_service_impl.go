@@ -1,6 +1,7 @@
 package audit_log
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
@@ -92,9 +93,7 @@ func (auditLogService *ServiceImpl) Record(
 	ginContext *gin.Context,
 	actionType string,
 	featureType string,
-	beforeEntity interface{},
-	afterEntity interface{},
-	description string,
+	auditLogPayload model.AuditLogPayload,
 ) error {
 	userJwtClaims, ipAddress, userAgent := helper.ExtractRequestData(ginContext)
 
@@ -102,9 +101,10 @@ func (auditLogService *ServiceImpl) Record(
 		UserId:      userJwtClaims.Id,
 		Action:      actionType,
 		Feature:     featureType,
-		Description: description,
-		Before:      beforeEntity,
-		After:       afterEntity,
+		Description: auditLogPayload.Description,
+		Before:      auditLogPayload.Before,
+		After:       auditLogPayload.After,
+		Relations:   auditLogPayload.Relations,
 		IpAddress:   ipAddress,
 		UserAgent:   userAgent,
 	}
@@ -112,11 +112,59 @@ func (auditLogService *ServiceImpl) Record(
 	valErr := auditLogService.validatorService.ValidateStruct(createAuditLogRequest)
 	auditLogService.validatorService.ParseValidationError(valErr, *createAuditLogRequest)
 
-	err := auditLogService.dbConnection.Transaction(func(tx *gorm.DB) error {
-		auditLogEntity := helper.MapCreateRequestIntoEntity[model.CreateAuditLogRequest, entity.AuditLog](createAuditLogRequest)
+	return auditLogService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		auditLogEntity := helper.MapCreateRequestIntoEntity[
+			model.CreateAuditLogRequest, entity.AuditLog](createAuditLogRequest)
+
 		auditLogEntity.SimpleAuditable = entity.NewSimpleAuditable(model.AUDIT_LOG_ACTOR_SYSTEM)
 
-		return auditLogService.auditLogRepository.Create(tx, auditLogEntity)
+		return auditLogService.auditLogRepository.Create(gormTransaction, auditLogEntity)
 	})
-	return err
+}
+
+func (auditLogService *ServiceImpl) Build(
+	beforeEntity interface{},
+	afterEntity interface{},
+	relations map[string]map[string][]uint64, // key=relationName, value={"before": [], "after": []}
+	description string,
+) model.AuditLogPayload {
+	before := map[string]interface{}{}
+	after := map[string]interface{}{}
+
+	// Handle entity fields
+	switch {
+	case beforeEntity != nil && afterEntity != nil:
+		fieldDiff := helper.DiffEntity(beforeEntity, afterEntity)
+		fmt.Println("DIFF", fieldDiff)
+		for field, val := range fieldDiff {
+			before[field] = val["before"]
+			after[field] = val["after"]
+		}
+	case beforeEntity == nil && afterEntity != nil:
+		// Create case
+		after = helper.NormalizeStruct(afterEntity)
+	case beforeEntity != nil && afterEntity == nil:
+		// Delete case
+		before = helper.NormalizeStruct(beforeEntity)
+	}
+	// Handle relations
+	relationChanges := map[string]interface{}{}
+	for relName, relVal := range relations {
+		beforeIds := relVal["before"]
+		afterIds := relVal["after"]
+
+		added, deleted, unchanged := helper.DiffUint64Slice(beforeIds, afterIds)
+
+		relationChanges[relName] = map[string]interface{}{
+			"added":     added,
+			"deleted":   deleted,
+			"unchanged": unchanged,
+		}
+	}
+	return model.AuditLogPayload{
+		Before:      before,
+		After:       after,
+		Relations:   relationChanges,
+		Description: description,
+	}
 }

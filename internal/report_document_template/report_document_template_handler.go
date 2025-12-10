@@ -47,17 +47,23 @@ func (reportDocumentTemplateHandler *Handler) CreateReportDocumentTemplate(ginCo
 func (reportDocumentTemplateHandler *Handler) UpdateReportDocumentTemplate(ginContext *gin.Context) {
 	var updateReportDocumentTemplateModel model.UpdateReportDocumentTemplateRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateReportDocumentTemplateModel)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	reportDocumentTemplateHandler.reportDocumentTemplateService.Update(ginContext, &updateReportDocumentTemplateModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("ReportDocumentTemplate has been created", nil))
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrPayloadInvalid))
+	reportDocumentTemplateId := ginContext.Param("id")
+	parsedReportDocumentTemplateId, err := strconv.ParseUint(reportDocumentTemplateId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
+	updateReportDocumentTemplateModel.Id = parsedReportDocumentTemplateId
+	paginatedRes := reportDocumentTemplateHandler.reportDocumentTemplateService.Update(ginContext, &updateReportDocumentTemplateModel)
+	ginContext.JSON(http.StatusOK, paginatedRes)
 }
 
 func (reportDocumentTemplateHandler *Handler) DeleteReportDocumentTemplate(ginContext *gin.Context) {
 	var deleteResourceGeneralRequest model.DeleteResourceGeneralRequest
+	err := ginContext.ShouldBindBodyWithJSON(&deleteResourceGeneralRequest)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrPayloadInvalid))
 	reportDocumentTemplateId := ginContext.Param("id")
 	parsedReportDocumentTemplateId, err := strconv.ParseUint(reportDocumentTemplateId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	deleteResourceGeneralRequest.Id = parsedReportDocumentTemplateId
-	reportDocumentTemplateHandler.reportDocumentTemplateService.Delete(ginContext, &deleteResourceGeneralRequest)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("reportRocumentTemplateId has been updated", nil))
+	paginatedRes := reportDocumentTemplateHandler.reportDocumentTemplateService.Delete(ginContext, &deleteResourceGeneralRequest)
+	ginContext.JSON(http.StatusOK, paginatedRes)
 }

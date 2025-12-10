@@ -2,10 +2,12 @@ package helper
 
 import (
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/logger"
 	"mime/multipart"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -93,4 +95,122 @@ func HashPassword(password string) (string, error) {
 
 func TakePointer[T any](value T) *T {
 	return &value
+}
+
+func DiffEntity(before interface{}, after interface{}) map[string]map[string]interface{} {
+	diff := make(map[string]map[string]interface{})
+
+	getValue := func(i interface{}) reflect.Value {
+		v := reflect.ValueOf(i)
+		if v.Kind() == reflect.Ptr {
+			return v.Elem()
+		}
+		return v
+	}
+
+	beforeVal := getValue(before)
+	afterVal := getValue(after)
+	beforeType := beforeVal.Type()
+
+	for i := 0; i < beforeVal.NumField(); i++ {
+		field := beforeType.Field(i)
+		fieldName := field.Name
+
+		beforeField := beforeVal.Field(i).Interface()
+		afterField := afterVal.Field(i).Interface()
+
+		// Skip complex types: struct, slice, map, pointer
+		kind := beforeVal.Field(i).Kind()
+		if kind == reflect.Struct || kind == reflect.Slice || kind == reflect.Map || kind == reflect.Ptr {
+			continue
+		}
+
+		if reflect.DeepEqual(beforeField, afterField) {
+			continue
+		}
+
+		diff[fieldName] = map[string]interface{}{
+			"before": beforeField,
+			"after":  afterField,
+		}
+	}
+
+	return diff
+}
+
+func DiffUint64Slice(beforeIds []uint64, afterIds []uint64) (added []uint64, removed []uint64, unchanged []uint64) {
+	beforeMap := map[uint64]bool{}
+	afterMap := map[uint64]bool{}
+	unchanged = []uint64{}
+
+	for _, beforeId := range beforeIds {
+		beforeMap[beforeId] = true
+	}
+
+	for _, afterId := range afterIds {
+		afterMap[afterId] = true
+		if !beforeMap[afterId] {
+			added = append(added, afterId)
+		} else {
+			unchanged = append(unchanged, afterId)
+		}
+	}
+
+	for _, beforeId := range beforeIds {
+		if !afterMap[beforeId] {
+			removed = append(removed, beforeId)
+		}
+	}
+
+	return
+}
+
+// Convert struct → map[string]interface{} jika bukan nil
+func NormalizeStruct(sourceStruct interface{}) map[string]interface{} {
+	if sourceStruct == nil {
+		return nil
+	}
+
+	val := reflect.ValueOf(sourceStruct)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	if val.Kind() != reflect.Struct {
+		return nil
+	}
+
+	result := make(map[string]interface{})
+	valType := val.Type()
+
+	for i := 0; i < val.NumField(); i++ {
+		field := valType.Field(i)
+		fieldVal := val.Field(i)
+
+		// Skip unexported fields
+		if field.PkgPath != "" {
+			continue
+		}
+
+		kind := fieldVal.Kind()
+		switch kind {
+		case reflect.Struct, reflect.Ptr, reflect.Slice, reflect.Map, reflect.Interface:
+			// Skip nested structs/slices/maps
+			continue
+		default:
+			result[field.Name] = fieldVal.Interface()
+		}
+	}
+
+	if len(result) == 0 {
+		return nil
+	}
+	return result
+}
+
+func ExtractIds[T trait.HasId](items []T) []uint64 {
+	ids := make([]uint64, len(items))
+	for i, item := range items {
+		ids[i] = item.GetId()
+	}
+	return ids
 }

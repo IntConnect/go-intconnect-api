@@ -58,7 +58,8 @@ func (reportDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (reportDocumentTemplateRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, reportDocumentTemplateId uint64) (*entity.ReportDocumentTemplate, error) {
 	var reportDocumentTemplateEntity entity.ReportDocumentTemplate
 	err := gormTransaction.Model(&entity.ReportDocumentTemplate{}).
-		Where("id = ?", reportDocumentTemplateId).Find(&reportDocumentTemplateEntity).Error
+		Preload("Parameters").
+		Where("id = ?", reportDocumentTemplateId).First(&reportDocumentTemplateEntity).Error
 
 	return &reportDocumentTemplateEntity, err
 }
@@ -73,5 +74,5 @@ func (reportDocumentTemplateRepositoryImpl *RepositoryImpl) Update(gormTransacti
 }
 
 func (reportDocumentTemplateRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.ReportDocumentTemplate{}).Where("id = ?", id).Delete(entity.ReportDocumentTemplate{}).Error
+	return gormTransaction.Model(entity.ReportDocumentTemplate{}).Where("id = ?", id).Delete(&entity.ReportDocumentTemplate{}).Error
 }

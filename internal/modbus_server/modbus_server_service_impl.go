@@ -92,14 +92,14 @@ func (modbusServerService *ServiceImpl) Create(ginContext *gin.Context, createMo
 		modbusServerEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
 		err := modbusServerService.modbusServerRepository.Create(gormTransaction, modbusServerEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		_ = modbusServerService.auditLogService.Record(
-			ginContext,
-			model.AUDIT_LOG_UPDATE,
-			model.AUDIT_LOG_FEATURE_MODBUS_SERVER,
-			nil,
-			modbusServerEntity,
-			"",
-		)
+		//_ = modbusServerService.auditLogService.Record(
+		//	ginContext,
+		//	model.AUDIT_LOG_UPDATE,
+		//	model.AUDIT_LOG_FEATURE_MODBUS_SERVER,
+		//	nil,
+		//	modbusServerEntity,
+		//	"",
+		//)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -116,18 +116,18 @@ func (modbusServerService *ServiceImpl) Update(ginContext *gin.Context, updateMo
 	err := modbusServerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		modbusServer, err := modbusServerService.modbusServerRepository.FindById(gormTransaction, updateModbusServerRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		rawModbusServer := modbusServer
+		//rawModbusServer := modbusServer
 		helper.MapUpdateRequestIntoEntity(updateModbusServerRequest, modbusServer)
 		modbusServer.Auditable = entity.UpdateAuditable(userJwtClaims.Username)
 		err = modbusServerService.modbusServerRepository.Update(gormTransaction, modbusServer)
-		_ = modbusServerService.auditLogService.Record(
-			ginContext,
-			model.AUDIT_LOG_UPDATE,
-			model.AUDIT_LOG_FEATURE_MODBUS_SERVER,
-			rawModbusServer,
-			modbusServer,
-			"",
-		)
+		//_ = modbusServerService.auditLogService.Record(
+		//	ginContext,
+		//	model.AUDIT_LOG_UPDATE,
+		//	model.AUDIT_LOG_FEATURE_MODBUS_SERVER,
+		//	rawModbusServer,
+		//	modbusServer,
+		//	"",
+		//)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
@@ -148,14 +148,14 @@ func (modbusServerService *ServiceImpl) Delete(ginContext *gin.Context, deleteMo
 		modbusServer.Auditable = entity.DeleteAuditable(userJwtClaims.Username)
 		err = modbusServerService.modbusServerRepository.Delete(gormTransaction, deleteModbusServerRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		_ = modbusServerService.auditLogService.Record(
-			ginContext,
-			model.AUDIT_LOG_CREATE,
-			model.AUDIT_LOG_FEATURE_MODBUS_SERVER,
-			nil,
-			modbusServer,
-			deleteModbusServerRequest.Reason,
-		)
+		//_ = modbusServerService.auditLogService.Record(
+		//	ginContext,
+		//	model.AUDIT_LOG_CREATE,
+		//	model.AUDIT_LOG_FEATURE_MODBUS_SERVER,
+		//	nil,
+		//	modbusServer,
+		//	deleteModbusServerRequest.Reason,
+		//)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

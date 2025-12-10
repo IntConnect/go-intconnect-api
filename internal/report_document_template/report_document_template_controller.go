@@ -6,6 +6,6 @@ type Controller interface {
 	FindAllReportDocumentTemplate(ginContext *gin.Context)
 	FindAllReportDocumentTemplatePagination(ginContext *gin.Context)
 	CreateReportDocumentTemplate(ginContext *gin.Context)
-	DeleteReportDocumentTemplate(ginContext *gin.Context)
 	UpdateReportDocumentTemplate(ginContext *gin.Context)
+	DeleteReportDocumentTemplate(ginContext *gin.Context)
 }

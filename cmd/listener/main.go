@@ -46,7 +46,7 @@ func main() {
 type ListenerFluxor struct {
 	gormDatabase         *gorm.DB
 	mqttBrokersMap       map[uint64]entity.MqttBroker
-	parametersMap        map[string]entity.Parameter
+	parametersMap        map[string]*entity.Parameter
 	insertionChan        chan []*entity.Telemetry
 	waitGroup            *sync.WaitGroup
 	telemetryRepository  telemetry.Repository
@@ -71,7 +71,7 @@ func NewListenerFluxor() *ListenerFluxor {
 	listenerFluxor := &ListenerFluxor{
 		gormDatabase:         gormDatabase,
 		mqttBrokersMap:       make(map[uint64]entity.MqttBroker),
-		parametersMap:        make(map[string]entity.Parameter),
+		parametersMap:        make(map[string]*entity.Parameter),
 		insertionChan:        make(chan []*entity.Telemetry, InsertionQueueSize),
 		waitGroup:            &sync.WaitGroup{},
 		telemetryRepository:  telemetryRepository,
@@ -146,7 +146,7 @@ func (listenerFluxor *ListenerFluxor) startMqttConnection() error {
 
 func (listenerFluxor *ListenerFluxor) StartPeriodicChecker() {
 	go func() {
-		ticker := time.NewTicker(1 * time.Minute)
+		ticker := time.NewTicker(1 * time.Second)
 		defer ticker.Stop()
 
 		for range ticker.C {
@@ -177,7 +177,7 @@ func (listenerFluxor *ListenerFluxor) CheckConfigurationPeriodically() {
 	}
 
 	newMqttBrokersMap := make(map[uint64]entity.MqttBroker)
-	newParametersMap := make(map[string]entity.Parameter)
+	newParametersMap := make(map[string]*entity.Parameter)
 
 	for _, mqttBrokerEntity := range mqttBrokerEntities {
 		newMqttBrokersMap[mqttBrokerEntity.Id] = mqttBrokerEntity

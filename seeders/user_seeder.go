@@ -24,6 +24,16 @@ func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
 		Status:     trait.UserStatusActive,
 		Auditable:  entity.NewAuditable("Administrator"),
 	})
+	gormDatabase.Model(&entity.User{}).Create(&entity.User{
+		RoleId:     1,
+		Username:   "admin2",
+		Name:       "Administrator2",
+		Email:      "admin2@gmail.com",
+		Password:   string(hashedPassword),
+		AvatarPath: "",
+		Status:     trait.UserStatusActive,
+		Auditable:  entity.NewAuditable("Administrator"),
+	})
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("mngr"), bcrypt.DefaultCost)
 
 	gormDatabase.Model(&entity.User{}).Create(&entity.User{

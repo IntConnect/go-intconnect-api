@@ -1,6 +1,7 @@
 package report_document_template
 
 import (
+	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/parameter"
@@ -17,6 +18,7 @@ import (
 
 type ServiceImpl struct {
 	reportDocumentTemplateRepository Repository
+	auditLogService                  auditLog.Service
 	parameterRepository              parameter.Repository
 	validatorService                 validator.Service
 	dbConnection                     *gorm.DB
@@ -25,13 +27,16 @@ type ServiceImpl struct {
 
 func NewService(reportDocumentTemplateRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper,
-	parameterRepository parameter.Repository) *ServiceImpl {
+	parameterRepository parameter.Repository,
+	auditLogService auditLog.Service,
+) *ServiceImpl {
 	return &ServiceImpl{
 		reportDocumentTemplateRepository: reportDocumentTemplateRepository,
 		validatorService:                 validatorService,
 		dbConnection:                     dbConnection,
 		viperConfig:                      viperConfig,
 		parameterRepository:              parameterRepository,
+		auditLogService:                  auditLogService,
 	}
 }
 
@@ -95,7 +100,24 @@ func (reportDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Context
 		reportDocumentTemplateEntity.Parameters = parameterEntities
 		err = reportDocumentTemplateService.reportDocumentTemplateRepository.Create(gormTransaction, reportDocumentTemplateEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := reportDocumentTemplateService.auditLogService.Build(
+			nil,                          // before entity
+			reportDocumentTemplateEntity, // after entity
+			map[string]map[string][]uint64{
+				"parameters": {
+					"before": nil,
+					"after":  createReportDocumentTemplateRequest.ParameterIds,
+				},
+			},
+			"",
+		)
 
+		err = reportDocumentTemplateService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_FEATURE_REPORT_DOCUMENT_TEMPLATE,
+				auditPayload)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -104,27 +126,86 @@ func (reportDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Context
 	return paginationResp
 }
 
-func (reportDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Context, updateReportDocumentTemplateRequest *model.UpdateReportDocumentTemplateRequest) {
+func (reportDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Context, updateReportDocumentTemplateRequest *model.UpdateReportDocumentTemplateRequest) *model.PaginatedResponse[*model.ReportDocumentTemplateResponse] {
+	// Validate
 	valErr := reportDocumentTemplateService.validatorService.ValidateStruct(updateReportDocumentTemplateRequest)
 	reportDocumentTemplateService.validatorService.ParseValidationError(valErr, *updateReportDocumentTemplateRequest)
+
 	err := reportDocumentTemplateService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		reportDocumentTemplate, err := reportDocumentTemplateService.reportDocumentTemplateRepository.FindById(gormTransaction, updateReportDocumentTemplateRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		beforeReportDocumentTemplate := *reportDocumentTemplate
+		beforeReportDocumentTemplate.Parameters = append([]*entity.Parameter(nil), reportDocumentTemplate.Parameters...)
+
+		// Map field biasa
 		helper.MapUpdateRequestIntoEntity(updateReportDocumentTemplateRequest, reportDocumentTemplate)
-		err = reportDocumentTemplateService.reportDocumentTemplateRepository.Update(gormTransaction, reportDocumentTemplate)
+		if err = reportDocumentTemplateService.reportDocumentTemplateRepository.Update(gormTransaction, reportDocumentTemplate); err != nil {
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		}
+
+		// Generate daftar parameter baru
+		newParameterIds := make([]entity.Parameter, 0, len(updateReportDocumentTemplateRequest.ParameterIds))
+		for _, parameterId := range updateReportDocumentTemplateRequest.ParameterIds {
+			newParameterIds = append(newParameterIds, entity.Parameter{Id: parameterId})
+		}
+
+		// Replace relasi M2M
+		if err := gormTransaction.Model(reportDocumentTemplate).Association("Parameters").Replace(&newParameterIds); err != nil {
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		}
+		auditPayload := reportDocumentTemplateService.auditLogService.Build(
+			&beforeReportDocumentTemplate, // before entity
+			reportDocumentTemplate,        // after entity
+			map[string]map[string][]uint64{
+				"parameters": {
+					"before": helper.ExtractIds(beforeReportDocumentTemplate.Parameters),
+					"after":  updateReportDocumentTemplateRequest.ParameterIds,
+				},
+			},
+			"",
+		)
+		err = reportDocumentTemplateService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_UPDATE,
+				model.AUDIT_LOG_FEATURE_REPORT_DOCUMENT_TEMPLATE,
+				auditPayload)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
+
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationReq := model.NewPaginationRequest()
+	return reportDocumentTemplateService.FindAllPagination(&paginationReq)
 }
 
-func (reportDocumentTemplateService *ServiceImpl) Delete(ginContext *gin.Context, deleteReportDocumentTemplateRequest *model.DeleteResourceGeneralRequest) {
+func (reportDocumentTemplateService *ServiceImpl) Delete(ginContext *gin.Context, deleteReportDocumentTemplateRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.ReportDocumentTemplateResponse] {
 	valErr := reportDocumentTemplateService.validatorService.ValidateStruct(deleteReportDocumentTemplateRequest)
 	reportDocumentTemplateService.validatorService.ParseValidationError(valErr, *deleteReportDocumentTemplateRequest)
 	err := reportDocumentTemplateService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := reportDocumentTemplateService.reportDocumentTemplateRepository.Delete(gormTransaction, deleteReportDocumentTemplateRequest.Id)
+		reportDocumentTemplate, err := reportDocumentTemplateService.reportDocumentTemplateRepository.FindById(gormTransaction, deleteReportDocumentTemplateRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		err = reportDocumentTemplateService.reportDocumentTemplateRepository.Delete(gormTransaction, deleteReportDocumentTemplateRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := reportDocumentTemplateService.auditLogService.Build(
+			reportDocumentTemplate, // before entity
+			nil,                    // after entity
+			map[string]map[string][]uint64{
+				"parameters": {
+					"before": helper.ExtractIds(reportDocumentTemplate.Parameters),
+					"after":  nil,
+				},
+			},
+			deleteReportDocumentTemplateRequest.Reason,
+		)
+		err = reportDocumentTemplateService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_DELETE,
+				model.AUDIT_LOG_FEATURE_REPORT_DOCUMENT_TEMPLATE,
+				auditPayload)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationReq := model.NewPaginationRequest()
+	return reportDocumentTemplateService.FindAllPagination(&paginationReq)
 }
