@@ -17,6 +17,7 @@ type Parameter struct {
 	RotationY               float32                   `gorm:"column:rotation_y"`
 	RotationZ               float32                   `gorm:"column:rotation_z"`
 	IsDisplay               bool                      `gorm:"column:is_display;default:true"`
+	IsAutomatic             bool                      `gorm:"column:is_automatic;default:true"`
 	Machine                 Machine                   `gorm:"foreignKey:MachineId;references:Id"`
 	MqttTopic               MqttTopic                 `gorm:"foreignKey:MqttTopicId;references:Id"`
 	ReportDocumentTemplates []*ReportDocumentTemplate `gorm:"many2many:report_document_templates_parameters;joinForeignKey:ParameterID;joinReferences:ReportDocumentTemplateID"`

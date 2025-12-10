@@ -10,7 +10,6 @@ CREATE TABLE facilities
     location       VARCHAR(255),
     status         facility_status_enum NOT NULL,
     thumbnail_path VARCHAR(255)         NOT NULL,
-    metadata       JSONB     DEFAULT '{}'::jsonb,
     created_by     VARCHAR(255),
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

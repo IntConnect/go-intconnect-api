@@ -16,6 +16,7 @@ CREATE TABLE parameters
     rotation_y    FLOAT,
     rotation_z    FLOAT,
     is_display    BOOLEAN   DEFAULT TRUE             NOT NULL,
+    is_automatic  BOOLEAN   DEFAULT TRUE             NOT NULL,
     created_by    VARCHAR(255),
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
