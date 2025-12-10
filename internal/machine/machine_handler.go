@@ -78,11 +78,11 @@ func (machineHandler *Handler) UpdateMachine(ginContext *gin.Context) {
 }
 
 func (machineHandler *Handler) DeleteMachine(ginContext *gin.Context) {
-	var deleteBomModel model.DeleteMachineRequest
-	currencyId := ginContext.Param("id")
-	parsedBomId, err := strconv.ParseUint(currencyId, 10, 32)
+	var deleteMachineModel model.DeleteMachineRequest
+	machineId := ginContext.Param("id")
+	parsedMachineId, err := strconv.ParseUint(machineId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	deleteBomModel.Id = parsedBomId
-	machineHandler.machineService.Delete(ginContext, &deleteBomModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Bom has been updated", nil))
+	deleteMachineModel.Id = parsedMachineId
+	paginatedRes := machineHandler.machineService.Delete(ginContext, &deleteMachineModel)
+	ginContext.JSON(http.StatusOK, paginatedRes)
 }

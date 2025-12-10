@@ -168,7 +168,6 @@ func (machineService *ServiceImpl) Delete(ginContext *gin.Context, deleteMachine
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		err := machineService.machineRepository.Delete(gormTransaction, deleteMachineRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

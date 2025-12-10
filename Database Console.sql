@@ -169,6 +169,8 @@ FROM report_document_templates_parameters;
 SELECT * FROM modbus_servers;
 SELECT * FROM parameters;
 SELECT * FROM machines;
+UPDATE machines SET deleted_at = null WHERE id = 1;
 
+UPDATE machines SET id = 3 WHERE id = 1;
 
 

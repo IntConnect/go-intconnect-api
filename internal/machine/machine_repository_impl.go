@@ -68,5 +68,5 @@ func (machineRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, ma
 }
 
 func (machineRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.Machine{}).Where("id = ?", id).Delete(entity.Machine{}).Error
+	return gormTransaction.Model(entity.Machine{}).Where("id = ?", id).Delete(&entity.Machine{}).Error
 }

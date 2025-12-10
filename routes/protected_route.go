@@ -168,7 +168,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	machineRouterGroup.GET("/:id", protectedRoutes.machineController.FindMachineById)
 	machineRouterGroup.POST("", protectedRoutes.machineController.CreateMachine)
 	machineRouterGroup.PUT("", protectedRoutes.machineController.UpdateMachine)
-	machineRouterGroup.DELETE("", protectedRoutes.machineController.DeleteMachine)
+	machineRouterGroup.DELETE("/:id", protectedRoutes.machineController.DeleteMachine)
 
 	parameterRouterGroup := routerGroup.Group("parameters")
 	parameterRouterGroup.GET("pagination", protectedRoutes.parameterController.FindAllParameterPagination)
