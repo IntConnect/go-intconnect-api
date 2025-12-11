@@ -91,7 +91,7 @@ func (machineService *ServiceImpl) FindById(ginContext *gin.Context, machineId u
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		machineEntity, err := machineService.machineRepository.FindById(gormTransaction, machineId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		machineResponseRequest = helper.MapEntityIntoResponse[*entity.Machine, *model.MachineResponse](machineEntity, mapper.FuncMapAuditable)
+		machineResponseRequest = helper.MapEntityIntoResponse[*entity.Machine, *model.MachineResponse](machineEntity, mapper.FuncMapAuditable, mapper.MapMachineDocument)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -101,7 +101,6 @@ func (machineService *ServiceImpl) FindById(ginContext *gin.Context, machineId u
 // Create - Membuat machine baru
 func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest) *model.PaginatedResponse[*model.MachineResponse] {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
-	ipAddress, _ := helper.ExtractRequestMeta(ginContext)
 	valErr := machineService.validatorService.ValidateStruct(createMachineRequest)
 	machineService.validatorService.ParseValidationError(valErr, *createMachineRequest)
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -112,6 +111,7 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 		machineEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineRequest, entity.Machine](createMachineRequest)
 		machineEntity.ModelPath = modelPath
 		machineEntity.ThumbnailPath = thumbnailPath
+		machineEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
 		err = machineService.machineRepository.Create(gormTransaction, machineEntity)
 		var machineDocumentEntities []*entity.MachineDocument
 		for _, createMachineDocumentRequest := range createMachineRequest.MachineDocuments {
@@ -126,15 +126,24 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 			err = machineService.machineDocumentRepository.CreateBatch(gormTransaction, machineDocumentEntities)
 			helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		}
-		machineService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
-			UserId:      userJwtClaims.Id,
-			Action:      model.AUDIT_LOG_CREATE,
-			Feature:     model.AUDIT_LOG_FEATURE_MACHINE,
-			Description: "",
-			Before:      nil,
-			After:       machineEntity,
-			IpAddress:   ipAddress,
-		})
+		auditPayload := machineService.auditLogService.Build(
+			nil,           // before entity
+			machineEntity, // after entity
+			map[string]map[string][]uint64{
+				"machine_documents": {
+					"before": nil,
+					"after":  helper.ExtractIds(machineDocumentEntities),
+				},
+			},
+			"",
+		)
+
+		err = machineService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_FEATURE_MACHINE,
+				auditPayload)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -145,13 +154,65 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 }
 
 func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachineRequest *model.UpdateMachineRequest) *model.PaginatedResponse[*model.MachineResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := machineService.validatorService.ValidateStruct(updateMachineRequest)
 	machineService.validatorService.ParseValidationError(valErr, *updateMachineRequest)
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		machine, err := machineService.machineRepository.FindById(gormTransaction, updateMachineRequest.Id)
+		machineEntity := helper.MapCreateRequestIntoEntity[model.UpdateMachineRequest, entity.Machine](updateMachineRequest)
+		if updateMachineRequest.Model != nil {
+			modelPath, err := machineService.localStorageService.Disk().Put(updateMachineRequest.Model, fmt.Sprintf("machines/models/%d-%s", time.Now().UnixNano(), updateMachineRequest.Model.Filename))
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+			machineEntity.ModelPath = modelPath
+		}
+		if updateMachineRequest.Thumbnail != nil {
+			thumbnailPath, err := machineService.localStorageService.Disk().Put(updateMachineRequest.Thumbnail, fmt.Sprintf("machines/thumbnails/%d-%s", time.Now().UnixNano(), updateMachineRequest.Thumbnail.Filename))
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+			machineEntity.ThumbnailPath = thumbnailPath
+		}
+		machineEntity.Auditable = entity.UpdateAuditable(userJwtClaims.Username)
+		err := machineService.machineRepository.Update(gormTransaction, machineEntity)
+		machineDocuments, err := machineService.machineDocumentRepository.FindBatchById(gormTransaction, updateMachineRequest.DeletedMachineDocumentIds)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		helper.MapUpdateRequestIntoEntity(updateMachineRequest, machine)
-		err = machineService.machineRepository.Update(gormTransaction, machine)
+		if len(machineDocuments) != len(updateMachineRequest.DeletedMachineDocumentIds) {
+			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusNotFound, fmt.Sprintf("%s machine documents", exception.ErrSomeResourceNotFound)))
+		}
+		for i, machineDocumentEntity := range machineDocuments {
+			newPath, err := machineService.localStorageService.Disk().MoveFile(machineDocumentEntity.FilePath, "machines/documents")
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
+			machineDocuments[i].FilePath = newPath
+			machineDocuments[i].Auditable = entity.DeleteAuditable(userJwtClaims.Username)
+		}
+
+		var machineDocumentEntities []*entity.MachineDocument
+		for _, createMachineDocumentRequest := range updateMachineRequest.MachineDocuments {
+			machineDocumentEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineDocumentRequest, entity.MachineDocument](&createMachineDocumentRequest)
+			machineDocumentFilePath, err := machineService.localStorageService.Disk().Put(createMachineDocumentRequest.DocumentFile, fmt.Sprintf("machines/documents/%d-%s", time.Now().UnixNano(), createMachineDocumentRequest.DocumentFile.Filename))
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+			machineDocumentEntity.FilePath = machineDocumentFilePath
+			machineDocumentEntity.MachineId = machineEntity.Id
+			machineDocumentEntities = append(machineDocumentEntities, machineDocumentEntity)
+		}
+		if len(machineDocumentEntities) > 0 {
+			err = machineService.machineDocumentRepository.CreateBatch(gormTransaction, machineDocumentEntities)
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		}
+		auditPayload := machineService.auditLogService.Build(
+			nil,           // before entity
+			machineEntity, // after entity
+			map[string]map[string][]uint64{
+				"machine_documents": {
+					"before": helper.ExtractIds(machineDocuments),
+					"after":  helper.ExtractIds(machineDocumentEntities),
+				},
+			},
+			"",
+		)
+
+		err = machineService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_FEATURE_MACHINE,
+				auditPayload)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
@@ -162,11 +223,28 @@ func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachine
 	return paginationResp
 }
 
-func (machineService *ServiceImpl) Delete(ginContext *gin.Context, deleteMachineRequest *model.DeleteMachineRequest) *model.PaginatedResponse[*model.MachineResponse] {
+func (machineService *ServiceImpl) Delete(ginContext *gin.Context, deleteMachineRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.MachineResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := machineService.validatorService.ValidateStruct(deleteMachineRequest)
 	machineService.validatorService.ParseValidationError(valErr, *deleteMachineRequest)
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := machineService.machineRepository.Delete(gormTransaction, deleteMachineRequest.Id)
+		machineEntity, err := machineService.machineRepository.FindById(gormTransaction, deleteMachineRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		machineEntity.Auditable = entity.DeleteAuditable(userJwtClaims.Username)
+		err = machineService.machineRepository.Delete(gormTransaction, machineEntity)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := machineService.auditLogService.Build(
+			machineEntity, // before entity
+			nil,           // after entity
+			nil,
+			deleteMachineRequest.Reason,
+		)
+
+		err = machineService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_DELETE,
+				model.AUDIT_LOG_FEATURE_MACHINE,
+				auditPayload)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})

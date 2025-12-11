@@ -84,3 +84,5 @@ INSERT INTO mqtt_brokers(host_name, mqtt_port, ws_port, is_active)
 VALUES ('10.175.16.39', '1883', '9001', true);
 
 SELECT * FROM audit_logs;
+SELECT * FROM machine_documents;
+SELECT * FROM machines;

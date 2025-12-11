@@ -14,7 +14,7 @@ func NewStorageManager(storageConfig configs.StorageConfig) (*Manager, error) {
 
 	switch storageConfig.Driver {
 	case "local":
-		diskContract = NewLocalStorage(storageConfig.BasePath)
+		diskContract = NewLocalStorage(storageConfig.BasePath, storageConfig.BasePathTrash)
 	default:
 		return nil, errors.New("unsupported storage driver: " + storageConfig.Driver)
 	}

@@ -9,6 +9,7 @@ import (
 type Repository interface {
 	FindAll(gormTransaction *gorm.DB) ([]entity.MachineDocument, error)
 	FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.MachineDocument, error)
+	FindBatchById(gormTransaction *gorm.DB, machineIds []uint64) ([]*entity.MachineDocument, error)
 	Create(gormTransaction *gorm.DB, machineDocumentEntity *entity.MachineDocument) error
 	CreateBatch(gormTransaction *gorm.DB, machineDocumentEntity []*entity.MachineDocument) error
 	Delete(gormTransaction *gorm.DB, machineDocumentId uint64) error

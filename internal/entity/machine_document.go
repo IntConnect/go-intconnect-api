@@ -5,7 +5,15 @@ type MachineDocument struct {
 	MachineId   uint64 `gorm:"column:machine_id;"`
 	Code        string `gorm:"column:code"`
 	Name        string `gorm:"column:name"`
-	Description string `gorm:"column:description"`
 	FilePath    string `gorm:"column:file_path"`
+	Description string `gorm:"column:description"`
 	Auditable
+}
+
+func (machineDocumentEntity *MachineDocument) GetId() uint64 {
+	return machineDocumentEntity.Id
+}
+
+func (machineDocumentEntity *MachineDocument) GetAuditable() *Auditable {
+	return &machineDocumentEntity.Auditable
 }

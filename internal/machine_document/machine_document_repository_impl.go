@@ -24,6 +24,12 @@ func (machineDocumentRepository *RepositoryImpl) FindById(gormTransaction *gorm.
 	return &machineEntity, err
 }
 
+func (machineDocumentRepository *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, machineIds []uint64) ([]*entity.MachineDocument, error) {
+	var machineEntity []*entity.MachineDocument
+	err := gormTransaction.Model(&entity.MachineDocument{}).Where("id IN ?", machineIds).Find(&machineEntity).Error
+	return machineEntity, err
+}
+
 func (machineDocumentRepository *RepositoryImpl) Create(gormTransaction *gorm.DB, machineDocumentEntity *entity.MachineDocument) error {
 	return gormTransaction.Create(machineDocumentEntity).Error
 }
