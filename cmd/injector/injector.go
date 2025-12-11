@@ -3,6 +3,7 @@ package injector
 import (
 	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
+	"go-intconnect-api/internal/breakdown"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
@@ -254,4 +255,10 @@ var ModbusServerModule = fx.Module("modbusServerFeature",
 	fx.Provide(fx.Annotate(modbusServer.NewRepository, fx.As(new(modbusServer.Repository)))),
 	fx.Provide(fx.Annotate(modbusServer.NewService, fx.As(new(modbusServer.Service)))),
 	fx.Provide(fx.Annotate(modbusServer.NewHandler, fx.As(new(modbusServer.Controller)))),
+)
+
+var BreakdownModule = fx.Module("breakdownFeature",
+	fx.Provide(fx.Annotate(breakdown.NewRepository, fx.As(new(breakdown.Repository)))),
+	fx.Provide(fx.Annotate(breakdown.NewService, fx.As(new(breakdown.Service)))),
+	fx.Provide(fx.Annotate(breakdown.NewHandler, fx.As(new(breakdown.Controller)))),
 )

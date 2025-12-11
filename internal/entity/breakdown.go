@@ -20,9 +20,12 @@ type Breakdown struct {
 	StartTime             time.Time `gorm:"column:start_time"`
 	EndTime               time.Time `gorm:"column:end_time"`
 	ProblemAt             time.Time `gorm:"column:problem_at"`
+	Machine               *Machine  `gorm:"foreignKey:MachineId;references:Id"`
+	ReportedByUser        *User     `gorm:"foreignKey:ReportedBy;references:Id"`
+	VerifiedByUser        *User     `gorm:"foreignKey:VerifiedBy;references:Id"`
 	Auditable             Auditable `gorm:"embedded"`
 }
 
-func (breakdownEntity Breakdown) GetAuditable() *Auditable {
+func (breakdownEntity *Breakdown) GetAuditable() *Auditable {
 	return &breakdownEntity.Auditable
 }

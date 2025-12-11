@@ -87,6 +87,7 @@ func (reportDocumentTemplateService *ServiceImpl) FindAllPagination(paginationRe
 
 // Create - Membuat reportDocumentTemplate baru
 func (reportDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Context, createReportDocumentTemplateRequest *model.CreateReportDocumentTemplateRequest) *model.PaginatedResponse[*model.ReportDocumentTemplateResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := reportDocumentTemplateService.validatorService.ValidateStruct(createReportDocumentTemplateRequest)
 	reportDocumentTemplateService.validatorService.ParseValidationError(valErr, *createReportDocumentTemplateRequest)
 	err := reportDocumentTemplateService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -98,6 +99,7 @@ func (reportDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Context
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		reportDocumentTemplateEntity.Parameters = parameterEntities
+		reportDocumentTemplateEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
 		err = reportDocumentTemplateService.reportDocumentTemplateRepository.Create(gormTransaction, reportDocumentTemplateEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := reportDocumentTemplateService.auditLogService.Build(
@@ -127,7 +129,7 @@ func (reportDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Context
 }
 
 func (reportDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Context, updateReportDocumentTemplateRequest *model.UpdateReportDocumentTemplateRequest) *model.PaginatedResponse[*model.ReportDocumentTemplateResponse] {
-	// Validate
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := reportDocumentTemplateService.validatorService.ValidateStruct(updateReportDocumentTemplateRequest)
 	reportDocumentTemplateService.validatorService.ParseValidationError(valErr, *updateReportDocumentTemplateRequest)
 
@@ -136,6 +138,7 @@ func (reportDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Context
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		beforeReportDocumentTemplate := *reportDocumentTemplate
 		beforeReportDocumentTemplate.Parameters = append([]*entity.Parameter(nil), reportDocumentTemplate.Parameters...)
+		reportDocumentTemplate.Auditable = entity.NewAuditable(userJwtClaims.Username)
 
 		// Map field biasa
 		helper.MapUpdateRequestIntoEntity(updateReportDocumentTemplateRequest, reportDocumentTemplate)
@@ -179,11 +182,13 @@ func (reportDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Context
 }
 
 func (reportDocumentTemplateService *ServiceImpl) Delete(ginContext *gin.Context, deleteReportDocumentTemplateRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.ReportDocumentTemplateResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := reportDocumentTemplateService.validatorService.ValidateStruct(deleteReportDocumentTemplateRequest)
 	reportDocumentTemplateService.validatorService.ParseValidationError(valErr, *deleteReportDocumentTemplateRequest)
 	err := reportDocumentTemplateService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		reportDocumentTemplate, err := reportDocumentTemplateService.reportDocumentTemplateRepository.FindById(gormTransaction, deleteReportDocumentTemplateRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		reportDocumentTemplate.Auditable = entity.DeleteAuditable(userJwtClaims.Username)
 		err = reportDocumentTemplateService.reportDocumentTemplateRepository.Delete(gormTransaction, deleteReportDocumentTemplateRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := reportDocumentTemplateService.auditLogService.Build(

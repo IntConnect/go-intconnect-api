@@ -57,6 +57,7 @@ func main() {
 		injector.AuditLogModule,
 		injector.SmtpServerModule,
 		injector.ModbusServerModule,
+		injector.BreakdownModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

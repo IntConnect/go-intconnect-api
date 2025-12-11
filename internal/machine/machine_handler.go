@@ -28,7 +28,7 @@ func NewHandler(machineService Service, viperConfig *viper.Viper) *Handler {
 
 func (machineHandler *Handler) FindAllMachine(ginContext *gin.Context) {
 	machineResponses := machineHandler.machineService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Machine has been fetched", machineResponses))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Machine has been fetched", machineResponses))
 }
 
 func (machineHandler *Handler) FindAllMachinePagination(ginContext *gin.Context) {
