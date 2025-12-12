@@ -231,8 +231,21 @@ func (machineService *ServiceImpl) Delete(ginContext *gin.Context, deleteMachine
 		machineEntity, err := machineService.machineRepository.FindById(gormTransaction, deleteMachineRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		machineEntity.Auditable = entity.DeleteAuditable(userJwtClaims.Username)
-		err = machineService.machineRepository.Delete(gormTransaction, machineEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		for i, machineDocumentEntity := range machineEntity.MachineDocuments {
+			newPath, err := machineService.localStorageService.Disk().MoveFile(machineDocumentEntity.FilePath, "machines/documents")
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
+			machineEntity.MachineDocuments[i].FilePath = newPath
+			machineEntity.MachineDocuments[i].Auditable = entity.DeleteAuditable(userJwtClaims.Username)
+		}
+		newPath, err := machineService.localStorageService.Disk().MoveFile(machineEntity.ThumbnailPath, "machines/thumbnails")
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
+		machineEntity.ThumbnailPath = newPath
+		newPath, err = machineService.localStorageService.Disk().MoveFile(machineEntity.ModelPath, "machines/models")
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
+		machineEntity.ModelPath = newPath
+		err = machineService.machineRepository.Delete(gormTransaction, machineEntity)
+
 		auditPayload := machineService.auditLogService.Build(
 			machineEntity, // before entity
 			nil,           // after entity

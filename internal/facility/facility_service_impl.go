@@ -47,7 +47,7 @@ func (facilityService *ServiceImpl) FindAll() []*model.FacilityResponse {
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		facilityEntities, err := facilityService.facilityRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		facilityResponsesRequest = mapper.MapFacilityEntitiesIntoFacilityResponses(facilityEntities)
+		facilityResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[*entity.Facility, *model.FacilityResponse](facilityEntities, mapper.FuncMapAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -69,7 +69,7 @@ func (facilityService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		facilityResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Facility, *model.FacilityResponse](
+		facilityResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.Facility, *model.FacilityResponse](
 			facilityEntities,
 			mapper.FuncMapAuditable,
 		)

@@ -15,6 +15,6 @@ type Facility struct {
 	Auditable
 }
 
-func (facilityEntity Facility) GetAuditable() *Auditable {
+func (facilityEntity *Facility) GetAuditable() *Auditable {
 	return &facilityEntity.Auditable
 }
