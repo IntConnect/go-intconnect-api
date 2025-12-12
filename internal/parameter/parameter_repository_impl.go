@@ -16,8 +16,10 @@ func NewRepository() *RepositoryImpl {
 func (parameterRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB, parameterFilterRequest *model.ParameterFilterRequest) ([]*entity.Parameter, error) {
 	var parameterEntities []*entity.Parameter
 	gormTransaction = gormTransaction.Model(&entity.Parameter{})
-	if parameterFilterRequest.IsAutomatic != nil {
-		gormTransaction = gormTransaction.Where("is_automatic = ?", *parameterFilterRequest.IsAutomatic)
+	if parameterFilterRequest != nil {
+		if parameterFilterRequest.IsAutomatic != nil {
+			gormTransaction = gormTransaction.Where("is_automatic = ?", *parameterFilterRequest.IsAutomatic)
+		}
 	}
 	err := gormTransaction.Find(&parameterEntities).Error
 	return parameterEntities, err
@@ -66,7 +68,7 @@ func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(
 }
 func (parameterRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, parameterId uint64) (*entity.Parameter, error) {
 	var parameterEntity entity.Parameter
-	err := gormTransaction.Model(&entity.Parameter{}).Where("id = ?", parameterId).Find(&parameterEntity).Error
+	err := gormTransaction.Model(&entity.Parameter{}).Where("id = ?", parameterId).First(&parameterEntity).Error
 
 	return &parameterEntity, err
 }

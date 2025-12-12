@@ -55,21 +55,22 @@ func (parameterHandler *Handler) FindByIdParameter(ginContext *gin.Context) {
 }
 
 func (parameterHandler *Handler) CreateParameter(ginContext *gin.Context) {
-	var createParameterRawRequest model.CreateParameterRawRequest
-	err := ginContext.ShouldBindJSON(&createParameterRawRequest)
+	var createParameterRequest model.CreateParameterRequest
+	err := ginContext.ShouldBindJSON(&createParameterRequest)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	createParameterRequest := helper.NormalizePayload[model.CreateParameterRawRequest, model.CreateParameterRequest](&createParameterRawRequest)
-	paginatedResponse := parameterHandler.parameterService.Create(ginContext, createParameterRequest)
+	paginatedResponse := parameterHandler.parameterService.Create(ginContext, &createParameterRequest)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (parameterHandler *Handler) UpdateParameter(ginContext *gin.Context) {
-	var updateParameterRawRequest model.UpdateParameterRawRequest
-	err := ginContext.ShouldBindBodyWithJSON(&updateParameterRawRequest)
+	var updateParameterRequest model.UpdateParameterRequest
+	err := ginContext.ShouldBindBodyWithJSON(&updateParameterRequest)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	updateParameterRequest := helper.NormalizePayload[model.UpdateParameterRawRequest, model.UpdateParameterRequest](&updateParameterRawRequest)
-
-	parameterHandler.parameterService.Update(ginContext, updateParameterRequest)
+	parameterId := ginContext.Param("id")
+	parsedParameterId, err := strconv.ParseUint(parameterId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
+	updateParameterRequest.Id = parsedParameterId
+	parameterHandler.parameterService.Update(ginContext, &updateParameterRequest)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been created", nil))
 }
 

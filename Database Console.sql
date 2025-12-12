@@ -89,6 +89,9 @@ SELECT *
 FROM machine_documents;
 SELECT *
 FROM machines;
+SELECT *
+FROM parameters
+WHERE is_automatic = false;
 
 ALTER TABLE parameters
     ADD COLUMN is_automatic BOOLEAN DEFAULT TRUE NOT NULL;

@@ -1,6 +1,7 @@
 package parameter
 
 import (
+	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
@@ -15,18 +16,21 @@ import (
 
 type ServiceImpl struct {
 	parameterRepository Repository
+	auditLogService     auditLog.Service
 	validatorService    validator.Service
 	dbConnection        *gorm.DB
 	viperConfig         *viper.Viper
 }
 
 func NewService(parameterRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper) *ServiceImpl {
+	viperConfig *viper.Viper,
+	auditLogService auditLog.Service) *ServiceImpl {
 	return &ServiceImpl{
 		parameterRepository: parameterRepository,
 		validatorService:    validatorService,
 		dbConnection:        dbConnection,
 		viperConfig:         viperConfig,
+		auditLogService:     auditLogService,
 	}
 }
 
@@ -120,6 +124,16 @@ func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParam
 		parameterEntity := helper.MapCreateRequestIntoEntity[model.CreateParameterRequest, entity.Parameter](createParameterRequest)
 		err := parameterService.parameterRepository.Create(gormTransaction, parameterEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := parameterService.auditLogService.Build(
+			nil,             // before entity
+			parameterEntity, // after entity
+			nil,
+			"",
+		)
+		err = parameterService.auditLogService.Record(ginContext,
+			model.AUDIT_LOG_CREATE,
+			model.AUDIT_LOG_FEATURE_PARAMETER,
+			auditPayload)
 		paginationRequest := model.NewPaginationRequest()
 		parameterResponses = parameterService.FindAllPagination(&paginationRequest)
 		return nil
@@ -132,11 +146,23 @@ func (parameterService *ServiceImpl) Update(ginContext *gin.Context, updateParam
 	valErr := parameterService.validatorService.ValidateStruct(updateParameterRequest)
 	parameterService.validatorService.ParseValidationError(valErr, *updateParameterRequest)
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		parameter, err := parameterService.parameterRepository.FindById(gormTransaction, updateParameterRequest.Id)
+
+		parameterEntity, err := parameterService.parameterRepository.FindById(gormTransaction, updateParameterRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		helper.MapUpdateRequestIntoEntity(updateParameterRequest, parameter)
-		err = parameterService.parameterRepository.Update(gormTransaction, parameter)
+		helper.MapUpdateRequestIntoEntity(updateParameterRequest, parameterEntity)
+		beforeParameterEntity := *parameterEntity
+		err = parameterService.parameterRepository.Update(gormTransaction, parameterEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := parameterService.auditLogService.Build(
+			beforeParameterEntity, // before entity
+			parameterEntity,       // after entity
+			nil,
+			"",
+		)
+		err = parameterService.auditLogService.Record(ginContext,
+			model.AUDIT_LOG_UPDATE,
+			model.AUDIT_LOG_FEATURE_PARAMETER,
+			auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -169,9 +195,20 @@ func (parameterService *ServiceImpl) Delete(ginContext *gin.Context, deleteParam
 	valErr := parameterService.validatorService.ValidateStruct(deleteParameterRequest)
 	parameterService.validatorService.ParseValidationError(valErr, *deleteParameterRequest)
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := parameterService.parameterRepository.Delete(gormTransaction, deleteParameterRequest.Id)
+		parameterEntity, err := parameterService.parameterRepository.FindById(gormTransaction, deleteParameterRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
+		err = parameterService.parameterRepository.Delete(gormTransaction, deleteParameterRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := parameterService.auditLogService.Build(
+			parameterEntity,
+			nil,
+			nil,
+			deleteParameterRequest.Reason,
+		)
+		err = parameterService.auditLogService.Record(ginContext,
+			model.AUDIT_LOG_DELETE,
+			model.AUDIT_LOG_FEATURE_PARAMETER,
+			auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

@@ -98,7 +98,7 @@ func (listenerFluxor *ListenerFluxor) loadInitialConfiguration() error {
 	if err != nil {
 		return err
 	}
-	parameterEntities, err := listenerFluxor.parameterRepository.FindAll(listenerFluxor.gormDatabase)
+	parameterEntities, err := listenerFluxor.parameterRepository.FindAll(listenerFluxor.gormDatabase, nil)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (listenerFluxor *ListenerFluxor) CheckConfigurationPeriodically() {
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return
 	}
-	parameterEntities, err := listenerFluxor.parameterRepository.FindAll(listenerFluxor.gormDatabase)
+	parameterEntities, err := listenerFluxor.parameterRepository.FindAll(listenerFluxor.gormDatabase, nil)
 	if err != nil {
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return
@@ -350,7 +350,7 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 		if err != nil {
 			logger.WithError(err).Error("Error creating new parameters")
 		}
-		parameterEntities, err := listenerFluxor.parameterRepository.FindAll(listenerFluxor.gormDatabase)
+		parameterEntities, err := listenerFluxor.parameterRepository.FindAll(listenerFluxor.gormDatabase, nil)
 		for _, parameterEntity := range parameterEntities {
 			listenerFluxor.parametersMap[parameterEntity.Code] = parameterEntity
 		}

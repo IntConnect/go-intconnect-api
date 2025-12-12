@@ -106,12 +106,6 @@ func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
 	return &entityObject
 }
 
-func NormalizePayload[S any, R any](createRequest *S) *R {
-	var entityObject R
-	DecodeFromSource[*S, *R](createRequest, &entityObject)
-	return &entityObject
-}
-
 func MapUpdateRequestIntoEntity[S any, R any](updateRequest S, existingEntity *R) {
 	existingEntity = DecodeFromSource[S, *R](updateRequest, existingEntity)
 }

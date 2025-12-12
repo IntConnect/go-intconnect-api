@@ -29,47 +29,8 @@ type ParameterDependency struct {
 }
 
 type CreateParameterRequest struct {
-	MachineId   uint64   `json:"machine_id" validate:"required,number,gt=0,exists=machines;id"`
-	MqttTopicId uint64   `json:"mqtt_topic_id" validate:"required,number,gt=0,exists=mqtt_topics;id"`
-	Name        string   `json:"name" validate:"required,min=3,max=100"`
-	Code        string   `json:"code" validate:"required,min=3,max=100"`
-	Unit        string   `json:"unit" validate:"required,min=1,max=100"`
-	MinValue    *float32 `json:"min_value,omitempty"`
-	MaxValue    *float32 `json:"max_value,omitempty"`
-	Description string   `json:"description"`
-	PositionX   *float32 `json:"position_x,omitempty"`
-	PositionY   *float32 `json:"position_y,omitempty"`
-	PositionZ   *float32 `json:"position_z,omitempty"`
-	RotationX   *float32 `json:"rotation_x,omitempty"`
-	RotationY   *float32 `json:"rotation_y,omitempty"`
-	RotationZ   *float32 `json:"rotation_z,omitempty"`
-	IsDisplay   bool     `json:"is_display"`
-	IsAutomatic bool     `json:"is_automatic"`
-}
-
-type CreateParameterRawRequest struct {
-	MachineId   string   `json:"machine_id" validate:"required,number,gt=0,exists=machines;id"`
-	MqttTopicId string   `json:"mqtt_topic_id" validate:"required,number,gt=0,exists=mqtt_topics;id"`
-	Name        string   `json:"name" validate:"required,min=3,max=100"`
-	Code        string   `json:"code" validate:"required,min=3,max=100"`
-	Unit        string   `json:"unit" validate:"required,min=1,max=100"`
-	MinValue    *float32 `json:"min_value,omitempty"`
-	MaxValue    *float32 `json:"max_value,omitempty"`
-	Description string   `json:"description"`
-	PositionX   *float32 `json:"position_x,omitempty"`
-	PositionY   *float32 `json:"position_y,omitempty"`
-	PositionZ   *float32 `json:"position_z,omitempty"`
-	RotationX   *float32 `json:"rotation_x,omitempty"`
-	RotationY   *float32 `json:"rotation_y,omitempty"`
-	RotationZ   *float32 `json:"rotation_z,omitempty"`
-	IsDisplay   bool     `json:"is_display"`
-	IsAutomatic bool     `json:"is_automatic"`
-}
-
-type UpdateParameterRawRequest struct {
-	Id          string   `json:"-" validate:"required,number,gt=0,exists=parameters;id'"`
-	MachineId   string   `json:"machine_id" validate:"required,number,gt=0,exists=machines;id"`
-	MqttTopicId string   `json:"mqtt_topic_id" validate:"required,number,gt=0,exists=mqtt_topics;id"`
+	MachineId   uint64   `json:"machine_id" validate:"required,number,gt=0,exists=machines;id" property:"Machine"`
+	MqttTopicId uint64   `json:"mqtt_topic_id" validate:"required,number,gt=0,exists=mqtt_topics;id" property:"MQTT Topic"`
 	Name        string   `json:"name" validate:"required,min=3,max=100"`
 	Code        string   `json:"code" validate:"required,min=3,max=100"`
 	Unit        string   `json:"unit" validate:"required,min=1,max=100"`
@@ -87,9 +48,9 @@ type UpdateParameterRawRequest struct {
 }
 
 type UpdateParameterRequest struct {
-	Id          uint64   `json:"-" validate:"required,number,gt=0,exists=parameters;id'"`
-	MachineId   uint64   `json:"machine_id" validate:"required,number,gt=0,exists=machines;id"`
-	MqttTopicId uint64   `json:"mqtt_topic_id" validate:"required,number,gt=0,exists=mqtt_topics;id"`
+	Id          uint64   `json:"-" validate:"required,number,gt=0,exists=parameters;id"`
+	MachineId   uint64   `json:"machine_id" validate:"required,number,gt=0,exists=machines;id" property:"Machine"`
+	MqttTopicId uint64   `json:"mqtt_topic_id" validate:"required,number,gt=0,exists=mqtt_topics;id" property:"MQTT Topic"`
 	Name        string   `json:"name" validate:"required,min=3,max=100"`
 	Code        string   `json:"code" validate:"required,min=3,max=100"`
 	Unit        string   `json:"unit" validate:"required,min=1,max=100"`
@@ -118,8 +79,8 @@ type ParameterOperationRequest struct {
 }
 
 type ParameterFilterRequest struct {
-	IsAutomatic *string `query:"is_automatic,default=all"`
-	IsDisplay   *string `query:"is_display,default=all"`
+	IsAutomatic *string `form:"is_automatic,default=all"`
+	IsDisplay   *string `form:"is_display,default=all"`
 }
 
 func (parameterResponse *ParameterResponse) GetAuditableResponse() *AuditableResponse {
