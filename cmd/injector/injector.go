@@ -4,6 +4,7 @@ import (
 	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/breakdown"
+	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
@@ -261,4 +262,10 @@ var BreakdownModule = fx.Module("breakdownFeature",
 	fx.Provide(fx.Annotate(breakdown.NewRepository, fx.As(new(breakdown.Repository)))),
 	fx.Provide(fx.Annotate(breakdown.NewService, fx.As(new(breakdown.Service)))),
 	fx.Provide(fx.Annotate(breakdown.NewHandler, fx.As(new(breakdown.Controller)))),
+)
+
+var CheckSheetDocumentModule = fx.Module("checkSheetDocumentTemplateFeature",
+	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewRepository, fx.As(new(checkSheetDocumentTemplate.Repository)))),
+	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewService, fx.As(new(checkSheetDocumentTemplate.Service)))),
+	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewHandler, fx.As(new(checkSheetDocumentTemplate.Controller)))),
 )

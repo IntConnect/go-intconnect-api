@@ -58,6 +58,7 @@ func main() {
 		injector.SmtpServerModule,
 		injector.ModbusServerModule,
 		injector.BreakdownModule,
+		injector.CheckSheetDocumentModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

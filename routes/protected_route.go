@@ -3,6 +3,7 @@ package routes
 import (
 	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
+	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
@@ -25,24 +26,25 @@ import (
 )
 
 type ProtectedRoutes struct {
-	viperConfig                      *viper.Viper
-	redisInstance                    *configs.RedisInstance
-	userController                   user.Controller
-	nodeController                   node.Controller
-	pipelineController               pipeline.Controller
-	protocolConfigurationController  protocolConfiguration.Controller
-	databaseConnectionController     databaseConnection.Controller
-	facilityController               facility.Controller
-	roleController                   role.Controller
-	permissionController             permission.Controller
-	mqttBrokerController             mqttBroker.Controller
-	machineController                machine.Controller
-	parameterController              parameter.Controller
-	mqttTopicController              mqttTopic.Controller
-	reportDocumentTemplateController reportDocumentTemplate.Controller
-	auditLogController               auditLog.Controller
-	smtpServerController             smtpServer.Controller
-	modbusServerController           modbusServer.Controller
+	viperConfig                          *viper.Viper
+	redisInstance                        *configs.RedisInstance
+	userController                       user.Controller
+	nodeController                       node.Controller
+	pipelineController                   pipeline.Controller
+	protocolConfigurationController      protocolConfiguration.Controller
+	databaseConnectionController         databaseConnection.Controller
+	facilityController                   facility.Controller
+	roleController                       role.Controller
+	permissionController                 permission.Controller
+	mqttBrokerController                 mqttBroker.Controller
+	machineController                    machine.Controller
+	parameterController                  parameter.Controller
+	mqttTopicController                  mqttTopic.Controller
+	auditLogController                   auditLog.Controller
+	smtpServerController                 smtpServer.Controller
+	modbusServerController               modbusServer.Controller
+	reportDocumentTemplateController     reportDocumentTemplate.Controller
+	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller
 
 	roleService role.Service
 }
@@ -66,6 +68,7 @@ func NewProtectedRoutes(
 	auditLogController auditLog.Controller,
 	smtpServerController smtpServer.Controller,
 	modbusServerController modbusServer.Controller,
+	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller,
 
 	roleService role.Service,
 
@@ -73,24 +76,25 @@ func NewProtectedRoutes(
 	return &ProtectedRoutes{
 		viperConfig: viperConfig,
 
-		userController:                   userController,
-		nodeController:                   nodeController,
-		pipelineController:               pipelineController,
-		protocolConfigurationController:  protocolConfigurationController,
-		databaseConnectionController:     databaseConnectionController,
-		facilityController:               facilityController,
-		roleController:                   roleController,
-		permissionController:             permissionController,
-		mqttBrokerController:             mqttBrokerController,
-		machineController:                machineController,
-		parameterController:              parameterController,
-		mqttTopicController:              mqttTopicController,
-		reportDocumentTemplateController: reportDocumentTemplateController,
-		auditLogController:               auditLogController,
-		redisInstance:                    redisInstance,
-		roleService:                      roleService,
-		smtpServerController:             smtpServerController,
-		modbusServerController:           modbusServerController,
+		userController:                       userController,
+		nodeController:                       nodeController,
+		pipelineController:                   pipelineController,
+		protocolConfigurationController:      protocolConfigurationController,
+		databaseConnectionController:         databaseConnectionController,
+		facilityController:                   facilityController,
+		roleController:                       roleController,
+		permissionController:                 permissionController,
+		mqttBrokerController:                 mqttBrokerController,
+		machineController:                    machineController,
+		parameterController:                  parameterController,
+		mqttTopicController:                  mqttTopicController,
+		reportDocumentTemplateController:     reportDocumentTemplateController,
+		auditLogController:                   auditLogController,
+		redisInstance:                        redisInstance,
+		roleService:                          roleService,
+		smtpServerController:                 smtpServerController,
+		modbusServerController:               modbusServerController,
+		checkSheetDocumentTemplateController: checkSheetDocumentTemplateController,
 	}
 }
 
@@ -212,5 +216,12 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	modbusServerRouterGroup.POST("", protectedRoutes.modbusServerController.CreateModbusServer)
 	modbusServerRouterGroup.PUT("/:id", protectedRoutes.modbusServerController.UpdateModbusServer)
 	modbusServerRouterGroup.DELETE("/:id", protectedRoutes.modbusServerController.DeleteModbusServer)
+
+	checkSheetDocumentTemplateRouterGroup := routerGroup.Group("check-sheet-document-templates")
+	checkSheetDocumentTemplateRouterGroup.GET("pagination", protectedRoutes.checkSheetDocumentTemplateController.FindAllCheckSheetDocumentTemplatePagination)
+	checkSheetDocumentTemplateRouterGroup.GET("", protectedRoutes.checkSheetDocumentTemplateController.FindAllCheckSheetDocumentTemplate)
+	checkSheetDocumentTemplateRouterGroup.POST("", protectedRoutes.checkSheetDocumentTemplateController.CreateCheckSheetDocumentTemplate)
+	checkSheetDocumentTemplateRouterGroup.PUT("/:id", protectedRoutes.checkSheetDocumentTemplateController.UpdateCheckSheetDocumentTemplate)
+	checkSheetDocumentTemplateRouterGroup.DELETE("/:id", protectedRoutes.checkSheetDocumentTemplateController.DeleteCheckSheetDocumentTemplate)
 
 }
