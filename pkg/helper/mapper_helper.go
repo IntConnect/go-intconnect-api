@@ -99,7 +99,14 @@ func MapEntityIntoResponse[S any, R any](
 	}
 	return responseObject
 }
+
 func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
+	var entityObject R
+	DecodeFromSource[*S, *R](createRequest, &entityObject)
+	return &entityObject
+}
+
+func NormalizePayload[S any, R any](createRequest *S) *R {
 	var entityObject R
 	DecodeFromSource[*S, *R](createRequest, &entityObject)
 	return &entityObject

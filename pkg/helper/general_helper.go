@@ -214,3 +214,5 @@ func ExtractIds[T trait.HasId](items []T) []uint64 {
 	}
 	return ids
 }
+
+func

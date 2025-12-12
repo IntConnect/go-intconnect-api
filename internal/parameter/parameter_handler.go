@@ -50,18 +50,21 @@ func (parameterHandler *Handler) FindByIdParameter(ginContext *gin.Context) {
 }
 
 func (parameterHandler *Handler) CreateParameter(ginContext *gin.Context) {
-	var createParameterModel model.CreateParameterRequest
-	err := ginContext.ShouldBindJSON(&createParameterModel)
+	var createParameterRawRequest model.CreateParameterRawRequest
+	err := ginContext.ShouldBindJSON(&createParameterRawRequest)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	paginatedResponse := parameterHandler.parameterService.Create(ginContext, &createParameterModel)
+	createParameterRequest := helper.NormalizePayload[model.CreateParameterRawRequest, model.CreateParameterRequest](&createParameterRawRequest)
+	paginatedResponse := parameterHandler.parameterService.Create(ginContext, createParameterRequest)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (parameterHandler *Handler) UpdateParameter(ginContext *gin.Context) {
-	var updateParameterModel model.UpdateParameterRequest
-	err := ginContext.ShouldBindBodyWithJSON(&updateParameterModel)
+	var updateParameterRawRequest model.UpdateParameterRawRequest
+	err := ginContext.ShouldBindBodyWithJSON(&updateParameterRawRequest)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	parameterHandler.parameterService.Update(ginContext, &updateParameterModel)
+	updateParameterRequest := helper.NormalizePayload[model.UpdateParameterRawRequest, model.UpdateParameterRequest](&updateParameterRawRequest)
+
+	parameterHandler.parameterService.Update(ginContext, updateParameterRequest)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been created", nil))
 }
 
