@@ -1,6 +1,7 @@
 package parameter
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -23,22 +24,26 @@ func NewHandler(parameterService Service, viperConfig *viper.Viper) *Handler {
 	}
 }
 
-func (parameterHandler *Handler) FindAllParameter(ginContext *gin.Context) {
-	parameterResponses := parameterHandler.parameterService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Parameters has been fetched", parameterResponses))
-}
-
 func (parameterHandler *Handler) FindDependencyParameter(ginContext *gin.Context) {
 	parameterResponses := parameterHandler.parameterService.FindDependencyParameter()
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Parameters has been fetched", parameterResponses))
+}
+
+func (parameterHandler *Handler) FindAllParameter(ginContext *gin.Context) {
+	var parameterFilterRequest model.ParameterFilterRequest
+	err := ginContext.ShouldBindQuery(&parameterFilterRequest)
+	fmt.Println(parameterFilterRequest)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	parameterResponses := parameterHandler.parameterService.FindAll(&parameterFilterRequest)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Parameters has been fetched", parameterResponses))
 }
 
 func (parameterHandler *Handler) FindAllParameterPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	paginatedResponse := parameterHandler.parameterService.FindAllPagination(&paginationReq)
-	ginContext.JSON(http.StatusOK, paginatedResponse)
+	paginatedResponses := parameterHandler.parameterService.FindAllPagination(&paginationReq)
+	ginContext.JSON(http.StatusOK, paginatedResponses)
 }
 
 func (parameterHandler *Handler) FindByIdParameter(ginContext *gin.Context) {

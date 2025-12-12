@@ -2,12 +2,13 @@ package parameter
 
 import (
 	"go-intconnect-api/internal/entity"
+	"go-intconnect-api/internal/model"
 
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	FindAll(gormTransaction *gorm.DB) ([]*entity.Parameter, error)
+	FindAll(gormTransaction *gorm.DB, parameterFilterRequest *model.ParameterFilterRequest) ([]*entity.Parameter, error)
 	FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]*entity.Parameter, int64, error)
 	FindBatchById(gormTransaction *gorm.DB, parameterIds []uint64) ([]*entity.Parameter, error)
 	FindById(gormTransaction *gorm.DB, parameterId uint64) (*entity.Parameter, error)

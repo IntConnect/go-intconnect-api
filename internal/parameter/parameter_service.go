@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	FindAll() []*model.ParameterResponse
+	FindAll(parameterFilterRequest *model.ParameterFilterRequest) []*model.ParameterResponse
 	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.ParameterResponse]
 	FindDependencyParameter() *model.ParameterDependency
 	FindById(ginContext *gin.Context, parameterId uint64) *model.ParameterResponse

@@ -117,6 +117,11 @@ type ParameterOperationRequest struct {
 	Sequence int     `json:"sequence" validate:"required,number"`
 }
 
+type ParameterFilterRequest struct {
+	IsAutomatic *string `query:"is_automatic,default=all"`
+	IsDisplay   *string `query:"is_display,default=all"`
+}
+
 func (parameterResponse *ParameterResponse) GetAuditableResponse() *AuditableResponse {
 	return parameterResponse.AuditableResponse
 }

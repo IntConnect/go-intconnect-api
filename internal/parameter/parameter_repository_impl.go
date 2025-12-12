@@ -2,6 +2,7 @@ package parameter
 
 import (
 	"go-intconnect-api/internal/entity"
+	"go-intconnect-api/internal/model"
 
 	"gorm.io/gorm"
 )
@@ -12,8 +13,12 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (parameterRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.Parameter, error) {
+func (parameterRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB, parameterFilterRequest *model.ParameterFilterRequest) ([]*entity.Parameter, error) {
 	var parameterEntities []*entity.Parameter
+	gormTransaction = gormTransaction.Model(&entity.Parameter{})
+	if parameterFilterRequest.IsAutomatic != nil {
+		gormTransaction = gormTransaction.Where("is_automatic = ?", *parameterFilterRequest.IsAutomatic)
+	}
 	err := gormTransaction.Find(&parameterEntities).Error
 	return parameterEntities, err
 }

@@ -30,10 +30,10 @@ func NewService(parameterRepository Repository, validatorService validator.Servi
 	}
 }
 
-func (parameterService *ServiceImpl) FindAll() []*model.ParameterResponse {
+func (parameterService *ServiceImpl) FindAll(parameterFilterRequest *model.ParameterFilterRequest) []*model.ParameterResponse {
 	var parameterResponsesRequest []*model.ParameterResponse
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		parameterEntities, err := parameterService.parameterRepository.FindAll(gormTransaction)
+		parameterEntities, err := parameterService.parameterRepository.FindAll(gormTransaction, parameterFilterRequest)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		parameterResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
 			*entity.Parameter,
