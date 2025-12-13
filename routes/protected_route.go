@@ -3,6 +3,7 @@ package routes
 import (
 	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
+	"go-intconnect-api/internal/breakdown"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
@@ -45,8 +46,8 @@ type ProtectedRoutes struct {
 	modbusServerController               modbusServer.Controller
 	reportDocumentTemplateController     reportDocumentTemplate.Controller
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller
-
-	roleService role.Service
+	breakdownController                  breakdown.Controller
+	roleService                          role.Service
 }
 
 func NewProtectedRoutes(
@@ -69,6 +70,7 @@ func NewProtectedRoutes(
 	smtpServerController smtpServer.Controller,
 	modbusServerController modbusServer.Controller,
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller,
+	breakdownController breakdown.Controller,
 
 	roleService role.Service,
 
@@ -95,6 +97,7 @@ func NewProtectedRoutes(
 		smtpServerController:                 smtpServerController,
 		modbusServerController:               modbusServerController,
 		checkSheetDocumentTemplateController: checkSheetDocumentTemplateController,
+		breakdownController:                  breakdownController,
 	}
 }
 
@@ -217,11 +220,19 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	modbusServerRouterGroup.PUT("/:id", protectedRoutes.modbusServerController.UpdateModbusServer)
 	modbusServerRouterGroup.DELETE("/:id", protectedRoutes.modbusServerController.DeleteModbusServer)
 
-	checkSheetDocumentTemplateRouterGroup := routerGroup.Group("check-sheet-document-templates")
+	checkSheetDocumentTemplateRouterGroup := routerGroup.Group("check-sheet-document")
 	checkSheetDocumentTemplateRouterGroup.GET("pagination", protectedRoutes.checkSheetDocumentTemplateController.FindAllCheckSheetDocumentTemplatePagination)
 	checkSheetDocumentTemplateRouterGroup.GET("", protectedRoutes.checkSheetDocumentTemplateController.FindAllCheckSheetDocumentTemplate)
 	checkSheetDocumentTemplateRouterGroup.POST("", protectedRoutes.checkSheetDocumentTemplateController.CreateCheckSheetDocumentTemplate)
 	checkSheetDocumentTemplateRouterGroup.PUT("/:id", protectedRoutes.checkSheetDocumentTemplateController.UpdateCheckSheetDocumentTemplate)
 	checkSheetDocumentTemplateRouterGroup.DELETE("/:id", protectedRoutes.checkSheetDocumentTemplateController.DeleteCheckSheetDocumentTemplate)
+
+	breakdownRouterGroup := routerGroup.Group("breakdowns")
+	breakdownRouterGroup.GET("pagination", protectedRoutes.breakdownController.FindAllBreakdownPagination)
+	breakdownRouterGroup.GET("", protectedRoutes.breakdownController.FindAllBreakdown)
+	breakdownRouterGroup.GET("/:id", protectedRoutes.breakdownController.FindBreakdownById)
+	breakdownRouterGroup.POST("", protectedRoutes.breakdownController.CreateBreakdown)
+	breakdownRouterGroup.PUT("/:id", protectedRoutes.breakdownController.UpdateBreakdown)
+	breakdownRouterGroup.DELETE("/:id", protectedRoutes.breakdownController.DeleteBreakdown)
 
 }

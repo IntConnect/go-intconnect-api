@@ -36,6 +36,14 @@ func (breakdownHandler *Handler) FindAllBreakdownPagination(ginContext *gin.Cont
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
+func (breakdownHandler *Handler) FindBreakdownById(ginContext *gin.Context) {
+	breakdownId := ginContext.Param("id")
+	parsedBreakdownId, err := strconv.ParseUint(breakdownId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	paginatedResponse := breakdownHandler.breakdownService.FindById(ginContext, parsedBreakdownId)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
+}
+
 func (breakdownHandler *Handler) CreateBreakdown(ginContext *gin.Context) {
 	var createBreakdownModel model.CreateBreakdownRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createBreakdownModel)

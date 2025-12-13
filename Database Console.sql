@@ -92,6 +92,12 @@ FROM machines;
 SELECT *
 FROM parameters
 WHERE is_automatic = false;
+SELECT *
+FROM breakdowns;
+SELECT *
+FROM breakdown_resources;
 
 ALTER TABLE parameters
     ADD COLUMN is_automatic BOOLEAN DEFAULT TRUE NOT NULL;
+
+DROP TABLE check_sheet_document_templates_parameters

@@ -1,13 +1,18 @@
 package breakdown
 
 import (
+	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
+	breakdownResource "go-intconnect-api/internal/breakdown_resource"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/storage"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
+	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -15,23 +20,29 @@ import (
 )
 
 type ServiceImpl struct {
-	breakdownRepository Repository
-	auditLogService     auditLog.Service
-	validatorService    validator.Service
-	dbConnection        *gorm.DB
-	viperConfig         *viper.Viper
+	breakdownRepository         Repository
+	breakdownResourceRepository breakdownResource.Repository
+	auditLogService             auditLog.Service
+	validatorService            validator.Service
+	dbConnection                *gorm.DB
+	viperConfig                 *viper.Viper
+	localStorageService         *storage.Manager
 }
 
 func NewService(breakdownRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper,
 	auditLogService auditLog.Service,
+	localStorageService *storage.Manager,
+	breakdownResourceRepository breakdownResource.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
-		breakdownRepository: breakdownRepository,
-		validatorService:    validatorService,
-		dbConnection:        dbConnection,
-		viperConfig:         viperConfig,
-		auditLogService:     auditLogService,
+		breakdownRepository:         breakdownRepository,
+		validatorService:            validatorService,
+		dbConnection:                dbConnection,
+		viperConfig:                 viperConfig,
+		auditLogService:             auditLogService,
+		localStorageService:         localStorageService,
+		breakdownResourceRepository: breakdownResourceRepository,
 	}
 }
 
@@ -46,6 +57,18 @@ func (breakdownService *ServiceImpl) FindAll() []*model.BreakdownResponse {
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return allBreakdown
+}
+
+func (breakdownService *ServiceImpl) FindById(ginContext *gin.Context, breakdownId uint64) *model.BreakdownResponse {
+	var breakdownResponseRequest *model.BreakdownResponse
+	err := breakdownService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		breakdownEntity, err := breakdownService.breakdownRepository.FindById(gormTransaction, breakdownId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		breakdownResponseRequest = helper.MapEntityIntoResponse[*entity.Breakdown, *model.BreakdownResponse](breakdownEntity, mapper.FuncMapAuditable)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return breakdownResponseRequest
 }
 
 // Create - Membuat breakdown baru
@@ -90,7 +113,30 @@ func (breakdownService *ServiceImpl) Create(ginContext *gin.Context, createBreak
 	err := breakdownService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		breakdownEntity := helper.MapCreateRequestIntoEntity[model.CreateBreakdownRequest, entity.Breakdown](createBreakdownRequest)
 		breakdownEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
+		breakdownEntity.ReportedBy = userJwtClaims.Id
 		err := breakdownService.breakdownRepository.Create(gormTransaction, breakdownEntity)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		var breakdownResourceEntities []entity.BreakdownResource
+		for _, breakdownResourceRequest := range createBreakdownRequest.BreakdownResourceRequests {
+			var breakdownResourceEntity entity.BreakdownResource
+
+			if breakdownResourceRequest.ImageFile != nil {
+				newPath, err := breakdownService.localStorageService.Disk().Put(breakdownResourceRequest.ImageFile, fmt.Sprintf("breakdowns/images/%d-%s", time.Now().UnixNano(), breakdownResourceRequest.ImageFile.Filename))
+				helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+				breakdownResourceEntity.ImagePath = newPath
+			}
+			if breakdownResourceRequest.VideoFile != nil {
+				newPath, err := breakdownService.localStorageService.Disk().Put(breakdownResourceRequest.VideoFile, fmt.Sprintf("breakdowns/videos/%d-%s", time.Now().UnixNano(), breakdownResourceRequest.VideoFile.Filename))
+				helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+				breakdownResourceEntity.VideoPath = newPath
+			}
+			if breakdownResourceEntity.ImagePath == "" && breakdownResourceEntity.VideoPath == "" {
+				continue
+			}
+			breakdownResourceEntities = append(breakdownResourceEntities)
+
+		}
+		err = breakdownService.breakdownResourceRepository.CreateBatch(gormTransaction, breakdownResourceEntities)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := breakdownService.auditLogService.Build(
 			nil,             // before entity

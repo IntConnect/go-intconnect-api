@@ -193,6 +193,7 @@ func existsValidator(db *gorm.DB) validator.Func {
 		tableName, columnName := params[0], params[1]
 		var count int64
 		db.Table(tableName).Where(fmt.Sprintf("%s = ?", columnName), val).Count(&count)
+		fmt.Println(columnName, val, count)
 		return count != 0
 	}
 }

@@ -1,0 +1,1 @@
+DROP TABLE check_sheet_document_templates_parameters;

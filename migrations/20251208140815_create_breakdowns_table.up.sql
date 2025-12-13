@@ -3,7 +3,7 @@ CREATE TABLE breakdowns
     id                     SERIAL PRIMARY KEY NOT NULL,
     machine_id             BIGINT             NOT NULL REFERENCES machines (id),
     reported_by            BIGINT             NOT NULL REFERENCES users (id),
-    verified_by            BIGINT             NOT NULL REFERENCES users (id),
+    verified_by            BIGINT REFERENCES users (id),
 
     problem_identification TEXT,
     people_issue           TEXT               NOT NULL DEFAULT '',
