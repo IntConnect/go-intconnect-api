@@ -1,6 +1,6 @@
 CREATE TABLE machine_documents
 (
-    id          SERIAL       NOT NULL,
+    id          SERIAL       NOT NULL PRIMARY KEY,
     machine_id  BIGINT       NOT NULL REFERENCES machines (id),
     code        VARCHAR(255) NOT NULL,
     name        VARCHAR(255) NOT NULL,

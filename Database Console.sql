@@ -90,16 +90,13 @@ FROM machine_documents;
 SELECT *
 FROM machines;
 SELECT *
-FROM parameters
-WHERE is_automatic = false;
+FROM parameters;
 SELECT *
 FROM breakdowns;
 SELECT *
 FROM breakdown_resources;
 SELECT *
 FROM system_settings;
+SELECT *
+FROM facilities;
 
-ALTER TABLE parameters
-    ADD COLUMN is_automatic BOOLEAN DEFAULT TRUE NOT NULL;
-
-DROP TABLE check_sheet_document_templates_parameters
