@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS areas
     updated_by VARCHAR(255),
     deleted_at TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
     deleted_by VARCHAR(255),
-    
+
     PRIMARY KEY (id)
 );
 

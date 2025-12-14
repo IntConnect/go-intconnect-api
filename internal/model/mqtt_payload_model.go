@@ -5,7 +5,7 @@ import "strings"
 
 type MqttPayload struct {
 	MqttInnerPayload map[string][]interface{} `json:"d"`
-	Timestamp        CustomTime                `json:"ts"`
+	Timestamp        CustomTime               `json:"ts"`
 }
 
 type CustomTime struct {

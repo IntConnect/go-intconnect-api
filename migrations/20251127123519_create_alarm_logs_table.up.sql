@@ -1,4 +1,5 @@
-CREATE TABLE alarm_logs(
+CREATE TABLE alarm_logs
+(
     id              SERIAL       NOT NULL PRIMARY KEY,
     parameter_id    BIGINT REFERENCES parameters (id),
     value           FLOAT        NOT NULL,
