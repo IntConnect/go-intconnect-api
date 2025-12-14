@@ -28,7 +28,6 @@ func (systemSettingRepositoryImpl *RepositoryImpl) FindByKey(gormTransaction *go
 
 func (systemSettingRepositoryImpl *RepositoryImpl) Manage(gormTransaction *gorm.DB, pipelineEntity *entity.SystemSetting) error {
 	return gormTransaction.Model(pipelineEntity).
-		Where("key = ?", pipelineEntity.Key).
-		Updates(pipelineEntity).Error
+		Save(pipelineEntity).Error
 
 }

@@ -10,10 +10,13 @@ CREATE TABLE facilities
     location       VARCHAR(255),
     status         facility_status_enum NOT NULL,
     thumbnail_path VARCHAR(255)         NOT NULL,
+    position_x     FLOAT                NOT NULL DEFAULT 0,
+    position_y     FLOAT                NOT NULL DEFAULT 0,
+    position_z     FLOAT                NOT NULL DEFAULT 0,
     created_by     VARCHAR(255),
-    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at     TIMESTAMP                     DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP                     DEFAULT CURRENT_TIMESTAMP,
     updated_by     VARCHAR(255),
-    deleted_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at     TIMESTAMP                     DEFAULT CURRENT_TIMESTAMP,
     deleted_by     VARCHAR(255)
 )

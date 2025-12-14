@@ -8,6 +8,9 @@ type CreateFacilityRequest struct {
 	Description string                `form:"description" validate:"omitempty,min=3,max=100"`
 	Location    string                `form:"location" validate:"omitempty,min=3,max=100"`
 	Thumbnail   *multipart.FileHeader `form:"thumbnail" validate:"required,requiredFile,fileExtension=.png .jpg"`
+	PositionX   *float64              `form:"position_x" validate:"required,number"`
+	PositionY   *float64              `form:"position_y" validate:"required,number"`
+	PositionZ   *float64              `form:"position_z" validate:"required,number"`
 }
 
 type UpdateFacilityRequest struct {
@@ -17,6 +20,9 @@ type UpdateFacilityRequest struct {
 	Description string                `form:"description" validate:"omitempty,min=3,max=100"`
 	Location    string                `form:"location" validate:"omitempty,min=3,max=100"`
 	Thumbnail   *multipart.FileHeader `form:"thumbnail" validate:"omitempty,fileExtension=.png .jpg"`
+	PositionX   *float64              `form:"position_x" validate:"required,number"`
+	PositionY   *float64              `form:"position_y" validate:"required,number"`
+	PositionZ   *float64              `form:"position_z" validate:"required,number"`
 }
 
 type FacilityResponse struct {
@@ -27,6 +33,9 @@ type FacilityResponse struct {
 	Location          string             `json:"location"`
 	Status            string             `json:"status"`
 	ThumbnailPath     string             `json:"thumbnail_path"`
+	PositionX         float64            `json:"position_x"`
+	PositionY         float64            `json:"position_y"`
+	PositionZ         float64            `json:"position_z"`
 	AuditableResponse *AuditableResponse `json:"auditable"`
 }
 
