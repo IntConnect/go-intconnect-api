@@ -150,8 +150,9 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	databaseConnectionRouterGroup.DELETE("", protectedRoutes.databaseConnectionController.DeleteDatabaseConnection)
 
 	facilityRouterGroup := routerGroup.Group("facilities")
-	facilityRouterGroup.GET("pagination", protectedRoutes.facilityController.FindAllPagination)
-	facilityRouterGroup.GET("", protectedRoutes.facilityController.FindAll)
+	facilityRouterGroup.GET("pagination", protectedRoutes.facilityController.FindAllFacilityPagination)
+	facilityRouterGroup.GET("", protectedRoutes.facilityController.FindAllFacility)
+	facilityRouterGroup.GET("/:id", protectedRoutes.facilityController.FindFacilityById)
 	facilityRouterGroup.POST("", protectedRoutes.facilityController.CreateFacility)
 	facilityRouterGroup.PUT("/:id", protectedRoutes.facilityController.UpdateFacility)
 	facilityRouterGroup.DELETE("/:id", protectedRoutes.facilityController.DeleteFacility)

@@ -54,6 +54,18 @@ func (facilityService *ServiceImpl) FindAll() []*model.FacilityResponse {
 	return facilityResponsesRequest
 }
 
+func (facilityService *ServiceImpl) FindById(facilityId uint64) *model.FacilityResponse {
+	var facilityResponse *model.FacilityResponse
+	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		facilityEntities, err := facilityService.facilityRepository.FindById(gormTransaction, facilityId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		facilityResponse = helper.MapEntityIntoResponse[*entity.Facility, *model.FacilityResponse](facilityEntities, mapper.FuncMapAuditable)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return facilityResponse
+}
+
 func (facilityService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.FacilityResponse] {
 	paginationQuery := helper.BuildPaginationQuery(paginationReq)
 	var facilityResponses []*model.FacilityResponse
@@ -88,8 +100,8 @@ func (facilityService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 }
 
 // Create - Membuat facility baru
-func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacilityRequest *model.CreateFacilityRequest) *model.PaginatedResponse[*model.FacilityResponse] {
-	var paginationResp *model.PaginatedResponse[*model.FacilityResponse]
+func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacilityRequest *model.CreateFacilityRequest) {
+	userJwtClaim := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := facilityService.validatorService.ValidateStruct(createFacilityRequest)
 	facilityService.validatorService.ParseValidationError(valErr, *createFacilityRequest)
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -98,24 +110,32 @@ func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacili
 		thumbnailPath, err := facilityService.localStorageService.Disk().Put(createFacilityRequest.Thumbnail, fmt.Sprintf("facilities/thumbnails/%d-%s", time.Now().UnixNano(), createFacilityRequest.Thumbnail.Filename))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 		facilityEntity.ThumbnailPath = thumbnailPath
+		facilityEntity.Auditable = entity.NewAuditable(userJwtClaim.Username)
 		err = facilityService.facilityRepository.Create(gormTransaction, facilityEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := facilityService.auditLogService.Build(
+			nil,
+			facilityEntity,
+			nil,
+			"",
+		)
 
+		err = facilityService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_FEATURE_FACILITY,
+				auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	paginationRequest := model.NewPaginationRequest()
-	paginationResp = facilityService.FindAllPagination(&paginationRequest)
-	return paginationResp
+
 }
 
 func (facilityService *ServiceImpl) Update(
 	ginContext *gin.Context,
 	updateFacilityRequest *model.UpdateFacilityRequest,
-) *model.PaginatedResponse[*model.FacilityResponse] {
+) {
 	userJwtClaim := helper.ExtractJwtClaimFromContext(ginContext)
-	ipAddress, _ := helper.ExtractRequestMeta(ginContext)
-	var paginationResp *model.PaginatedResponse[*model.FacilityResponse]
 
 	valErr := facilityService.validatorService.ValidateStruct(updateFacilityRequest)
 	facilityService.validatorService.ParseValidationError(valErr, *updateFacilityRequest)
@@ -124,7 +144,7 @@ func (facilityService *ServiceImpl) Update(
 
 		// 1. Ambil entity lama
 		facility, err := facilityService.facilityRepository.FindById(gormTransaction, updateFacilityRequest.Id)
-		pastFacility := facility
+		beforeFacility := *facility
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		// 2. Update fields non-Thumbnail
@@ -150,31 +170,27 @@ func (facilityService *ServiceImpl) Update(
 		facility.Auditable = entity.UpdateAuditable(userJwtClaim.Name)
 		err = facilityService.facilityRepository.Update(gormTransaction, facility)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		facilityService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
-			UserId:      userJwtClaim.Id,
-			Action:      model.AUDIT_LOG_CREATE,
-			Feature:     model.AUDIT_LOG_FEATURE_FACILITY,
-			Description: "",
-			Before:      pastFacility,
-			After:       facility,
-			IpAddress:   ipAddress,
-		})
+		auditPayload := facilityService.auditLogService.Build(
+			&beforeFacility, // before entity
+			facility,        // after entity
+			nil,
+			"",
+		)
+
+		err = facilityService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_UPDATE,
+				model.AUDIT_LOG_FEATURE_FACILITY,
+				auditPayload)
 		return nil
 	})
 
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-	// Kembalikan pagination
-	paginationRequest := model.NewPaginationRequest()
-	paginationResp = facilityService.FindAllPagination(&paginationRequest)
-
-	return paginationResp
 }
 
 func (facilityService *ServiceImpl) Delete(ginContext *gin.Context, deleteFacilityRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.FacilityResponse] {
 	userJwtClaim := helper.ExtractJwtClaimFromContext(ginContext)
-	ipAddress, _ := helper.ExtractRequestMeta(ginContext)
-
 	var paginationResp *model.PaginatedResponse[*model.FacilityResponse]
 	valErr := facilityService.validatorService.ValidateStruct(deleteFacilityRequest)
 	facilityService.validatorService.ParseValidationError(valErr, *deleteFacilityRequest)
@@ -182,19 +198,23 @@ func (facilityService *ServiceImpl) Delete(ginContext *gin.Context, deleteFacili
 		facilityEntity, err := facilityService.facilityRepository.FindById(gormTransaction, deleteFacilityRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if facilityEntity.ThumbnailPath != "" {
-			_ = facilityService.localStorageService.Disk().Delete(facilityEntity.ThumbnailPath)
+			newPath, _ := facilityService.localStorageService.Disk().MoveFile(facilityEntity.ThumbnailPath, "facilities/thumbnails")
+			facilityEntity.ThumbnailPath = newPath
 		}
+		facilityEntity.Auditable = entity.DeleteAuditable(userJwtClaim.Name)
 		err = facilityService.facilityRepository.Delete(gormTransaction, deleteFacilityRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		facilityService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
-			UserId:      userJwtClaim.Id,
-			Action:      model.AUDIT_LOG_CREATE,
-			Feature:     model.AUDIT_LOG_FEATURE_FACILITY,
-			Description: deleteFacilityRequest.Reason,
-			Before:      facilityEntity,
-			After:       nil,
-			IpAddress:   ipAddress,
-		})
+		auditPayload := facilityService.auditLogService.Build(
+			facilityEntity, // before entity
+			nil,            // after entity
+			nil,
+			deleteFacilityRequest.Reason,
+		)
+		err = facilityService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_DELETE,
+				model.AUDIT_LOG_FEATURE_FACILITY,
+				auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

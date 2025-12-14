@@ -210,7 +210,7 @@ func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachine
 
 		err = machineService.auditLogService.
 			Record(ginContext,
-				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_UPDATE,
 				model.AUDIT_LOG_FEATURE_MACHINE,
 				auditPayload)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))

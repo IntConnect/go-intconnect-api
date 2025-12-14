@@ -26,17 +26,25 @@ func NewHandler(facilityService Service, viperConfig *viper.Viper) *Handler {
 	}
 }
 
-func (facilityHandler *Handler) FindAll(ginContext *gin.Context) {
+func (facilityHandler *Handler) FindAllFacility(ginContext *gin.Context) {
 	facilityResponses := facilityHandler.facilityService.FindAll()
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Facility has been fetched", facilityResponses))
 }
 
-func (facilityHandler *Handler) FindAllPagination(ginContext *gin.Context) {
+func (facilityHandler *Handler) FindAllFacilityPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	paginatedResponse := facilityHandler.facilityService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
+}
+
+func (facilityHandler *Handler) FindFacilityById(ginContext *gin.Context) {
+	facilityId := ginContext.Param("id")
+	parsedFacilityId, err := strconv.ParseUint(facilityId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	facilityResponse := facilityHandler.facilityService.FindById(parsedFacilityId)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Facility has been fetched", facilityResponse))
 }
 
 func (facilityHandler *Handler) CreateFacility(ginContext *gin.Context) {
@@ -47,8 +55,8 @@ func (facilityHandler *Handler) CreateFacility(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	thumbnailFile, err := ginContext.FormFile("thumbnail")
 	createFacilityModel.Thumbnail = thumbnailFile
-	paginatedResponse := facilityHandler.facilityService.Create(ginContext, &createFacilityModel)
-	ginContext.JSON(http.StatusOK, paginatedResponse)
+	facilityHandler.facilityService.Create(ginContext, &createFacilityModel)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("Facility has been updated", nil))
 }
 
 func (facilityHandler *Handler) UpdateFacility(ginContext *gin.Context) {
@@ -63,8 +71,8 @@ func (facilityHandler *Handler) UpdateFacility(ginContext *gin.Context) {
 	parsedFacilityId, err := strconv.ParseUint(facilityId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	updateFacilityModel.Id = parsedFacilityId
-	paginatedResponse := facilityHandler.facilityService.Update(ginContext, &updateFacilityModel)
-	ginContext.JSON(http.StatusOK, paginatedResponse)
+	facilityHandler.facilityService.Update(ginContext, &updateFacilityModel)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("Facility has been updated", nil))
 }
 
 func (facilityHandler *Handler) DeleteFacility(ginContext *gin.Context) {

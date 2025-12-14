@@ -66,13 +66,8 @@ func (facilityRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB,
 	return &facilityEntity, err
 }
 
-func (facilityRepositoryImpl *RepositoryImpl) FindByName(pipelineName string) *entity.Facility {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (facilityRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineEntity *entity.Facility) error {
-	return gormTransaction.Model(pipelineEntity).Create(pipelineEntity).Error
+func (facilityRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, facilityEntity *entity.Facility) error {
+	return gormTransaction.Model(facilityEntity).Create(facilityEntity).Error
 
 }
 
@@ -81,5 +76,5 @@ func (facilityRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, f
 }
 
 func (facilityRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.Facility{}).Where("id = ?", id).Delete(&entity.Facility{}).Error
+	return gormTransaction.Model(entity.Facility{}).Where("id = ?", id).Save(&entity.Facility{}).Error
 }
