@@ -49,12 +49,14 @@ func (facilityHandler *Handler) FindFacilityById(ginContext *gin.Context) {
 
 func (facilityHandler *Handler) CreateFacility(ginContext *gin.Context) {
 	var createFacilityModel model.CreateFacilityRequest
-	err := ginContext.Request.ParseMultipartForm(32 << 20) // 32MB maxMemory
+	err := ginContext.Request.ParseMultipartForm(500 << 20)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	err = facilityHandler.formDecoder.Decode(&createFacilityModel, ginContext.Request.PostForm)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	thumbnailFile, err := ginContext.FormFile("thumbnail")
+	thumbnailFile, _ := ginContext.FormFile("thumbnail")
 	createFacilityModel.Thumbnail = thumbnailFile
+	facilityFile, _ := ginContext.FormFile("model")
+	createFacilityModel.Model = facilityFile
 	facilityHandler.facilityService.Create(ginContext, &createFacilityModel)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("Facility has been updated", nil))
 }

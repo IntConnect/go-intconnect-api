@@ -10,6 +10,7 @@ CREATE TABLE facilities
     location       VARCHAR(255),
     status         facility_status_enum NOT NULL,
     thumbnail_path VARCHAR(255)         NOT NULL,
+    model_path     VARCHAR(255)         NOT NULL,
     position_x     FLOAT                NOT NULL DEFAULT 0,
     position_y     FLOAT                NOT NULL DEFAULT 0,
     position_z     FLOAT                NOT NULL DEFAULT 0,

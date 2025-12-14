@@ -12,6 +12,7 @@ type Facility struct {
 	Location      string               `gorm:"column:location"`
 	Status        trait.FacilityStatus `gorm:"column:status"`
 	ThumbnailPath string               `gorm:"column:thumbnail_path"`
+	ModelPath     string               `gorm:"column:model_path"`
 	PositionX     float64              `gorm:"column:position_x"`
 	PositionY     float64              `gorm:"column:position_y"`
 	PositionZ     float64              `gorm:"column:position_z"`

@@ -110,6 +110,9 @@ func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacili
 		thumbnailPath, err := facilityService.localStorageService.Disk().Put(createFacilityRequest.Thumbnail, fmt.Sprintf("facilities/thumbnails/%d-%s", time.Now().UnixNano(), createFacilityRequest.Thumbnail.Filename))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 		facilityEntity.ThumbnailPath = thumbnailPath
+		modelPath, err := facilityService.localStorageService.Disk().Put(createFacilityRequest.Thumbnail, fmt.Sprintf("facilities/models/%d-%s", time.Now().UnixNano(), createFacilityRequest.Model.Filename))
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+		facilityEntity.ModelPath = modelPath
 		facilityEntity.Auditable = entity.NewAuditable(userJwtClaim.Username)
 		err = facilityService.facilityRepository.Create(gormTransaction, facilityEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
