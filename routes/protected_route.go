@@ -19,6 +19,7 @@ import (
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
 	smtpServer "go-intconnect-api/internal/smtp_server"
+	systemSetting "go-intconnect-api/internal/system_setting"
 	"go-intconnect-api/internal/user"
 	"go-intconnect-api/pkg/middleware"
 
@@ -47,6 +48,7 @@ type ProtectedRoutes struct {
 	reportDocumentTemplateController     reportDocumentTemplate.Controller
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller
 	breakdownController                  breakdown.Controller
+	systemSettingController              systemSetting.Controller
 	roleService                          role.Service
 }
 
@@ -71,6 +73,7 @@ func NewProtectedRoutes(
 	modbusServerController modbusServer.Controller,
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller,
 	breakdownController breakdown.Controller,
+	systemSettingController systemSetting.Controller,
 
 	roleService role.Service,
 
@@ -98,6 +101,7 @@ func NewProtectedRoutes(
 		modbusServerController:               modbusServerController,
 		checkSheetDocumentTemplateController: checkSheetDocumentTemplateController,
 		breakdownController:                  breakdownController,
+		systemSettingController:              systemSettingController,
 	}
 }
 
@@ -234,5 +238,10 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	breakdownRouterGroup.POST("", protectedRoutes.breakdownController.CreateBreakdown)
 	breakdownRouterGroup.PUT("/:id", protectedRoutes.breakdownController.UpdateBreakdown)
 	breakdownRouterGroup.DELETE("/:id", protectedRoutes.breakdownController.DeleteBreakdown)
+
+	systemSettingRouterGroup := routerGroup.Group("system-settings")
+	systemSettingRouterGroup.GET("", protectedRoutes.systemSettingController.FindAllSystemSetting)
+	systemSettingRouterGroup.GET("/:key", protectedRoutes.systemSettingController.FindSystemSettingByKey)
+	systemSettingRouterGroup.POST("", protectedRoutes.systemSettingController.ManageSystemSetting)
 
 }

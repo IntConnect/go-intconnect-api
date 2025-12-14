@@ -96,6 +96,8 @@ SELECT *
 FROM breakdowns;
 SELECT *
 FROM breakdown_resources;
+SELECT *
+FROM system_settings;
 
 ALTER TABLE parameters
     ADD COLUMN is_automatic BOOLEAN DEFAULT TRUE NOT NULL;

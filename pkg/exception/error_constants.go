@@ -57,8 +57,9 @@ const (
 	ErrThirdPartyAPIError   = "Third party API error"
 	ErrPaymentFailed        = "Payment processing failed"
 
-	ErrPayloadInvalid   = "Payload invalid or deformed"
-	ErrParameterInvalid = "Parameter invalid or not supplied"
+	ErrPayloadInvalid           = "Payload invalid or deformed"
+	ErrParameterInvalid         = "Parameter invalid or not supplied"
+	ErrSystemSettingKeyNotMatch = "The system setting key is invalid"
 )
 
 // Convention Status Code

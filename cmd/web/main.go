@@ -59,6 +59,8 @@ func main() {
 		injector.ModbusServerModule,
 		injector.BreakdownModule,
 		injector.CheckSheetDocumentModule,
+		injector.BreakdownResourceModule,
+		injector.SystemSettingModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

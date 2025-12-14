@@ -48,8 +48,9 @@ func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}
 
 func DecodeFromSource[S any, T any](sourceMapping S, targetMapping T) T {
 	decoderConfig := &mapstructure.DecoderConfig{
-		DecodeHook: StringIntoTypeHookFunc,
-		Result:     &targetMapping,
+		DecodeHook:       StringIntoTypeHookFunc,
+		Result:           &targetMapping,
+		WeaklyTypedInput: true,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
 	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
@@ -108,4 +109,9 @@ func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
 
 func MapUpdateRequestIntoEntity[S any, R any](updateRequest S, existingEntity *R) {
 	existingEntity = DecodeFromSource[S, *R](updateRequest, existingEntity)
+}
+
+func ParsingHashMapIntoStruct[R any](sourceHashMap map[string]interface{}, rawStruct R) *R {
+	parsedRawStruct := DecodeFromSource[map[string]interface{}, *R](sourceHashMap, &rawStruct)
+	return parsedRawStruct
 }

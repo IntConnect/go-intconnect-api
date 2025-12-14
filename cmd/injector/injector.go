@@ -4,6 +4,7 @@ import (
 	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/breakdown"
+	breakdownResource "go-intconnect-api/internal/breakdown_resource"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
@@ -23,6 +24,7 @@ import (
 	"go-intconnect-api/internal/role"
 	smtpServer "go-intconnect-api/internal/smtp_server"
 	"go-intconnect-api/internal/storage"
+	systemSetting "go-intconnect-api/internal/system_setting"
 	"go-intconnect-api/internal/user"
 	validatorService "go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -202,7 +204,7 @@ var PipelineNodeModule = fx.Module("pipelineNodeFeature",
 	fx.Provide(fx.Annotate(pipelineNode.NewRepository, fx.As(new(pipelineNode.Repository)))),
 )
 
-var PipelineEdgeModule = fx.Module("pipelineFeature",
+var PipelineEdgeModule = fx.Module("pipelineEdgeFeature",
 	fx.Provide(fx.Annotate(pipelineEdge.NewRepository, fx.As(new(pipelineEdge.Repository)))),
 )
 
@@ -268,4 +270,14 @@ var CheckSheetDocumentModule = fx.Module("checkSheetDocumentTemplateFeature",
 	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewRepository, fx.As(new(checkSheetDocumentTemplate.Repository)))),
 	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewService, fx.As(new(checkSheetDocumentTemplate.Service)))),
 	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewHandler, fx.As(new(checkSheetDocumentTemplate.Controller)))),
+)
+
+var BreakdownResourceModule = fx.Module("breakdownResourceFeature",
+	fx.Provide(fx.Annotate(breakdownResource.NewRepository, fx.As(new(breakdownResource.Repository)))),
+)
+
+var SystemSettingModule = fx.Module("systemSettingFeature",
+	fx.Provide(fx.Annotate(systemSetting.NewRepository, fx.As(new(systemSetting.Repository)))),
+	fx.Provide(fx.Annotate(systemSetting.NewService, fx.As(new(systemSetting.Service)))),
+	fx.Provide(fx.Annotate(systemSetting.NewHandler, fx.As(new(systemSetting.Controller)))),
 )
