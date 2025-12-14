@@ -1,7 +1,6 @@
 package smtp_server
 
 import (
-	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -109,7 +108,6 @@ func (smtpServerService *ServiceImpl) Create(ginContext *gin.Context, createSmtp
 }
 
 func (smtpServerService *ServiceImpl) Update(ginContext *gin.Context, updateSmtpServerRequest *model.UpdateSmtpServerRequest) *model.PaginatedResponse[*model.SmtpServerResponse] {
-	fmt.Println(updateSmtpServerRequest)
 	jwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	ipAddress, userAgent := helper.ExtractRequestMeta(ginContext)
 	var paginationResp *model.PaginatedResponse[*model.SmtpServerResponse]

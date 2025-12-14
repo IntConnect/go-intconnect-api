@@ -1,7 +1,6 @@
 package audit_log
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
@@ -135,7 +134,6 @@ func (auditLogService *ServiceImpl) Build(
 	switch {
 	case beforeEntity != nil && afterEntity != nil:
 		fieldDiff := helper.DiffEntity(beforeEntity, afterEntity)
-		fmt.Println("DIFF", fieldDiff)
 		for field, val := range fieldDiff {
 			before[field] = val["before"]
 			after[field] = val["after"]

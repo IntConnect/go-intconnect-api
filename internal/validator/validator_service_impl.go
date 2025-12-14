@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"fmt"
 	"go-intconnect-api/pkg/exception"
 	"net/http"
 	"reflect"
@@ -52,7 +51,6 @@ func (validatorService *ServiceImpl) ParseValidationError(validationError error,
 
 			parsedMap[fieldJSON] = cleanMessage
 		}
-		fmt.Println(parsedMap)
 		panic(exception.NewApplicationErrorSpecific(http.StatusBadRequest, exception.StatusValidationError, exception.MsgValidationError, parsedMap))
 	}
 }

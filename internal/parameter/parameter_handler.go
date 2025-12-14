@@ -1,7 +1,6 @@
 package parameter
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -32,7 +31,6 @@ func (parameterHandler *Handler) FindDependencyParameter(ginContext *gin.Context
 func (parameterHandler *Handler) FindAllParameter(ginContext *gin.Context) {
 	var parameterFilterRequest model.ParameterFilterRequest
 	err := ginContext.ShouldBindQuery(&parameterFilterRequest)
-	fmt.Println(parameterFilterRequest)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	parameterResponses := parameterHandler.parameterService.FindAll(&parameterFilterRequest)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Parameters has been fetched", parameterResponses))

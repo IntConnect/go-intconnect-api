@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -88,7 +87,6 @@ func (userHandler *Handler) UpdateProfile(ginContext *gin.Context) {
 	updateUserProfileRequest.Avatar = avatarFile
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	newGeneratedToken := userHandler.userService.UpdateProfile(ginContext, &updateUserProfileRequest)
-	fmt.Println(newGeneratedToken)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Update profile success", gin.H{
 		"token": newGeneratedToken,
 	}))

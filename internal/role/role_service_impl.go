@@ -1,7 +1,6 @@
 package role
 
 import (
-	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -115,7 +114,6 @@ func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleReques
 		if len(permissionEntities) != len(updateRoleRequest.PermissionIds) {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 		}
-		fmt.Println(permissionEntities)
 		err = gormTransaction.Model(roleEntity).Association("Permissions").Replace(permissionEntities)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
