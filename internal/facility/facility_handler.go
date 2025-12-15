@@ -55,8 +55,8 @@ func (facilityHandler *Handler) CreateFacility(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	thumbnailFile, _ := ginContext.FormFile("thumbnail")
 	createFacilityModel.Thumbnail = thumbnailFile
-	facilityFile, _ := ginContext.FormFile("model")
-	createFacilityModel.Model = facilityFile
+	modelFile, _ := ginContext.FormFile("model")
+	createFacilityModel.Model = modelFile
 	facilityHandler.facilityService.Create(ginContext, &createFacilityModel)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("Facility has been updated", nil))
 }
@@ -69,6 +69,8 @@ func (facilityHandler *Handler) UpdateFacility(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	thumbnailFile, _ := ginContext.FormFile("thumbnail")
 	updateFacilityModel.Thumbnail = thumbnailFile
+	modelFile, _ := ginContext.FormFile("model")
+	updateFacilityModel.Model = modelFile
 	facilityId := ginContext.Param("id")
 	parsedFacilityId, err := strconv.ParseUint(facilityId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))

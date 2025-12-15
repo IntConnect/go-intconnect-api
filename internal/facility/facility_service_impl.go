@@ -110,7 +110,7 @@ func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacili
 		thumbnailPath, err := facilityService.localStorageService.Disk().Put(createFacilityRequest.Thumbnail, fmt.Sprintf("facilities/thumbnails/%d-%s", time.Now().UnixNano(), createFacilityRequest.Thumbnail.Filename))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 		facilityEntity.ThumbnailPath = thumbnailPath
-		modelPath, err := facilityService.localStorageService.Disk().Put(createFacilityRequest.Thumbnail, fmt.Sprintf("facilities/models/%d-%s", time.Now().UnixNano(), createFacilityRequest.Model.Filename))
+		modelPath, err := facilityService.localStorageService.Disk().Put(createFacilityRequest.Model, fmt.Sprintf("facilities/models/%d-%s", time.Now().UnixNano(), createFacilityRequest.Model.Filename))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 		facilityEntity.ModelPath = modelPath
 		facilityEntity.Auditable = entity.NewAuditable(userJwtClaim.Username)
@@ -168,6 +168,22 @@ func (facilityService *ServiceImpl) Update(
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 
 			facility.ThumbnailPath = newPath
+		}
+
+		if updateFacilityRequest.Model != nil {
+			// 3a. Hapus file lama jika ada
+			if facility.ModelPath != "" {
+				_ = facilityService.localStorageService.Disk().Delete(facility.ModelPath)
+			}
+
+			// 3b. Simpan file baru
+			newPath, err := facilityService.localStorageService.Disk().Put(
+				updateFacilityRequest.Model,
+				fmt.Sprintf("facilities/models/%d-%s", time.Now().UnixNano(), updateFacilityRequest.Model.Filename),
+			)
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+
+			facility.ModelPath = newPath
 		}
 
 		facility.Auditable = entity.UpdateAuditable(userJwtClaim.Name)
