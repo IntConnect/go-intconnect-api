@@ -94,9 +94,13 @@ FROM parameters;
 SELECT *
 FROM breakdowns;
 SELECT *
+FROM users;
+SELECT *
 FROM breakdown_resources;
 SELECT *
 FROM system_settings;
 SELECT *
 FROM facilities;
+SELECT *
+FROM machines;
 
