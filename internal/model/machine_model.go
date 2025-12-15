@@ -44,6 +44,7 @@ type MachineResponse struct {
 	ModelScale        float32                    `json:"model_scale"`
 	ThumbnailPath     string                     `json:"thumbnail_path"`
 	ModelPath         string                     `json:"model_path"`
+	Parameters        []ParameterResponse        `json:"parameters" mapstructure:"Parameters"`
 	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
 	Facility          *FacilityResponse          `json:"facility" mapstructure:"facility"`
 	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"auditable"`

@@ -14,6 +14,7 @@ type Machine struct {
 	ModelPath        string            `gorm:"column:model_path"`
 	Facility         *Facility         `gorm:"foreignKey:FacilityId;references:Id"`
 	MachineDocuments []MachineDocument `gorm:"foreignKey:MachineId;references:Id"`
+	Parameters       []Parameter       `gorm:"foreignKey:MachineId;references:Id"`
 	Auditable
 }
 

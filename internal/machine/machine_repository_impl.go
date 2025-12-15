@@ -51,6 +51,7 @@ func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	return machineEntities, totalItems, nil
 }
+
 func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.Machine, error) {
 	var machineEntity entity.Machine
 	err := gormTransaction.Model(&entity.Machine{}).
@@ -59,6 +60,17 @@ func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, 
 		First(&machineEntity).Error
 
 	return &machineEntity, err
+}
+
+func (machineRepositoryImpl *RepositoryImpl) FindByFacilityId(gormTransaction *gorm.DB, facilityId uint64) ([]*entity.Machine, error) {
+	var machineEntities []*entity.Machine
+	err := gormTransaction.Model(&entity.Machine{}).
+		Preload("MachineDocuments").
+		Preload("Parameters").
+		Where("facility_id = ?", facilityId).
+		First(&machineEntities).Error
+
+	return machineEntities, err
 }
 
 func (machineRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineEntity *entity.Machine) error {

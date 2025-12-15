@@ -47,6 +47,14 @@ func (machineHandler *Handler) FindMachineById(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Machine has been fetched", machineResponse))
 }
 
+func (machineHandler *Handler) FindMachineByFacilityId(ginContext *gin.Context) {
+	facilityId := ginContext.Param("id")
+	parsedFacilityId, err := strconv.ParseUint(facilityId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
+	machineResponse := machineHandler.machineService.FindByFacilityId(ginContext, parsedFacilityId)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Machine has been fetched", machineResponse))
+}
+
 func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 
 	var createMachineModel model.CreateMachineRequest

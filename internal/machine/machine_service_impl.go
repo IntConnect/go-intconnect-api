@@ -98,6 +98,18 @@ func (machineService *ServiceImpl) FindById(ginContext *gin.Context, machineId u
 	return machineResponseRequest
 }
 
+func (machineService *ServiceImpl) FindByFacilityId(ginContext *gin.Context, facilityId uint64) []*model.MachineResponse {
+	var machineResponseRequest []*model.MachineResponse
+	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		machineEntities, err := machineService.machineRepository.FindByFacilityId(gormTransaction, facilityId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		machineResponseRequest = helper.MapEntitiesIntoResponsesWithFunc[*entity.Machine, *model.MachineResponse](machineEntities, mapper.FuncMapAuditable, mapper.MapMachineDocument)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return machineResponseRequest
+}
+
 // Create - Membuat machine baru
 func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest) *model.PaginatedResponse[*model.MachineResponse] {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
