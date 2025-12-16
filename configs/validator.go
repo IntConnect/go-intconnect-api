@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/trait"
+	"go-intconnect-api/pkg/helper"
 	"mime/multipart"
 	"regexp"
 	"strconv"
@@ -171,13 +172,12 @@ func uniqueValidator(db *gorm.DB) validator.Func {
 		}
 
 		var count int64
-		query := db.Table(tableName).Where(fmt.Sprintf("%s = ?", columnName), val)
+		query := db.Debug().Table(tableName).Where(fmt.Sprintf("%s = ?", columnName), val)
 
 		// Jika pkField & pkVal valid, tambahkan kondisi exclude record yang sama
 		if pkField != "" && pkVal != nil {
-			query = query.Where(fmt.Sprintf("%s <> ?", pkField), pkVal)
+			query = query.Where(fmt.Sprintf("%s <> ?", helper.ConvertIntoSnakeCase(pkField)), pkVal)
 		}
-
 		query.Count(&count)
 		return count == 0
 	}
