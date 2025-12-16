@@ -12,6 +12,9 @@ type CreateFacilityRequest struct {
 	PositionX   *float64              `form:"position_x" validate:"required,number"`
 	PositionY   *float64              `form:"position_y" validate:"required,number"`
 	PositionZ   *float64              `form:"position_z" validate:"required,number"`
+	CameraX     *float64              `form:"camera_x" validate:"required,number"`
+	CameraY     *float64              `form:"camera_y" validate:"required,number"`
+	CameraZ     *float64              `form:"camera_z" validate:"required,number"`
 }
 
 type UpdateFacilityRequest struct {
@@ -25,6 +28,9 @@ type UpdateFacilityRequest struct {
 	PositionX   *float64              `form:"position_x" validate:"required,number"`
 	PositionY   *float64              `form:"position_y" validate:"required,number"`
 	PositionZ   *float64              `form:"position_z" validate:"required,number"`
+	CameraX     *float64              `form:"camera_x" validate:"required,number"`
+	CameraY     *float64              `form:"camera_y" validate:"required,number"`
+	CameraZ     *float64              `form:"camera_z" validate:"required,number"`
 }
 
 type FacilityResponse struct {
@@ -39,6 +45,9 @@ type FacilityResponse struct {
 	PositionX         float64            `json:"position_x"`
 	PositionY         float64            `json:"position_y"`
 	PositionZ         float64            `json:"position_z"`
+	CameraX           float64            `json:"camera_x"`
+	CameraY           float64            `json:"camera_y"`
+	CameraZ           float64            `json:"camera_z"`
 	AuditableResponse *AuditableResponse `json:"auditable"`
 }
 
