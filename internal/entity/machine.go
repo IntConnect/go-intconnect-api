@@ -12,9 +12,9 @@ type Machine struct {
 	ModelScale       float32           `gorm:"column:model_scale"`
 	ThumbnailPath    string            `gorm:"column:thumbnail_path"`
 	ModelPath        string            `gorm:"column:model_path"`
-	Facility         *Facility         `gorm:"foreignKey:FacilityId;references:Id"`
+	Facility         Facility          `gorm:"foreignKey:FacilityId;references:Id"`
 	MachineDocuments []MachineDocument `gorm:"foreignKey:MachineId;references:Id"`
-	Parameters       []Parameter       `gorm:"foreignKey:MachineId;references:Id"`
+	MqttTopic        MqttTopic         `gorm:"foreignKey:MqttTopicId;references:Id"`
 	Auditable
 }
 

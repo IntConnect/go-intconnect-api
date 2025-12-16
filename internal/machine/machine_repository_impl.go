@@ -56,6 +56,7 @@ func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, 
 	var machineEntity entity.Machine
 	err := gormTransaction.Model(&entity.Machine{}).
 		Preload("MachineDocuments").
+		Preload("MqttTopic").
 		Where("id = ?", machineId).
 		First(&machineEntity).Error
 

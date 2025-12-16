@@ -1,7 +1,6 @@
 CREATE TABLE parameters
 (
     id            SERIAL PRIMARY KEY,
-    machine_id    BIGINT REFERENCES machines (id)    NOT NULL,
     mqtt_topic_id BIGINT REFERENCES mqtt_topics (id) NOT NULL,
     name          VARCHAR(255)                       NOT NULL,
     code          VARCHAR(255)                       NOT NULL,

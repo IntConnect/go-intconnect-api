@@ -2,7 +2,6 @@ package entity
 
 type Parameter struct {
 	Id                      uint64                    `gorm:"column:id;primaryKey;autoIncrement"`
-	MachineId               uint64                    `gorm:"column:machine_id;"`
 	MqttTopicId             uint64                    `gorm:"column:mqtt_topic_id;"`
 	Name                    string                    `gorm:"column:name"`
 	Code                    string                    `gorm:"column:code"`
@@ -18,7 +17,6 @@ type Parameter struct {
 	RotationZ               float32                   `gorm:"column:rotation_z"`
 	IsDisplay               bool                      `gorm:"column:is_display;default:true"`
 	IsAutomatic             bool                      `gorm:"column:is_automatic;default:true"`
-	Machine                 Machine                   `gorm:"foreignKey:MachineId;references:Id"`
 	MqttTopic               MqttTopic                 `gorm:"foreignKey:MqttTopicId;references:Id"`
 	ReportDocumentTemplates []*ReportDocumentTemplate `gorm:"many2many:report_document_templates_parameters;joinForeignKey:ParameterID;joinReferences:ReportDocumentTemplateID"`
 	ParameterOperation      []*ParameterOperation     `gorm:"foreignKey:ParameterId;references:Id"`

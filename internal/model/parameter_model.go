@@ -2,7 +2,6 @@ package model
 
 type ParameterResponse struct {
 	Id                uint64             `json:"id"`
-	MachineId         uint64             `json:"machine_id"`
 	MqttTopicId       uint64             `json:"mqtt_topic_id"`
 	Name              string             `json:"name"`
 	Code              string             `json:"code"`
@@ -18,7 +17,6 @@ type ParameterResponse struct {
 	RotationZ         float32            `json:"rotation_z"`
 	IsDisplay         bool               `json:"is_display"`
 	IsAutomatic       bool               `json:"is_automatic"`
-	MachineResponse   *MachineResponse   `json:"machine" mapstructure:"-"`
 	MqttTopicResponse *MqttTopicResponse `json:"mqtt_topic" mapstructure:"-"`
 	AuditableResponse *AuditableResponse `json:"auditable" mapstructure:"-"`
 }
