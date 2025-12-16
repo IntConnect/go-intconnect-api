@@ -168,7 +168,9 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachineRequest *model.UpdateMachineRequest) *model.PaginatedResponse[*model.MachineResponse] {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := machineService.validatorService.ValidateStruct(updateMachineRequest)
+
 	machineService.validatorService.ParseValidationError(valErr, *updateMachineRequest)
+
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		machineEntity := helper.MapCreateRequestIntoEntity[model.UpdateMachineRequest, entity.Machine](updateMachineRequest)
 		if updateMachineRequest.Model != nil {
@@ -194,7 +196,6 @@ func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachine
 			machineDocuments[i].FilePath = newPath
 			machineDocuments[i].Auditable = entity.DeleteAuditable(userJwtClaims.Username)
 		}
-
 		var machineDocumentEntities []*entity.MachineDocument
 		for _, createMachineDocumentRequest := range updateMachineRequest.MachineDocuments {
 			machineDocumentEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineDocumentRequest, entity.MachineDocument](&createMachineDocumentRequest)

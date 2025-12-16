@@ -78,7 +78,6 @@ func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 }
 
 func (machineHandler *Handler) UpdateMachine(ginContext *gin.Context) {
-
 	var updateMachineModel model.UpdateMachineRequest
 	err := ginContext.Request.ParseMultipartForm(500 << 20) // 32MB maxMemory
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
@@ -88,17 +87,17 @@ func (machineHandler *Handler) UpdateMachine(ginContext *gin.Context) {
 	thumbnailFile, _ := ginContext.FormFile("thumbnail")
 	updateMachineModel.Model = modelFile
 	updateMachineModel.Thumbnail = thumbnailFile
-	machineId := ginContext.Param("id")
-	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
-	updateMachineModel.Id = parsedMachineId
+
 	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents[", "].document_file", len(updateMachineModel.MachineDocuments))
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	for i, machineDocument := range updateMachineModel.MachineDocuments {
 		machineDocument.DocumentFile = extractIndexedFiles[i]
 		updateMachineModel.MachineDocuments[i] = machineDocument
 	}
-
+	machineId := ginContext.Param("id")
+	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
+	updateMachineModel.Id = parsedMachineId
 	paginatedRes := machineHandler.machineService.Update(ginContext, &updateMachineModel)
 	ginContext.JSON(http.StatusOK, paginatedRes)
 }
