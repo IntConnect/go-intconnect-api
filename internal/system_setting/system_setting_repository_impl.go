@@ -4,6 +4,7 @@ import (
 	"go-intconnect-api/internal/entity"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type RepositoryImpl struct{}
@@ -26,8 +27,18 @@ func (systemSettingRepositoryImpl *RepositoryImpl) FindByKey(gormTransaction *go
 	return &systemSettingEntity, err
 }
 
-func (systemSettingRepositoryImpl *RepositoryImpl) Manage(gormTransaction *gorm.DB, pipelineEntity *entity.SystemSetting) error {
-	return gormTransaction.Model(pipelineEntity).
-		Save(pipelineEntity).Error
+func (systemSettingRepositoryImpl *RepositoryImpl) Manage(
+	gormTransaction *gorm.DB,
+	systemSettingEntity *entity.SystemSetting,
+) error {
 
+	return gormTransaction.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "key"}}, // UNIQUE key
+		DoUpdates: clause.AssignmentColumns([]string{
+			"description",
+			"value",
+			"updated_at",
+			"updated_by",
+		}),
+	}).Create(systemSettingEntity).Error
 }

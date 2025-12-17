@@ -77,15 +77,18 @@ func (systemSettingService *ServiceImpl) Manage(ginContext *gin.Context, createS
 		loadedStruct := resolvedSchema.NewPayload
 		parsedPayload := helper.ParsingHashMapIntoStruct[*model.DashboardSettingPayload](createSystemSettingRequest.Value, loadedStruct().(*model.DashboardSettingPayload))
 		modelFile, _ := ginContext.FormFile("value[model]")
-		(*parsedPayload).ModelFile = modelFile
-		valErr := systemSettingService.validatorService.ValidateStruct(*(parsedPayload))
-		systemSettingService.validatorService.ParseValidationError(valErr, parsedPayload)
+		if modelFile != nil {
+			(*parsedPayload).ModelFile = modelFile
+			valErr = systemSettingService.validatorService.ValidateStruct(*(parsedPayload))
+			systemSettingService.validatorService.ParseValidationError(valErr, parsedPayload)
+			newPath, err := systemSettingService.localStorageService.Disk().Put(modelFile, fmt.Sprintf("system-settings/models/%d-%s", time.Now().UnixNano(), modelFile.Filename))
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
+			createSystemSettingRequest.Value["model_path"] = newPath
+		}
+		fmt.Println(createSystemSettingRequest.Value)
 		systemSettingEntity := helper.MapCreateRequestIntoEntity[model.ManageSystemSettingRequest, entity.SystemSetting](createSystemSettingRequest)
-		newPath, err := systemSettingService.localStorageService.Disk().Put(modelFile, fmt.Sprintf("system-settings/models/%d-%s", time.Now().UnixNano(), modelFile.Filename))
-		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
-		createSystemSettingRequest.Value["model_path"] = newPath
 		systemSettingEntity.Value = createSystemSettingRequest.Value
-		err = systemSettingService.systemSettingRepository.Manage(gormTransaction, systemSettingEntity)
+		err := systemSettingService.systemSettingRepository.Manage(gormTransaction, systemSettingEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil

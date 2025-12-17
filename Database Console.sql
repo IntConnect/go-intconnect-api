@@ -103,5 +103,7 @@ SELECT *
 FROM facilities;
 SELECT *
 FROM machines;
+SELECT *
+FROM system_settings;
 
 

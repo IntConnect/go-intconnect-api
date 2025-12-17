@@ -38,7 +38,7 @@ func (systemSettingHandler *Handler) FindSystemSettingByKey(ginContext *gin.Cont
 
 func (systemSettingHandler *Handler) ManageSystemSetting(ginContext *gin.Context) {
 	var createSystemSettingModel model.ManageSystemSettingRequest
-	err := ginContext.Request.ParseMultipartForm(32 << 20) // 32MB maxMemory
+	err := ginContext.Request.ParseMultipartForm(500 << 20) // 32MB maxMemory
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	err = systemSettingHandler.formDecoder.Decode(&createSystemSettingModel, ginContext.Request.PostForm)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
