@@ -56,7 +56,8 @@ func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, 
 	var machineEntity entity.Machine
 	err := gormTransaction.Model(&entity.Machine{}).
 		Preload("MachineDocuments").
-		Preload("MqttTopic").
+		Preload("MqttTopic.Parameters").
+		Preload("MqttTopic.MqttBroker").
 		Where("id = ?", machineId).
 		First(&machineEntity).Error
 
@@ -68,6 +69,7 @@ func (machineRepositoryImpl *RepositoryImpl) FindByFacilityId(gormTransaction *g
 	err := gormTransaction.Model(&entity.Machine{}).
 		Preload("MachineDocuments").
 		Preload("MqttTopic.Parameters").
+		Preload("MqttTopic.MqttBroker").
 		Where("facility_id = ?", facilityId).
 		First(&machineEntities).Error
 
