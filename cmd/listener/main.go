@@ -340,7 +340,6 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 				MaxValue:    0,
 				Description: "",
 				MqttTopicId: detailMqttTopic["mqtt_topic_id"],
-				MachineId:   detailMqttTopic["machine_id"],
 			})
 		}
 	}
