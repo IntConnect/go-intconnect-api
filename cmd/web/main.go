@@ -61,6 +61,7 @@ func main() {
 		injector.CheckSheetDocumentModule,
 		injector.BreakdownResourceModule,
 		injector.SystemSettingModule,
+		injector.ParameterOperationModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

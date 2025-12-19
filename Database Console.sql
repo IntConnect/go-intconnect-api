@@ -105,5 +105,8 @@ SELECT *
 FROM machines;
 SELECT *
 FROM system_settings;
+SELECT *
+FROM parameter_operations;
+DELETE FROM parameter_operations
 
 

@@ -15,6 +15,7 @@ import (
 	mqttTopic "go-intconnect-api/internal/mqtt_topic"
 	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/parameter"
+	parameterOperation "go-intconnect-api/internal/parameter_operation"
 	"go-intconnect-api/internal/permission"
 	"go-intconnect-api/internal/pipeline"
 	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
@@ -274,6 +275,10 @@ var CheckSheetDocumentModule = fx.Module("checkSheetDocumentTemplateFeature",
 
 var BreakdownResourceModule = fx.Module("breakdownResourceFeature",
 	fx.Provide(fx.Annotate(breakdownResource.NewRepository, fx.As(new(breakdownResource.Repository)))),
+)
+
+var ParameterOperationModule = fx.Module("parameterOperationFeature",
+	fx.Provide(fx.Annotate(parameterOperation.NewRepository, fx.As(new(parameterOperation.Repository)))),
 )
 
 var SystemSettingModule = fx.Module("systemSettingFeature",

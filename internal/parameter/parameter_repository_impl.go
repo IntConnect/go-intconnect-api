@@ -57,6 +57,7 @@ func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
+		Preload("ParameterOperations").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).
@@ -68,7 +69,9 @@ func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(
 }
 func (parameterRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, parameterId uint64) (*entity.Parameter, error) {
 	var parameterEntity entity.Parameter
-	err := gormTransaction.Model(&entity.Parameter{}).Where("id = ?", parameterId).First(&parameterEntity).Error
+	err := gormTransaction.Model(&entity.Parameter{}).
+		Preload("ParameterOperations").
+		Where("id = ?", parameterId).First(&parameterEntity).Error
 
 	return &parameterEntity, err
 }

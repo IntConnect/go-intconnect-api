@@ -1,24 +1,25 @@
 package model
 
 type ParameterResponse struct {
-	Id                uint64             `json:"id"`
-	MqttTopicId       uint64             `json:"mqtt_topic_id"`
-	Name              string             `json:"name"`
-	Code              string             `json:"code"`
-	Unit              string             `json:"unit"`
-	MinValue          float32            `json:"min_value"`
-	MaxValue          float32            `json:"max_value"`
-	Description       string             `json:"description"`
-	PositionX         float32            `json:"position_x"`
-	PositionY         float32            `json:"position_y"`
-	PositionZ         float32            `json:"position_z"`
-	RotationX         float32            `json:"rotation_x"`
-	RotationY         float32            `json:"rotation_y"`
-	RotationZ         float32            `json:"rotation_z"`
-	IsDisplay         bool               `json:"is_display"`
-	IsAutomatic       bool               `json:"is_automatic"`
-	MqttTopicResponse *MqttTopicResponse `json:"mqtt_topic" mapstructure:"-"`
-	AuditableResponse *AuditableResponse `json:"auditable" mapstructure:"-"`
+	Id                uint64                       `json:"id"`
+	MqttTopicId       *uint64                      `json:"mqtt_topic_id"`
+	Name              string                       `json:"name"`
+	Code              string                       `json:"code"`
+	Unit              string                       `json:"unit"`
+	MinValue          float32                      `json:"min_value"`
+	MaxValue          float32                      `json:"max_value"`
+	Description       string                       `json:"description"`
+	PositionX         float32                      `json:"position_x"`
+	PositionY         float32                      `json:"position_y"`
+	PositionZ         float32                      `json:"position_z"`
+	RotationX         float32                      `json:"rotation_x"`
+	RotationY         float32                      `json:"rotation_y"`
+	RotationZ         float32                      `json:"rotation_z"`
+	IsDisplay         bool                         `json:"is_display"`
+	IsAutomatic       bool                         `json:"is_automatic"`
+	MqttTopicResponse *MqttTopicResponse           `json:"mqtt_topic" mapstructure:"-"`
+	AuditableResponse *AuditableResponse           `json:"auditable" mapstructure:"-"`
+	Operations        []ParameterOperationResponse `json:"operations" mapstructure:"ParameterOperations"`
 }
 
 type ParameterDependency struct {
@@ -66,14 +67,23 @@ type UpdateParameterRequest struct {
 }
 
 type ManageParameterOperationRequest struct {
-	Id                  uint64                       `json:"id" validate:"required,number"`
-	ParameterOperations []*ParameterOperationRequest `json:"parameter_operations" validate:"required,dive,min=1"`
+	Id      uint64                       `json:"-" validate:"required,number"`
+	Created []*ParameterOperationRequest `json:"created"`
+	Updated []*ParameterOperationRequest `json:"updated"`
+	Deleted []uint64                     `json:"deleted"`
 }
 
 type ParameterOperationRequest struct {
+	Id       uint64  `json:"id" validate:"required,number"`
 	Type     string  `json:"type" validate:"required,oneof=ADDITION SUBTRACTION MULTIPLICATION DIVISION"`
-	Value    float32 `json:"value" validate:"required,number"`
-	Sequence int     `json:"sequence" validate:"required,number"`
+	Value    float32 `json:"value" validate:"required"`
+	Sequence int     `json:"sequence" validate:"required"`
+}
+type ParameterOperationResponse struct {
+	Id       uint64  `json:"id"`
+	Type     string  `json:"type"`
+	Value    float32 `json:"value"`
+	Sequence int     `json:"sequence"`
 }
 
 type ParameterFilterRequest struct {

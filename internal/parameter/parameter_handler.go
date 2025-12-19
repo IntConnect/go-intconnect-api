@@ -75,6 +75,9 @@ func (parameterHandler *Handler) UpdateParameter(ginContext *gin.Context) {
 func (parameterHandler *Handler) UpdateParameterOperation(ginContext *gin.Context) {
 	var manageParameterOperationModel model.ManageParameterOperationRequest
 	err := ginContext.ShouldBindBodyWithJSON(&manageParameterOperationModel)
+	parameterId := ginContext.Param("id")
+	parsedParameterId, err := strconv.ParseUint(parameterId, 10, 64)
+	manageParameterOperationModel.Id = parsedParameterId
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	paginatedRes := parameterHandler.parameterService.UpdateOperation(ginContext, &manageParameterOperationModel)
 	ginContext.JSON(http.StatusOK, paginatedRes)
