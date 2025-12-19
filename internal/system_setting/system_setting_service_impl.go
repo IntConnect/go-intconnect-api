@@ -85,7 +85,6 @@ func (systemSettingService *ServiceImpl) Manage(ginContext *gin.Context, createS
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
 			createSystemSettingRequest.Value["model_path"] = newPath
 		}
-		fmt.Println(createSystemSettingRequest.Value)
 		systemSettingEntity := helper.MapCreateRequestIntoEntity[model.ManageSystemSettingRequest, entity.SystemSetting](createSystemSettingRequest)
 		systemSettingEntity.Value = createSystemSettingRequest.Value
 		err := systemSettingService.systemSettingRepository.Manage(gormTransaction, systemSettingEntity)

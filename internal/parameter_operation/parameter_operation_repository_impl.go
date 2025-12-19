@@ -1,7 +1,6 @@
 package parameter_operation
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 
 	"gorm.io/gorm"
@@ -28,8 +27,6 @@ func (parameterOperationRepository *RepositoryImpl) Update(gormTransaction *gorm
 
 func (parameterOperationRepository *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, parameterOperationIds []uint64) ([]*entity.ParameterOperation, error) {
 	var parameterOperationEntities []*entity.ParameterOperation
-	fmt.Println(1.2)
 	err := gormTransaction.Where("id IN ?", parameterOperationIds).Find(&parameterOperationEntities).Error
-	fmt.Println(1.1)
 	return parameterOperationEntities, err
 }

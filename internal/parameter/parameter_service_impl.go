@@ -1,7 +1,6 @@
 package parameter
 
 import (
-	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -181,20 +180,17 @@ func (parameterService *ServiceImpl) UpdateOperation(ginContext *gin.Context, up
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntity, err := parameterService.parameterRepository.FindById(gormTransaction, updateParameterRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		fmt.Println(1)
 		deletedParameterOperationEntities, err := parameterService.parameterOperationRepository.FindBatchById(gormTransaction, updateParameterRequest.Deleted)
 		if len(deletedParameterOperationEntities) != len(updateParameterRequest.Deleted) {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusNotFound, exception.ErrSomeResourceNotFound))
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		fmt.Println(2)
 		var createdParameterOperationEntities []*entity.ParameterOperation
 		for _, parameterOperationRequest := range updateParameterRequest.Created {
 			parameterOperationEntity := helper.MapCreateRequestIntoEntity[model.ParameterOperationRequest, entity.ParameterOperation](parameterOperationRequest)
 			parameterOperationEntity.ParameterId = parameterEntity.Id
 			createdParameterOperationEntities = append(createdParameterOperationEntities, parameterOperationEntity)
 		}
-		fmt.Println(3)
 		var updateParameterOperationEntities []*entity.ParameterOperation
 		for _, parameterOperationRequest := range updateParameterRequest.Updated {
 			parameterOperationEntity := helper.MapCreateRequestIntoEntity[model.ParameterOperationRequest, entity.ParameterOperation](parameterOperationRequest)
@@ -204,7 +200,6 @@ func (parameterService *ServiceImpl) UpdateOperation(ginContext *gin.Context, up
 		if len(updateParameterRequest.Deleted) > 0 {
 			err = parameterService.parameterOperationRepository.DeleteBatchById(gormTransaction, updateParameterRequest.Deleted)
 		}
-		fmt.Println(4)
 		if len(updateParameterOperationEntities) > 0 {
 			for _, operationParameterEntity := range updateParameterOperationEntities {
 				err = parameterService.parameterOperationRepository.Update(gormTransaction, operationParameterEntity)
@@ -215,7 +210,6 @@ func (parameterService *ServiceImpl) UpdateOperation(ginContext *gin.Context, up
 			err = parameterService.parameterOperationRepository.CreateBatch(gormTransaction, createdParameterOperationEntities)
 
 		}
-		fmt.Println(5)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
