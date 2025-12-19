@@ -1,0 +1,66 @@
+@startuml
+
+title **Activity – Login**
+
+'------------------------------------------------
+' GENERAL STYLING
+'------------------------------------------------
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
+
+'------------------------------------------------
+' ARROWS
+'------------------------------------------------
+skinparam ArrowColor #2E2E2E
+skinparam ArrowThickness 2
+skinparam ArrowFontSize 13
+skinparam ArrowFontColor #1A1A1A
+
+'------------------------------------------------
+' ACTIVITY BLOCKS
+'------------------------------------------------
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #7A7A7A
+skinparam ActivityBorderThickness 1.2
+skinparam ActivityFontColor #1A1A1A
+
+'------------------------------------------------
+' START / STOP NODES
+'------------------------------------------------
+skinparam StartColor #4CAF50
+skinparam EndColor #E53935
+skinparam StartFontColor white
+skinparam EndFontColor white
+
+'------------------------------------------------
+' DECISIONS
+'------------------------------------------------
+skinparam DiamondBackgroundColor #FFF7CC
+skinparam DiamondBorderColor #C5A600
+skinparam DiamondFontColor #2A2A2A
+
+'------------------------------------------------
+' NOTES
+'------------------------------------------------
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor #E0C66F
+!define ROLES Administrator\nOperator\nMaintenance\nManager\nSupervisor
+
+|ROLES|
+start
+:Membuka Aplikasi;
+:Menekan Tombol Login;
+|#AntiqueWhite|System|
+repeat
+:Menampilkan Halaman Login;
+|ROLES|
+:Mengisi Username/Email;
+:Mengisi Password;
+|System|
+ :Melakukan Validasi;
+repeat while (Valid?) is (No) not (Yes)
+|System|
+:Menampilkan Halaman Dashboard;
+stop
+@enduml
