@@ -122,7 +122,7 @@ func parsePostgresError(pgErr *pgconn.PgError, override string) *ApplicationErro
 	for _, m := range maps {
 		if pgErr.Code == m.code {
 			return &ApplicationError{
-				HttpStatusCode:       0,
+				HttpStatusCode:       m.statusCode,
 				ConventionStatusCode: StatusDatabaseError,
 				Message:              getMessage(override, m.generator(pgErr)),
 				Details:              nil,

@@ -26,6 +26,7 @@ import (
 	smtpServer "go-intconnect-api/internal/smtp_server"
 	"go-intconnect-api/internal/storage"
 	systemSetting "go-intconnect-api/internal/system_setting"
+	"go-intconnect-api/internal/telemetry"
 	"go-intconnect-api/internal/user"
 	validatorService "go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -285,4 +286,10 @@ var SystemSettingModule = fx.Module("systemSettingFeature",
 	fx.Provide(fx.Annotate(systemSetting.NewRepository, fx.As(new(systemSetting.Repository)))),
 	fx.Provide(fx.Annotate(systemSetting.NewService, fx.As(new(systemSetting.Service)))),
 	fx.Provide(fx.Annotate(systemSetting.NewHandler, fx.As(new(systemSetting.Controller)))),
+)
+
+var TelemetryModule = fx.Module("telemetryFeature",
+	fx.Provide(fx.Annotate(telemetry.NewRepository, fx.As(new(telemetry.Repository)))),
+	fx.Provide(fx.Annotate(telemetry.NewService, fx.As(new(telemetry.Service)))),
+	fx.Provide(fx.Annotate(telemetry.NewHandler, fx.As(new(telemetry.Controller)))),
 )

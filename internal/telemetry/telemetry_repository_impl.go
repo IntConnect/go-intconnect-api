@@ -1,7 +1,9 @@
 package telemetry
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/entity"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -12,9 +14,29 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (telemetryRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Telemetry, error) {
-	var telemetryEntities []entity.Telemetry
-	err := gormTransaction.Find(&telemetryEntities).Error
+func (telemetryRepositoryImpl *RepositoryImpl) FindAllFilter(gormTransaction *gorm.DB, searchedParameterIds []uint64, intervalVal string, startDate, endDate time.Time) ([]*entity.TelemetryQuery, error) {
+	sqlQuery := `
+SELECT
+	id,
+  bucket,
+  parameter_id,
+  last_value
+FROM (
+    SELECT 
+        id,
+      time_bucket_gapfill(?::interval, timestamp) AS bucket,
+      parameter_id,
+      last(value, timestamp) AS last_value
+    FROM telemetries
+    WHERE parameter_id IN (?)
+      AND timestamp BETWEEN ? AND ?
+    GROUP BY id, bucket, parameter_id
+) q
+ORDER BY bucket;
+`
+
+	var telemetryEntities []*entity.TelemetryQuery
+	err := gormTransaction.Raw(sqlQuery, intervalVal, searchedParameterIds, startDate, endDate).Scan(&telemetryEntities).Error
 	return telemetryEntities, err
 }
 
@@ -57,27 +79,6 @@ func (telemetryRepositoryImpl *RepositoryImpl) FindAllPagination(
 	return telemetryEntities, totalItems, nil
 }
 
-func (telemetryRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, telemetryId uint64) (*entity.Telemetry, error) {
-	var telemetryEntity entity.Telemetry
-	err := gormTransaction.Model(&entity.Telemetry{}).
-		Preload("TelemetryGroup", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Where("id = ?", telemetryId).Find(&telemetryEntity).Error
-
-	return &telemetryEntity, err
-}
-
-func (telemetryRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, telemetryEntity *entity.Telemetry) error {
-	return gormTransaction.Model(telemetryEntity).Create(telemetryEntity).Error
-}
 func (telemetryRepositoryImpl *RepositoryImpl) CreateBatch(gormTransaction *gorm.DB, telemetryEntities []*entity.Telemetry) error {
 	return gormTransaction.Model(telemetryEntities).Create(telemetryEntities).Error
-}
-
-func (telemetryRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, telemetryEntity *entity.Telemetry) error {
-	return gormTransaction.Model(telemetryEntity).Save(telemetryEntity).Error
-}
-
-func (telemetryRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.Telemetry{}).Where("id = ?", id).Delete(entity.Telemetry{}).Error
 }

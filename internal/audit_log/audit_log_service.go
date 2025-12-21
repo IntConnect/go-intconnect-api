@@ -20,7 +20,7 @@ type Service interface {
 	Build(
 		beforeEntity interface{},
 		afterEntity interface{},
-		relations map[string]map[string][]uint64,
+		relation map[string]map[string][]uint64,
 		description string,
 	) model.AuditLogPayload
 }

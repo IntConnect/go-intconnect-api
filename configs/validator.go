@@ -3,6 +3,7 @@ package configs
 import (
 	"fmt"
 	"go-intconnect-api/internal/entity"
+	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/pkg/helper"
 	"mime/multipart"
@@ -43,6 +44,8 @@ func InitializeValidator(dbConnection *gorm.DB) (*validator.Validate, ut.Transla
 	validate.RegisterValidation("date", dateValidator("2006-01-02"))
 	validate.RegisterValidation("datetime", dateValidator("2006-01-02 15:04"))
 	validate.RegisterValidation("matchPassword", matchPasswordValidator(dbConnection))
+	validate.RegisterStructValidation(CreateParameterRequestValidation, model.CreateParameterRequest{})
+	validate.RegisterStructValidation(UpdateParameterRequestValidation, model.UpdateParameterRequest{})
 
 	// ======================
 	// Register translations
@@ -299,6 +302,57 @@ func matchPasswordValidator(dbConnection *gorm.DB) validator.Func {
 		}
 
 		return true
+	}
+}
+
+func CreateParameterRequestValidation(structLevel validator.StructLevel) {
+	req := structLevel.Current().Interface().(model.CreateParameterRequest)
+
+	// Jika automatic → mqtt_topic_id wajib
+	if req.IsAutomatic && req.MqttTopicId == nil {
+		structLevel.ReportError(
+			req.MqttTopicId,
+			"mqtt_topic_id",
+			"MqttTopicId",
+			"required_when_automatic",
+			"",
+		)
+	}
+
+	// Jika manual → mqtt_topic_id tidak boleh ada
+	if !req.IsAutomatic && req.MqttTopicId != nil {
+		structLevel.ReportError(
+			req.MqttTopicId,
+			"mqtt_topic_id",
+			"MqttTopicId",
+			"forbidden_when_manual",
+			"",
+		)
+	}
+}
+func UpdateParameterRequestValidation(structLevel validator.StructLevel) {
+	req := structLevel.Current().Interface().(model.UpdateParameterRequest)
+
+	// Jika automatic → mqtt_topic_id wajib
+	if req.IsAutomatic && req.MqttTopicId == nil {
+		structLevel.ReportError(
+			req.MqttTopicId,
+			"mqtt_topic_id",
+			"MqttTopicId",
+			"required_when_automatic",
+			"",
+		)
+	}
+
+	// Jika manual → mqtt_topic_id tidak boleh ada
+	if !req.IsAutomatic && req.MqttTopicId != nil {
+		structLevel.ReportError(
+			req.MqttTopicId,
+			"mqtt_topic_id",
+			"MqttTopicId",
+			"forbidden_when_manual",
+			"",
+		)
 	}
 }
 

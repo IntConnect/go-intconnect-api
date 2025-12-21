@@ -111,7 +111,7 @@ func (machineService *ServiceImpl) FindByFacilityId(ginContext *gin.Context, fac
 }
 
 // Create - Membuat machine baru
-func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest) *model.PaginatedResponse[*model.MachineResponse] {
+func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest) {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := machineService.validatorService.ValidateStruct(createMachineRequest)
 	machineService.validatorService.ParseValidationError(valErr, *createMachineRequest)
@@ -159,13 +159,10 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	var paginationResp *model.PaginatedResponse[*model.MachineResponse]
-	paginationRequest := model.NewPaginationRequest()
-	paginationResp = machineService.FindAllPagination(&paginationRequest)
-	return paginationResp
+
 }
 
-func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachineRequest *model.UpdateMachineRequest) *model.PaginatedResponse[*model.MachineResponse] {
+func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachineRequest *model.UpdateMachineRequest) {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := machineService.validatorService.ValidateStruct(updateMachineRequest)
 
@@ -230,10 +227,7 @@ func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachine
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	var paginationResp *model.PaginatedResponse[*model.MachineResponse]
-	paginationRequest := model.NewPaginationRequest()
-	paginationResp = machineService.FindAllPagination(&paginationRequest)
-	return paginationResp
+
 }
 
 func (machineService *ServiceImpl) Delete(ginContext *gin.Context, deleteMachineRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.MachineResponse] {

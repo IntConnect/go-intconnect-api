@@ -25,7 +25,7 @@ func NewHandler(reportDocumentTemplateService Service, viperConfig *viper.Viper)
 
 func (reportDocumentTemplateHandler *Handler) FindAllReportDocumentTemplate(ginContext *gin.Context) {
 	reportDocumentTemplateResponses := reportDocumentTemplateHandler.reportDocumentTemplateService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Report document template has been fetched", reportDocumentTemplateResponses))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Report document template has been fetched", reportDocumentTemplateResponses))
 }
 
 func (reportDocumentTemplateHandler *Handler) FindAllReportDocumentTemplatePagination(ginContext *gin.Context) {

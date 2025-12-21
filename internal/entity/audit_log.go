@@ -14,10 +14,10 @@ type AuditLog struct {
 	Description     string                 `gorm:"column:description"`
 	Before          map[string]interface{} `gorm:"-:all"`
 	After           map[string]interface{} `gorm:"-:all"`
-	Relations       map[string]interface{} `gorm:"-:all"`
+	Relation        map[string]interface{} `gorm:"-:all"`
 	BeforeRaw       []byte                 `gorm:"column:before;type:jsonb"`
 	AfterRaw        []byte                 `gorm:"column:after;type:jsonb"`
-	RelationsRaw    []byte                 `gorm:"column:relations;type:jsonb"`
+	RelationRaw     []byte                 `gorm:"column:relation;type:jsonb"`
 	IpAddress       string                 `gorm:"column:ip_address"`
 	UserAgent       string                 `gorm:"column:user_agent"`
 	User            User                   `gorm:"foreignKey:UserId;references:Id"`
@@ -31,8 +31,8 @@ func (auditLogEntity *AuditLog) AfterFind(gormTransaction *gorm.DB) (err error) 
 	if len(auditLogEntity.AfterRaw) > 0 {
 		err = json.Unmarshal(auditLogEntity.AfterRaw, &auditLogEntity.After)
 	}
-	if len(auditLogEntity.RelationsRaw) > 0 {
-		err = json.Unmarshal(auditLogEntity.RelationsRaw, &auditLogEntity.Relations)
+	if len(auditLogEntity.RelationRaw) > 0 {
+		err = json.Unmarshal(auditLogEntity.RelationRaw, &auditLogEntity.Relation)
 	}
 	return
 }
@@ -43,8 +43,8 @@ func (auditLogEntity *AuditLog) BeforeSave(gormTransaction *gorm.DB) (err error)
 	if auditLogEntity.After != nil && len(auditLogEntity.After) > 0 {
 		auditLogEntity.AfterRaw, err = json.Marshal(auditLogEntity.After)
 	}
-	if auditLogEntity.Relations != nil && len(auditLogEntity.Relations) > 0 {
-		auditLogEntity.RelationsRaw, err = json.Marshal(auditLogEntity.Relations)
+	if auditLogEntity.Relation != nil && len(auditLogEntity.Relation) > 0 {
+		auditLogEntity.RelationRaw, err = json.Marshal(auditLogEntity.Relation)
 	}
 	return nil
 }

@@ -7,7 +7,7 @@ type CreateAuditLogRequest struct {
 	Description string `json:"description"`
 	Before      any    `json:"before"`
 	After       any    `json:"after"`
-	Relations   any    `json:"relations"`
+	Relation    any    `json:"relation"`
 	IpAddress   string `json:"ip_address"`
 	UserAgent   string `json:"user_agent"`
 }
@@ -29,7 +29,7 @@ type AuditLogResponse struct {
 type AuditLogPayload struct {
 	Before      interface{}
 	After       interface{}
-	Relations   map[string]interface{}
+	Relation    map[string]interface{}
 	Description string
 }
 

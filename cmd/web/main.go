@@ -62,6 +62,7 @@ func main() {
 		injector.BreakdownResourceModule,
 		injector.SystemSettingModule,
 		injector.ParameterOperationModule,
+		injector.TelemetryModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

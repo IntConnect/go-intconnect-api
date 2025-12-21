@@ -18,7 +18,6 @@ func (rolePermissionSeeder *RolePermissionSeeder) Run(gormDatabase *gorm.DB) err
 		err = gormDatabase.Create(&entity.RolePermission{
 			RoleId:       1,
 			PermissionId: permissionEntity.Id,
-			Granted:      false,
 		}).Error
 		if err != nil {
 			panic(err)

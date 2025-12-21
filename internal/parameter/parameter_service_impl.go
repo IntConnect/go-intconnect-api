@@ -128,6 +128,9 @@ func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParam
 	parameterService.validatorService.ParseValidationError(valErr, *createParameterRequest)
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntity := helper.MapCreateRequestIntoEntity[model.CreateParameterRequest, entity.Parameter](createParameterRequest)
+		if !parameterEntity.IsAutomatic {
+			parameterEntity.MqttTopicId = nil
+		}
 		err := parameterService.parameterRepository.Create(gormTransaction, parameterEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := parameterService.auditLogService.Build(
@@ -157,6 +160,9 @@ func (parameterService *ServiceImpl) Update(ginContext *gin.Context, updateParam
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		helper.MapUpdateRequestIntoEntity(updateParameterRequest, parameterEntity)
 		beforeParameterEntity := *parameterEntity
+		if !parameterEntity.IsAutomatic {
+			parameterEntity.MqttTopicId = nil
+		}
 		err = parameterService.parameterRepository.Update(gormTransaction, parameterEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := parameterService.auditLogService.Build(

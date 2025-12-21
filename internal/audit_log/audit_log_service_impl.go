@@ -103,7 +103,7 @@ func (auditLogService *ServiceImpl) Record(
 		Description: auditLogPayload.Description,
 		Before:      auditLogPayload.Before,
 		After:       auditLogPayload.After,
-		Relations:   auditLogPayload.Relations,
+		Relation:    auditLogPayload.Relation,
 		IpAddress:   ipAddress,
 		UserAgent:   userAgent,
 	}
@@ -145,7 +145,7 @@ func (auditLogService *ServiceImpl) Build(
 		// Delete case
 		before = helper.NormalizeStruct(beforeEntity)
 	}
-	// Handle relations
+	// Handle relation
 	relationChanges := map[string]interface{}{}
 	for relName, relVal := range relations {
 		beforeIds := relVal["before"]
@@ -162,7 +162,7 @@ func (auditLogService *ServiceImpl) Build(
 	return model.AuditLogPayload{
 		Before:      before,
 		After:       after,
-		Relations:   relationChanges,
+		Relation:    relationChanges,
 		Description: description,
 	}
 }

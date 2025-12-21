@@ -58,7 +58,7 @@ func (reportDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (reportDocumentTemplateRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, reportDocumentTemplateId uint64) (*entity.ReportDocumentTemplate, error) {
 	var reportDocumentTemplateEntity entity.ReportDocumentTemplate
 	err := gormTransaction.Model(&entity.ReportDocumentTemplate{}).
-		Preload("Parameters").
+		Preload("Parameters.MqttTopic.Machine").
 		Where("id = ?", reportDocumentTemplateId).First(&reportDocumentTemplateEntity).Error
 
 	return &reportDocumentTemplateEntity, err

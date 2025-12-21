@@ -20,6 +20,7 @@ import (
 	"go-intconnect-api/internal/role"
 	smtpServer "go-intconnect-api/internal/smtp_server"
 	systemSetting "go-intconnect-api/internal/system_setting"
+	"go-intconnect-api/internal/telemetry"
 	"go-intconnect-api/internal/user"
 	"go-intconnect-api/pkg/middleware"
 
@@ -49,6 +50,7 @@ type ProtectedRoutes struct {
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller
 	breakdownController                  breakdown.Controller
 	systemSettingController              systemSetting.Controller
+	telemetryController                  telemetry.Controller
 	roleService                          role.Service
 }
 
@@ -74,6 +76,7 @@ func NewProtectedRoutes(
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller,
 	breakdownController breakdown.Controller,
 	systemSettingController systemSetting.Controller,
+	telemetryController telemetry.Controller,
 
 	roleService role.Service,
 
@@ -102,6 +105,7 @@ func NewProtectedRoutes(
 		checkSheetDocumentTemplateController: checkSheetDocumentTemplateController,
 		breakdownController:                  breakdownController,
 		systemSettingController:              systemSettingController,
+		telemetryController:                  telemetryController,
 	}
 }
 
@@ -245,5 +249,8 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	systemSettingRouterGroup.GET("", protectedRoutes.systemSettingController.FindAllSystemSetting)
 	systemSettingRouterGroup.GET("/:key", protectedRoutes.systemSettingController.FindSystemSettingByKey)
 	systemSettingRouterGroup.POST("", protectedRoutes.systemSettingController.ManageSystemSetting)
+
+	telemetryRouterGroup := routerGroup.Group("telemetries")
+	telemetryRouterGroup.POST("/report", protectedRoutes.telemetryController.GenerateReport)
 
 }

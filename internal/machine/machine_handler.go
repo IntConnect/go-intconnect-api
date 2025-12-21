@@ -74,7 +74,7 @@ func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 	}
 
 	machineHandler.machineService.Create(ginContext, &createMachineModel)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Machine has been created", nil))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("Machine has been created", nil))
 }
 
 func (machineHandler *Handler) UpdateMachine(ginContext *gin.Context) {
@@ -98,8 +98,8 @@ func (machineHandler *Handler) UpdateMachine(ginContext *gin.Context) {
 	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
 	updateMachineModel.Id = parsedMachineId
-	paginatedRes := machineHandler.machineService.Update(ginContext, &updateMachineModel)
-	ginContext.JSON(http.StatusOK, paginatedRes)
+	machineHandler.machineService.Update(ginContext, &updateMachineModel)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("Machine has been updated", nil))
 }
 
 func (machineHandler *Handler) DeleteMachine(ginContext *gin.Context) {

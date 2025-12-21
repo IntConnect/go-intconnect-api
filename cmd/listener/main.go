@@ -331,15 +331,26 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 		listenerFluxor.rwMutex.RLock()
 		_, isExists := listenerFluxor.parametersMap[mqttKey]
 		listenerFluxor.rwMutex.RUnlock()
+		mqttTopicId := detailMqttTopic["mqtt_topic_id"]
 		if !isExists {
+
 			newParameters = append(newParameters, &entity.Parameter{
+				MqttTopicId: &mqttTopicId,
 				Name:        mqttKey,
 				Code:        mqttKey,
-				Unit:        "",
+				Unit:        "N/A",
 				MinValue:    0,
 				MaxValue:    0,
-				Description: "",
-				MqttTopicId: detailMqttTopic["mqtt_topic_id"],
+				Description: "N/A",
+				PositionX:   0,
+				PositionY:   0,
+				PositionZ:   0,
+				RotationX:   0,
+				RotationY:   0,
+				RotationZ:   0,
+				IsDisplay:   false,
+				IsAutomatic: true,
+				Auditable:   entity.NewAuditable("System"),
 			})
 		}
 	}
@@ -483,7 +494,7 @@ func converterMqttTopicsToListenerResponse(mqttTopicEntities []entity.MqttTopic)
 
 func (listenerFluxor *ListenerFluxor) StartSnapshotSaver(ctx context.Context) {
 	go func() {
-		snapshotTicker := time.NewTicker(1 * time.Minute)
+		snapshotTicker := time.NewTicker(5 * time.Second)
 		defer snapshotTicker.Stop()
 
 		for {
