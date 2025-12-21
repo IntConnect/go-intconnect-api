@@ -1,6 +1,6 @@
 
 @startuml
-title **Activity – Create Facility**
+title **Activity – Daftar Facility**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -35,34 +35,23 @@ skinparam NoteBorderColor #E0C66F
 !define SYSTEM #AntiqueWhite|System
 |ROLES|
 start
+:Pilih Menu Configuration;
+
+|SYSTEM|
+:Menampilkan Menu Configuration;
+
+|ROLES|
 :Pilih Menu Facility;
 
-
 |SYSTEM|
-:Menampilkan Halaman Daftar Facility;
+if (Memiliki Akses?) then (yes)
+:Menampilkan Halaman
+Daftar Facility;
 
-|ROLES|
-:Tekan Tombol New Facility;
-
-|SYSTEM|
-:Menampilkan Formulir;
-
-|ROLES|
-
-repeat
-  :Input Detail Facility;
-  :Submit;
-
-  |System|
-  :Melakukan Validasi;
-
-repeat while (Valid?) is (Tidak) not (Ya)
-
-|System|
-:Simpan Facility Baru;
-:Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Facility;
-:Menampilkan Halaman Daftar Facility;
+else (no)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
 
 stop
 @enduml

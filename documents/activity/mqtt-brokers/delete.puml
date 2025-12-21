@@ -48,7 +48,7 @@ start
 |ROLES|
 
 repeat
-  :Konfirmasi Alamat Penghapusan;
+  :Konfirmasi Alasan Penghapusan;
   :Submit;
 
   |System|

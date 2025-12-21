@@ -1,6 +1,6 @@
 
 @startuml
-title **Activity – Delete Facility**
+title **Activity – Daftar Facility**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -35,32 +35,23 @@ skinparam NoteBorderColor #E0C66F
 !define SYSTEM #AntiqueWhite|System
 |ROLES|
 start
-:Pilih Menu Facility;
-
+:Pilih Menu Configuration;
 
 |SYSTEM|
-:Menampilkan Halaman Daftar Facility;
+:Menampilkan Menu Configuration;
 
 |ROLES|
-:Tekan Tombol Delete Facility;
+:Pilih Menu Facility;
 
+|SYSTEM|
+if (Memiliki Akses?) then (yes)
+:Menampilkan Halaman
+Daftar Facility;
 
-|ROLES|
-
-repeat
-  :Konfirmasi Alasan Penghapusan;
-  :Submit;
-
-  |System|
-  :Melakukan Validasi;
-
-repeat while (Valid?) is (Tidak) not (Ya)
-
-|System|
-:Simpan Facility Baru;
-:Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Facility;
-:Menampilkan Halaman Daftar Facility;
+else (no)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
 
 stop
 @enduml
