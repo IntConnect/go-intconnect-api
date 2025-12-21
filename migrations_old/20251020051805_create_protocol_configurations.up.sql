@@ -1,6 +1,6 @@
 CREATE TABLE protocol_configurations
 (
-    id          BIGSERIAL PRIMARY KEY,
+    id          SERIAL PRIMARY KEY,
     name        VARCHAR(100) NOT NULL,
     protocol    VARCHAR(50)  NOT NULL,
     description TEXT,

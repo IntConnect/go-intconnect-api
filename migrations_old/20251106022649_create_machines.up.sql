@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS machines
 (
-    id         SERIAL PRIMARY KEY NOT NULL,
-    name       VARCHAR(150)       NOT NULL,
+    id         SERIAL PRIMARY KEY,
+    name       VARCHAR(150) NOT NULL,
     parameter  VARCHAR(50),
     photo      VARCHAR(255),
     asset_3d   VARCHAR(255),
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS machines
     camera_y   DECIMAL(10, 3) DEFAULT 0,
     camera_z   DECIMAL(10, 3) DEFAULT 0,
     camera_fov DECIMAL(10, 3) DEFAULT 50,
-    area_id    UUID               NOT NULL,
+    area_id    UUID         NOT NULL,
 
     created_at TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,

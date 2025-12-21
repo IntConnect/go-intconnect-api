@@ -1,6 +1,6 @@
 CREATE TABLE alarm_logs
 (
-    id              SERIAL       NOT NULL PRIMARY KEY,
+    id              SERIAL PRIMARY KEY,
     parameter_id    BIGINT REFERENCES parameters (id),
     value           FLOAT        NOT NULL,
     type            VARCHAR(255) NOT NULL,
