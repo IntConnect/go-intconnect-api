@@ -81,19 +81,30 @@ func (systemSettingService *ServiceImpl) Manage(ginContext *gin.Context, createS
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrSystemSettingKeyNotMatch))
 		}
 		loadedStruct := resolvedSchema.NewPayload
+		systemSettingEntity, err := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, createSystemSettingRequest.Key)
 		parsedPayload := helper.ParsingHashMapIntoStruct[*model.DashboardSettingPayload](createSystemSettingRequest.Value, loadedStruct().(*model.DashboardSettingPayload))
 		modelFile, _ := ginContext.FormFile("value[model]")
 		if modelFile != nil {
 			(*parsedPayload).ModelFile = modelFile
-			valErr = systemSettingService.validatorService.ValidateStruct(*(parsedPayload))
-			systemSettingService.validatorService.ParseValidationError(valErr, parsedPayload)
 			newPath, err := systemSettingService.localStorageService.Disk().Put(modelFile, fmt.Sprintf("system-settings/models/%d-%s", time.Now().UnixNano(), modelFile.Filename))
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
 			createSystemSettingRequest.Value["model_path"] = newPath
+		} else {
+			var modelFileErr error
+			if err == nil {
+				modelFileErr = systemSettingService.validatorService.ValidateVar((*parsedPayload).ModelFile, "omitempty")
+				createSystemSettingRequest.Value["model_path"] = systemSettingEntity.Value["model_path"]
+			} else {
+				modelFileErr = systemSettingService.validatorService.ValidateVar((*parsedPayload).ModelFile, "required")
+			}
+			systemSettingService.validatorService.ParseValidationError(valErr, modelFileErr)
 		}
-		systemSettingEntity := helper.MapCreateRequestIntoEntity[model.ManageSystemSettingRequest, entity.SystemSetting](createSystemSettingRequest)
+
+		valErr = systemSettingService.validatorService.ValidateStruct(*(parsedPayload))
+		systemSettingService.validatorService.ParseValidationError(valErr, *parsedPayload)
+		systemSettingEntity = helper.MapCreateRequestIntoEntity[model.ManageSystemSettingRequest, entity.SystemSetting](createSystemSettingRequest)
 		systemSettingEntity.Value = createSystemSettingRequest.Value
-		err := systemSettingService.systemSettingRepository.Manage(gormTransaction, systemSettingEntity)
+		err = systemSettingService.systemSettingRepository.Manage(gormTransaction, systemSettingEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil

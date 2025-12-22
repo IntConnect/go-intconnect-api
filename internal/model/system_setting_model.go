@@ -25,7 +25,7 @@ type DashboardSettingPayload struct {
 	CameraY       float64               `json:"camera_y" mapstructure:"camera_y" validate:"required"`
 	CameraZ       float64               `json:"camera_z" mapstructure:"camera_z" validate:"required"`
 	PinObjectName string                `json:"pin_object_name" mapstructure:"pin_object_name" validate:"required"`
-	ModelFile     *multipart.FileHeader `json:"model_file" mapstructure:"model_file" validate:"required"`
+	ModelFile     *multipart.FileHeader `json:"model_file" mapstructure:"model_file"`
 }
 
 type SystemSettingResponse struct {
