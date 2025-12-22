@@ -6,6 +6,7 @@ import (
 
 // Map nama seeder → struct
 var SeederRegistry = map[string]Seeder{
+	"InitialSeeder":        &InitialSeeder{},
 	"PermissionSeeder":     &PermissionSeeder{},
 	"UserSeeder":           &UserSeeder{},
 	"RoleSeeder":           &RoleSeeder{},
