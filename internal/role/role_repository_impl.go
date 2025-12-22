@@ -92,7 +92,7 @@ func (roleRepositoryImpl *RepositoryImpl) DeleteAllCache(ctx context.Context) er
 func (roleRepositoryImpl *RepositoryImpl) FindRoleCacheById(ctx context.Context, roleId uint64) (*entity.Role, error) {
 	redisKey := fmt.Sprintf("%s%d", roleRepositoryImpl.redisRoleCacheKey, roleId)
 
-	data, err := roleRepositoryImpl.redisInstance.RedisClient.Get(ctx, redisKey).Result()
+	rolePayload, err := roleRepositoryImpl.redisInstance.RedisClient.Get(ctx, redisKey).Result()
 	if err == redis.Nil {
 		return nil, nil // cache miss
 	}
@@ -100,12 +100,12 @@ func (roleRepositoryImpl *RepositoryImpl) FindRoleCacheById(ctx context.Context,
 		return nil, err
 	}
 
-	var role entity.Role
-	if err := json.Unmarshal([]byte(data), &role); err != nil {
+	var roleEntity entity.Role
+	if err := json.Unmarshal([]byte(rolePayload), &roleEntity); err != nil {
 		return nil, err
 	}
 
-	return &role, nil
+	return &roleEntity, nil
 }
 
 func (roleRepositoryImpl *RepositoryImpl) SetByIdCache(ctx context.Context, roleId uint64, roleEntity *entity.Role) error {
