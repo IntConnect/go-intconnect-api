@@ -163,7 +163,9 @@ func (roleService *ServiceImpl) FindById(ginContext *gin.Context, roleId uint64)
 			roleResponse = helper.MapEntityIntoResponse[
 				*entity.Role,
 				*model.RoleResponse,
-			](roleEntity, mapper.FuncMapAuditable)
+			](roleEntity,
+				[]string{},
+				mapper.FuncMapAuditable)
 			return nil
 		}
 		roleEntity, err = roleService.roleRepository.FindById(gormTransaction, roleId)
@@ -171,7 +173,9 @@ func (roleService *ServiceImpl) FindById(ginContext *gin.Context, roleId uint64)
 		roleResponse = helper.MapEntityIntoResponse[
 			*entity.Role,
 			*model.RoleResponse,
-		](roleEntity, mapper.FuncMapAuditable)
+		](roleEntity,
+			[]string{},
+			mapper.FuncMapAuditable)
 		err = roleService.roleRepository.SetByIdCache(backgroundContext, roleId, roleEntity)
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
 		return nil

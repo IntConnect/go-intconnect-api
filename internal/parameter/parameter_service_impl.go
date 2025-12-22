@@ -113,6 +113,7 @@ func (parameterService *ServiceImpl) FindById(ginContext *gin.Context, parameter
 			*model.ParameterResponse,
 		](
 			parameterEntity,
+			[]string{},
 			mapper.FuncMapAuditable[*entity.Parameter, *model.ParameterResponse],
 		)
 		return nil
