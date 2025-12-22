@@ -39,6 +39,11 @@ func (userHandler *Handler) FindById(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("User fetched successfully", userResponse))
 }
 
+func (userHandler *Handler) FindSelf(ginContext *gin.Context) {
+	userResponse := userHandler.userService.FindSelf(ginContext)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("User fetched successfully", userResponse))
+}
+
 func (userHandler *Handler) FindAllUserPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)

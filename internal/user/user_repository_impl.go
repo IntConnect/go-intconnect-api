@@ -59,9 +59,8 @@ func (userRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (userRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, userId uint64) (*entity.User, error) {
 	var userEntity entity.User
 	err := gormTransaction.Model(&entity.User{}).
-		Preload("Role", func(gormTx *gorm.DB) *gorm.DB {
-			return gormTx.Select("id, name")
-		}).Where("id = ?", userId).Find(&userEntity).Error
+		Preload("Role").
+		Where("id = ?", userId).Find(&userEntity).Error
 
 	return &userEntity, err
 }

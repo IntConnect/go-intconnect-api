@@ -6,6 +6,7 @@ import (
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/role"
 	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -23,6 +24,7 @@ import (
 
 type ServiceImpl struct {
 	userRepository   Repository
+	roleService      role.Service
 	auditLogService  auditLog.Service
 	validatorService validator.Service
 	dbConnection     *gorm.DB
@@ -34,6 +36,7 @@ func NewService(userRepository Repository, validatorService validator.Service, d
 	viperConfig *viper.Viper,
 	auditLogService auditLog.Service,
 	redisInstance *configs.RedisInstance,
+	roleService role.Service,
 ) *ServiceImpl {
 	return &ServiceImpl{
 		userRepository:   userRepository,
@@ -42,6 +45,7 @@ func NewService(userRepository Repository, validatorService validator.Service, d
 		viperConfig:      viperConfig,
 		auditLogService:  auditLogService,
 		redisInstance:    redisInstance,
+		roleService:      roleService,
 	}
 }
 
@@ -98,6 +102,23 @@ func (userService *ServiceImpl) FindById(ginContext *gin.Context, userId uint64)
 		userResponse = helper.MapEntityIntoResponse[*entity.User, *model.UserResponse](userEntity,
 			[]string{},
 			mapper.FuncMapAuditable)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return userResponse
+}
+
+func (userService *ServiceImpl) FindSelf(ginContext *gin.Context) *model.UserResponse {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
+	var userResponse *model.UserResponse
+	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		userEntity, err := userService.userRepository.FindById(gormTransaction, userJwtClaims.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		roleResponse := userService.roleService.FindById(ginContext, userEntity.RoleId)
+		userResponse = helper.MapEntityIntoResponse[*entity.User, *model.UserResponse](userEntity,
+			[]string{},
+			mapper.FuncMapAuditable)
+		userResponse.RoleResponse = roleResponse
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
