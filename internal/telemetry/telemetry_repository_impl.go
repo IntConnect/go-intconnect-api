@@ -1,7 +1,6 @@
 package telemetry
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 	"time"
 
