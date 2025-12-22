@@ -27,7 +27,12 @@ func NewHandler(facilityService Service, viperConfig *viper.Viper) *Handler {
 }
 
 func (facilityHandler *Handler) FindAllFacility(ginContext *gin.Context) {
-	facilityResponses := facilityHandler.facilityService.FindAll()
+	facilityResponses := facilityHandler.facilityService.FindAll(false)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Facility has been fetched", facilityResponses))
+}
+
+func (facilityHandler *Handler) FindMinimalAllFacility(ginContext *gin.Context) {
+	facilityResponses := facilityHandler.facilityService.FindAll(true)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Facility has been fetched", facilityResponses))
 }
 

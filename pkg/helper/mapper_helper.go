@@ -74,7 +74,22 @@ func MapEntitiesIntoResponsesWithFunc[S any, R any](
 	for _, entityObject := range entityObjects {
 		responseObjects = append(
 			responseObjects,
-			MapEntityIntoResponse[S, R](entityObject, renderPayloads...),
+			MapEntityIntoResponse[S, R](entityObject, []string{}, renderPayloads...),
+		)
+	}
+	return responseObjects
+}
+
+func MapEntitiesIntoResponsesWithIgnoredFieldsWithFunc[S any, R any](
+	entityObjects []S,
+	ignoredFields []string,
+	renderPayloads ...func(S, R),
+) []R {
+	var responseObjects []R
+	for _, entityObject := range entityObjects {
+		responseObjects = append(
+			responseObjects,
+			MapEntityIntoResponse[S, R](entityObject, []string{}, renderPayloads...),
 		)
 	}
 	return responseObjects
@@ -82,7 +97,10 @@ func MapEntitiesIntoResponsesWithFunc[S any, R any](
 
 func MapEntityIntoResponse[S any, R any](
 	entityObject S,
+	ignoredFields []string,
+
 	renderPayloads ...func(S, R),
+
 ) R {
 	var responseObject R
 	if reflect.TypeOf(responseObject).Kind() == reflect.Ptr {
@@ -90,6 +108,11 @@ func MapEntityIntoResponse[S any, R any](
 	}
 	decoded := DecodeFromSource[S, R](entityObject, responseObject)
 	responseObject = decoded
+
+	// Remove fields if necessary
+	if len(ignoredFields) > 0 {
+		removeIgnoredFields(responseObject, ignoredFields)
+	}
 	if len(renderPayloads) > 0 {
 		for _, renderPayload := range renderPayloads {
 			if renderPayload == nil { // <-- cegah panic
@@ -114,4 +137,19 @@ func MapUpdateRequestIntoEntity[S any, R any](updateRequest S, existingEntity *R
 func ParsingHashMapIntoStruct[R any](sourceHashMap map[string]interface{}, rawStruct R) *R {
 	parsedRawStruct := DecodeFromSource[map[string]interface{}, *R](sourceHashMap, &rawStruct)
 	return parsedRawStruct
+}
+
+func removeIgnoredFields[R any](obj R, ignored []string) {
+	reflectVal := reflect.ValueOf(obj)
+	if reflectVal.Kind() == reflect.Ptr {
+		reflectVal = reflectVal.Elem()
+	}
+
+	for _, field := range ignored {
+		fieldName := reflectVal.FieldByName(field)
+		if fieldName.IsValid() && fieldName.CanSet() {
+			zero := reflect.Zero(fieldName.Type())
+			fieldName.Set(zero)
+		}
+	}
 }

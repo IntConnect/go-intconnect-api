@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	FindAll() []*model.FacilityResponse
+	FindAll(isMinimal bool) []*model.FacilityResponse
 	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.FacilityResponse]
 	FindById(facilityId uint64) *model.FacilityResponse
 	Create(ginContext *gin.Context, createFacilityRequest *model.CreateFacilityRequest)

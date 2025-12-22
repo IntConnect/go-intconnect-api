@@ -36,6 +36,10 @@ type SystemSettingResponse struct {
 	AuditableResponse *AuditableResponse     `json:"auditable_response"`
 }
 
+type MinimalSystemSettingResponse struct {
+	Value map[string]interface{} `json:"value"`
+}
+
 func (systemSettingResponse *SystemSettingResponse) GetAuditableResponse() *AuditableResponse {
 	return systemSettingResponse.AuditableResponse
 }

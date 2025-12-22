@@ -53,12 +53,18 @@ func (systemSettingService *ServiceImpl) FindAll() []*model.SystemSettingRespons
 	return systemSettingResponsesRequest
 }
 
-func (systemSettingService *ServiceImpl) FindByKey(systemSettingKey string) *model.SystemSettingResponse {
+func (systemSettingService *ServiceImpl) FindByKey(systemSettingKey string, isMinimal bool) *model.SystemSettingResponse {
 	var systemSettingResponsesRequest *model.SystemSettingResponse
+
 	err := systemSettingService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		systemSettingEntities, err := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, systemSettingKey)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		systemSettingResponsesRequest = helper.MapEntityIntoResponse[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities)
+		if isMinimal {
+			systemSettingResponsesRequest = helper.MapEntityIntoResponse[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities, []string{})
+		} else {
+			systemSettingResponsesRequest = helper.MapEntityIntoResponse[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities, []string{"Id", "Description", "Key"})
+		}
+
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

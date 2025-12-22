@@ -119,6 +119,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	userRouterGroup.POST("", middleware.HasPermission("USER_CREATE"), protectedRoutes.userController.CreateUser)
 	userRouterGroup.PUT("/:id", middleware.HasPermission("USER_UPDATE"), protectedRoutes.userController.UpdateUser)
 	userRouterGroup.DELETE("/:id", middleware.HasPermission("USER_DELETE"), protectedRoutes.userController.DeleteUser)
+	userRouterGroup.GET("/logout", protectedRoutes.userController.LogoutUser)
 
 	nodeRouterGroup := routerGroup.Group("nodes")
 	nodeRouterGroup.GET("pagination", protectedRoutes.nodeController.FindAllPagination)

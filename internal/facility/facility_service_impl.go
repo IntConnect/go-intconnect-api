@@ -42,12 +42,16 @@ func NewService(facilityRepository Repository, validatorService validator.Servic
 	}
 }
 
-func (facilityService *ServiceImpl) FindAll() []*model.FacilityResponse {
+func (facilityService *ServiceImpl) FindAll(isMinimal bool) []*model.FacilityResponse {
 	var facilityResponsesRequest []*model.FacilityResponse
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		facilityEntities, err := facilityService.facilityRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		facilityResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[*entity.Facility, *model.FacilityResponse](facilityEntities, mapper.FuncMapAuditable)
+		if isMinimal {
+			facilityResponsesRequest = helper.MapEntitiesIntoResponsesWithIgnoredFieldsWithFunc[*entity.Facility, *model.FacilityResponse](facilityEntities, []string{}, mapper.FuncMapAuditable)
+		} else {
+			facilityResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[*entity.Facility, *model.FacilityResponse](facilityEntities, mapper.FuncMapAuditable)
+		}
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -59,7 +63,9 @@ func (facilityService *ServiceImpl) FindById(facilityId uint64) *model.FacilityR
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		facilityEntities, err := facilityService.facilityRepository.FindById(gormTransaction, facilityId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		facilityResponse = helper.MapEntityIntoResponse[*entity.Facility, *model.FacilityResponse](facilityEntities, mapper.FuncMapAuditable)
+		facilityResponse = helper.MapEntityIntoResponse[*entity.Facility, *model.FacilityResponse](facilityEntities,
+			[]string{},
+			mapper.FuncMapAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

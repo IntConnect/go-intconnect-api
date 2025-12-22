@@ -8,6 +8,6 @@ import (
 
 type Service interface {
 	FindAll() []*model.SystemSettingResponse
-	FindByKey(systemSettingKey string) *model.SystemSettingResponse
+	FindByKey(systemSettingKey string, isMinimal bool) *model.SystemSettingResponse
 	Manage(ginContext *gin.Context, createSystemSettingRequest *model.ManageSystemSettingRequest) []*model.SystemSettingResponse
 }

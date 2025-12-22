@@ -32,7 +32,13 @@ func (systemSettingHandler *Handler) FindAllSystemSetting(ginContext *gin.Contex
 
 func (systemSettingHandler *Handler) FindSystemSettingByKey(ginContext *gin.Context) {
 	systemSettingKey := ginContext.Param("key")
-	systemSettingResponse := systemSettingHandler.systemSettingService.FindByKey(systemSettingKey)
+	systemSettingResponse := systemSettingHandler.systemSettingService.FindByKey(systemSettingKey, false)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("System Setting has been fetched", systemSettingResponse))
+}
+
+func (systemSettingHandler *Handler) FindMinimalSystemSettingByKey(ginContext *gin.Context) {
+	systemSettingKey := ginContext.Param("key")
+	systemSettingResponse := systemSettingHandler.systemSettingService.FindByKey(systemSettingKey, true)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("System Setting has been fetched", systemSettingResponse))
 }
 
