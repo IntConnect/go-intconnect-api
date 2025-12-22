@@ -57,6 +57,11 @@ func (userHandler *Handler) LoginUser(ginContext *gin.Context) {
 	}))
 }
 
+func (userHandler *Handler) LogoutUser(ginContext *gin.Context) {
+	userHandler.userService.HandleLogout(ginContext)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("User logout successfully", nil))
+}
+
 func (userHandler *Handler) CreateUser(ginContext *gin.Context) {
 	var createUserModel model.CreateUserRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createUserModel)

@@ -4,6 +4,7 @@ import "github.com/gin-gonic/gin"
 
 type Controller interface {
 	LoginUser(ginContext *gin.Context)
+	LogoutUser(ginContext *gin.Context)
 	FindAllUser(ginContext *gin.Context)
 	FindById(ginContext *gin.Context)
 	FindAllUserPagination(ginContext *gin.Context)

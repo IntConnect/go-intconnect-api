@@ -95,7 +95,9 @@ func (userService *ServiceImpl) FindById(ginContext *gin.Context, userId uint64)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userEntity, err := userService.userRepository.FindById(gormTransaction, userId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		userResponse = helper.MapEntityIntoResponse[*entity.User, *model.UserResponse](userEntity, mapper.FuncMapAuditable)
+		userResponse = helper.MapEntityIntoResponse[*entity.User, *model.UserResponse](userEntity,
+			[]string{},
+			mapper.FuncMapAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -127,12 +129,7 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 	userService.validatorService.ParseValidationError(err, *loginUserRequest)
 	var tokenString string
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var userEntity entity.User
-		err = gormTransaction.
-			Preload("Role").
-			Where("email = ?", loginUserRequest.UserIdentifier).
-			Or("username = ?", loginUserRequest.UserIdentifier).
-			First(&userEntity).Error
+		userEntity, err := userService.userRepository.FindByIdentifier(gormTransaction, loginUserRequest.UserIdentifier)
 
 		if err = bcrypt.CompareHashAndPassword([]byte(userEntity.Password), []byte(loginUserRequest.Password)); err != nil {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, "User credentials invalid"))
@@ -177,7 +174,15 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 	})
 	return tokenString
 }
-
+func (userService *ServiceImpl) HandleLogout(ginContext *gin.Context) {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
+	redisKey := fmt.Sprintf("auth:token:%d", userJwtClaims.Id)
+	deletedKey, err := userService.redisInstance.RedisClient.Del(ginContext.Request.Context(), redisKey).Result()
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
+	if deletedKey <= 0 {
+		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
+	}
+}
 func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserRequest *model.UpdateUserRequest) *model.PaginatedResponse[*model.UserResponse] {
 	var paginationResp *model.PaginatedResponse[*model.UserResponse]
 	valErr := userService.validatorService.ValidateStruct(updateUserRequest)
