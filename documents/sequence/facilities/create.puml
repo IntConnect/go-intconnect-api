@@ -1,0 +1,192 @@
+@startuml
+
+' Definisi ukuran font (bisa diatur sesuai kebutuhan)
+skinparam defaultFontSize 13
+skinparam defaultFontName Times New Roman
+
+' Definisi warna dan style untuk participant
+skinparam participant {
+    BackgroundColor #ECF0F1
+    BorderColor #34495E
+    FontColor Black
+    FontSize 13
+    FontName Times New Roman
+}
+
+skinparam sequence {
+    ArrowColor #34495E
+    LifeLineBorderColor #34495E
+    LifeLineBackgroundColor #ECF0F1
+    ArrowFontSize 11
+    ArrowFontName Times New Roman
+}
+
+' Definisi aktor dengan warna berbeda menggunakan hex color
+actor "Administrator" as admin #E74C3C
+boundary "Create Facility\nPage" as boundCreateFacility #3498DB
+control "Auth\nMiddleware" as authMiddleware #9B59B6
+control "Facility\nController" as facilityController #2ECC71
+control "Facility\nService" as facilityService #F39C12
+control "Facility\nRepository" as facilityRepository #E67E22
+control "File\nService" as fileService #16A085
+database "Redis" as dbRedis #C0392B
+database "PostgreSQL" as dbPsql #2980B9
+database "Local Disk\nStorage" as localStorage #7F8C8D
+
+title
+<size:20><b>Sequence Diagram - Create Facility</b></size>
+----
+end title
+
+autonumber
+
+' === FLOW UTAMA ===
+admin -> boundCreateFacility: Input Data
+activate boundCreateFacility
+
+boundCreateFacility -> authMiddleware: Send Request
+activate authMiddleware
+
+' === CEK TOKEN DI REDIS ===
+authMiddleware -> dbRedis: Find JWT Token
+activate dbRedis
+dbRedis --> authMiddleware: Return JWT Token / Error
+deactivate dbRedis
+
+alt #LightPink JWT Token Not Found
+    authMiddleware --> boundCreateFacility: Return 401 Unauthorized
+    boundCreateFacility --> admin: **Redirect ke Login Page**
+    deactivate authMiddleware
+    deactivate boundCreateFacility
+
+else #LightYellow JWT Token Found
+
+    ' === CEK PERMISSION ===
+    authMiddleware -> authMiddleware: Validate Permission
+
+    alt #LightPink Insufficient Permission
+        authMiddleware --> boundCreateFacility: Return 403 Forbidden
+        boundCreateFacility --> admin: **Redirect ke Unauthorized Page**
+        deactivate authMiddleware
+        deactivate boundCreateFacility
+
+    else #LightGreen Token Valid & Has Permission
+
+        authMiddleware --> facilityController: Forward Request
+        deactivate authMiddleware
+        activate facilityController
+
+        ' === VALIDASI REQUEST ===
+        facilityController -> facilityController: Validate Request
+
+        alt #LightPink Request Not Valid
+            facilityController --> boundCreateFacility: Return 400 Bad Request
+            boundCreateFacility --> admin: **Show Error Message**
+            deactivate facilityController
+            deactivate boundCreateFacility
+
+        else #LightGreen Request Valid
+
+            facilityController -> facilityService: Parse & Forwared Request
+            activate facilityService
+
+            ' === BUSINESS LOGIC & FILE VALIDATION ===F
+            facilityService -> facilityService: Business Validation\n(Duplication, Rules, \n Data Format)
+
+            alt File Upload Exists
+                facilityService -> facilityService: Validate File\n(Size, Type, Extension)
+            end
+
+            alt #LightPink Business/File Failed
+                facilityService --> facilityController: Throw ValidationException
+                deactivate facilityService
+                facilityController --> boundCreateFacility: 422 Unprocessable Entity
+                boundCreateFacility --> admin: **Show validation error**
+                deactivate facilityController
+                deactivate boundCreateFacility
+
+            else #LightGreen Business/File Success
+
+                ' === UPLOAD FILE KE LOCAL STORAGE (jika ada) ===
+                alt File Upload Exists
+                    facilityService -> fileService: Upload File (Image)
+                    activate fileService
+
+                    fileService -> fileService: Generate Unique Filename
+                    fileService -> localStorage: Save File
+                    activate localStorage
+
+                        alt #LightPink Disk write error
+                            localStorage --> fileService: IOException
+                            deactivate localStorage
+                            fileService --> facilityService: Throw FileUploadException
+                            deactivate fileService
+                            facilityService --> facilityController: Return Error
+                            deactivate facilityService
+                            facilityController --> boundCreateFacility: Return 500 Internal Server Error
+                            boundCreateFacility --> admin: **Show Request Failed**
+                            deactivate facilityController
+                            deactivate boundCreateFacility
+
+                        else #LightGreen File Saved
+                            localStorage --> facilityService: Return File Path
+                            deactivate localStorage
+                            deactivate fileService
+                            facilityService --> facilityService: Inject File Path
+                        end
+                    end
+                end
+
+                ' === SIMPAN KE DATABASE ===
+                facilityService -> facilityRepository: Save Data
+                activate facilityRepository
+
+                ' === SIMPAN KE DATABASE ===
+                facilityRepository -> dbPsql: Store Data
+                activate dbPsql
+
+                alt #LightPink Database Error
+                    dbPsql --> facilityRepository: SQLException
+                    deactivate dbPsql
+                    facilityRepository --> facilityService: Throw DatabaseException
+                    deactivate facilityRepository
+
+                    ' === ROLLBACK: Hapus file jika DB gagal ===
+                    facilityService -> fileService: Rollback - Delete Uploaded File
+                    activate fileService
+                    fileService -> localStorage: Delete File dari Disk
+                    activate localStorage
+                    localStorage --> fileService: File Deleted
+                    deactivate localStorage
+                    deactivate fileService
+
+                    facilityService --> facilityController: Intercept Exception
+                    deactivate facilityService
+                    facilityController --> boundCreateFacility: 500 Internal Server Error
+                    boundCreateFacility --> admin: **Show error message**
+                    deactivate facilityController
+                    deactivate boundCreateFacility
+
+                else #LightGreen Success Store
+                    dbPsql --> facilityRepository: Return Nil Error State
+                    deactivate dbPsql
+
+                    facilityRepository --> facilityService: Return Success State
+                    deactivate facilityRepository
+
+                    facilityService --> facilityController: Return Success Response
+                    deactivate facilityService
+
+                    facilityController --> boundCreateFacility: Return 201 Created
+                    deactivate facilityController
+
+                    boundCreateFacility --> admin: **Show Success Message**
+                    boundCreateFacility --> admin: **Redirect ke List Facility**
+                    deactivate boundCreateFacility
+
+                end
+            end
+        end
+    end
+
+@enduml

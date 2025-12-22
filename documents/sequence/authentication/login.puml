@@ -1,0 +1,59 @@
+@startuml
+
+' Definisi ukuran font (bisa diatur sesuai kebutuhan)
+skinparam defaultFontSize 14
+skinparam defaultFontName Times New Roman
+
+' Definisi warna dan style untuk participant
+skinparam participant {
+    BackgroundColor #ECF0F1
+    BorderColor #34495E
+    FontColor Black
+    FontSize 14
+    FontName Times New Roman
+}
+
+skinparam sequence {
+    ArrowColor #34495E
+    LifeLineBorderColor #34495E
+    LifeLineBackgroundColor #ECF0F1
+    ArrowFontSize 12
+    ArrowFontName Times New Roman
+}
+
+' Definisi aktor dengan warna berbeda menggunakan hex color
+actor "Administrator" as admin #E74C3C
+actor "Manager" as mgr #3498DB
+actor "Supervisor" as spv #2ECC71
+actor "Maintenance" as mtn #F39C12
+actor "Operator" as op #9B59B6
+boundary "Login" as boundLogin
+control "User Controller" as userController
+control "User Service" as userService
+control "User Repository" as userRepository
+database "Redis" as dbRedis
+database "PostgreSQL" as dbPsql
+title
+<size:20><b>Sequence Diagram - Login</b></size>
+----
+<size:10>Version 1.0 | Date: 21 Desember 2025</size>
+end title
+
+' Contoh interaksi
+admin -> boundLogin: Input Data
+boundLogin -> userController: Send Request
+userController -> userService: Parsing Body Request
+userService -> userRepository: Find By Username or Email
+userRepository -> dbPsql: Query Data
+userRepository -> userService: Return User Data and Error
+alt#Gold #LightBlue Successful case
+    userService -> dbRedis: Save Token
+    userService -> userController: Return Token
+    userController -> boundLogin: Return Success Request
+    boundLogin -> admin: Redirect To Dashboard
+else #Pink Failure
+    userService -> userController: Intercept Request
+    userController -> boundLogin: Return Failure Request
+    boundLogin -> admin: Show Failed Message
+end
+@enduml

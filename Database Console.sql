@@ -115,6 +115,8 @@ SELECT *
 FROM parameters;
 SELECT *
 FROM report_document_templates;
+SELECT *
+FROM roles;
 
 
 

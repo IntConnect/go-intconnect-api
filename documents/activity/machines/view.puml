@@ -1,6 +1,6 @@
 
 @startuml
-title **Activity – Daftar Facility**
+title **Activity – Daftar Machine**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -41,12 +41,12 @@ start
 :Menampilkan Menu Configuration;
 
 |ROLES|
-:Pilih Menu Facility;
+:Pilih Menu Machine;
 
 |SYSTEM|
 if (Memiliki Akses?) then (yes)
 :Menampilkan Halaman
-Daftar Facility;
+Daftar Machine;
 
 else (no)
 :Menampilkan Halaman

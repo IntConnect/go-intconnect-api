@@ -57,9 +57,8 @@ repeat
 repeat while (Valid?) is (Tidak) not (Ya)
 
 |System|
-:Simpan Facility Baru;
+:Melakukan Soft Delete;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Facility;
 :Menampilkan Halaman Daftar Facility;
 
 stop

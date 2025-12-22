@@ -49,7 +49,7 @@ start
 |ROLES|
 
 repeat
-  :Input Detail Facility;
+  :Input Informasi Facility;
   :Submit;
 
   |System|
