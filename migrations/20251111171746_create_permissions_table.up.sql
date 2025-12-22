@@ -1,7 +1,7 @@
 CREATE TABLE permissions
 (
     id          SERIAL PRIMARY KEY,
-    code        VARCHAR(255) NOT NULL,
+    code        VARCHAR(255) NOT NULL UNIQUE,
     name        VARCHAR(255) NOT NULL,
     category    VARCHAR(255) NOT NULL,
     description TEXT,
