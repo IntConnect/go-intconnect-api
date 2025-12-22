@@ -39,7 +39,9 @@ func (validatorService *ServiceImpl) ParseValidationError(validationError error,
 	if validationError != nil {
 		parsedMap := make(map[string]interface{})
 		reflectType := reflect.TypeOf(dtoStruct)
-
+		if reflectType.Kind() == reflect.Ptr {
+			reflectType = reflectType.Elem()
+		}
 		for _, fieldError := range validationError.(validator.ValidationErrors) {
 			fieldJSON := getJSONFieldName(reflectType, fieldError.StructField())
 			fieldName := fieldError.StructField()
