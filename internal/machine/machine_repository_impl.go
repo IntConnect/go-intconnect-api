@@ -71,7 +71,7 @@ func (machineRepositoryImpl *RepositoryImpl) FindByFacilityId(gormTransaction *g
 		Preload("MqttTopic.Parameters").
 		Preload("MqttTopic.MqttBroker").
 		Where("facility_id = ?", facilityId).
-		First(&machineEntities).Error
+		Find(&machineEntities).Error
 
 	return machineEntities, err
 }

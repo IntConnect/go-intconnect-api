@@ -7,9 +7,9 @@ type CreateMachineRequest struct {
 	Name             string                         `form:"name" validate:"required,min=3,max=100,unique=machines;name"`
 	Code             string                         `form:"code" validate:"required,min=3,max=100,unique=machines;code"`
 	Description      string                         `form:"description"`
-	CameraX          float64                        `form:"camera_x" validate:"required"`
-	CameraY          float64                        `form:"camera_y" validate:"required"`
-	CameraZ          float64                        `form:"camera_z" validate:"required"`
+	CameraX          *float64                       `form:"camera_x" validate:"required"`
+	CameraY          *float64                       `form:"camera_y" validate:"required"`
+	CameraZ          *float64                       `form:"camera_z" validate:"required"`
 	Model            *multipart.FileHeader          `form:"model" validate:"required,requiredFile,fileExtension=.glb"`
 	Thumbnail        *multipart.FileHeader          `form:"thumbnail" validate:"required,requiredFile,fileExtension=.png .jpg"`
 	MachineDocuments []CreateMachineDocumentRequest `form:"machine_documents" validate:"dive"`
@@ -21,9 +21,9 @@ type UpdateMachineRequest struct {
 	Name                      string                         `form:"name" validate:"required,min=3,max=100,unique=machines;name;Id"`
 	Code                      string                         `form:"code" validate:"required,min=3,max=100,unique=machines;code;Id"`
 	Description               string                         `form:"description"`
-	CameraX                   float64                        `form:"camera_x" validate:"required"`
-	CameraY                   float64                        `form:"camera_y" validate:"required"`
-	CameraZ                   float64                        `form:"camera_z" validate:"required"`
+	CameraX                   *float64                       `form:"camera_x" validate:"required"`
+	CameraY                   *float64                       `form:"camera_y" validate:"required"`
+	CameraZ                   *float64                       `form:"camera_z" validate:"required"`
 	Model                     *multipart.FileHeader          `form:"model" validate:"omitempty,fileExtension=.glb"`
 	Thumbnail                 *multipart.FileHeader          `form:"thumbnail" validate:"omitempty,fileExtension=.png .jpg"`
 	MachineDocuments          []CreateMachineDocumentRequest `form:"machine_documents" validate:"dive"`
