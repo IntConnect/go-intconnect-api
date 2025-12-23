@@ -222,12 +222,13 @@ func (facilityService *ServiceImpl) Delete(ginContext *gin.Context, deleteFacili
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		facilityEntity, err := facilityService.facilityRepository.FindById(gormTransaction, deleteFacilityRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		if facilityEntity.ThumbnailPath != "" {
-			newPath, _ := facilityService.localStorageService.Disk().MoveFile(facilityEntity.ThumbnailPath, "facilities/thumbnails")
-			facilityEntity.ThumbnailPath = newPath
-		}
+		newPath, _ := facilityService.localStorageService.Disk().MoveFile(facilityEntity.ThumbnailPath, "facilities/thumbnails")
+		facilityEntity.ThumbnailPath = newPath
+		newModelPath, _ := facilityService.localStorageService.Disk().MoveFile(facilityEntity.ModelPath, "facilities/thumbnails")
+		facilityEntity.ModelPath = newModelPath
+
 		facilityEntity.Auditable = entity.DeleteAuditable(userJwtClaim.Name)
-		err = facilityService.facilityRepository.Delete(gormTransaction, deleteFacilityRequest.Id)
+		err = facilityService.facilityRepository.Delete(gormTransaction, facilityEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := facilityService.auditLogService.Build(
 			facilityEntity, // before entity

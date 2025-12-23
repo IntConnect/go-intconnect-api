@@ -12,6 +12,6 @@ type Repository interface {
 	FindById(gormTransaction *gorm.DB, facilityId uint64) (*entity.Facility, error)
 	Create(gormTransaction *gorm.DB, facilityEntity *entity.Facility) error
 	Update(gormTransaction *gorm.DB, facilityEntity *entity.Facility) error
-	Delete(gormTransaction *gorm.DB, facilityId uint64) error
+	Delete(gormTransaction *gorm.DB, facilityEntity *entity.Facility) error
 	FindBatchById(gormTransaction *gorm.DB, facilityIds []uint64) ([]entity.Facility, error)
 }

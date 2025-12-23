@@ -16,9 +16,9 @@ type Facility struct {
 	PositionX     float64              `gorm:"column:position_x"`
 	PositionY     float64              `gorm:"column:position_y"`
 	PositionZ     float64              `gorm:"column:position_z"`
-	CameraX       float64              `gorm:"column:camera_x;default:0"`
-	CameraY       float64              `gorm:"column:camera_y;default:0"`
-	CameraZ       float64              `gorm:"column:camera_z;default:0"`
+	CameraX       float64              `gorm:"column:camera_x;"`
+	CameraY       float64              `gorm:"column:camera_y;"`
+	CameraZ       float64              `gorm:"column:camera_z;"`
 	Auditable
 }
 

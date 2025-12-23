@@ -118,8 +118,6 @@ FROM report_document_templates;
 SELECT *
 FROM roles;
 
-
-
 DELETE
 FROM parameters;
 DELETE
@@ -140,3 +138,5 @@ FROM (
     GROUP BY bucket, parameter_id
 ) q
 ORDER BY bucket;
+
+UPDATE facilities SET deleted_at = null;
