@@ -268,6 +268,24 @@ func (permissionSeeder *PermissionSeeder) Run(gormDatabase *gorm.DB) error {
 			Auditable:   entity.NewAuditable("System"),
 		},
 
+		// Permission
+		{
+			Code:        "PERMISSION_VIEW",
+			Name:        "View",
+			Category:    "Permission",
+			Description: "Permission to view permissions",
+			Auditable:   entity.NewAuditable("System"),
+		},
+
+		// Permission
+		{
+			Code:        "AUDIT_LOG_VIEW",
+			Name:        "View",
+			Category:    "Audit Log",
+			Description: "Permission to view audit logs",
+			Auditable:   entity.NewAuditable("System"),
+		},
+
 		// Check Sheet Document Template
 		{
 			Code:        "CHECK_SHEET_DOCUMENT_TEMPLATE_VIEW",
@@ -298,15 +316,6 @@ func (permissionSeeder *PermissionSeeder) Run(gormDatabase *gorm.DB) error {
 			Auditable:   entity.NewAuditable("System"),
 		},
 
-		// Check Sheet
-		{
-			Code:        "CHECK_SHEET_VIEW",
-			Name:        "View",
-			Category:    "Check Sheet",
-			Description: "Permission to view check sheet",
-			Auditable:   entity.NewAuditable("System"),
-		},
-
 		// System Setting
 		{
 			Code:        "SYSTEM_SETTING_VIEW",
@@ -320,6 +329,96 @@ func (permissionSeeder *PermissionSeeder) Run(gormDatabase *gorm.DB) error {
 			Name:        "Manage",
 			Category:    "System Setting",
 			Description: "Permission to manage system setting",
+			Auditable:   entity.NewAuditable("System"),
+		},
+
+		// Check Sheet
+		{
+			Code:        "CHECK_SHEET_VIEW",
+			Name:        "View",
+			Category:    "Check Sheet",
+			Description: "Permission to view check sheet",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "CHECK_SHEET_CREATE",
+			Name:        "Create",
+			Category:    "Check Sheet",
+			Description: "Permission to create check sheet",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "CHECK_SHEET_EDIT",
+			Name:        "Update",
+			Category:    "Check Sheet",
+			Description: "Permission to update check sheet",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "CHECK_SHEET_DELETE",
+			Name:        "Delete",
+			Category:    "Check Sheet",
+			Description: "Permission to delete check sheet",
+			Auditable:   entity.NewAuditable("System"),
+		},
+
+		// SMTP Server
+		{
+			Code:        "SMTP_SERVER_VIEW",
+			Name:        "View",
+			Category:    "SMTP Server",
+			Description: "Permission to view SMTP servers",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "SMTP_SERVER_CREATE",
+			Name:        "Create",
+			Category:    "SMTP Server",
+			Description: "Permission to create SMTP servers",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "SMTP_SERVER_EDIT",
+			Name:        "Update",
+			Category:    "SMTP Server",
+			Description: "Permission to update SMTP servers",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "SMTP_SERVER_DELETE",
+			Name:        "Delete",
+			Category:    "SMTP Server",
+			Description: "Permission to delete SMTP servers",
+			Auditable:   entity.NewAuditable("System"),
+		},
+
+		// Modbus Server
+		{
+			Code:        "MODBUS_SERVER_VIEW",
+			Name:        "View",
+			Category:    "MODBUS SERVERS",
+			Description: "Permission to view Modbus servers",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "MODBUS_SERVER_CREATE",
+			Name:        "Create",
+			Category:    "MODBUS SERVERS",
+			Description: "Permission to create Modbus servers",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "MODBUS_SERVER_EDIT",
+			Name:        "Update",
+			Category:    "MODBUS SERVERS",
+			Description: "Permission to update Modbus servers",
+			Auditable:   entity.NewAuditable("System"),
+		},
+		{
+			Code:        "MODBUS_SERVER_DELETE",
+			Name:        "Delete",
+			Category:    "MODBUS SERVERS",
+			Description: "Permission to delete Modbus servers",
 			Auditable:   entity.NewAuditable("System"),
 		},
 	})
