@@ -87,8 +87,9 @@ type ParameterOperationResponse struct {
 }
 
 type ParameterFilterRequest struct {
-	IsAutomatic *string `form:"is_automatic,default=all"`
-	IsDisplay   *string `form:"is_display,default=all"`
+	IsAutomatic *string `form:"omitempty,is_automatic"`
+	IsDisplay   *string `form:"omitempty,is_display"`
+	IsWatch     *string `form:"omitempty,is_watch"`
 }
 
 func (parameterResponse *ParameterResponse) GetAuditableResponse() *AuditableResponse {

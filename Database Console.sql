@@ -123,20 +123,20 @@ FROM parameters;
 DELETE
 FROM telemetries;
 
-SELECT
-  bucket,
-  parameter_id,
-  last_value
-FROM (
-    SELECT
-      time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
-      parameter_id,
-      last(value, timestamp) AS last_value
-    FROM telemetries
-    WHERE parameter_id IN (46,47,48,49)
-      AND timestamp BETWEEN '2025-12-20 15:04:00' AND '2025-12-20 19:04:00'
-    GROUP BY bucket, parameter_id
-) q
+SELECT bucket,
+       parameter_id,
+       last_value
+FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
+             parameter_id,
+             last(value, timestamp)                                AS last_value
+      FROM telemetries
+      WHERE parameter_id IN (46, 47, 48, 49)
+        AND timestamp BETWEEN '2025-12-20 15:04:00' AND '2025-12-20 19:04:00'
+      GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
 
-UPDATE facilities SET deleted_at = null;
+
+ALTER TABLE parameters
+    ADD COLUMN is_watch      BOOLEAN      NOT NULL DEFAULT FALSE;
+
+SELECT * FROM check_sheet_document_templates;

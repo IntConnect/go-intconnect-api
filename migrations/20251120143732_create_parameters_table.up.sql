@@ -8,6 +8,8 @@ CREATE TABLE parameters
     min_value     FLOAT        NOT NULL DEFAULT 0,
     max_value     FLOAT        NOT NULL DEFAULT 0,
     description   TEXT,
+    category      VARCHAR(255) NOT NULL,
+    data_type     VARCHAR(255) NOT NULL DEFAULT 'String',
     position_x    FLOAT        NOT NULL DEFAULT 0,
     position_y    FLOAT        NOT NULL DEFAULT 0,
     position_z    FLOAT        NOT NULL DEFAULT 0,

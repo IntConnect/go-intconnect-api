@@ -231,7 +231,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	modbusServerRouterGroup.PUT("/:id", protectedRoutes.modbusServerController.UpdateModbusServer)
 	modbusServerRouterGroup.DELETE("/:id", protectedRoutes.modbusServerController.DeleteModbusServer)
 
-	checkSheetDocumentTemplateRouterGroup := routerGroup.Group("check-sheet-document")
+	checkSheetDocumentTemplateRouterGroup := routerGroup.Group("check-sheet-document-templates")
 	checkSheetDocumentTemplateRouterGroup.GET("pagination", protectedRoutes.checkSheetDocumentTemplateController.FindAllCheckSheetDocumentTemplatePagination)
 	checkSheetDocumentTemplateRouterGroup.GET("", protectedRoutes.checkSheetDocumentTemplateController.FindAllCheckSheetDocumentTemplate)
 	checkSheetDocumentTemplateRouterGroup.POST("", protectedRoutes.checkSheetDocumentTemplateController.CreateCheckSheetDocumentTemplate)
