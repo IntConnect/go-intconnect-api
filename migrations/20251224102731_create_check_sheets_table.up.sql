@@ -6,6 +6,7 @@ CREATE TABLE check_sheets
     verified_by                      BIGINT REFERENCES users (id),
     date                             DATE                                                  NOT NULL,
     note                             TEXT,
+    status                           VARCHAR(255)                                          NOT NULL DEFAULT 'Draft',
     created_at                       TIMESTAMP                                             NOT NULL DEFAULT current_timestamp,
     created_by                       VARCHAR(255),
     updated_at                       TIMESTAMP                                             NOT NULL DEFAULT current_timestamp,

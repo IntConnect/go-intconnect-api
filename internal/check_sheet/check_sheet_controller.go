@@ -1,4 +1,4 @@
-package check_sheet_document_template
+package check_sheet
 
 import "github.com/gin-gonic/gin"
 

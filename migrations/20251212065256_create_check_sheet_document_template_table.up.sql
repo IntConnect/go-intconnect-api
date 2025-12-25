@@ -5,8 +5,6 @@ CREATE TABLE check_sheet_document_templates
     no              VARCHAR(255) NOT NULL,
     description     VARCHAR(255),
     category        VARCHAR(255) NOT NULL,
-    rotation        INT          NOT NULL DEFAULT 1,
-    rotation_type   VARCHAR(255) NOT NULL DEFAULT 'Day',
     interval        INT          NOT NULL DEFAULT 1,
     revision_number INT          NOT NULL DEFAULT 0,
     effective_date  DATE         NOT NULL,

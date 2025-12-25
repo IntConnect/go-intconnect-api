@@ -1,4 +1,4 @@
-package check_sheet_document_template
+package check_sheet
 
 import (
 	"go-intconnect-api/internal/entity"
@@ -7,10 +7,10 @@ import (
 )
 
 type Repository interface {
-	FindAll(gormTransaction *gorm.DB) ([]*entity.CheckSheetDocumentTemplate, error)
-	FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]*entity.CheckSheetDocumentTemplate, int64, error)
-	FindById(gormTransaction *gorm.DB, checkSheetId uint64) (*entity.CheckSheetDocumentTemplate, error)
-	Create(gormTransaction *gorm.DB, checkSheetEntity *entity.CheckSheetDocumentTemplate) error
-	Update(gormTransaction *gorm.DB, checkSheetEntity *entity.CheckSheetDocumentTemplate) error
+	FindAll(gormTransaction *gorm.DB) ([]*entity.CheckSheet, error)
+	FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]*entity.CheckSheet, int64, error)
+	FindById(gormTransaction *gorm.DB, checkSheetId uint64) (*entity.CheckSheet, error)
+	Create(gormTransaction *gorm.DB, checkSheetEntity *entity.CheckSheet) error
+	Update(gormTransaction *gorm.DB, checkSheetEntity *entity.CheckSheet) error
 	Delete(gormTransaction *gorm.DB, checkSheetId uint64) error
 }

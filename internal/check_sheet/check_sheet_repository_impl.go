@@ -1,4 +1,4 @@
-package check_sheet_document_template
+package check_sheet
 
 import (
 	"go-intconnect-api/internal/entity"
@@ -12,24 +12,24 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.CheckSheetDocumentTemplate, error) {
-	var checkSheetDocumentTemplateEntities []*entity.CheckSheetDocumentTemplate
-	err := gormTransaction.Find(&checkSheetDocumentTemplateEntities).Error
-	return checkSheetDocumentTemplateEntities, err
+func (checkSheetImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.CheckSheet, error) {
+	var checkSheetEntities []*entity.CheckSheet
+	err := gormTransaction.Find(&checkSheetEntities).Error
+	return checkSheetEntities, err
 }
 
-func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPagination(
+func (checkSheetImpl *RepositoryImpl) FindAllPagination(
 	gormTransaction *gorm.DB,
 	orderClause string,
 	offsetVal, limitPage int,
 	searchQuery string,
-) ([]*entity.CheckSheetDocumentTemplate, int64, error) {
+) ([]*entity.CheckSheet, int64, error) {
 
-	var checkSheetDocumentTemplateEntities []*entity.CheckSheetDocumentTemplate
+	var checkSheetEntities []*entity.CheckSheet
 	var totalItems int64
 
 	// Base query
-	rawQuery := gormTransaction.Model(&entity.CheckSheetDocumentTemplate{})
+	rawQuery := gormTransaction.Model(&entity.CheckSheet{})
 
 	// Search
 	if searchQuery != "" {
@@ -48,31 +48,31 @@ func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPaginatio
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).
-		Find(&checkSheetDocumentTemplateEntities).Error; err != nil {
+		Find(&checkSheetEntities).Error; err != nil {
 		return nil, 0, err
 	}
 
-	return checkSheetDocumentTemplateEntities, totalItems, nil
+	return checkSheetEntities, totalItems, nil
 }
 
-func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, checkSheetDocumentTemplateId uint64) (*entity.CheckSheetDocumentTemplate, error) {
-	var checkSheetDocumentTemplateEntity entity.CheckSheetDocumentTemplate
-	err := gormTransaction.Model(&entity.CheckSheetDocumentTemplate{}).
+func (checkSheetImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, checkSheetId uint64) (*entity.CheckSheet, error) {
+	var checkSheetEntity entity.CheckSheet
+	err := gormTransaction.Model(&entity.CheckSheet{}).
 		Preload("Parameters").
-		Where("id = ?", checkSheetDocumentTemplateId).First(&checkSheetDocumentTemplateEntity).Error
+		Where("id = ?", checkSheetId).First(&checkSheetEntity).Error
 
-	return &checkSheetDocumentTemplateEntity, err
+	return &checkSheetEntity, err
 }
 
-func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, currencyEntity *entity.CheckSheetDocumentTemplate) error {
+func (checkSheetImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, currencyEntity *entity.CheckSheet) error {
 	return gormTransaction.Model(currencyEntity).Create(currencyEntity).Error
 
 }
 
-func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, checkSheetDocumentTemplateEntity *entity.CheckSheetDocumentTemplate) error {
-	return gormTransaction.Model(checkSheetDocumentTemplateEntity).Save(checkSheetDocumentTemplateEntity).Error
+func (checkSheetImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, checkSheetEntity *entity.CheckSheet) error {
+	return gormTransaction.Model(checkSheetEntity).Save(checkSheetEntity).Error
 }
 
-func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.CheckSheetDocumentTemplate{}).Where("id = ?", id).Delete(&entity.CheckSheetDocumentTemplate{}).Error
+func (checkSheetImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
+	return gormTransaction.Model(entity.CheckSheet{}).Where("id = ?", id).Delete(&entity.CheckSheet{}).Error
 }
