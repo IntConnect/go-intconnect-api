@@ -1,5 +1,5 @@
+
 @startuml
-title **Activity – Melihat Daftar Facility**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -30,28 +30,18 @@ skinparam DiamondFontColor #2A2A2A
 skinparam NoteBackgroundColor #FFFDE7
 skinparam NoteBorderColor #E0C66F
 
-!define ROLES Administrator
-!define SYSTEM #AntiqueWhite|System
-|ROLES|
+|Staf Operator Utility|
 start
-:Akses Sistem;
+:Memeriksa nilai parameter pada \nHMI mesin chiller;
+:Mencatat nilai pada form \nLog Sheet Chilled Water;
+:Meletakkan form pada Binder;
 
+|Engineering Supervisor|
+:Review pencatatan pada form \nLog Sheet Chilled Water;
+:Mengirim Data;
 
- |ROLES|
-
-
-|ROLES|
-:Pilih Menu Facility;
-
-|SYSTEM|
-if (Memiliki Akses?) then (Ya)
-:Menampilkan Halaman
-Daftar Facility;
-
-else (Tidak)
-:Menampilkan Halaman
-401 Unauthorized;
-endif
+|Auditor|
+:Memerika data pencatatan;
 
 stop
 @enduml

@@ -55,8 +55,7 @@ start
 repeat
 :Menampilkan Halaman Login;
 |ROLES|
-:Mengisi Username/Email;
-:Mengisi Password;
+:Mengisi Kredensial;
 |System|
  :Melakukan Validasi;
 repeat while (Valid?) is (No) not (Yes)

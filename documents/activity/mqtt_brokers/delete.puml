@@ -1,5 +1,5 @@
 @startuml
-title **Activity – Membuat Data Machine**
+title **Activity – Menghapus Data MQTT Broker**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -57,15 +57,18 @@ endif
   :Menampilkan Dashboard;
 
 |ROLES|
-:Pilih Menu Machine;
-:Tekan Tombol New Machine;
+:Pilih Menu MQTT Broker;
+:Tekan Tombol Trash;
 
 |SYSTEM|
-:Menampilkan Formulir;
+:Menampilkan Dialog \nKonfirmasi Penghapusan;
+
+
 
 |ROLES|
 repeat
-  :Input Informasi Machine;
+|ROLES|
+:Mengisi Alasan\nPenghapusan;
   :Submit;
 
   |SYSTEM|
@@ -74,10 +77,10 @@ repeat
 repeat while (Valid?) is (Tidak)
 
 |SYSTEM|
-:Simpan Machine Baru;
+:Melakukan Soft-delete;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Machine;
-:Menampilkan Halaman Daftar Machine;
+:Redirect ke Halaman Daftar MQTT Broker;
+:Menampilkan Halaman Daftar MQTT Broker;
 
 stop
 @enduml

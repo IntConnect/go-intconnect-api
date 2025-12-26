@@ -1,5 +1,5 @@
 @startuml
-title **Activity – Membuat Data Machine**
+title **Activity – Melihat Daftar MQTT Broker**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -32,7 +32,6 @@ skinparam NoteBorderColor #E0C66F
 
 !define ROLES Administrator
 !define SYSTEM #AntiqueWhite|System
-
 |ROLES|
 start
 :Akses Sistem;
@@ -55,29 +54,21 @@ else (Tidak)
   |SYSTEM|
 endif
   :Menampilkan Dashboard;
+ |ROLES|
+
 
 |ROLES|
-:Pilih Menu Machine;
-:Tekan Tombol New Machine;
+:Pilih Menu MQTT Broker;
 
 |SYSTEM|
-:Menampilkan Formulir;
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman
+Daftar MQTT Broker;
 
-|ROLES|
-repeat
-  :Input Informasi Machine;
-  :Submit;
-
-  |SYSTEM|
-  :Melakukan Validasi;
-  backward:Menampilkan\nPesan Error;
-repeat while (Valid?) is (Tidak)
-
-|SYSTEM|
-:Simpan Machine Baru;
-:Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Machine;
-:Menampilkan Halaman Daftar Machine;
+else (Tidak)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
 
 stop
 @enduml

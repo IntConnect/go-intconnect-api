@@ -1,5 +1,5 @@
 @startuml
-title **Activity – Membuat Data Machine**
+title **Activity – Mengubah Data SMTP Server**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -57,15 +57,15 @@ endif
   :Menampilkan Dashboard;
 
 |ROLES|
-:Pilih Menu Machine;
-:Tekan Tombol New Machine;
+:Pilih Menu SMTP Server;
+:Tekan Button Dengan \nIcon Pencil (Edit);
 
 |SYSTEM|
 :Menampilkan Formulir;
 
 |ROLES|
 repeat
-  :Input Informasi Machine;
+  :Ubah Informasi SMTP Server;
   :Submit;
 
   |SYSTEM|
@@ -74,10 +74,10 @@ repeat
 repeat while (Valid?) is (Tidak)
 
 |SYSTEM|
-:Simpan Machine Baru;
+:Memperbarui Data SMTP Server;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Machine;
-:Menampilkan Halaman Daftar Machine;
+:Redirect ke Halaman Daftar SMTP Server;
+:Menampilkan Halaman Daftar SMTP Server;
 
 stop
 @enduml

@@ -1,6 +1,5 @@
-
 @startuml
-title **Activity – Delete Machine**
+title **Activity – Menghapus Data Machine**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -33,32 +32,54 @@ skinparam NoteBorderColor #E0C66F
 
 !define ROLES Administrator
 !define SYSTEM #AntiqueWhite|System
+
 |ROLES|
 start
-:Pilih Menu Machine;
-
+:Akses Sistem;
 
 |SYSTEM|
-:Menampilkan Halaman Daftar Machine;
+if (Sudah Login?) then (Ya)
+else (Tidak)
+  :Menampilkan Halaman Login;
+
+  |ROLES|
+  repeat
+    :Input Kredensial;
+    :Klik Login;
+
+    |SYSTEM|
+    :Validasi Kredensial;
+    backward:Menampilkan\nPesan Error;
+  repeat while (Valid?) is (Tidak)
+
+  |SYSTEM|
+endif
+  :Menampilkan Dashboard;
 
 |ROLES|
-:Tekan Tombol Delete Machine;
+:Pilih Menu Machine;
+:Tekan Tombol Trash;
+
+|SYSTEM|
+:Menampilkan Dialog \nKonfirmasi Penghapusan;
+
 
 
 |ROLES|
-
 repeat
-  :Konfirmasi Alasan Penghapusan;
+|ROLES|
+:Mengisi Alasan\nPenghapusan;
   :Submit;
 
-  |System|
+  |SYSTEM|
   :Melakukan Validasi;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?) is (Tidak)
 
-repeat while (Valid?) is (Tidak) not (Ya)
-
-|System|
-:Melakukan Soft Delete;
+|SYSTEM|
+:Melakukan Soft-delete;
 :Menampilkan Pesan Sukses;
+:Redirect ke Halaman Daftar Machine;
 :Menampilkan Halaman Daftar Machine;
 
 stop

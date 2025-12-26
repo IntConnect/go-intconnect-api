@@ -1,6 +1,5 @@
-
 @startuml
-title **Activity – Edit Facility**
+title **Activity – Mengubah Data Facility**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -33,33 +32,49 @@ skinparam NoteBorderColor #E0C66F
 
 !define ROLES Administrator
 !define SYSTEM #AntiqueWhite|System
+
 |ROLES|
 start
-:Pilih Menu Facility;
-
+:Akses Sistem;
 
 |SYSTEM|
-:Menampilkan Halaman Daftar Facility;
+if (Sudah Login?) then (Ya)
+else (Tidak)
+  :Menampilkan Halaman Login;
+
+  |ROLES|
+  repeat
+    :Input Kredensial;
+    :Klik Login;
+
+    |SYSTEM|
+    :Validasi Kredensial;
+    backward:Menampilkan\nPesan Error;
+  repeat while (Valid?) is (Tidak)
+
+  |SYSTEM|
+endif
+  :Menampilkan Dashboard;
 
 |ROLES|
-:Tekan Tombol New Facility;
+:Pilih Menu Facility;
+:Tekan Button Dengan \nIcon Pencil (Edit);
 
 |SYSTEM|
 :Menampilkan Formulir;
 
 |ROLES|
-
 repeat
   :Ubah Informasi Facility;
   :Submit;
 
-  |System|
+  |SYSTEM|
   :Melakukan Validasi;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?) is (Tidak)
 
-repeat while (Valid?) is (Tidak) not (Ya)
-
-|System|
-:Simpan Facility Baru;
+|SYSTEM|
+:Memperbarui Data Facility;
 :Menampilkan Pesan Sukses;
 :Redirect ke Halaman Daftar Facility;
 :Menampilkan Halaman Daftar Facility;

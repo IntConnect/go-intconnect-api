@@ -1,6 +1,5 @@
-
 @startuml
-title **Activity – Edit Machine**
+title **Activity – Mengubah Data Machine**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -33,33 +32,49 @@ skinparam NoteBorderColor #E0C66F
 
 !define ROLES Administrator
 !define SYSTEM #AntiqueWhite|System
+
 |ROLES|
 start
-:Pilih Menu Machine;
-
+:Akses Sistem;
 
 |SYSTEM|
-:Menampilkan Halaman Daftar Machine;
+if (Sudah Login?) then (Ya)
+else (Tidak)
+  :Menampilkan Halaman Login;
+
+  |ROLES|
+  repeat
+    :Input Kredensial;
+    :Klik Login;
+
+    |SYSTEM|
+    :Validasi Kredensial;
+    backward:Menampilkan\nPesan Error;
+  repeat while (Valid?) is (Tidak)
+
+  |SYSTEM|
+endif
+  :Menampilkan Dashboard;
 
 |ROLES|
-:Tekan Tombol New Machine;
+:Pilih Menu Machine;
+:Tekan Button Dengan \nIcon Pencil (Edit);
 
 |SYSTEM|
 :Menampilkan Formulir;
 
 |ROLES|
-
 repeat
   :Ubah Informasi Machine;
   :Submit;
 
-  |System|
+  |SYSTEM|
   :Melakukan Validasi;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?) is (Tidak)
 
-repeat while (Valid?) is (Tidak) not (Ya)
-
-|System|
-:Simpan Machine Baru;
+|SYSTEM|
+:Memperbarui Data Machine;
 :Menampilkan Pesan Sukses;
 :Redirect ke Halaman Daftar Machine;
 :Menampilkan Halaman Daftar Machine;
