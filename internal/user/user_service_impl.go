@@ -100,7 +100,6 @@ func (userService *ServiceImpl) FindById(ginContext *gin.Context, userId uint64)
 		userEntity, err := userService.userRepository.FindById(gormTransaction, userId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		userResponse = helper.MapEntityIntoResponse[*entity.User, *model.UserResponse](userEntity,
-			[]string{},
 			mapper.FuncMapAuditable)
 		return nil
 	})
@@ -116,7 +115,6 @@ func (userService *ServiceImpl) FindSelf(ginContext *gin.Context) *model.UserRes
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		roleResponse := userService.roleService.FindById(ginContext, userEntity.RoleId)
 		userResponse = helper.MapEntityIntoResponse[*entity.User, *model.UserResponse](userEntity,
-			[]string{},
 			mapper.FuncMapAuditable)
 		userResponse.RoleResponse = roleResponse
 		return nil

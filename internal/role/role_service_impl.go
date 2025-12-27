@@ -164,7 +164,6 @@ func (roleService *ServiceImpl) FindById(ginContext *gin.Context, roleId uint64)
 				*entity.Role,
 				*model.RoleResponse,
 			](roleEntity,
-				[]string{},
 				mapper.FuncMapAuditable)
 			return nil
 		}
@@ -174,7 +173,6 @@ func (roleService *ServiceImpl) FindById(ginContext *gin.Context, roleId uint64)
 			*entity.Role,
 			*model.RoleResponse,
 		](roleEntity,
-			[]string{},
 			mapper.FuncMapAuditable)
 		err = roleService.roleRepository.SetByIdCache(backgroundContext, roleId, roleEntity)
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))

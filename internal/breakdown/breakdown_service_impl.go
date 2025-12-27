@@ -65,7 +65,6 @@ func (breakdownService *ServiceImpl) FindById(ginContext *gin.Context, breakdown
 		breakdownEntity, err := breakdownService.breakdownRepository.FindById(gormTransaction, breakdownId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		breakdownResponseRequest = helper.MapEntityIntoResponse[*entity.Breakdown, *model.BreakdownResponse](breakdownEntity,
-			[]string{},
 			mapper.FuncMapAuditable)
 		return nil
 	})

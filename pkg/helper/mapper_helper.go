@@ -74,7 +74,7 @@ func MapEntitiesIntoResponsesWithFunc[S any, R any](
 	for _, entityObject := range entityObjects {
 		responseObjects = append(
 			responseObjects,
-			MapEntityIntoResponse[S, R](entityObject, []string{}, renderPayloads...),
+			MapEntityIntoResponse[S, R](entityObject, renderPayloads...),
 		)
 	}
 	return responseObjects
@@ -89,18 +89,16 @@ func MapEntitiesIntoResponsesWithIgnoredFieldsWithFunc[S any, R any](
 	for _, entityObject := range entityObjects {
 		responseObjects = append(
 			responseObjects,
-			MapEntityIntoResponse[S, R](entityObject, []string{}, renderPayloads...),
+			MapEntityIntoResponseWithIgnoredFields[S, R](entityObject, ignoredFields, renderPayloads...),
 		)
 	}
 	return responseObjects
 }
 
-func MapEntityIntoResponse[S any, R any](
+func MapEntityIntoResponseWithIgnoredFields[S any, R any](
 	entityObject S,
 	ignoredFields []string,
-
 	renderPayloads ...func(S, R),
-
 ) R {
 	var responseObject R
 	if reflect.TypeOf(responseObject).Kind() == reflect.Ptr {
@@ -113,6 +111,28 @@ func MapEntityIntoResponse[S any, R any](
 	if len(ignoredFields) > 0 {
 		removeIgnoredFields(responseObject, ignoredFields)
 	}
+	if len(renderPayloads) > 0 {
+		for _, renderPayload := range renderPayloads {
+			if renderPayload == nil { // <-- cegah panic
+				continue
+			}
+			renderPayload(entityObject, responseObject)
+		}
+	}
+	return responseObject
+}
+
+func MapEntityIntoResponse[S any, R any](
+	entityObject S,
+	renderPayloads ...func(S, R),
+) R {
+	var responseObject R
+	if reflect.TypeOf(responseObject).Kind() == reflect.Ptr {
+		responseObject = reflect.New(reflect.TypeOf(responseObject).Elem()).Interface().(R)
+	}
+	decoded := DecodeFromSource[S, R](entityObject, responseObject)
+	responseObject = decoded
+
 	if len(renderPayloads) > 0 {
 		for _, renderPayload := range renderPayloads {
 			if renderPayload == nil { // <-- cegah panic

@@ -23,7 +23,6 @@ func MapMachineDocument(machineEntity *entity.Machine, machineResponse *model.Ma
 
 		mapped := helper.MapEntityIntoResponse[*entity.MachineDocument, *model.MachineDocumentResponse](
 			machineDocument,
-			[]string{},
 			FuncMapAuditable, // tetap boleh mapping auditable jika butuh
 		)
 

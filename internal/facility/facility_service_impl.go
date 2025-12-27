@@ -63,9 +63,7 @@ func (facilityService *ServiceImpl) FindById(facilityId uint64) *model.FacilityR
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		facilityEntities, err := facilityService.facilityRepository.FindById(gormTransaction, facilityId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		facilityResponse = helper.MapEntityIntoResponse[*entity.Facility, *model.FacilityResponse](facilityEntities,
-			[]string{},
-			mapper.FuncMapAuditable)
+		facilityResponse = helper.MapEntityIntoResponse[*entity.Facility, *model.FacilityResponse](facilityEntities, mapper.FuncMapAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

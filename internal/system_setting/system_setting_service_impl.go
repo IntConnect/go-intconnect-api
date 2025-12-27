@@ -60,9 +60,9 @@ func (systemSettingService *ServiceImpl) FindByKey(systemSettingKey string, isMi
 		systemSettingEntities, err := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, systemSettingKey)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if isMinimal {
-			systemSettingResponsesRequest = helper.MapEntityIntoResponse[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities, []string{})
+			systemSettingResponsesRequest = helper.MapEntityIntoResponse[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities)
 		} else {
-			systemSettingResponsesRequest = helper.MapEntityIntoResponse[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities, []string{"Id", "Description", "Key"})
+			systemSettingResponsesRequest = helper.MapEntityIntoResponseWithIgnoredFields[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities, []string{"Id", "Description", "Key"})
 		}
 
 		return nil
