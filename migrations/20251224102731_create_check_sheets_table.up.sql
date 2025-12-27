@@ -4,7 +4,7 @@ CREATE TABLE check_sheets
     check_sheet_document_template_id BIGINT REFERENCES check_sheet_document_templates (id) NOT NULL,
     reported_by                      BIGINT                                                NOT NULL REFERENCES users (id),
     verified_by                      BIGINT REFERENCES users (id),
-    date                             DATE                                                  NOT NULL,
+    timestamp                        TIMESTAMP                                             NOT NULL DEFAULT current_timestamp,
     note                             TEXT,
     status                           VARCHAR(255)                                          NOT NULL DEFAULT 'Draft',
     created_at                       TIMESTAMP                                             NOT NULL DEFAULT current_timestamp,

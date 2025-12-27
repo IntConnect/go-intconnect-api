@@ -63,6 +63,8 @@ func main() {
 		injector.SystemSettingModule,
 		injector.ParameterOperationModule,
 		injector.TelemetryModule,
+		injector.CheckSheetModule,
+		injector.CheckSheetValueModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

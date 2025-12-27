@@ -4,6 +4,7 @@ import (
 	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/breakdown"
+	checkSheet "go-intconnect-api/internal/check_sheet"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
@@ -51,6 +52,7 @@ type ProtectedRoutes struct {
 	breakdownController                  breakdown.Controller
 	systemSettingController              systemSetting.Controller
 	telemetryController                  telemetry.Controller
+	checkSheetController                 checkSheet.Controller
 	roleService                          role.Service
 }
 
@@ -77,6 +79,7 @@ func NewProtectedRoutes(
 	breakdownController breakdown.Controller,
 	systemSettingController systemSetting.Controller,
 	telemetryController telemetry.Controller,
+	checkSheetController checkSheet.Controller,
 
 	roleService role.Service,
 
@@ -106,6 +109,7 @@ func NewProtectedRoutes(
 		breakdownController:                  breakdownController,
 		systemSettingController:              systemSettingController,
 		telemetryController:                  telemetryController,
+		checkSheetController:                 checkSheetController,
 	}
 }
 
@@ -253,5 +257,13 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 
 	telemetryRouterGroup := routerGroup.Group("telemetries")
 	telemetryRouterGroup.POST("/report", protectedRoutes.telemetryController.GenerateReport)
+
+	checkSheetRouterGroup := routerGroup.Group("check-sheets")
+	checkSheetRouterGroup.GET("pagination", protectedRoutes.checkSheetController.FindAllCheckSheetPagination)
+	checkSheetRouterGroup.GET("", protectedRoutes.checkSheetController.FindAllCheckSheet)
+	checkSheetRouterGroup.GET("/:id", protectedRoutes.checkSheetController.FindCheckSheetById)
+	checkSheetRouterGroup.POST("", protectedRoutes.checkSheetController.CreateCheckSheet)
+	checkSheetRouterGroup.PUT("/:id", protectedRoutes.checkSheetController.UpdateCheckSheet)
+	checkSheetRouterGroup.DELETE("/:id", protectedRoutes.checkSheetController.DeleteCheckSheet)
 
 }

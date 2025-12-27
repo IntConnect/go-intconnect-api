@@ -25,7 +25,7 @@ func NewHandler(checkSheetDocumentTemplateService Service, viperConfig *viper.Vi
 
 func (checkSheetDocumentTemplateHandler *Handler) FindAllCheckSheetDocumentTemplate(ginContext *gin.Context) {
 	checkSheetDocumentTemplateResponses := checkSheetDocumentTemplateHandler.checkSheetDocumentTemplateService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Check sheet document template has been fetched", checkSheetDocumentTemplateResponses))
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Check sheet document template has been fetched", checkSheetDocumentTemplateResponses))
 }
 
 func (checkSheetDocumentTemplateHandler *Handler) FindAllCheckSheetDocumentTemplatePagination(ginContext *gin.Context) {

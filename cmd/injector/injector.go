@@ -5,7 +5,9 @@ import (
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/breakdown"
 	breakdownResource "go-intconnect-api/internal/breakdown_resource"
+	checkSheet "go-intconnect-api/internal/check_sheet"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
+	checkSheetValue "go-intconnect-api/internal/check_sheet_value"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
@@ -292,4 +294,14 @@ var TelemetryModule = fx.Module("telemetryFeature",
 	fx.Provide(fx.Annotate(telemetry.NewRepository, fx.As(new(telemetry.Repository)))),
 	fx.Provide(fx.Annotate(telemetry.NewService, fx.As(new(telemetry.Service)))),
 	fx.Provide(fx.Annotate(telemetry.NewHandler, fx.As(new(telemetry.Controller)))),
+)
+
+var CheckSheetModule = fx.Module("checkSheetFeature",
+	fx.Provide(fx.Annotate(checkSheet.NewRepository, fx.As(new(checkSheet.Repository)))),
+	fx.Provide(fx.Annotate(checkSheet.NewService, fx.As(new(checkSheet.Service)))),
+	fx.Provide(fx.Annotate(checkSheet.NewHandler, fx.As(new(checkSheet.Controller)))),
+)
+
+var CheckSheetValueModule = fx.Module("checkSheetValueFeature",
+	fx.Provide(fx.Annotate(checkSheetValue.NewRepository, fx.As(new(checkSheetValue.Repository)))),
 )

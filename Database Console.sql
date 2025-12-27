@@ -117,7 +117,14 @@ SELECT *
 FROM report_document_templates;
 SELECT *
 FROM roles;
+SELECT *
+FROM check_sheet_values;
+SELECT *
+FROM parameters;
 
+
+DELETE
+FROM check_sheet_document_templates;
 DELETE
 FROM parameters;
 DELETE
@@ -137,6 +144,12 @@ ORDER BY bucket;
 
 
 ALTER TABLE parameters
-    ADD COLUMN is_watch      BOOLEAN      NOT NULL DEFAULT FALSE;
+    ADD COLUMN is_watch BOOLEAN NOT NULL DEFAULT FALSE;
 
-SELECT * FROM check_sheet_document_templates;
+SELECT *
+FROM check_sheet_document_templates;
+SELECT *
+FROM parameters;
+
+UPDATE facilities
+SET deleted_at = NULL;

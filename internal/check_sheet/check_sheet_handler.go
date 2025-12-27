@@ -12,58 +12,66 @@ import (
 )
 
 type Handler struct {
-	checkSheetDocumentTemplateService Service
-	viperConfig                       *viper.Viper
+	checkSheetService Service
+	viperConfig       *viper.Viper
 }
 
-func NewHandler(checkSheetDocumentTemplateService Service, viperConfig *viper.Viper) *Handler {
+func NewHandler(checkSheetService Service, viperConfig *viper.Viper) *Handler {
 	return &Handler{
-		checkSheetDocumentTemplateService: checkSheetDocumentTemplateService,
-		viperConfig:                       viperConfig,
+		checkSheetService: checkSheetService,
+		viperConfig:       viperConfig,
 	}
 }
 
-func (checkSheetDocumentTemplateHandler *Handler) FindAllCheckSheetDocumentTemplate(ginContext *gin.Context) {
-	checkSheetDocumentTemplateResponses := checkSheetDocumentTemplateHandler.checkSheetDocumentTemplateService.FindAll()
-	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Check sheet document template has been fetched", checkSheetDocumentTemplateResponses))
+func (checkSheetHandler *Handler) FindAllCheckSheet(ginContext *gin.Context) {
+	checkSheetResponses := checkSheetHandler.checkSheetService.FindAll()
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Check sheet document template has been fetched", checkSheetResponses))
 }
 
-func (checkSheetDocumentTemplateHandler *Handler) FindAllCheckSheetDocumentTemplatePagination(ginContext *gin.Context) {
+func (checkSheetHandler *Handler) FindAllCheckSheetPagination(ginContext *gin.Context) {
 	var paginationReq model.PaginationRequest
 	err := ginContext.ShouldBindQuery(&paginationReq)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	paginatedResponse := checkSheetDocumentTemplateHandler.checkSheetDocumentTemplateService.FindAllPagination(&paginationReq)
+	paginatedResponse := checkSheetHandler.checkSheetService.FindAllPagination(&paginationReq)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
-func (checkSheetDocumentTemplateHandler *Handler) CreateCheckSheetDocumentTemplate(ginContext *gin.Context) {
-	var createCheckSheetDocumentTemplateModel model.CreateCheckSheetDocumentTemplateRequest
-	err := ginContext.ShouldBindBodyWithJSON(&createCheckSheetDocumentTemplateModel)
+func (checkSheetHandler *Handler) FindCheckSheetById(ginContext *gin.Context) {
+	checkSheetId := ginContext.Param("id")
+	parsedCheckSheetId, err := strconv.ParseUint(checkSheetId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	paginatedRes := checkSheetDocumentTemplateHandler.checkSheetDocumentTemplateService.Create(ginContext, &createCheckSheetDocumentTemplateModel)
+	paginatedResponse := checkSheetHandler.checkSheetService.FindById(ginContext, parsedCheckSheetId)
+	ginContext.JSON(http.StatusOK, paginatedResponse)
+}
+
+func (checkSheetHandler *Handler) CreateCheckSheet(ginContext *gin.Context) {
+	var createCheckSheetModel model.CreateCheckSheetRequest
+	err := ginContext.ShouldBindBodyWithJSON(&createCheckSheetModel)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	paginatedRes := checkSheetHandler.checkSheetService.Create(ginContext, &createCheckSheetModel)
 	ginContext.JSON(http.StatusOK, paginatedRes)
 }
 
-func (checkSheetDocumentTemplateHandler *Handler) UpdateCheckSheetDocumentTemplate(ginContext *gin.Context) {
-	var updateCheckSheetDocumentTemplateModel model.UpdateCheckSheetDocumentTemplateRequest
-	err := ginContext.ShouldBindBodyWithJSON(&updateCheckSheetDocumentTemplateModel)
+func (checkSheetHandler *Handler) UpdateCheckSheet(ginContext *gin.Context) {
+	var updateCheckSheetModel model.UpdateCheckSheetRequest
+	err := ginContext.ShouldBindBodyWithJSON(&updateCheckSheetModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrPayloadInvalid))
-	checkSheetDocumentTemplateId := ginContext.Param("id")
-	parsedCheckSheetDocumentTemplateId, err := strconv.ParseUint(checkSheetDocumentTemplateId, 10, 64)
+	checkSheetId := ginContext.Param("id")
+	parsedCheckSheetId, err := strconv.ParseUint(checkSheetId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
-	updateCheckSheetDocumentTemplateModel.Id = parsedCheckSheetDocumentTemplateId
-	paginatedRes := checkSheetDocumentTemplateHandler.checkSheetDocumentTemplateService.Update(ginContext, &updateCheckSheetDocumentTemplateModel)
+	updateCheckSheetModel.Id = parsedCheckSheetId
+	paginatedRes := checkSheetHandler.checkSheetService.Update(ginContext, &updateCheckSheetModel)
 	ginContext.JSON(http.StatusOK, paginatedRes)
 }
 
-func (checkSheetDocumentTemplateHandler *Handler) DeleteCheckSheetDocumentTemplate(ginContext *gin.Context) {
+func (checkSheetHandler *Handler) DeleteCheckSheet(ginContext *gin.Context) {
 	var deleteResourceGeneralRequest model.DeleteResourceGeneralRequest
 	err := ginContext.ShouldBindBodyWithJSON(&deleteResourceGeneralRequest)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrPayloadInvalid))
-	checkSheetDocumentTemplateId := ginContext.Param("id")
-	parsedCheckSheetDocumentTemplateId, err := strconv.ParseUint(checkSheetDocumentTemplateId, 10, 32)
+	checkSheetId := ginContext.Param("id")
+	parsedCheckSheetId, err := strconv.ParseUint(checkSheetId, 10, 32)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	deleteResourceGeneralRequest.Id = parsedCheckSheetDocumentTemplateId
-	paginatedRes := checkSheetDocumentTemplateHandler.checkSheetDocumentTemplateService.Delete(ginContext, &deleteResourceGeneralRequest)
+	deleteResourceGeneralRequest.Id = parsedCheckSheetId
+	paginatedRes := checkSheetHandler.checkSheetService.Delete(ginContext, &deleteResourceGeneralRequest)
 	ginContext.JSON(http.StatusOK, paginatedRes)
 }

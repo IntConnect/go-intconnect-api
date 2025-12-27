@@ -14,7 +14,9 @@ func NewRepository() *RepositoryImpl {
 
 func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.CheckSheetDocumentTemplate, error) {
 	var checkSheetDocumentTemplateEntities []*entity.CheckSheetDocumentTemplate
-	err := gormTransaction.Find(&checkSheetDocumentTemplateEntities).Error
+	err := gormTransaction.
+		Preload("Parameters").
+		Find(&checkSheetDocumentTemplateEntities).Error
 	return checkSheetDocumentTemplateEntities, err
 }
 

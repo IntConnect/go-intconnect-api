@@ -11,8 +11,19 @@ type CheckSheetResponse struct {
 }
 
 type CreateCheckSheetRequest struct {
-	CheckSheetDocumentTemplateId uint64 `json:"check_sheet_document_template_id" validate:"required,gte=1,exists=check_sheets;id"`
-	Date                         string `json:"date" validate:"required,date"`
+	CheckSheetDocumentTemplateId uint64             `json:"check_sheet_document_template_id" validate:"required,gte=1,exists=check_sheets;id"`
+	CheckSheetValues             []*CheckSheetValue `json:"check_sheet_values" validate:"required,min=1,dive,required"`
+}
+
+type CheckSheetValue struct {
+	CheckSheetReportDocumentTemplateParameterId uint64 `json:"check_sheet_report_document_template_parameter_id"`
+	Value                                       string `json:"value"`
+}
+
+type UpdateCheckSheetRequest struct {
+	Id                           uint64             `json:"-" validate:"required,gte=1,exists=check_sheets;id"`
+	CheckSheetDocumentTemplateId uint64             `json:"check_sheet_document_template_id" validate:"required,gte=1,exists=check_sheet_document_templates;id"`
+	CheckSheetValues             []*CheckSheetValue `json:"check_sheet_values" validate:"required,min=1,dive,required"`
 }
 
 func (checkSheetResponse *CheckSheetResponse) GetAuditableResponse() *AuditableResponse {
@@ -21,4 +32,8 @@ func (checkSheetResponse *CheckSheetResponse) GetAuditableResponse() *AuditableR
 
 func (checkSheetResponse *CheckSheetResponse) SetAuditableResponse(auditableResponse *AuditableResponse) {
 	checkSheetResponse.AuditableResponse = auditableResponse
+}
+
+func (checkSheetValue *CheckSheetValue) GetId() uint64 {
+	return checkSheetValue.CheckSheetReportDocumentTemplateParameterId
 }

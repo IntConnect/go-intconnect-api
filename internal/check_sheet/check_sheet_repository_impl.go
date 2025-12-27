@@ -58,7 +58,7 @@ func (checkSheetImpl *RepositoryImpl) FindAllPagination(
 func (checkSheetImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, checkSheetId uint64) (*entity.CheckSheet, error) {
 	var checkSheetEntity entity.CheckSheet
 	err := gormTransaction.Model(&entity.CheckSheet{}).
-		Preload("Parameters").
+		Preload("CheckSheetValue").
 		Where("id = ?", checkSheetId).First(&checkSheetEntity).Error
 
 	return &checkSheetEntity, err
