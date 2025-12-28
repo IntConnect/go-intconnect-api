@@ -110,7 +110,7 @@ func registerTranslations(validate *validator.Validate, trans ut.Translator) {
 		{
 			tag: "date",
 			message: func(fe validator.FieldError) string {
-				return fmt.Sprintf("%s must be a valid date (YYYY-MM-DD)", formatFieldName(fe.Field()))
+				return fmt.Sprintf("%s must be a valid date (YYYY-MM-DD)", fe.Field())
 			},
 		},
 		{
