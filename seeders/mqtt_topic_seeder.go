@@ -18,12 +18,6 @@ func (mqttTopicSeeder *MqttTopicSeeder) Run(gormDatabase *gorm.DB) error {
 		QoS:          0,
 		Auditable:    entity.NewAuditable("System"),
 	})
-	gormDatabase.Model(&entity.MqttTopic{}).Create(&entity.MqttTopic{
-		MachineId:    1,
-		MqttBrokerId: 2,
-		Name:         "publish/data/chiller1",
-		QoS:          0,
-		Auditable:    entity.NewAuditable("System"),
-	})
+
 	return nil
 }

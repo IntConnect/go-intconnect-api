@@ -10,7 +10,7 @@ import (
 type InitialSeeder struct{}
 
 func (initialSeeder *InitialSeeder) Run(gormDatabase *gorm.DB) error {
-	seederNames := []string{"RoleSeeder", "PermissionSeeder", "RolePermissionSeeder", "UserSeeder"}
+	seederNames := []string{"RoleSeeder", "PermissionSeeder", "RolePermissionSeeder", "UserSeeder", "FacilitySeeder", "MachineSeeder"}
 	for _, name := range seederNames {
 		s, err := GetSeeder(name)
 		if err != nil {

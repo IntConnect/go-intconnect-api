@@ -14,6 +14,7 @@ var SeederRegistry = map[string]Seeder{
 	"MqttBrokerSeeder":     &MqttBrokerSeeder{},
 	"MqttTopicSeeder":      &MqttTopicSeeder{},
 	"FacilitySeeder":       &FacilitySeeder{},
+	"MachineSeeder":        &MachineSeeder{},
 }
 
 // Ambil seeder dari nama

@@ -277,7 +277,7 @@ func (permissionSeeder *PermissionSeeder) Run(gormDatabase *gorm.DB) error {
 			Auditable:   entity.NewAuditable("System"),
 		},
 
-		// Permission
+		// Audit Log
 		{
 			Code:        "AUDIT_LOG_VIEW",
 			Name:        "View",
