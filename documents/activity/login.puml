@@ -1,13 +1,11 @@
 @startuml
-
-title **Activity – Login**
-
 '------------------------------------------------
 ' GENERAL STYLING
 '------------------------------------------------
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
+skinparam Padding 5
 
 '------------------------------------------------
 ' ARROWS

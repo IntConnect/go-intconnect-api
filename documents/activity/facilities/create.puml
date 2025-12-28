@@ -1,6 +1,4 @@
 @startuml
-title **Activity – Membuat Data Facility**
-
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
@@ -36,6 +34,7 @@ skinparam NoteBorderColor #E0C66F
 |ROLES|
 start
 |ROLES|
+:Login;
 :Pilih Menu Facility;
 :Tekan Tombol New Facility;
 

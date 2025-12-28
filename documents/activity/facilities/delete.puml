@@ -1,5 +1,4 @@
 @startuml
-title **Activity – Menghapus Data Facility**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -35,28 +34,7 @@ skinparam NoteBorderColor #E0C66F
 
 |ROLES|
 start
-:Akses Sistem;
-
-|SYSTEM|
-if (Sudah Login?) then (Ya)
-else (Tidak)
-  :Menampilkan Halaman Login;
-
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
-
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
-endif
-  :Menampilkan Dashboard;
-
-|ROLES|
+:Login;
 :Pilih Menu Facility;
 :Tekan Tombol Trash;
 
@@ -80,7 +58,6 @@ repeat while (Valid?) is (Tidak)
 :Melakukan Soft-delete;
 :Menampilkan Pesan Sukses;
 :Redirect ke Halaman Daftar Facility;
-:Menampilkan Halaman Daftar Facility;
 
 stop
 @enduml
