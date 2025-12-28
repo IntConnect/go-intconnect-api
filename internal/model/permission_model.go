@@ -6,7 +6,7 @@ type PermissionResponse struct {
 	Name              string             `json:"name"`
 	Category          string             `json:"category"`
 	Description       string             `json:"description"`
-	AuditableResponse *AuditableResponse `json:"auditable_response"`
+	AuditableResponse *AuditableResponse `json:"auditable" mapstructure:"auditable"`
 }
 
 func (permissionResponse *PermissionResponse) GetAuditableResponse() *AuditableResponse {
