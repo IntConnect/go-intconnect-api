@@ -15,7 +15,7 @@ func NewRepository() *RepositoryImpl {
 func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.CheckSheetDocumentTemplate, error) {
 	var checkSheetDocumentTemplateEntities []*entity.CheckSheetDocumentTemplate
 	err := gormTransaction.
-		Preload("Parameters").
+		Preload("CheckSheetDocumentTemplateParameter").
 		Find(&checkSheetDocumentTemplateEntities).Error
 	return checkSheetDocumentTemplateEntities, err
 }
@@ -46,7 +46,7 @@ func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPaginatio
 
 	// Fetch paginated data
 	if err := rawQuery.
-		Preload("Parameters").
+		Preload("CheckSheetDocumentTemplateParameters.Parameter").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).

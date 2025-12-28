@@ -6,6 +6,7 @@ CREATE TABLE check_sheet_document_templates
     description     VARCHAR(255),
     category        VARCHAR(255) NOT NULL,
     interval        INT          NOT NULL DEFAULT 1,
+    interval_type   VARCHAR(255) NOT NULL DEFAULT 'Hours',
     revision_number INT          NOT NULL DEFAULT 0,
     effective_date  DATE         NOT NULL,
     created_by      VARCHAR(255),

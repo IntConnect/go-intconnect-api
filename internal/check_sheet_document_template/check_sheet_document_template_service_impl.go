@@ -98,9 +98,16 @@ func (checkSheetDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Con
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrSomeResourceNotFound))
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		checkSheetDocumentTemplateEntity.Parameters = parameterEntities
 		checkSheetDocumentTemplateEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
 		err = checkSheetDocumentTemplateService.checkSheetDocumentTemplateRepository.Create(gormTransaction, checkSheetDocumentTemplateEntity)
+		var checkSheetDocumentTemplateParameters []*entity.CheckSheetDocumentTemplateParameter
+		for _, parameterEntity := range parameterEntities {
+			checkSheetDocumentTemplateParameters = append(checkSheetDocumentTemplateParameters, &entity.CheckSheetDocumentTemplateParameter{
+				CheckSheetDocumentTemplateId: checkSheetDocumentTemplateEntity.Id,
+				ParameterId:                  parameterEntity.Id,
+			})
+		}
+
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := checkSheetDocumentTemplateService.auditLogService.Build(
 			nil,                              // before entity
@@ -137,7 +144,7 @@ func (checkSheetDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Con
 		checkSheetDocumentTemplate, err := checkSheetDocumentTemplateService.checkSheetDocumentTemplateRepository.FindById(gormTransaction, updateCheckSheetDocumentTemplateRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		beforeCheckSheetDocumentTemplate := *checkSheetDocumentTemplate
-		beforeCheckSheetDocumentTemplate.Parameters = append([]*entity.Parameter(nil), checkSheetDocumentTemplate.Parameters...)
+		beforeCheckSheetDocumentTemplate.CheckSheetDocumentTemplateParameters = append([]*entity.CheckSheetDocumentTemplateParameter(nil), checkSheetDocumentTemplate.CheckSheetDocumentTemplateParameters...)
 		checkSheetDocumentTemplate.Auditable = entity.NewAuditable(userJwtClaims.Username)
 
 		// Map field biasa
@@ -161,7 +168,7 @@ func (checkSheetDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Con
 			checkSheetDocumentTemplate,        // after entity
 			map[string]map[string][]uint64{
 				"parameters": {
-					"before": helper.ExtractIds(beforeCheckSheetDocumentTemplate.Parameters),
+					"before": helper.ExtractIds(beforeCheckSheetDocumentTemplate.CheckSheetDocumentTemplateParameters),
 					"after":  updateCheckSheetDocumentTemplateRequest.ParameterIds,
 				},
 			},
@@ -196,7 +203,7 @@ func (checkSheetDocumentTemplateService *ServiceImpl) Delete(ginContext *gin.Con
 			nil,                        // after entity
 			map[string]map[string][]uint64{
 				"parameters": {
-					"before": helper.ExtractIds(checkSheetDocumentTemplate.Parameters),
+					"before": helper.ExtractIds(checkSheetDocumentTemplate.CheckSheetDocumentTemplateParameters),
 					"after":  nil,
 				},
 			},

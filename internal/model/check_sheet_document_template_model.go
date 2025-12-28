@@ -6,9 +6,8 @@ type CheckSheetDocumentTemplateResponse struct {
 	No                string               `json:"no"`
 	Description       string               `json:"description"`
 	Category          string               `json:"category"`
-	Rotation          int                  `json:"rotation"`
-	RotationType      string               `json:"rotation_type"`
 	Interval          int                  `json:"interval"`
+	IntervalType      string               `json:"interval_type"`
 	RevisionNumber    int                  `json:"revision_number"`
 	EffectiveDate     string               `json:"effective_date"`
 	ParameterResponse []*ParameterResponse `json:"parameters" mapstructure:"parameters"`
@@ -21,9 +20,8 @@ type CreateCheckSheetDocumentTemplateRequest struct {
 	Description    string   `json:"description"`
 	ParameterIds   []uint64 `json:"parameter_ids" validate:"required,min=1,dive,number,gt=0"`
 	Category       string   `json:"category" validate:"required"`
-	Rotation       int      `json:"rotation" validate:"required,gte=1"`
-	RotationType   string   `json:"rotation_type" validate:"required,oneof=Day Week Month"`
 	Interval       int      `json:"interval" validate:"required,gte=1"`
+	IntervalType   string   `json:"interval_type" validate:"required,oneof=Hours Minutes"`
 	RevisionNumber int      `json:"revision_number"`
 	EffectiveDate  string   `json:"effective_date" validate:"required,date"`
 }
@@ -35,9 +33,8 @@ type UpdateCheckSheetDocumentTemplateRequest struct {
 	Description    string   `json:"description"`
 	ParameterIds   []uint64 `json:"parameter_ids" validate:"required,min=1,dive,number,gt=0"`
 	Category       string   `json:"category" validate:"required"`
-	Rotation       int      `json:"rotation" validate:"required,gte=1"`
-	RotationType   string   `json:"rotation_type" validate:"required,oneof=Day Week Month"`
 	Interval       int      `json:"interval" validate:"required,gte=1"`
+	IntervalType   string   `json:"interval_type" validate:"required,oneof= Hours Minutes"`
 	RevisionNumber int      `json:"revision_number"`
 	EffectiveDate  string   `json:"effective_date" validate:"required,date"`
 }
