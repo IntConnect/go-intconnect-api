@@ -98,6 +98,13 @@ func TakePointer[T any](value T) *T {
 	return &value
 }
 
+func DebugArrPointer[T any](arrayOfPointer []*T) {
+	for _, pointerData := range arrayOfPointer {
+		logger.Debug(pointerData)
+
+	}
+}
+
 func DiffEntity(before interface{}, after interface{}) map[string]map[string]interface{} {
 	diff := make(map[string]map[string]interface{})
 
