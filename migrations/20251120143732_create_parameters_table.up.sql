@@ -1,3 +1,5 @@
+CREATE TYPE parameter_categories_enum AS ENUM ('Data', 'Status', 'Time');
+
 CREATE TABLE parameters
 (
     id            SERIAL PRIMARY KEY,
@@ -8,7 +10,7 @@ CREATE TABLE parameters
     min_value     FLOAT        NOT NULL DEFAULT 0,
     max_value     FLOAT        NOT NULL DEFAULT 0,
     description   TEXT,
-    category      VARCHAR(255) NOT NULL,
+    category      VARCHAR(255) NOT NULL DEFAULT 'Data',
     data_type     VARCHAR(255) NOT NULL DEFAULT 'String',
     position_x    FLOAT        NOT NULL DEFAULT 0,
     position_y    FLOAT        NOT NULL DEFAULT 0,
