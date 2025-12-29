@@ -118,13 +118,22 @@ FROM report_document_templates;
 SELECT *
 FROM roles;
 SELECT *
-FROM check_sheet_values;
-SELECT *
 FROM parameters;
-
+SELECT *
+FROM machines;
+SELECT *
+FROM check_sheet_document_templates;
+SELECT *
+FROM check_sheet_document_templates_parameters;
+SELECT *
+FROM check_sheets;
+SELECT *
+FROM check_sheet_values;
 
 DELETE
-FROM check_sheet_document_templates;
+FROM check_sheet_values;
+DELETE
+FROM check_sheets;
 DELETE
 FROM parameters;
 DELETE

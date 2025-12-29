@@ -44,7 +44,9 @@ func (checkSheetImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
-		Preload("Parameters").
+		Preload("ReportedByUser").
+		Preload("VerifiedByUser").
+		Preload("CheckSheetDocumentTemplate").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).
@@ -58,7 +60,10 @@ func (checkSheetImpl *RepositoryImpl) FindAllPagination(
 func (checkSheetImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, checkSheetId uint64) (*entity.CheckSheet, error) {
 	var checkSheetEntity entity.CheckSheet
 	err := gormTransaction.Model(&entity.CheckSheet{}).
-		Preload("CheckSheetValue").
+		Preload("ReportedByUser").
+		Preload("VerifiedByUser").
+		Preload("CheckSheetDocumentTemplate").
+		Preload("CheckSheetValues").
 		Where("id = ?", checkSheetId).First(&checkSheetEntity).Error
 
 	return &checkSheetEntity, err

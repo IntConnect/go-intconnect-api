@@ -7,6 +7,7 @@ type Controller interface {
 	FindAllCheckSheetPagination(ginContext *gin.Context)
 	FindCheckSheetById(ginContext *gin.Context)
 	CreateCheckSheet(ginContext *gin.Context)
+	ApprovalCheckSheet(ginContext *gin.Context)
 	UpdateCheckSheet(ginContext *gin.Context)
 	DeleteCheckSheet(ginContext *gin.Context)
 }

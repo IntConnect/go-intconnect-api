@@ -1,6 +1,7 @@
 package check_sheet
 
 import (
+	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	checkSheetValue "go-intconnect-api/internal/check_sheet_value"
@@ -54,7 +55,7 @@ func (checkSheetService *ServiceImpl) FindAll() []*model.CheckSheetResponse {
 	err := checkSheetService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		checkSheetResponse, err := checkSheetService.checkSheetRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allCheckSheet = helper.MapEntitiesIntoResponsesWithFunc[*entity.CheckSheet, *model.CheckSheetResponse](checkSheetResponse, mapper.FuncMapAuditable)
+		allCheckSheet = helper.MapEntitiesIntoResponsesWithFunc[*entity.CheckSheet, *model.CheckSheetResponse](checkSheetResponse, mapper.FuncMapAuditable, mapper.MapCheckSheet)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -79,6 +80,7 @@ func (checkSheetService *ServiceImpl) FindAllPagination(paginationReq *model.Pag
 		checkSheetResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.CheckSheet, *model.CheckSheetResponse](
 			checkSheetEntities,
 			mapper.FuncMapAuditable,
+			mapper.MapCheckSheet,
 		)
 		totalItems = total
 
@@ -99,14 +101,16 @@ func (checkSheetService *ServiceImpl) FindById(ginContext *gin.Context, checkShe
 	err := checkSheetService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		checkSheetEntity, err := checkSheetService.checkSheetRepository.FindById(gormTransaction, checkSheetId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		helper.DebugArrPointer(checkSheetEntity.CheckSheetValues)
+		fmt.Println(checkSheetEntity.CheckSheetValues)
 		checkSheetResponse = helper.MapEntityIntoResponse[*entity.CheckSheet, *model.CheckSheetResponse](checkSheetEntity, mapper.FuncMapAuditable)
+		checkSheetResponse.CheckSheetValues = helper.MapEntitiesIntoResponses[*entity.CheckSheetValue, *model.CheckSheetValueResponse](checkSheetEntity.CheckSheetValues)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return checkSheetResponse
 }
 
-// Create - Membuat checkSheet baru
 func (checkSheetService *ServiceImpl) Create(ginContext *gin.Context, createCheckSheetRequest *model.CreateCheckSheetRequest) *model.PaginatedResponse[*model.CheckSheetResponse] {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := checkSheetService.validatorService.ValidateStruct(createCheckSheetRequest)
@@ -116,15 +120,11 @@ func (checkSheetService *ServiceImpl) Create(ginContext *gin.Context, createChec
 		checkSheetEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
 		checkSheetEntity.ReportedBy = userJwtClaims.Id
 		checkSheetEntity.Timestamp = time.Now()
+		checkSheetEntity.Status = "Draft"
+		checkSheetValueEntities := helper.MapEntitiesIntoResponses[*model.CheckSheetValue, *entity.CheckSheetValue](createCheckSheetRequest.CheckSheetValues)
+		checkSheetEntity.CheckSheetValues = checkSheetValueEntities
 		err := checkSheetService.checkSheetRepository.Create(gormTransaction, checkSheetEntity)
-		var checkSheetValueEntities []entity.CheckSheetValue
-		for _, checkSheetValueRequest := range createCheckSheetRequest.CheckSheetValues {
-			checkSheetValueEntities = append(checkSheetValueEntities, entity.CheckSheetValue{
-				CheckSheetId:                          checkSheetEntity.Id,
-				CheckSheetDocumentTemplateParameterId: checkSheetValueRequest.CheckSheetReportDocumentTemplateParameterId,
-				Value:                                 checkSheetValueRequest.Value,
-			})
-		}
+
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := checkSheetService.auditLogService.Build(
 			nil,              // before entity
@@ -141,6 +141,48 @@ func (checkSheetService *ServiceImpl) Create(ginContext *gin.Context, createChec
 		err = checkSheetService.auditLogService.
 			Record(ginContext,
 				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_FEATURE_CHECK_SHEET_DOCUMENT_TEMPLATE,
+				auditPayload)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp := checkSheetService.FindAllPagination(&paginationRequest)
+	return paginationResp
+}
+func (checkSheetService *ServiceImpl) Approval(ginContext *gin.Context, approvalCheckSheet *model.ApprovalCheckSheet) *model.PaginatedResponse[*model.CheckSheetResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
+	valErr := checkSheetService.validatorService.ValidateStruct(approvalCheckSheet)
+	checkSheetService.validatorService.ParseValidationError(valErr, *approvalCheckSheet)
+	err := checkSheetService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		decisionString := "Rejected"
+		if approvalCheckSheet.Decision {
+			decisionString = "Approved"
+		}
+		checkSheetEntity, err := checkSheetService.checkSheetRepository.FindById(gormTransaction, approvalCheckSheet.CheckSheetId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		checkSheetEntity.Status = decisionString
+		checkSheetEntity.VerifiedBy = &userJwtClaims.Id
+		checkSheetEntity.Auditable = entity.UpdateAuditable(userJwtClaims.Username)
+		checkSheetEntity.Note = approvalCheckSheet.Note
+		err = checkSheetService.checkSheetRepository.Update(gormTransaction, checkSheetEntity)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := checkSheetService.auditLogService.Build(
+			nil,              // before entity
+			checkSheetEntity, // after entity
+			map[string]map[string][]uint64{
+				"check_sheet_value_id": {
+					"before": helper.ExtractIds(checkSheetEntity.CheckSheetValues),
+					"after":  helper.ExtractIds(checkSheetEntity.CheckSheetValues),
+				},
+			},
+			"",
+		)
+
+		err = checkSheetService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_UPDATE,
 				model.AUDIT_LOG_FEATURE_CHECK_SHEET_DOCUMENT_TEMPLATE,
 				auditPayload)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -170,7 +212,7 @@ func (checkSheetService *ServiceImpl) Update(ginContext *gin.Context, updateChec
 		for _, checkSheetValueEntity := range updateCheckSheetRequest.CheckSheetValues {
 			checkSheetValueEntities = append(checkSheetValueEntities, entity.CheckSheetValue{
 				CheckSheetId:                          checkSheetEntity.Id,
-				CheckSheetDocumentTemplateParameterId: checkSheetValueEntity.CheckSheetReportDocumentTemplateParameterId,
+				CheckSheetDocumentTemplateParameterId: checkSheetValueEntity.CheckSheetDocumentTemplateParameterId,
 				Value:                                 checkSheetValueEntity.Value,
 			})
 		}
@@ -180,7 +222,7 @@ func (checkSheetService *ServiceImpl) Update(ginContext *gin.Context, updateChec
 			checkSheetEntity, // after entity
 			map[string]map[string][]uint64{
 				"check_sheet_value_id": {
-					"before": helper.ExtractIds(checkSheetEntity.CheckSheetValue),
+					"before": helper.ExtractIds(checkSheetEntity.CheckSheetValues),
 					"after":  helper.ExtractIds(updateCheckSheetRequest.CheckSheetValues),
 				},
 			},
@@ -189,7 +231,7 @@ func (checkSheetService *ServiceImpl) Update(ginContext *gin.Context, updateChec
 
 		err = checkSheetService.auditLogService.
 			Record(ginContext,
-				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_UPDATE,
 				model.AUDIT_LOG_FEATURE_CHECK_SHEET_DOCUMENT_TEMPLATE,
 				auditPayload)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -216,7 +258,7 @@ func (checkSheetService *ServiceImpl) Delete(ginContext *gin.Context, deleteChec
 			nil,        // after entity
 			map[string]map[string][]uint64{
 				"parameters": {
-					"before": helper.ExtractIds(checkSheet.CheckSheetValue),
+					"before": helper.ExtractIds(checkSheet.CheckSheetValues),
 					"after":  nil,
 				},
 			},

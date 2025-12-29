@@ -52,6 +52,18 @@ func (checkSheetHandler *Handler) CreateCheckSheet(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, paginatedRes)
 }
 
+func (checkSheetHandler *Handler) ApprovalCheckSheet(ginContext *gin.Context) {
+	var approvalCheckSheet model.ApprovalCheckSheet
+	err := ginContext.ShouldBindBodyWithJSON(&approvalCheckSheet)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	checkSheetId := ginContext.Param("id")
+	parsedCheckSheetId, err := strconv.ParseUint(checkSheetId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
+	approvalCheckSheet.CheckSheetId = parsedCheckSheetId
+	paginatedRes := checkSheetHandler.checkSheetService.Approval(ginContext, &approvalCheckSheet)
+	ginContext.JSON(http.StatusOK, paginatedRes)
+}
+
 func (checkSheetHandler *Handler) UpdateCheckSheet(ginContext *gin.Context) {
 	var updateCheckSheetModel model.UpdateCheckSheetRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateCheckSheetModel)

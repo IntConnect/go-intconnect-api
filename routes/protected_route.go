@@ -263,6 +263,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	checkSheetRouterGroup.GET("", protectedRoutes.checkSheetController.FindAllCheckSheet)
 	checkSheetRouterGroup.GET("/:id", protectedRoutes.checkSheetController.FindCheckSheetById)
 	checkSheetRouterGroup.POST("", protectedRoutes.checkSheetController.CreateCheckSheet)
+	checkSheetRouterGroup.POST("/approval/:id", protectedRoutes.checkSheetController.ApprovalCheckSheet)
 	checkSheetRouterGroup.PUT("/:id", protectedRoutes.checkSheetController.UpdateCheckSheet)
 	checkSheetRouterGroup.DELETE("/:id", protectedRoutes.checkSheetController.DeleteCheckSheet)
 
