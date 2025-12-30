@@ -11,7 +11,7 @@ type Repository interface {
 	FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.CheckSheetDocumentTemplateParameter, int64, error)
 	FindById(gormTransaction *gorm.DB, checkSheetDocumentTemplateParameterId uint64) (*entity.CheckSheetDocumentTemplateParameter, error)
 	CreateBatch(gormTransaction *gorm.DB, checkSheetDocumentTemplateParameterEntities []*entity.CheckSheetDocumentTemplateParameter) error
-	DeleteBatch(gormTransaction *gorm.DB, checkSheetDocumentTemplateParameterId []*entity.CheckSheetDocumentTemplateParameter) error
+	DeleteBatch(gormTransaction *gorm.DB, checkSheetDocumentTemplateId uint64, checkSheetDocumentTemplateParameterIds []uint64) error
 	DeleteBatchById(gormTransaction *gorm.DB, checkSheetDocumentTemplateParameterId []uint64) error
 	DeleteBatchByCheckSheetId(gormTransaction *gorm.DB, checkSheetId uint64) error
 }

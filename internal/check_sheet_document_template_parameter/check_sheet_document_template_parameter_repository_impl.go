@@ -67,8 +67,8 @@ func (checkSheetDocumentTemplateParameterRepositoryImpl *RepositoryImpl) CreateB
 	return gormTransaction.Model(checkSheetDocumentTemplateParameterEntities).Create(checkSheetDocumentTemplateParameterEntities).Error
 }
 
-func (checkSheetDocumentTemplateParameterRepositoryImpl *RepositoryImpl) DeleteBatch(gormTransaction *gorm.DB, checkSheetDocumentTemplateParameterEntities []*entity.CheckSheetDocumentTemplateParameter) error {
-	return gormTransaction.Delete(checkSheetDocumentTemplateParameterEntities).Error
+func (checkSheetDocumentTemplateParameterRepositoryImpl *RepositoryImpl) DeleteBatch(gormTransaction *gorm.DB, checkSheetDocumentTemplateId uint64, checkSheetDocumentTemplateParameterIds []uint64) error {
+	return gormTransaction.Where("id IN ? AND check_sheet_document_template_id = ?").Delete(checkSheetDocumentTemplateParameterIds, checkSheetDocumentTemplateId).Error
 }
 
 func (checkSheetDocumentTemplateParameterRepositoryImpl *RepositoryImpl) DeleteBatchById(gormTransaction *gorm.DB, checkSheetDocumentTemplateParameterId []uint64) error {
