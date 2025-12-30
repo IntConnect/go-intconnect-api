@@ -101,7 +101,6 @@ func TakePointer[T any](value T) *T {
 func DebugArrPointer[T any](arrayOfPointer []*T) {
 	for _, pointerData := range arrayOfPointer {
 		logger.Debug(pointerData)
-
 	}
 }
 
