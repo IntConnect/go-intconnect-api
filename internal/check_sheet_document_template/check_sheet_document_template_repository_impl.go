@@ -15,8 +15,6 @@ func NewRepository() *RepositoryImpl {
 func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.CheckSheetDocumentTemplate, error) {
 	var checkSheetDocumentTemplateEntities []*entity.CheckSheetDocumentTemplate
 	err := gormTransaction.
-		Preload("CheckSheetDocumentTemplateParameters").
-		Preload("CheckSheetDocumentTemplateParameters.Parameter").
 		Find(&checkSheetDocumentTemplateEntities).Error
 	return checkSheetDocumentTemplateEntities, err
 }
@@ -37,7 +35,7 @@ func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPaginatio
 	// Search
 	if searchQuery != "" {
 		searchPattern := "%" + searchQuery + "%"
-		rawQuery = rawQuery.Where("name ILIKE ? OR code ILIKE ?", searchPattern, searchPattern)
+		rawQuery = rawQuery.Where("name ILIKE ? OR no ILIKE ? OR description ILIKE ?", searchPattern, searchPattern, searchPattern)
 	}
 
 	// Count first
@@ -47,8 +45,6 @@ func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPaginatio
 
 	// Fetch paginated data
 	if err := rawQuery.
-		Preload("CheckSheetDocumentTemplateParameters").
-		Preload("CheckSheetDocumentTemplateParameters.Parameter").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).
@@ -62,7 +58,6 @@ func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindAllPaginatio
 func (checkSheetDocumentTemplateRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, checkSheetDocumentTemplateId uint64) (*entity.CheckSheetDocumentTemplate, error) {
 	var checkSheetDocumentTemplateEntity entity.CheckSheetDocumentTemplate
 	err := gormTransaction.Model(&entity.CheckSheetDocumentTemplate{}).
-		Preload("CheckSheetDocumentTemplateParameters").
 		Where("id = ?", checkSheetDocumentTemplateId).First(&checkSheetDocumentTemplateEntity).Error
 
 	return &checkSheetDocumentTemplateEntity, err

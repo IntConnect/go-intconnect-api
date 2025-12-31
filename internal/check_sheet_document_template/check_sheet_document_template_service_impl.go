@@ -3,15 +3,12 @@ package check_sheet_document_template
 import (
 	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
-	checkSheetDocumentTemplateParameter "go-intconnect-api/internal/check_sheet_document_template_parameter"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
-	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -19,29 +16,23 @@ import (
 )
 
 type ServiceImpl struct {
-	checkSheetDocumentTemplateRepository          Repository
-	checkSheetDocumentTemplateParameterRepository checkSheetDocumentTemplateParameter.Repository
-	auditLogService                               auditLog.Service
-	parameterRepository                           parameter.Repository
-	validatorService                              validator.Service
-	dbConnection                                  *gorm.DB
-	viperConfig                                   *viper.Viper
+	checkSheetDocumentTemplateRepository Repository
+	auditLogService                      auditLog.Service
+	validatorService                     validator.Service
+	dbConnection                         *gorm.DB
+	viperConfig                          *viper.Viper
 }
 
 func NewService(checkSheetDocumentTemplateRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper,
-	parameterRepository parameter.Repository,
 	auditLogService auditLog.Service,
-	checkSheetDocumentTemplateParameterRepository checkSheetDocumentTemplateParameter.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
 		checkSheetDocumentTemplateRepository: checkSheetDocumentTemplateRepository,
 		validatorService:                     validatorService,
 		dbConnection:                         dbConnection,
 		viperConfig:                          viperConfig,
-		parameterRepository:                  parameterRepository,
 		auditLogService:                      auditLogService,
-		checkSheetDocumentTemplateParameterRepository: checkSheetDocumentTemplateParameterRepository,
 	}
 }
 
@@ -97,32 +88,13 @@ func (checkSheetDocumentTemplateService *ServiceImpl) Create(ginContext *gin.Con
 	checkSheetDocumentTemplateService.validatorService.ParseValidationError(valErr, *createCheckSheetDocumentTemplateRequest)
 	err := checkSheetDocumentTemplateService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		checkSheetDocumentTemplateEntity := helper.MapCreateRequestIntoEntity[model.CreateCheckSheetDocumentTemplateRequest, entity.CheckSheetDocumentTemplate](createCheckSheetDocumentTemplateRequest)
-		checkSheetDocumentTemplateEntity.Auditable = entity.NewAuditable("Administrator")
-		parameterEntities, err := checkSheetDocumentTemplateService.parameterRepository.FindBatchById(gormTransaction, createCheckSheetDocumentTemplateRequest.ParameterIds)
-		if len(parameterEntities) != len(createCheckSheetDocumentTemplateRequest.ParameterIds) {
-			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrSomeResourceNotFound))
-		}
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		checkSheetDocumentTemplateEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
-		err = checkSheetDocumentTemplateService.checkSheetDocumentTemplateRepository.Create(gormTransaction, checkSheetDocumentTemplateEntity)
-		var checkSheetDocumentTemplateParameters []*entity.CheckSheetDocumentTemplateParameter
-		for _, parameterEntity := range parameterEntities {
-			checkSheetDocumentTemplateParameters = append(checkSheetDocumentTemplateParameters, &entity.CheckSheetDocumentTemplateParameter{
-				CheckSheetDocumentTemplateId: checkSheetDocumentTemplateEntity.Id,
-				ParameterId:                  parameterEntity.Id,
-			})
-		}
-		err = checkSheetDocumentTemplateService.checkSheetDocumentTemplateParameterRepository.CreateBatch(gormTransaction, checkSheetDocumentTemplateParameters)
+		err := checkSheetDocumentTemplateService.checkSheetDocumentTemplateRepository.Create(gormTransaction, checkSheetDocumentTemplateEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := checkSheetDocumentTemplateService.auditLogService.Build(
-			nil,                              // before entity
-			checkSheetDocumentTemplateEntity, // after entity
-			map[string]map[string][]uint64{
-				"check_sheet_document_template_parameters": {
-					"deleted":  nil,
-					"appended": createCheckSheetDocumentTemplateRequest.ParameterIds,
-				},
-			},
+			nil,
+			checkSheetDocumentTemplateEntity,
+			nil,
 			"",
 		)
 
@@ -144,75 +116,23 @@ func (checkSheetDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Con
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := checkSheetDocumentTemplateService.validatorService.ValidateStruct(updateCheckSheetDocumentTemplateRequest)
 	checkSheetDocumentTemplateService.validatorService.ParseValidationError(valErr, *updateCheckSheetDocumentTemplateRequest)
-	type mappingNewestParameter struct {
-		isFound     bool
-		parameterId uint64
-	}
+
 	err := checkSheetDocumentTemplateService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		checkSheetDocumentTemplate, err := checkSheetDocumentTemplateService.checkSheetDocumentTemplateRepository.FindById(gormTransaction, updateCheckSheetDocumentTemplateRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		beforeCheckSheetDocumentTemplate := *checkSheetDocumentTemplate
-		beforeCheckSheetDocumentTemplate.CheckSheetDocumentTemplateParameters = append([]*entity.CheckSheetDocumentTemplateParameter(nil), checkSheetDocumentTemplate.CheckSheetDocumentTemplateParameters...)
 		checkSheetDocumentTemplate.Auditable = entity.UpdateAuditable(userJwtClaims.Username)
 		checkSheetDocumentTemplate.RevisionNumber += 1
 		// Map field biasa
 		helper.MapUpdateRequestIntoEntity(updateCheckSheetDocumentTemplateRequest, checkSheetDocumentTemplate)
-		if err = checkSheetDocumentTemplateService.checkSheetDocumentTemplateRepository.Update(gormTransaction, checkSheetDocumentTemplate); err != nil {
-			helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		}
-		// Jika ada di request namun tidak ada di entity -> Baru
-		// Jika ada di entity dan tidak ada di request -> Delete
-		// Ada di request dan ada di entity -> Existing
-		var oldSet = make(map[uint64]mappingNewestParameter)
-		var newSet = make(map[uint64]mappingNewestParameter)
+		fmt.Println(checkSheetDocumentTemplate)
+		err = checkSheetDocumentTemplateService.checkSheetDocumentTemplateRepository.Update(gormTransaction, checkSheetDocumentTemplate)
 
-		for _, checkSheetDocumentTemplateParameterEntity := range checkSheetDocumentTemplate.CheckSheetDocumentTemplateParameters {
-			oldSet[checkSheetDocumentTemplateParameterEntity.ParameterId] = mappingNewestParameter{
-				isFound:     true,
-				parameterId: checkSheetDocumentTemplateParameterEntity.ParameterId,
-			}
-		}
-		for _, parameterId := range updateCheckSheetDocumentTemplateRequest.ParameterIds {
-			newSet[parameterId] = mappingNewestParameter{
-				isFound:     true,
-				parameterId: parameterId,
-			}
-		}
-		deleted := make([]uint64, 0)
-		for id := range oldSet {
-			if !newSet[id].isFound {
-				deleted = append(deleted, id)
-			}
-		}
-
-		appended := make([]*entity.CheckSheetDocumentTemplateParameter, 0)
-		for id := range newSet {
-			if !oldSet[id].isFound {
-				appended = append(appended, &entity.CheckSheetDocumentTemplateParameter{
-					Id:                           id,
-					CheckSheetDocumentTemplateId: updateCheckSheetDocumentTemplateRequest.Id,
-					ParameterId:                  oldSet[id].parameterId,
-				})
-			}
-		}
-
-		fmt.Println(oldSet)
-		fmt.Println(newSet)
-		helper.DebugArrPointer(appended)
-
-		err = checkSheetDocumentTemplateService.checkSheetDocumentTemplateParameterRepository.DeleteBatch(gormTransaction, updateCheckSheetDocumentTemplateRequest.Id, deleted)
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		err = checkSheetDocumentTemplateService.checkSheetDocumentTemplateParameterRepository.CreateBatch(gormTransaction, appended)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := checkSheetDocumentTemplateService.auditLogService.Build(
 			&beforeCheckSheetDocumentTemplate, // before entity
 			checkSheetDocumentTemplate,        // after entity
-			map[string]map[string][]uint64{
-				"check_sheet_document_template_parameters": {
-					"appended": helper.ExtractIds(appended),
-					"deleted":  deleted,
-				},
-			},
+			nil,
 			"",
 		)
 		err = checkSheetDocumentTemplateService.auditLogService.
@@ -242,12 +162,7 @@ func (checkSheetDocumentTemplateService *ServiceImpl) Delete(ginContext *gin.Con
 		auditPayload := checkSheetDocumentTemplateService.auditLogService.Build(
 			checkSheetDocumentTemplate, // before entity
 			nil,                        // after entity
-			map[string]map[string][]uint64{
-				"check_sheet_document_template_parameters": {
-					"appended": nil,
-					"deleted":  helper.ExtractIds(checkSheetDocumentTemplate.CheckSheetDocumentTemplateParameters),
-				},
-			},
+			nil,
 			deleteCheckSheetDocumentTemplateRequest.Reason,
 		)
 		err = checkSheetDocumentTemplateService.auditLogService.

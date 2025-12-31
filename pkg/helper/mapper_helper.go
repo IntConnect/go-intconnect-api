@@ -1,14 +1,15 @@
 package helper
 
 import (
+	"fmt"
 	"go-intconnect-api/pkg/exception"
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-viper/mapstructure/v2"
-	"gorm.io/gorm"
 )
 
 func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
@@ -33,14 +34,31 @@ func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}
 			return float32(val), err
 		}
 	case reflect.TypeOf(time.Time{}):
-		if rawTime, ok := data.(time.Time); ok {
-			return rawTime.String(), nil
-		}
-	case reflect.TypeOf(gorm.DeletedAt{}):
-		if gormDeletedAt, ok := data.(gorm.DeletedAt); ok {
-			return gormDeletedAt.Time.String(), nil
-		} else {
-			return nil, nil
+		if str, ok := data.(string); ok {
+			// Trim untuk keamanan input
+			str = strings.TrimSpace(str)
+
+			if str == "" {
+				return time.Time{}, nil
+			}
+
+			// Daftar layout yang diizinkan
+			layouts := []string{
+				"2006-01-02",       // YYYY-MM-DD
+				"2006-01-02 15:04", // YYYY-MM-DD HH:mm
+			}
+
+			var parsed time.Time
+			var err error
+
+			for _, layout := range layouts {
+				parsed, err = time.Parse(layout, str)
+				if err == nil {
+					return parsed, nil
+				}
+			}
+
+			return nil, fmt.Errorf("invalid date format: %s", str)
 		}
 	}
 	return data, nil
