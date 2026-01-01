@@ -3,6 +3,7 @@ package machine
 import (
 	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
+	dashboardWidget "go-intconnect-api/internal/dashboard_widget"
 	"go-intconnect-api/internal/entity"
 	machineDocument "go-intconnect-api/internal/machine_document"
 	"go-intconnect-api/internal/model"
@@ -21,6 +22,7 @@ import (
 
 type ServiceImpl struct {
 	machineRepository         Repository
+	dashboardWidgetRepository dashboardWidget.Repository
 	auditLogService           auditLog.Service
 	machineDocumentRepository machineDocument.Repository
 	validatorService          validator.Service
@@ -34,6 +36,7 @@ func NewService(machineRepository Repository, validatorService validator.Service
 	localStorageService *storage.Manager,
 	machineDocumentRepository machineDocument.Repository,
 	auditLogService auditLog.Service,
+	dashboardWidgetRepository dashboardWidget.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
 		machineRepository:         machineRepository,
@@ -43,6 +46,7 @@ func NewService(machineRepository Repository, validatorService validator.Service
 		localStorageService:       localStorageService,
 		machineDocumentRepository: machineDocumentRepository,
 		auditLogService:           auditLogService,
+		dashboardWidgetRepository: dashboardWidgetRepository,
 	}
 }
 
@@ -109,6 +113,26 @@ func (machineService *ServiceImpl) FindByFacilityId(ginContext *gin.Context, fac
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return machineResponseRequest
+}
+
+func (machineService *ServiceImpl) ManageDashboard(ginContext *gin.Context, machineDashboardWidget *model.MachineDashboardWidget) {
+	valErr := machineService.validatorService.ValidateStruct(machineDashboardWidget)
+	machineService.validatorService.ParseValidationError(valErr, *machineDashboardWidget)
+	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var dashboardWidgetEntities []*entity.DashboardWidget
+		for _, dashboardWidgetRequest := range machineDashboardWidget.DashboardWidget {
+			var dashboardWidgetEntity entity.DashboardWidget
+			helper.MapUpdateRequestIntoEntity(dashboardWidgetRequest, &dashboardWidgetEntity)
+			dashboardWidgetEntity.MachineId = machineDashboardWidget.MachineId
+			dashboardWidgetEntities = append(dashboardWidgetEntities, &dashboardWidgetEntity)
+		}
+		if len(dashboardWidgetEntities) > 0 {
+			err := machineService.dashboardWidgetRepository.CreateBatch(gormTransaction, dashboardWidgetEntities)
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		}
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
 // Create - Membuat machine baru

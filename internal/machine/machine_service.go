@@ -11,6 +11,7 @@ type Service interface {
 	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.MachineResponse]
 	FindById(ginContext *gin.Context, machineId uint64) *model.MachineResponse
 	FindByFacilityId(ginContext *gin.Context, facilityId uint64) []*model.MachineResponse
+	ManageDashboard(ginContext *gin.Context, machineDashboardWidget *model.MachineDashboardWidget)
 	Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest)
 	Update(ginContext *gin.Context, updateMachineRequest *model.UpdateMachineRequest)
 	Delete(ginContext *gin.Context, deleteMachineRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.MachineResponse]

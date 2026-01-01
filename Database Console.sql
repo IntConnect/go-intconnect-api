@@ -127,6 +127,10 @@ SELECT *
 FROM check_sheets;
 SELECT *
 FROM check_sheet_values;
+SELECT *
+FROM dashboard_widgets;
+
+DELETE  FROM dashboard_widgets WHERE id =5 ;
 
 DELETE
 FROM check_sheet_values;

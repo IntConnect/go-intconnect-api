@@ -9,6 +9,7 @@ import (
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	checkSheetDocumentTemplateParameter "go-intconnect-api/internal/check_sheet_document_template_parameter"
 	checkSheetValue "go-intconnect-api/internal/check_sheet_value"
+	dashboardWidget "go-intconnect-api/internal/dashboard_widget"
 	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
@@ -309,4 +310,8 @@ var CheckSheetValueModule = fx.Module("checkSheetValueFeature",
 
 var CheckSheetDocumentTemplateParameterModule = fx.Module("checkSheetDocumentTemplateParameterFeature",
 	fx.Provide(fx.Annotate(checkSheetDocumentTemplateParameter.NewRepository, fx.As(new(checkSheetDocumentTemplateParameter.Repository)))),
+)
+
+var DashboardWidgetModule = fx.Module("checkSheetDocumentTemplateParameterFeature",
+	fx.Provide(fx.Annotate(dashboardWidget.NewRepository, fx.As(new(dashboardWidget.Repository)))),
 )

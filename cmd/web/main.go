@@ -66,6 +66,7 @@ func main() {
 		injector.CheckSheetModule,
 		injector.CheckSheetValueModule,
 		injector.CheckSheetDocumentTemplateParameterModule,
+		injector.DashboardWidgetModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

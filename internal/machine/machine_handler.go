@@ -1,6 +1,7 @@
 package machine
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -55,6 +56,19 @@ func (machineHandler *Handler) FindMachineByFacilityId(ginContext *gin.Context) 
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Machine has been fetched", machineResponse))
 }
 
+func (machineHandler *Handler) ManageDashboard(ginContext *gin.Context) {
+	machineId := ginContext.Param("id")
+	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
+	var machineDashboardWidget model.MachineDashboardWidget
+	err = ginContext.ShouldBindBodyWithJSON(&machineDashboardWidget)
+	machineDashboardWidget.MachineId = parsedMachineId
+	fmt.Println(machineDashboardWidget)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	machineHandler.machineService.ManageDashboard(ginContext, &machineDashboardWidget)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("Machine has been fetched", nil))
+}
+
 func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 
 	var createMachineModel model.CreateMachineRequest
@@ -87,7 +101,6 @@ func (machineHandler *Handler) UpdateMachine(ginContext *gin.Context) {
 	thumbnailFile, _ := ginContext.FormFile("thumbnail")
 	updateMachineModel.Model = modelFile
 	updateMachineModel.Thumbnail = thumbnailFile
-
 	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents[", "].document_file", len(updateMachineModel.MachineDocuments))
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	for i, machineDocument := range updateMachineModel.MachineDocuments {

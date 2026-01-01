@@ -189,6 +189,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	machineRouterGroup.GET("/:id", protectedRoutes.machineController.FindMachineById)
 	machineRouterGroup.GET("/facilities/:id", protectedRoutes.machineController.FindMachineByFacilityId)
 	machineRouterGroup.POST("", protectedRoutes.machineController.CreateMachine)
+	machineRouterGroup.POST("/dashboard/:id", protectedRoutes.machineController.ManageDashboard)
 	machineRouterGroup.PUT("/:id", protectedRoutes.machineController.UpdateMachine)
 	machineRouterGroup.DELETE("/:id", protectedRoutes.machineController.DeleteMachine)
 

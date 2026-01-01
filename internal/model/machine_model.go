@@ -43,8 +43,20 @@ type MachineResponse struct {
 	ModelPath         string                     `json:"model_path"`
 	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic" mapstructure:"MqttTopic"`
 	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
+	DashboardWidget   []*DashboardWidget         `json:"widgets" mapstructure:"DashboardWidget"`
 	Facility          *FacilityResponse          `json:"facility" mapstructure:"facility"`
 	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"auditable"`
+}
+
+type MachineDashboardWidget struct {
+	MachineId       uint64            `json:"-" validate:"required,exists=machines;id"`
+	DashboardWidget []DashboardWidget `json:"dashboard_widgets" validate:"required,dive"`
+}
+
+type DashboardWidget struct {
+	Code   string                 `json:"code" validate:"required"`
+	Layout map[string]interface{} `json:"layout"`
+	Config map[string]interface{} `json:"config"`
 }
 
 func (machineResponse *MachineResponse) GetAuditableResponse() *AuditableResponse {
