@@ -1,6 +1,4 @@
 @startuml
-title **Activity – Melihat Daftar MQTT Broker**
-
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
@@ -32,43 +30,31 @@ skinparam NoteBorderColor #E0C66F
 
 !define ROLES Administrator
 !define SYSTEM #AntiqueWhite|System
+
 |ROLES|
 start
-:Akses Sistem;
+|ROLES|
+:Login;
+:Pilih Menu Machine;
+:Tekan Tombol New Machine;
 
 |SYSTEM|
-if (Sudah Login?) then (Ya)
-else (Tidak)
-  :Menampilkan Halaman Login;
-
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
-
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
-endif
-  :Menampilkan Dashboard;
- |ROLES|
-
+:Menampilkan Formulir;
 
 |ROLES|
-:Pilih Menu MQTT Broker;
+repeat
+  :Input Informasi Machine;
+  :Submit;
+
+  |SYSTEM|
+  :Melakukan Validasi;
+  backward: Menampilkan\nPesan Error;
+repeat while (Valid?) is (Tidak)
 
 |SYSTEM|
-if (Memiliki Akses?) then (Ya)
-:Menampilkan Halaman
-Daftar MQTT Broker;
-
-else (Tidak)
-:Menampilkan Halaman
-401 Unauthorized;
-endif
+:Simpan Machine Baru;
+:Menampilkan Pesan Sukses;
+:Redirect ke Halaman Daftar Machine;
 
 stop
 @enduml

@@ -1,6 +1,4 @@
 @startuml
-title **Activity – Membuat Data SMTP Server**
-
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
@@ -35,49 +33,28 @@ skinparam NoteBorderColor #E0C66F
 
 |ROLES|
 start
-:Akses Sistem;
-
-|SYSTEM|
-if (Sudah Login?) then (Ya)
-else (Tidak)
-  :Menampilkan Halaman Login;
-
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
-
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
-endif
-  :Menampilkan Dashboard;
-
 |ROLES|
-:Pilih Menu SMTP Server;
-:Tekan Tombol New SMTP Server;
+:Login;
+:Pilih Menu MQTT Broker;
+:Tekan Tombol New MQTT Broker;
 
 |SYSTEM|
 :Menampilkan Formulir;
 
 |ROLES|
 repeat
-  :Input Informasi SMTP Server;
+  :Input Informasi MQTT Broker;
   :Submit;
 
   |SYSTEM|
   :Melakukan Validasi;
-  backward:Menampilkan\nPesan Error;
+  backward: Menampilkan\nPesan Error;
 repeat while (Valid?) is (Tidak)
 
 |SYSTEM|
-:Simpan SMTP Server Baru;
+:Simpan MQTT Broker Baru;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar SMTP Server;
-:Menampilkan Halaman Daftar SMTP Server;
+:Redirect ke Halaman Daftar MQTT Broker;
 
 stop
 @enduml

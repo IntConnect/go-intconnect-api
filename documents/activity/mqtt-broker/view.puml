@@ -1,6 +1,4 @@
 @startuml
-title **Activity – Menghapus Data MQTT Broker**
-
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
@@ -32,55 +30,26 @@ skinparam NoteBorderColor #E0C66F
 
 !define ROLES Administrator
 !define SYSTEM #AntiqueWhite|System
-
 |ROLES|
 start
-:Akses Sistem;
+:Login;
 
-|SYSTEM|
-if (Sudah Login?) then (Ya)
-else (Tidak)
-  :Menampilkan Halaman Login;
 
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
+ |ROLES|
 
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
-endif
-  :Menampilkan Dashboard;
 
 |ROLES|
 :Pilih Menu MQTT Broker;
-:Tekan Tombol Trash;
 
 |SYSTEM|
-:Menampilkan Dialog \nKonfirmasi Penghapusan;
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman
+Daftar MQTT Broker;
 
-
-
-|ROLES|
-repeat
-|ROLES|
-:Mengisi Alasan\nPenghapusan;
-  :Submit;
-
-  |SYSTEM|
-  :Melakukan Validasi;
-  backward:Menampilkan\nPesan Error;
-repeat while (Valid?) is (Tidak)
-
-|SYSTEM|
-:Melakukan Soft-delete;
-:Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar MQTT Broker;
-:Menampilkan Halaman Daftar MQTT Broker;
+else (Tidak)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
 
 stop
 @enduml

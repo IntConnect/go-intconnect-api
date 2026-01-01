@@ -1,6 +1,4 @@
 @startuml
-title **Activity – Mengubah Data Parameter**
-
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
@@ -35,49 +33,28 @@ skinparam NoteBorderColor #E0C66F
 
 |ROLES|
 start
-:Akses Sistem;
-
-|SYSTEM|
-if (Sudah Login?) then (Ya)
-else (Tidak)
-  :Menampilkan Halaman Login;
-
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
-
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
-endif
-  :Menampilkan Dashboard;
-
 |ROLES|
+:Login;
 :Pilih Menu Parameter;
-:Tekan Button Dengan \nIcon Pencil (Edit);
+:Tekan Tombol New Parameter;
 
 |SYSTEM|
 :Menampilkan Formulir;
 
 |ROLES|
 repeat
-  :Ubah Informasi Parameter;
+  :Input Informasi Parameter;
   :Submit;
 
   |SYSTEM|
   :Melakukan Validasi;
-  backward:Menampilkan\nPesan Error;
+  backward: Menampilkan\nPesan Error;
 repeat while (Valid?) is (Tidak)
 
 |SYSTEM|
-:Memperbarui Data Parameter;
+:Simpan Parameter Baru;
 :Menampilkan Pesan Sukses;
 :Redirect ke Halaman Daftar Parameter;
-:Menampilkan Halaman Daftar Parameter;
 
 stop
 @enduml

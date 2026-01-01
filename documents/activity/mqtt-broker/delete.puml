@@ -1,5 +1,4 @@
 @startuml
-title **Activity – Mengubah Data SMTP Server**
 
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
@@ -35,37 +34,19 @@ skinparam NoteBorderColor #E0C66F
 
 |ROLES|
 start
-:Akses Sistem;
+:Login;
+:Pilih Menu MQTT Broker;
+:Tekan Tombol Trash;
 
 |SYSTEM|
-if (Sudah Login?) then (Ya)
-else (Tidak)
-  :Menampilkan Halaman Login;
+:Menampilkan Dialog \nKonfirmasi Penghapusan;
 
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
 
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
-endif
-  :Menampilkan Dashboard;
-
-|ROLES|
-:Pilih Menu SMTP Server;
-:Tekan Button Dengan \nIcon Pencil (Edit);
-
-|SYSTEM|
-:Menampilkan Formulir;
 
 |ROLES|
 repeat
-  :Ubah Informasi SMTP Server;
+|ROLES|
+:Mengisi Alasan\nPenghapusan;
   :Submit;
 
   |SYSTEM|
@@ -74,10 +55,9 @@ repeat
 repeat while (Valid?) is (Tidak)
 
 |SYSTEM|
-:Memperbarui Data SMTP Server;
+:Melakukan Soft-delete;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar SMTP Server;
-:Menampilkan Halaman Daftar SMTP Server;
+:Redirect ke Halaman Daftar MQTT Broker;
 
 stop
 @enduml

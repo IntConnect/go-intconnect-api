@@ -1,6 +1,4 @@
 @startuml
-title **Activity – Mengubah Data Parameter**
-
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
@@ -32,55 +30,26 @@ skinparam NoteBorderColor #E0C66F
 
 !define ROLES Administrator
 !define SYSTEM #AntiqueWhite|System
-
 |ROLES|
 start
-:Akses Sistem;
+:Login;
+
+
+ |ROLES|
+
+
+|ROLES|
+:Pilih Menu Machine;
 
 |SYSTEM|
-if (Sudah Login?) then (Ya)
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman
+Daftar Machine;
+
 else (Tidak)
-  :Menampilkan Halaman Login;
-
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
-
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
+:Menampilkan Halaman
+401 Unauthorized;
 endif
-  :Menampilkan Dashboard;
-
-|ROLES|
-:Pilih Menu Parameter;
-:Tekan Tombol Trash;
-
-|SYSTEM|
-:Menampilkan Dialog \nKonfirmasi Penghapusan;
-
-
-
-|ROLES|
-repeat
-|ROLES|
-:Mengisi Alasan\nPenghapusan;
-  :Submit;
-
-  |SYSTEM|
-  :Melakukan Validasi;
-  backward:Menampilkan\nPesan Error;
-repeat while (Valid?) is (Tidak)
-
-|SYSTEM|
-:Melakukan Soft-delete;
-:Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Parameter;
-:Menampilkan Halaman Daftar Parameter;
 
 stop
 @enduml

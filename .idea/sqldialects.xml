@@ -3,7 +3,6 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/Database Console.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/migrations/20251212065256_create_check_sheet_document_template_table.down.sql" dialect="PostgreSQL" />
-    <file url="file://$PROJECT_DIR$/migrations/20251212090806_create_check_sheet_document_templates_parameters_table.down.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/migrations_old/20250810133418_create_pipelines.down.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/migrations_old/20250810133418_create_pipelines.up.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/migrations_old/20250812154541_create_pipeline_nodes.down.sql" dialect="PostgreSQL" />

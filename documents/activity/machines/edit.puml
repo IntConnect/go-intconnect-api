@@ -1,6 +1,4 @@
 @startuml
-title **Activity – Mengubah Data SMTP Server**
-
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
@@ -35,40 +33,17 @@ skinparam NoteBorderColor #E0C66F
 
 |ROLES|
 start
-:Akses Sistem;
-
-|SYSTEM|
-if (Sudah Login?) then (Ya)
-else (Tidak)
-  :Menampilkan Halaman Login;
-
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
-
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
-endif
-  :Menampilkan Dashboard;
-
+:Login;
 |ROLES|
-:Pilih Menu SMTP Server;
-:Tekan Tombol Trash;
+:Pilih Menu Machine;
+:Tekan Button Dengan \nIcon Pencil (Edit);
 
 |SYSTEM|
-:Menampilkan Dialog \nKonfirmasi Penghapusan;
-
-
+:Menampilkan Formulir;
 
 |ROLES|
 repeat
-|ROLES|
-:Mengisi Alasan\nPenghapusan;
+  :Ubah Informasi Machine;
   :Submit;
 
   |SYSTEM|
@@ -77,10 +52,9 @@ repeat
 repeat while (Valid?) is (Tidak)
 
 |SYSTEM|
-:Melakukan Soft-delete;
+:Memperbarui Data Machine;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar SMTP Server;
-:Menampilkan Halaman Daftar SMTP Server;
+:Redirect ke Halaman Daftar Machine;
 
 stop
 @enduml

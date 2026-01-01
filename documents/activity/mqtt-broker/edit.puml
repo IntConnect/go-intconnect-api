@@ -1,6 +1,4 @@
 @startuml
-title **Activity – Membuat Data MQTT Broker**
-
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
 skinparam defaultFontSize 14
@@ -35,37 +33,17 @@ skinparam NoteBorderColor #E0C66F
 
 |ROLES|
 start
-:Akses Sistem;
-
-|SYSTEM|
-if (Sudah Login?) then (Ya)
-else (Tidak)
-  :Menampilkan Halaman Login;
-
-  |ROLES|
-  repeat
-    :Input Kredensial;
-    :Klik Login;
-
-    |SYSTEM|
-    :Validasi Kredensial;
-    backward:Menampilkan\nPesan Error;
-  repeat while (Valid?) is (Tidak)
-
-  |SYSTEM|
-endif
-  :Menampilkan Dashboard;
-
+:Login;
 |ROLES|
 :Pilih Menu MQTT Broker;
-:Tekan Tombol New MQTT Broker;
+:Tekan Button Dengan \nIcon Pencil (Edit);
 
 |SYSTEM|
 :Menampilkan Formulir;
 
 |ROLES|
 repeat
-  :Input Informasi MQTT Broker;
+  :Ubah Informasi MQTT Broker;
   :Submit;
 
   |SYSTEM|
@@ -74,10 +52,9 @@ repeat
 repeat while (Valid?) is (Tidak)
 
 |SYSTEM|
-:Simpan MQTT Broker Baru;
+:Memperbarui Data MQTT Broker;
 :Menampilkan Pesan Sukses;
 :Redirect ke Halaman Daftar MQTT Broker;
-:Menampilkan Halaman Daftar MQTT Broker;
 
 stop
 @enduml

@@ -124,8 +124,6 @@ FROM machines;
 SELECT *
 FROM check_sheet_document_templates;
 SELECT *
-FROM check_sheet_document_templates_parameters;
-SELECT *
 FROM check_sheets;
 SELECT *
 FROM check_sheet_values;
