@@ -23,7 +23,7 @@ type CreateRegisterRequest struct {
 }
 
 type UpdateRegisterRequest struct {
-	Id             uint64 `json:"-" validate:"required,number,gt=0"`
+	Id             uint64 `json:"-" validate:"required,number,gte=1"`
 	MachineId      uint64 `json:"machine_id" validate:"required,gte=1,exists=machines;id"`
 	ModbusServerId uint64 `json:"modbus_server_id" validate:"required,gte=1,exists=modbus_servers;id"`
 	MemoryLocation string `json:"memory_location" validate:"required"`

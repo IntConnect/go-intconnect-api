@@ -12,11 +12,11 @@ type ReportDocumentTemplateResponse struct {
 type CreateReportDocumentTemplateRequest struct {
 	Name         string   `json:"name" validate:"required,min=3,max=255"`
 	Code         string   `json:"code" validate:"required,min=3,max=255"`
-	ParameterIds []uint64 `json:"parameter_ids" validate:"required,min=1,dive,number,gt=0"`
+	ParameterIds []uint64 `json:"parameter_ids" validate:"required,min=1,dive,number,gte=1"`
 }
 
 type UpdateReportDocumentTemplateRequest struct {
-	Id           uint64   `json:"-" validate:"required,number,gt=0,exists=report_document_templates;id"`
+	Id           uint64   `json:"-" validate:"required,number,gte=1,exists=report_document_templates;id"`
 	Name         string   `json:"name" validate:"required,min=3,max=255"`
 	Code         string   `json:"code" validate:"required,min=3,max=255"`
 	ParameterIds []uint64 `json:"parameter_ids" validate:"required,min=1,dive,exists=parameters;id"`

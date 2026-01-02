@@ -3,14 +3,14 @@ package model
 type CreateRoleRequest struct {
 	Name          string   `json:"name" validate:"required,min=3,max=50"`
 	Description   string   `json:"description" validate:""`
-	PermissionIds []uint64 `json:"permission_id" validate:"required,dive,number,gt=0"`
+	PermissionIds []uint64 `json:"permission_id" validate:"required,dive,number,gte=1"`
 }
 
 type UpdateRoleRequest struct {
 	Id            uint64   `json:"id" validate:"required,number"`
 	Name          string   `json:"name" validate:"required,min=3,max=50"`
 	Description   string   `json:"description" validate:""`
-	PermissionIds []uint64 `json:"permission_ids" validate:"required,dive,number,gt=0"`
+	PermissionIds []uint64 `json:"permission_ids" validate:"required,dive,number,gte=1"`
 }
 
 type RoleResponse struct {

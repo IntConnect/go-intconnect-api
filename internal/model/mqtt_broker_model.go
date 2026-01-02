@@ -21,7 +21,7 @@ type CreateMqttBrokerRequest struct {
 }
 
 type UpdateMqttBrokerRequest struct {
-	Id       uint64 `json:"-" validate:"required,number,gt=0"`
+	Id       uint64 `json:"-" validate:"required,number,gte=1"`
 	HostName string `json:"host_name" validate:"required,min=3,max=100"`
 	MqttPort string `json:"mqtt_port" validate:"required,min=1,max=5"`
 	WsPort   string `json:"ws_port" validate:"required,min=1,max=5"`

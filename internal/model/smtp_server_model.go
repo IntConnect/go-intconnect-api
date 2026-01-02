@@ -23,7 +23,7 @@ type CreateSmtpServerRequest struct {
 }
 
 type UpdateSmtpServerRequest struct {
-	Id          uint64 `json:"-" validate:"required,number,gt=0"`
+	Id          uint64 `json:"-" validate:"required,number,gte=1"`
 	Host        string `json:"host" validate:"required,min=1,max=100"`
 	Port        string `json:"port" validate:"required,min=1,max=100"`
 	Username    string `json:"username" validate:"required,min=1,max=100"`

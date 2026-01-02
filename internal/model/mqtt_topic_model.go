@@ -18,16 +18,16 @@ type MqttTopicDependency struct {
 }
 
 type CreateMqttTopicRequest struct {
-	MachineId    uint64 `json:"machine_id" validate:"required,number,gt=0,exists=machines;id"`
-	MqttBrokerId uint64 `json:"mqtt_broker_id" validate:"required,number,gt=0,exists=mqtt_brokers;id"`
+	MachineId    uint64 `json:"machine_id" validate:"required,number,gte=1,exists=machines;id"`
+	MqttBrokerId uint64 `json:"mqtt_broker_id" validate:"required,number,gte=1,exists=mqtt_brokers;id"`
 	Name         string `json:"name" validate:"required,min=3,max=255"`
 	QoS          int    `json:"qos" validate:"oneof=0 1 2"`
 }
 
 type UpdateMqttTopicRequest struct {
 	Id           uint64 `json:"-" validate:"required,exists=mqtt_topics;id"`
-	MachineId    uint64 `json:"machine_id" validate:"required,number,gt=0,exists=machines;id"`
-	MqttBrokerId uint64 `json:"mqtt_broker_id" validate:"required,number,gt=0,exists=mqtt_brokers;id"`
+	MachineId    uint64 `json:"machine_id" validate:"required,number,gte=1,exists=machines;id"`
+	MqttBrokerId uint64 `json:"mqtt_broker_id" validate:"required,number,gte=1,exists=mqtt_brokers;id"`
 	Name         string `json:"name" validate:"required,min=3,max=255"`
 	QoS          int    `json:"qos" validate:"oneof=0 1 2"`
 }

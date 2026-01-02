@@ -29,7 +29,7 @@ type CreateCheckSheetDocumentTemplateRequest struct {
 }
 
 type UpdateCheckSheetDocumentTemplateRequest struct {
-	Id             uint64 `json:"-" validate:"required,number,gt=0,exists=check_sheet_document_templates;id"`
+	Id             uint64 `json:"-" validate:"required,number,gte=1,exists=check_sheet_document_templates;id"`
 	MachineId      uint64 `json:"machine_id" validate:"required,gte=1,exists=machines;id"`
 	Name           string `json:"name" validate:"required,min=3,max=255"`
 	No             string `json:"no" validate:"required,min=3,max=255"`
