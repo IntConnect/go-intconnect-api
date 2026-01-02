@@ -52,6 +52,7 @@ const (
 	AUDIT_LOG_FEATURE_USER                          = "USER"
 	AUDIT_LOG_FEATURE_ROLE                          = "ROLE"
 	AUDIT_LOG_FEATURE_MQTT_BROKER                   = "MQTT_BROKER"
+	AUDIT_LOG_FEATURE_REGISTER                      = "REGISTER"
 	AUDIT_LOG_FEATURE_SYSTEM_SETTING                = "SYSTEM_SETTING"
 	AUDIT_LOG_FEATURE_FACILITY                      = "FACILITY"
 	AUDIT_LOG_FEATURE_MACHINE                       = "MACHINE"
