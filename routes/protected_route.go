@@ -6,17 +6,13 @@ import (
 	"go-intconnect-api/internal/breakdown"
 	checkSheet "go-intconnect-api/internal/check_sheet"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
-	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
 	modbusServer "go-intconnect-api/internal/modbus_server"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	mqttTopic "go-intconnect-api/internal/mqtt_topic"
-	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/permission"
-	"go-intconnect-api/internal/pipeline"
-	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
 	smtpServer "go-intconnect-api/internal/smtp_server"
@@ -33,10 +29,6 @@ type ProtectedRoutes struct {
 	viperConfig                          *viper.Viper
 	redisInstance                        *configs.RedisInstance
 	userController                       user.Controller
-	nodeController                       node.Controller
-	pipelineController                   pipeline.Controller
-	protocolConfigurationController      protocolConfiguration.Controller
-	databaseConnectionController         databaseConnection.Controller
 	facilityController                   facility.Controller
 	roleController                       role.Controller
 	permissionController                 permission.Controller
@@ -61,10 +53,6 @@ func NewProtectedRoutes(
 	redisInstance *configs.RedisInstance,
 
 	userController user.Controller,
-	nodeController node.Controller,
-	pipelineController pipeline.Controller,
-	protocolConfigurationController protocolConfiguration.Controller,
-	databaseConnectionController databaseConnection.Controller,
 	facilityController facility.Controller,
 	roleController role.Controller,
 	permissionController permission.Controller,
@@ -88,10 +76,6 @@ func NewProtectedRoutes(
 		viperConfig: viperConfig,
 
 		userController:                       userController,
-		nodeController:                       nodeController,
-		pipelineController:                   pipelineController,
-		protocolConfigurationController:      protocolConfigurationController,
-		databaseConnectionController:         databaseConnectionController,
 		facilityController:                   facilityController,
 		roleController:                       roleController,
 		permissionController:                 permissionController,
@@ -124,39 +108,6 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	userRouterGroup.PUT("/:id", middleware.HasPermission("ROLE_USER_UPDATE"), protectedRoutes.userController.UpdateUser)
 	userRouterGroup.DELETE("/:id", middleware.HasPermission("ROLE_USER_DELETE"), protectedRoutes.userController.DeleteUser)
 	userRouterGroup.GET("/logout", protectedRoutes.userController.LogoutUser)
-
-	nodeRouterGroup := routerGroup.Group("nodes")
-	nodeRouterGroup.GET("pagination", protectedRoutes.nodeController.FindAllPagination)
-	nodeRouterGroup.GET("", protectedRoutes.nodeController.FindAll)
-	nodeRouterGroup.POST("", protectedRoutes.nodeController.CreateNode)
-	nodeRouterGroup.PUT("", protectedRoutes.nodeController.UpdateNode)
-	nodeRouterGroup.DELETE("", protectedRoutes.nodeController.DeleteNode)
-
-	pipelineRouterGroup := routerGroup.Group("pipelines")
-	pipelineRouterGroup.GET("pagination", protectedRoutes.pipelineController.FindAllPagination)
-	pipelineRouterGroup.GET("", protectedRoutes.pipelineController.FindAll, middleware.HasPermission("PIPELINE_VIEW"))
-	pipelineRouterGroup.GET("/:id", protectedRoutes.pipelineController.FindById)
-	pipelineRouterGroup.POST("", protectedRoutes.pipelineController.CreatePipeline)
-	pipelineRouterGroup.GET("/run/:id", protectedRoutes.pipelineController.RunPipeline)
-	pipelineRouterGroup.PUT("", protectedRoutes.pipelineController.UpdatePipeline)
-	pipelineRouterGroup.DELETE("", protectedRoutes.pipelineController.DeletePipeline)
-
-	protocolConfigurationRouterGroup := routerGroup.Group("protocol-configurations")
-	protocolConfigurationRouterGroup.GET("pagination", protectedRoutes.protocolConfigurationController.FindAllPagination)
-	protocolConfigurationRouterGroup.GET("", protectedRoutes.protocolConfigurationController.FindAll)
-	protocolConfigurationRouterGroup.GET("/:id", protectedRoutes.protocolConfigurationController.FindById)
-	protocolConfigurationRouterGroup.POST("", protectedRoutes.protocolConfigurationController.CreateProtocolConfiguration)
-	protocolConfigurationRouterGroup.PUT("", protectedRoutes.protocolConfigurationController.UpdateProtocolConfiguration)
-	protocolConfigurationRouterGroup.DELETE("", protectedRoutes.protocolConfigurationController.DeleteProtocolConfiguration)
-
-	databaseConnectionRouterGroup := routerGroup.Group("database-connections")
-	databaseConnectionRouterGroup.GET("pagination", protectedRoutes.databaseConnectionController.FindAllPagination)
-	databaseConnectionRouterGroup.GET("", protectedRoutes.databaseConnectionController.FindAll)
-	databaseConnectionRouterGroup.GET("/:id", protectedRoutes.databaseConnectionController.FindById)
-	databaseConnectionRouterGroup.POST("", protectedRoutes.databaseConnectionController.CreateDatabaseConnection)
-	databaseConnectionRouterGroup.POST("schema/:id", protectedRoutes.databaseConnectionController.CreateDatabaseSchema)
-	databaseConnectionRouterGroup.PUT("", protectedRoutes.databaseConnectionController.UpdateDatabaseConnection)
-	databaseConnectionRouterGroup.DELETE("", protectedRoutes.databaseConnectionController.DeleteDatabaseConnection)
 
 	facilityRouterGroup := routerGroup.Group("facilities")
 	facilityRouterGroup.GET("pagination", protectedRoutes.facilityController.FindAllFacilityPagination)

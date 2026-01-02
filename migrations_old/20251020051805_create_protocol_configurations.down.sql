@@ -1,1 +1,0 @@
-DROP TABLE protocol_configurations;

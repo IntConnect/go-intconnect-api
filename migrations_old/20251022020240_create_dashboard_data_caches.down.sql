@@ -1,1 +1,0 @@
-DROP TABLE dashboard_data_cache;

@@ -10,21 +10,15 @@ import (
 	checkSheetDocumentTemplateParameter "go-intconnect-api/internal/check_sheet_document_template_parameter"
 	checkSheetValue "go-intconnect-api/internal/check_sheet_value"
 	dashboardWidget "go-intconnect-api/internal/dashboard_widget"
-	databaseConnection "go-intconnect-api/internal/database_connection"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
 	machineDocument "go-intconnect-api/internal/machine_document"
 	modbusServer "go-intconnect-api/internal/modbus_server"
 	mqttBroker "go-intconnect-api/internal/mqtt_broker"
 	mqttTopic "go-intconnect-api/internal/mqtt_topic"
-	"go-intconnect-api/internal/node"
 	"go-intconnect-api/internal/parameter"
 	parameterOperation "go-intconnect-api/internal/parameter_operation"
 	"go-intconnect-api/internal/permission"
-	"go-intconnect-api/internal/pipeline"
-	pipelineEdge "go-intconnect-api/internal/pipeline_edge"
-	pipelineNode "go-intconnect-api/internal/pipeline_node"
-	protocolConfiguration "go-intconnect-api/internal/protocol_configuration"
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
 	smtpServer "go-intconnect-api/internal/smtp_server"
@@ -160,32 +154,8 @@ var UserModule = fx.Module("userFeature",
 	fx.Provide(fx.Annotate(user.NewHandler, fx.As(new(user.Controller)))),
 )
 
-var NodeModule = fx.Module("nodeFeature",
-	fx.Provide(fx.Annotate(node.NewRepository, fx.As(new(node.Repository)))),
-	fx.Provide(fx.Annotate(node.NewService, fx.As(new(node.Service)))),
-	fx.Provide(fx.Annotate(node.NewHandler, fx.As(new(node.Controller)))),
-)
-
 var ValidatorModule = fx.Module("validatorFeature",
 	fx.Provide(fx.Annotate(validatorService.NewService, fx.As(new(validatorService.Service)))),
-)
-
-var PipelineModule = fx.Module("pipelineFeature",
-	fx.Provide(fx.Annotate(pipeline.NewRepository, fx.As(new(pipeline.Repository)))),
-	fx.Provide(fx.Annotate(pipeline.NewService, fx.As(new(pipeline.Service)))),
-	fx.Provide(fx.Annotate(pipeline.NewHandler, fx.As(new(pipeline.Controller)))),
-)
-
-var PipelineConfigurationModule = fx.Module("pipelineConfigurationFeature",
-	fx.Provide(fx.Annotate(protocolConfiguration.NewRepository, fx.As(new(protocolConfiguration.Repository)))),
-	fx.Provide(fx.Annotate(protocolConfiguration.NewService, fx.As(new(protocolConfiguration.Service)))),
-	fx.Provide(fx.Annotate(protocolConfiguration.NewHandler, fx.As(new(protocolConfiguration.Controller)))),
-)
-
-var DatabaseConnectionModule = fx.Module("databaseConnectionFeature",
-	fx.Provide(fx.Annotate(databaseConnection.NewRepository, fx.As(new(databaseConnection.Repository)))),
-	fx.Provide(fx.Annotate(databaseConnection.NewService, fx.As(new(databaseConnection.Service)))),
-	fx.Provide(fx.Annotate(databaseConnection.NewHandler, fx.As(new(databaseConnection.Controller)))),
 )
 
 var FacilityModule = fx.Module("facilityFeature",
@@ -204,14 +174,6 @@ var PermissionModule = fx.Module("permissionFeature",
 	fx.Provide(fx.Annotate(permission.NewRepository, fx.As(new(permission.Repository)))),
 	fx.Provide(fx.Annotate(permission.NewService, fx.As(new(permission.Service)))),
 	fx.Provide(fx.Annotate(permission.NewHandler, fx.As(new(permission.Controller)))),
-)
-
-var PipelineNodeModule = fx.Module("pipelineNodeFeature",
-	fx.Provide(fx.Annotate(pipelineNode.NewRepository, fx.As(new(pipelineNode.Repository)))),
-)
-
-var PipelineEdgeModule = fx.Module("pipelineEdgeFeature",
-	fx.Provide(fx.Annotate(pipelineEdge.NewRepository, fx.As(new(pipelineEdge.Repository)))),
 )
 
 var MqttBrokerModule = fx.Module("mqttBrokerFeature",
