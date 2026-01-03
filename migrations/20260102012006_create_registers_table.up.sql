@@ -6,7 +6,6 @@ CREATE TABLE registers
     memory_location  VARCHAR(255) NOT NULL,
     name             VARCHAR(255) NOT NULL,
     description      VARCHAR(255) NOT NULL,
-    value            TEXT         NOT NULL DEFAULT 'String',
     data_type        VARCHAR(255) NOT NULL,
     created_at       TIMESTAMP    NOT NULL DEFAULT current_timestamp,
     created_by       VARCHAR(255),

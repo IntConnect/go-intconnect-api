@@ -7,7 +7,6 @@ type RegisterResponse struct {
 	MemoryLocation    string             `json:"memory_location"`
 	Name              string             `json:"name"`
 	Description       string             `json:"description"`
-	Value             string             `json:"value"`
 	DataType          string             `json:"data_type"`
 	AuditableResponse *AuditableResponse `json:"auditable"`
 }
@@ -18,7 +17,6 @@ type CreateRegisterRequest struct {
 	MemoryLocation string `json:"memory_location" validate:"required"`
 	Name           string `json:"name" validate:"required"`
 	Description    string `json:"description" validate:"required"`
-	Value          string `json:"value" validate:"required"`
 	DataType       string `json:"data_type" validate:"required"`
 }
 
@@ -29,8 +27,12 @@ type UpdateRegisterRequest struct {
 	MemoryLocation string `json:"memory_location" validate:"required"`
 	Name           string `json:"name" validate:"required"`
 	Description    string `json:"description" validate:"required"`
-	Value          string `json:"value" validate:"required"`
 	DataType       string `json:"data_type" validate:"required"`
+}
+
+type RegisterDependency struct {
+	MachineResponses      []MachineResponse      `json:"machines"`
+	ModbusServerResponses []ModbusServerResponse `json:"modbus_servers"`
 }
 
 func (smtpServerResponse *RegisterResponse) GetAuditableResponse() *AuditableResponse {

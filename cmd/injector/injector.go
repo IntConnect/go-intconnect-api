@@ -19,6 +19,7 @@ import (
 	"go-intconnect-api/internal/parameter"
 	parameterOperation "go-intconnect-api/internal/parameter_operation"
 	"go-intconnect-api/internal/permission"
+	"go-intconnect-api/internal/register"
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
 	smtpServer "go-intconnect-api/internal/smtp_server"
@@ -276,4 +277,10 @@ var CheckSheetDocumentTemplateParameterModule = fx.Module("checkSheetDocumentTem
 
 var DashboardWidgetModule = fx.Module("checkSheetDocumentTemplateParameterFeature",
 	fx.Provide(fx.Annotate(dashboardWidget.NewRepository, fx.As(new(dashboardWidget.Repository)))),
+)
+
+var RegisterModule = fx.Module("registerFeature",
+	fx.Provide(fx.Annotate(register.NewRepository, fx.As(new(register.Repository)))),
+	fx.Provide(fx.Annotate(register.NewService, fx.As(new(register.Service)))),
+	fx.Provide(fx.Annotate(register.NewHandler, fx.As(new(register.Controller)))),
 )

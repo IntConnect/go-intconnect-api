@@ -23,9 +23,9 @@ func (registerRepositoryImpl *RepositoryImpl) FindAllPagination(
 	orderClause string,
 	offsetVal, limitPage int,
 	searchQuery string,
-) ([]entity.Register, int64, error) {
+) ([]*entity.Register, int64, error) {
 
-	var registerEntities []entity.Register
+	var registerEntities []*entity.Register
 	var totalItems int64
 
 	// Base query

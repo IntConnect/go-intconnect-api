@@ -13,6 +13,7 @@ import (
 	mqttTopic "go-intconnect-api/internal/mqtt_topic"
 	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/permission"
+	"go-intconnect-api/internal/register"
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
 	smtpServer "go-intconnect-api/internal/smtp_server"
@@ -45,6 +46,7 @@ type ProtectedRoutes struct {
 	systemSettingController              systemSetting.Controller
 	telemetryController                  telemetry.Controller
 	checkSheetController                 checkSheet.Controller
+	registerController                   register.Controller
 	roleService                          role.Service
 }
 
@@ -68,7 +70,7 @@ func NewProtectedRoutes(
 	systemSettingController systemSetting.Controller,
 	telemetryController telemetry.Controller,
 	checkSheetController checkSheet.Controller,
-
+	registerController register.Controller,
 	roleService role.Service,
 
 ) *ProtectedRoutes {
@@ -94,6 +96,7 @@ func NewProtectedRoutes(
 		systemSettingController:              systemSettingController,
 		telemetryController:                  telemetryController,
 		checkSheetController:                 checkSheetController,
+		registerController:                   registerController,
 	}
 }
 
@@ -218,5 +221,13 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	checkSheetRouterGroup.POST("/approval/:id", protectedRoutes.checkSheetController.ApprovalCheckSheet)
 	checkSheetRouterGroup.PUT("/:id", protectedRoutes.checkSheetController.UpdateCheckSheet)
 	checkSheetRouterGroup.DELETE("/:id", protectedRoutes.checkSheetController.DeleteCheckSheet)
+
+	registerRouterGroup := routerGroup.Group("registers")
+	registerRouterGroup.GET("", protectedRoutes.registerController.FindAllRegister)
+	registerRouterGroup.GET("pagination", protectedRoutes.registerController.FindAllRegisterPagination)
+	registerRouterGroup.GET("dependency", protectedRoutes.registerController.FindRegisterDependency)
+	registerRouterGroup.POST("", protectedRoutes.registerController.CreateRegister)
+	registerRouterGroup.PUT("/:id", protectedRoutes.registerController.UpdateRegister)
+	registerRouterGroup.DELETE("/:id", protectedRoutes.registerController.DeleteRegister)
 
 }

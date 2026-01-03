@@ -36,6 +36,11 @@ func (registerHandler *Handler) FindAllRegisterPagination(ginContext *gin.Contex
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
+func (registerHandler *Handler) FindRegisterDependency(ginContext *gin.Context) {
+	mqttTopicDependency := registerHandler.registerService.FindDependency()
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse(model.RESPONSE_SUCCESS, mqttTopicDependency))
+}
+
 func (registerHandler *Handler) CreateRegister(ginContext *gin.Context) {
 	var createRegisterModel model.CreateRegisterRequest
 	err := ginContext.ShouldBindBodyWithJSON(&createRegisterModel)

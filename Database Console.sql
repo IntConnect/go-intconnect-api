@@ -113,6 +113,7 @@ SELECT *
 FROM telemetries;
 SELECT *
 FROM parameters;
+
 SELECT *
 FROM report_document_templates;
 SELECT *
@@ -129,6 +130,8 @@ SELECT *
 FROM check_sheet_values;
 SELECT *
 FROM dashboard_widgets;
+SELECT *
+FROM modbus_servers;
 
 DELETE  FROM dashboard_widgets WHERE id =5 ;
 

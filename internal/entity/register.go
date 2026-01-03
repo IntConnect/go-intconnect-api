@@ -7,7 +7,6 @@ type Register struct {
 	MemoryLocation string `gorm:"column:memory_location"`
 	Name           string `gorm:"column:name"`
 	Description    string `gorm:"column:description"`
-	Value          string `gorm:"column:value"`
 	DataType       string `gorm:"column:data_type"`
 	Auditable
 }

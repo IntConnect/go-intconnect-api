@@ -60,7 +60,7 @@ func (registerService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		registerResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Register, *model.RegisterResponse](
+		registerResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.Register, *model.RegisterResponse](
 			registerEntities,
 			mapper.FuncMapAuditable,
 		)
@@ -104,6 +104,22 @@ func (registerService *ServiceImpl) Create(ginContext *gin.Context, createRegist
 	paginationRequest := model.NewPaginationRequest()
 	paginationResp = registerService.FindAllPagination(&paginationRequest)
 	return paginationResp
+}
+func (registerService *ServiceImpl) FindDependency() *model.RegisterDependency {
+	var registerDependency = &model.RegisterDependency{}
+	err := registerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var machineEntities []entity.Machine
+		var modbusServerEntities []entity.ModbusServer
+		err := gormTransaction.Find(&machineEntities).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		err = gormTransaction.Find(&modbusServerEntities).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		registerDependency.MachineResponses = helper.MapEntitiesIntoResponses[entity.Machine, model.MachineResponse](machineEntities)
+		registerDependency.ModbusServerResponses = helper.MapEntitiesIntoResponses[entity.ModbusServer, model.ModbusServerResponse](modbusServerEntities)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return registerDependency
 }
 
 func (registerService *ServiceImpl) Update(ginContext *gin.Context, updateRegisterRequest *model.UpdateRegisterRequest) *model.PaginatedResponse[*model.RegisterResponse] {
