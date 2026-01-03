@@ -224,8 +224,8 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 
 	registerRouterGroup := routerGroup.Group("registers")
 	registerRouterGroup.GET("", protectedRoutes.registerController.FindAllRegister)
-	registerRouterGroup.GET("pagination", protectedRoutes.registerController.FindAllRegisterPagination)
-	registerRouterGroup.GET("dependency", protectedRoutes.registerController.FindRegisterDependency)
+	registerRouterGroup.GET("/pagination", protectedRoutes.registerController.FindAllRegisterPagination)
+	registerRouterGroup.GET("/dependency", protectedRoutes.registerController.FindRegisterDependency)
 	registerRouterGroup.POST("", protectedRoutes.registerController.CreateRegister)
 	registerRouterGroup.PUT("/:id", protectedRoutes.registerController.UpdateRegister)
 	registerRouterGroup.DELETE("/:id", protectedRoutes.registerController.DeleteRegister)

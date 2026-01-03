@@ -100,7 +100,31 @@ func TakePointer[T any](value T) *T {
 
 func DebugArrPointer[T any](arrayOfPointer []*T) {
 	for _, pointerData := range arrayOfPointer {
-		logger.Debug(pointerData)
+		if pointerData == nil {
+			logger.Debug("nil pointer")
+			continue
+		}
+
+		val := reflect.ValueOf(pointerData)
+		typ := val.Type()
+
+		// cek apakah pointer
+		if typ.Kind() == reflect.Ptr {
+			elemVal := val.Elem()
+			elemType := elemVal.Type()
+
+			// cek apakah pointer ke struct
+			if elemType.Kind() == reflect.Struct {
+				logger.Debug("pointer to struct detected")
+				logger.Debug(elemVal.Interface()) // dereference
+			} else {
+				logger.Debug("pointer to non-struct")
+				logger.Debug(pointerData)
+			}
+		} else {
+			logger.Debug("not a pointer")
+			logger.Debug(pointerData)
+		}
 	}
 }
 

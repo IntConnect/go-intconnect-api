@@ -132,6 +132,8 @@ SELECT *
 FROM dashboard_widgets;
 SELECT *
 FROM modbus_servers;
+SELECT *
+FROM registers;
 
 DELETE  FROM dashboard_widgets WHERE id =5 ;
 

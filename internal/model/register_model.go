@@ -1,14 +1,16 @@
 package model
 
 type RegisterResponse struct {
-	Id                uint64             `json:"id"`
-	MachineId         uint64             `json:"machine_id"`
-	ModbusServerId    uint64             `json:"modbus_server_id"`
-	MemoryLocation    string             `json:"memory_location"`
-	Name              string             `json:"name"`
-	Description       string             `json:"description"`
-	DataType          string             `json:"data_type"`
-	AuditableResponse *AuditableResponse `json:"auditable"`
+	Id                   uint64                `json:"id"`
+	MachineId            uint64                `json:"machine_id"`
+	ModbusServerId       uint64                `json:"modbus_server_id"`
+	MemoryLocation       string                `json:"memory_location"`
+	Name                 string                `json:"name"`
+	Description          string                `json:"description"`
+	DataType             string                `json:"data_type"`
+	MachineResponse      *MachineResponse      `json:"machine" mapstructure:"Machine"`
+	ModbusServerResponse *ModbusServerResponse `json:"modbus_server" mapstructure:"ModbusServer"`
+	AuditableResponse    *AuditableResponse    `json:"auditable"`
 }
 
 type CreateRegisterRequest struct {

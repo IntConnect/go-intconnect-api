@@ -12,9 +12,12 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (registerRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Register, error) {
-	var registerEntities []entity.Register
-	err := gormTransaction.Find(&registerEntities).Error
+func (registerRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.Register, error) {
+	var registerEntities []*entity.Register
+	err := gormTransaction.
+		Preload("Machine").
+		Preload("ModbusServer").
+		Find(&registerEntities).Error
 	return registerEntities, err
 }
 
@@ -44,6 +47,8 @@ func (registerRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
+		Preload("Machine").
+		Preload("ModbusServer").
 		Order(orderClause).
 		Offset(offsetVal).
 		Limit(limitPage).

@@ -39,7 +39,7 @@ func (registerService *ServiceImpl) FindAll() []*model.RegisterResponse {
 	err := registerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		registerEntities, err := registerService.registerRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		registerResponsesRequest = helper.MapEntitiesIntoResponses[entity.Register, *model.RegisterResponse](registerEntities)
+		registerResponsesRequest = helper.MapEntitiesIntoResponses[*entity.Register, *model.RegisterResponse](registerEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -63,6 +63,7 @@ func (registerService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 		registerResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.Register, *model.RegisterResponse](
 			registerEntities,
 			mapper.FuncMapAuditable,
+			mapper.FuncMapRegister,
 		)
 		totalItems = total
 
@@ -80,11 +81,13 @@ func (registerService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 
 // Create - Membuat register baru
 func (registerService *ServiceImpl) Create(ginContext *gin.Context, createRegisterRequest *model.CreateRegisterRequest) *model.PaginatedResponse[*model.RegisterResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	var paginationResp *model.PaginatedResponse[*model.RegisterResponse]
 	valErr := registerService.validatorService.ValidateStruct(createRegisterRequest)
 	registerService.validatorService.ParseValidationError(valErr, *createRegisterRequest)
 	err := registerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		registerEntity := helper.MapCreateRequestIntoEntity[model.CreateRegisterRequest, entity.Register](createRegisterRequest)
+		registerEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
 		err := registerService.registerRepository.Create(gormTransaction, registerEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := registerService.auditLogService.Build(
@@ -123,6 +126,7 @@ func (registerService *ServiceImpl) FindDependency() *model.RegisterDependency {
 }
 
 func (registerService *ServiceImpl) Update(ginContext *gin.Context, updateRegisterRequest *model.UpdateRegisterRequest) *model.PaginatedResponse[*model.RegisterResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	var paginationResp *model.PaginatedResponse[*model.RegisterResponse]
 	valErr := registerService.validatorService.ValidateStruct(updateRegisterRequest)
 	registerService.validatorService.ParseValidationError(valErr, *updateRegisterRequest)
@@ -131,6 +135,7 @@ func (registerService *ServiceImpl) Update(ginContext *gin.Context, updateRegist
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		oldRegisterEntity := *registerEntity
 		helper.MapUpdateRequestIntoEntity(updateRegisterRequest, registerEntity)
+		registerEntity.Auditable = entity.UpdateAuditable(userJwtClaims.Username)
 		err = registerService.registerRepository.Update(gormTransaction, registerEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := registerService.auditLogService.Build(
@@ -153,12 +158,14 @@ func (registerService *ServiceImpl) Update(ginContext *gin.Context, updateRegist
 }
 
 func (registerService *ServiceImpl) Delete(ginContext *gin.Context, deleteRegisterRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.RegisterResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	var paginationResp *model.PaginatedResponse[*model.RegisterResponse]
 	valErr := registerService.validatorService.ValidateStruct(deleteRegisterRequest)
 	registerService.validatorService.ParseValidationError(valErr, *deleteRegisterRequest)
 	err := registerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		registerEntity, err := registerService.registerRepository.FindById(gormTransaction, deleteRegisterRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		registerEntity.Auditable = entity.DeleteAuditable(userJwtClaims.Username)
 		err = registerService.registerRepository.Delete(gormTransaction, deleteRegisterRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		paginationRequest := model.NewPaginationRequest()
