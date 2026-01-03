@@ -18,6 +18,7 @@ type CreateMachineRequest struct {
 type UpdateMachineRequest struct {
 	Id                        uint64                         `form:"-" validate:"required,exists=machines;id"`
 	FacilityId                uint64                         `form:"facility_id" validate:"required,exists=facilities;id"`
+	ParameterId               *uint64                        `form:"parameter_id" validate:"omitempty,required,exists=parameters;id"`
 	Name                      string                         `form:"name" validate:"required,min=3,max=100,unique=machines;name;Id"`
 	Code                      string                         `form:"code" validate:"required,min=3,max=100,unique=machines;code;Id"`
 	Description               string                         `form:"description"`
@@ -33,6 +34,7 @@ type UpdateMachineRequest struct {
 type MachineResponse struct {
 	Id                uint64                     `json:"id"`
 	FacilityId        uint64                     `json:"facility_id"`
+	ParameterId       uint64                     `json:"parameter_id"`
 	Name              string                     `json:"name"`
 	Code              string                     `json:"code"`
 	Description       string                     `json:"description"`
@@ -42,6 +44,7 @@ type MachineResponse struct {
 	ThumbnailPath     string                     `json:"thumbnail_path"`
 	ModelPath         string                     `json:"model_path"`
 	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic" mapstructure:"MqttTopic"`
+	ParameterResponse *ParameterResponse         `json:"parameter_response" mapstructure:"Parameter"`
 	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
 	DashboardWidget   []*DashboardWidget         `json:"widgets" mapstructure:"DashboardWidget"`
 	Facility          *FacilityResponse          `json:"facility" mapstructure:"Facility"`

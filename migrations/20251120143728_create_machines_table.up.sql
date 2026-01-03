@@ -2,6 +2,7 @@ CREATE TABLE machines
 (
     id             SERIAL PRIMARY KEY,
     facility_id    BIGINT       NOT NULL REFERENCES facilities (id),
+    parameter_id   BIGINT REFERENCES parameters (id),
     name           VARCHAR(255) NOT NULL,
     code           VARCHAR(255) NOT NULL,
     description    VARCHAR(255) NOT NULL,
@@ -10,7 +11,6 @@ CREATE TABLE machines
     camera_x       FLOAT        NOT NULL DEFAULT 0,
     camera_y       FLOAT        NOT NULL DEFAULT 0,
     camera_z       FLOAT        NOT NULL DEFAULT 0,
-
     created_by     VARCHAR(255),
     created_at     TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,

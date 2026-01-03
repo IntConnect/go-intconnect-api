@@ -97,8 +97,7 @@ SELECT *
 FROM users;
 SELECT *
 FROM breakdown_resources;
-SELECT *
-FROM system_settings;
+
 SELECT *
 FROM facilities;
 SELECT *
@@ -135,8 +134,6 @@ FROM modbus_servers;
 SELECT *
 FROM registers;
 
-DELETE  FROM dashboard_widgets WHERE id =5 ;
-
 DELETE
 FROM check_sheet_values;
 DELETE
@@ -159,13 +156,3 @@ FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
 ORDER BY bucket;
 
 
-ALTER TABLE parameters
-    ADD COLUMN is_watch BOOLEAN NOT NULL DEFAULT FALSE;
-
-SELECT *
-FROM check_sheet_document_templates;
-SELECT *
-FROM parameters;
-
-UPDATE facilities
-SET deleted_at = NULL;

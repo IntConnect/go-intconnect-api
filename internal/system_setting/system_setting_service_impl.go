@@ -100,6 +100,7 @@ func (systemSettingService *ServiceImpl) Manage(ginContext *gin.Context, createS
 			systemSettingService.validatorService.ParseValidationError(valErr, modelFileErr)
 		}
 
+		fmt.Println(*parsedPayload)
 		valErr = systemSettingService.validatorService.ValidateStruct(*(parsedPayload))
 		systemSettingService.validatorService.ParseValidationError(valErr, *parsedPayload)
 		systemSettingEntity = helper.MapCreateRequestIntoEntity[model.ManageSystemSettingRequest, entity.SystemSetting](createSystemSettingRequest)

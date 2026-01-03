@@ -3,6 +3,7 @@ package entity
 type Machine struct {
 	Id               uint64             `gorm:"column:id;primaryKey;autoIncrement"`
 	FacilityId       uint64             `gorm:"column:facility_id;"`
+	ParameterId      *uint64            `gorm:"column:parameter_id;"`
 	Name             string             `gorm:"column:name"`
 	Code             string             `gorm:"column:code"`
 	Description      string             `gorm:"column:description"`
@@ -13,6 +14,7 @@ type Machine struct {
 	ModelPath        string             `gorm:"column:model_path"`
 	Facility         *Facility          `gorm:"foreignKey:FacilityId;references:Id"`
 	MqttTopic        *MqttTopic         `gorm:"foreignKey:MachineId;references:Id"`
+	Parameter        *Parameter         `gorm:"foreignKey:ParameterId;references:Id"`
 	MachineDocuments []*MachineDocument `gorm:"foreignKey:MachineId;references:Id"`
 	DashboardWidget  []*DashboardWidget `gorm:"foreignKey:MachineId;references:Id"`
 	Auditable        Auditable          `gorm:"embedded"`

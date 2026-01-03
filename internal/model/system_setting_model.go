@@ -21,6 +21,8 @@ type ManageSystemSettingRequest struct {
 }
 
 type DashboardSettingPayload struct {
+	Showing       string                `json:"showing" validate:"required"`
+	MachineId     *uint64               `json:"machine_id" validate:"omitempty,gte=1,exists=machines;id"`
 	CameraX       float64               `json:"camera_x" mapstructure:"camera_x" validate:"required"`
 	CameraY       float64               `json:"camera_y" mapstructure:"camera_y" validate:"required"`
 	CameraZ       float64               `json:"camera_z" mapstructure:"camera_z" validate:"required"`
