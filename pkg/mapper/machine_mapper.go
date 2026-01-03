@@ -19,12 +19,11 @@ func MapMachineDocument(machineEntity *entity.Machine, machineResponse *model.Ma
 	result := make([]*model.MachineDocumentResponse, 0, len(machineEntity.MachineDocuments))
 
 	for i := range machineEntity.MachineDocuments {
-		machineDocument := &machineEntity.MachineDocuments[i]
+		machineDocument := machineEntity.MachineDocuments[i]
 
 		mapped := helper.MapEntityIntoResponse[*entity.MachineDocument, *model.MachineDocumentResponse](
 			machineDocument,
-			FuncMapAuditable, // tetap boleh mapping auditable jika butuh
-		)
+			FuncMapAuditable)
 
 		result = append(result, mapped)
 	}

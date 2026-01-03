@@ -44,8 +44,8 @@ type MachineResponse struct {
 	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic" mapstructure:"MqttTopic"`
 	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
 	DashboardWidget   []*DashboardWidget         `json:"widgets" mapstructure:"DashboardWidget"`
-	Facility          *FacilityResponse          `json:"facility" mapstructure:"facility"`
-	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"auditable"`
+	Facility          *FacilityResponse          `json:"facility" mapstructure:"Facility"`
+	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"Auditable"`
 }
 
 type MachineDashboardWidget struct {
