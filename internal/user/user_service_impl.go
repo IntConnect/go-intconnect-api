@@ -7,6 +7,7 @@ import (
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/role"
+	"go-intconnect-api/internal/storage"
 	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -23,13 +24,14 @@ import (
 )
 
 type ServiceImpl struct {
-	userRepository   Repository
-	roleService      role.Service
-	auditLogService  auditLog.Service
-	validatorService validator.Service
-	dbConnection     *gorm.DB
-	viperConfig      *viper.Viper
-	redisInstance    *configs.RedisInstance
+	userRepository      Repository
+	roleService         role.Service
+	auditLogService     auditLog.Service
+	validatorService    validator.Service
+	dbConnection        *gorm.DB
+	viperConfig         *viper.Viper
+	redisInstance       *configs.RedisInstance
+	localStorageService *storage.Manager
 }
 
 func NewService(userRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
@@ -37,15 +39,17 @@ func NewService(userRepository Repository, validatorService validator.Service, d
 	auditLogService auditLog.Service,
 	redisInstance *configs.RedisInstance,
 	roleService role.Service,
+	localStorageService *storage.Manager,
 ) *ServiceImpl {
 	return &ServiceImpl{
-		userRepository:   userRepository,
-		validatorService: validatorService,
-		dbConnection:     dbConnection,
-		viperConfig:      viperConfig,
-		auditLogService:  auditLogService,
-		redisInstance:    redisInstance,
-		roleService:      roleService,
+		userRepository:      userRepository,
+		validatorService:    validatorService,
+		dbConnection:        dbConnection,
+		viperConfig:         viperConfig,
+		auditLogService:     auditLogService,
+		redisInstance:       redisInstance,
+		roleService:         roleService,
+		localStorageService: localStorageService,
 	}
 }
 
@@ -158,13 +162,14 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 			jwtHour = 72
 		}
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"id":        userEntity.Id,
-			"email":     userEntity.Email,
-			"username":  userEntity.Username,
-			"name":      userEntity.Name,
-			"role_id":   userEntity.RoleId,
-			"role_name": userEntity.Role.Name,
-			"exp":       time.Now().Add(time.Hour * time.Duration(jwtHour)).Unix(),
+			"id":          userEntity.Id,
+			"email":       userEntity.Email,
+			"username":    userEntity.Username,
+			"name":        userEntity.Name,
+			"role_id":     userEntity.RoleId,
+			"role_name":   userEntity.Role.Name,
+			"avatar_path": userEntity.AvatarPath,
+			"exp":         time.Now().Add(time.Hour * time.Duration(jwtHour)).Unix(),
 		})
 		tokenString, err = tokenInstance.SignedString([]byte(userService.viperConfig.GetString("JWT_SECRET")))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
@@ -224,25 +229,32 @@ func (userService *ServiceImpl) UpdateProfile(ginContext *gin.Context, updateUse
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	updateUserProfileRequest.Id = userJwtClaims.Id
 	valErr := userService.validatorService.ValidateStruct(updateUserProfileRequest)
-	var user *entity.User
 	userService.validatorService.ParseValidationError(valErr, *updateUserProfileRequest)
+	var tokenString string
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var err error
-		user, err = userService.userRepository.FindById(gormTransaction, updateUserProfileRequest.Id)
+		userEntity, err := userService.userRepository.FindById(gormTransaction, updateUserProfileRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		helper.MapUpdateRequestIntoEntity(updateUserProfileRequest, user)
+		helper.MapUpdateRequestIntoEntity(updateUserProfileRequest, userEntity)
 		if updateUserProfileRequest.Password != nil {
-			user.Password, _ = helper.HashPassword(*updateUserProfileRequest.Password)
+			userEntity.Password, _ = helper.HashPassword(*updateUserProfileRequest.Password)
 		}
-		err = userService.userRepository.Update(gormTransaction, user)
+		if updateUserProfileRequest.Avatar != nil {
+			newPath, err := userService.localStorageService.Disk().Put(updateUserProfileRequest.Avatar, fmt.Sprintf("users/profiles/%d-%s", time.Now().UnixNano(), updateUserProfileRequest.Avatar.Filename))
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
+			userEntity.AvatarPath = newPath
+		}
+
+		err = userService.userRepository.Update(gormTransaction, userEntity)
+		tokenString = userService.HandleLogin(ginContext, &model.LoginUserRequest{
+			UserIdentifier: userEntity.Email,
+			Password:       updateUserProfileRequest.CurrentPassword,
+		})
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return userService.HandleLogin(ginContext, &model.LoginUserRequest{
-		UserIdentifier: user.Email,
-		Password:       updateUserProfileRequest.CurrentPassword,
-	})
+	return tokenString
 }
 
 func (userService *ServiceImpl) Delete(ginContext *gin.Context, deleteUserRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.UserResponse] {

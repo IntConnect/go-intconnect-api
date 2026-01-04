@@ -12,6 +12,7 @@ type User struct {
 	AvatarPath string           `gorm:"column:avatar_path"`
 	Status     trait.UserStatus `gorm:"column:status"`
 	Role       *Role            `gorm:"foreignKey:RoleId;references:Id"`
+	AuditLog   []*AuditLog      `gorm:"foreignKey:UserId;references:Id"`
 	Auditable
 }
 

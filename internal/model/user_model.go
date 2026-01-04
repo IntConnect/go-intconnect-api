@@ -16,14 +16,15 @@ type JwtClaimRequest struct {
 }
 
 type UserResponse struct {
-	Id                uint64             `json:"id"`
-	Username          string             `json:"username"`
-	Name              string             `json:"name"`
-	Email             string             `json:"email"`
-	AvatarPath        string             `json:"avatar_path"`
-	Status            trait.UserStatus   `json:"status"`
-	RoleResponse      *RoleResponse      `json:"role,omitempty" mapstructure:"role"`
-	AuditableResponse *AuditableResponse `json:"auditable_response"`
+	Id                uint64              `json:"id"`
+	Username          string              `json:"username"`
+	Name              string              `json:"name"`
+	Email             string              `json:"email"`
+	AvatarPath        string              `json:"avatar_path"`
+	Status            trait.UserStatus    `json:"status"`
+	RoleResponse      *RoleResponse       `json:"role,omitempty" mapstructure:"role"`
+	AuditLogResponse  []*AuditLogResponse `json:"audit_log" mapstructure:"AuditLog"`
+	AuditableResponse *AuditableResponse  `json:"auditable_response"`
 }
 
 type CreateUserRequest struct {

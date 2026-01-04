@@ -60,6 +60,9 @@ func (userRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, use
 	var userEntity entity.User
 	err := gormTransaction.Model(&entity.User{}).
 		Preload("Role").
+		Preload("AuditLog", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.Where("user_id = ?", userId).Limit(10)
+		}).
 		Where("id = ?", userId).Find(&userEntity).Error
 
 	return &userEntity, err
