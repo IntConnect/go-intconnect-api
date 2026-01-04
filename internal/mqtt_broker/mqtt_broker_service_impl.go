@@ -78,26 +78,27 @@ func (mqttBrokerService *ServiceImpl) FindAllPagination(paginationReq *model.Pag
 	)
 }
 
-// Create - Membuat mqttBroker baru
 func (mqttBrokerService *ServiceImpl) Create(ginContext *gin.Context, createMqttBrokerRequest *model.CreateMqttBrokerRequest) *model.PaginatedResponse[*model.MqttBrokerResponse] {
 	jwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
-	ipAddress, _ := helper.ExtractRequestMeta(ginContext)
 	var paginationResp *model.PaginatedResponse[*model.MqttBrokerResponse]
 	valErr := mqttBrokerService.validatorService.ValidateStruct(createMqttBrokerRequest)
 	mqttBrokerService.validatorService.ParseValidationError(valErr, *createMqttBrokerRequest)
 	err := mqttBrokerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		mqttBrokerEntity := helper.MapCreateRequestIntoEntity[model.CreateMqttBrokerRequest, entity.MqttBroker](createMqttBrokerRequest)
+		mqttBrokerEntity.Auditable = entity.NewAuditable(jwtClaims.Username)
 		err := mqttBrokerService.mqttBrokerRepository.Create(gormTransaction, mqttBrokerEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mqttBrokerService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
-			UserId:      jwtClaims.Id,
-			Action:      model.AUDIT_LOG_CREATE,
-			Feature:     model.AUDIT_LOG_FEATURE_MQTT_BROKER,
-			Description: "",
-			Before:      nil,
-			After:       mqttBrokerEntity,
-			IpAddress:   ipAddress,
-		})
+		auditPayload := mqttBrokerService.auditLogService.Build(
+			nil,
+			mqttBrokerEntity,
+			nil,
+			"",
+		)
+		err = mqttBrokerService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_FEATURE_MQTT_BROKER,
+				auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -107,15 +108,30 @@ func (mqttBrokerService *ServiceImpl) Create(ginContext *gin.Context, createMqtt
 }
 
 func (mqttBrokerService *ServiceImpl) Update(ginContext *gin.Context, updateMqttBrokerRequest *model.UpdateMqttBrokerRequest) *model.PaginatedResponse[*model.MqttBrokerResponse] {
+	jwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	var paginationResp *model.PaginatedResponse[*model.MqttBrokerResponse]
 	valErr := mqttBrokerService.validatorService.ValidateStruct(updateMqttBrokerRequest)
 	mqttBrokerService.validatorService.ParseValidationError(valErr, *updateMqttBrokerRequest)
 	err := mqttBrokerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		mqttBroker, err := mqttBrokerService.mqttBrokerRepository.FindById(gormTransaction, updateMqttBrokerRequest.Id)
+		mqttBrokerEntity, err := mqttBrokerService.mqttBrokerRepository.FindById(gormTransaction, updateMqttBrokerRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		helper.MapUpdateRequestIntoEntity(updateMqttBrokerRequest, mqttBroker)
-		err = mqttBrokerService.mqttBrokerRepository.Update(gormTransaction, mqttBroker)
+		oldMqttBroker := *mqttBrokerEntity
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		helper.MapUpdateRequestIntoEntity(updateMqttBrokerRequest, mqttBrokerEntity)
+		mqttBrokerEntity.Auditable = entity.UpdateAuditable(jwtClaims.Username)
+		err = mqttBrokerService.mqttBrokerRepository.Update(gormTransaction, mqttBrokerEntity)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := mqttBrokerService.auditLogService.Build(
+			&oldMqttBroker,
+			mqttBrokerEntity,
+			nil,
+			"",
+		)
+		err = mqttBrokerService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_UPDATE,
+				model.AUDIT_LOG_FEATURE_MQTT_BROKER,
+				auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -126,25 +142,27 @@ func (mqttBrokerService *ServiceImpl) Update(ginContext *gin.Context, updateMqtt
 
 func (mqttBrokerService *ServiceImpl) Delete(ginContext *gin.Context, deleteMqttBrokerRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.MqttBrokerResponse] {
 	jwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
-	ipAddress, _ := helper.ExtractRequestMeta(ginContext)
 
 	var paginationResp *model.PaginatedResponse[*model.MqttBrokerResponse]
 	valErr := mqttBrokerService.validatorService.ValidateStruct(deleteMqttBrokerRequest)
 	mqttBrokerService.validatorService.ParseValidationError(valErr, *deleteMqttBrokerRequest)
 	err := mqttBrokerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := mqttBrokerService.mqttBrokerRepository.Delete(gormTransaction, deleteMqttBrokerRequest.Id)
+		mqttBrokerEntity, err := mqttBrokerService.mqttBrokerRepository.FindById(gormTransaction, deleteMqttBrokerRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginationResp = mqttBrokerService.FindAllPagination(&paginationRequest)
-		mqttBrokerService.auditLogService.Create(ginContext, &model.CreateAuditLogRequest{
-			UserId:      jwtClaims.Id,
-			Action:      model.AUDIT_LOG_DELETE,
-			Feature:     model.AUDIT_LOG_FEATURE_MQTT_BROKER,
-			Description: deleteMqttBrokerRequest.Reason,
-			Before:      "",
-			After:       "",
-			IpAddress:   ipAddress,
-		})
+		mqttBrokerEntity.Auditable = entity.DeleteAuditable(jwtClaims.Username)
+		err = mqttBrokerService.mqttBrokerRepository.Delete(gormTransaction, deleteMqttBrokerRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		auditPayload := mqttBrokerService.auditLogService.Build(
+			mqttBrokerEntity,
+			nil,
+			nil,
+			deleteMqttBrokerRequest.Reason,
+		)
+		err = mqttBrokerService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_DELETE,
+				model.AUDIT_LOG_FEATURE_MQTT_BROKER,
+				auditPayload)
 		return nil
 	})
 	paginationRequest := model.NewPaginationRequest()
