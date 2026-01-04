@@ -8,8 +8,8 @@ type Parameter struct {
 	Name                                 string                                 `gorm:"column:name"`
 	Code                                 string                                 `gorm:"column:code"`
 	Unit                                 string                                 `gorm:"column:unit"`
-	MinValue                             float32                                `gorm:"column:min_value"`
-	MaxValue                             float32                                `gorm:"column:max_value"`
+	MinValue                             float64                                `gorm:"column:min_value"`
+	MaxValue                             float64                                `gorm:"column:max_value"`
 	Description                          string                                 `gorm:"column:description"`
 	Category                             trait.ParameterCategory                `gorm:"column:category"`
 	PositionX                            float32                                `gorm:"column:position_x"`
@@ -18,6 +18,7 @@ type Parameter struct {
 	RotationX                            float32                                `gorm:"column:rotation_x"`
 	RotationY                            float32                                `gorm:"column:rotation_y"`
 	RotationZ                            float32                                `gorm:"column:rotation_z"`
+	AbnormalDuration                     int                                    `gorm:"column:abnormal_duration"`
 	IsAutomatic                          bool                                   `gorm:"column:is_automatic;"`
 	IsDisplay                            bool                                   `gorm:"column:is_display;"`
 	IsWatch                              bool                                   `gorm:"column:is_watch;"`

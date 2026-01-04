@@ -43,6 +43,15 @@ func main() {
 	listenerFluxorInstance.WaitForShutdown()
 }
 
+type AbnormalWindow struct {
+	Values        []float64
+	LastCheckedAt time.Time
+}
+
+type AlarmRecoveryWindow struct {
+	NormalCount int
+}
+
 type ListenerFluxor struct {
 	gormDatabase         *gorm.DB
 	mqttBrokersMap       map[uint64]entity.MqttBroker
@@ -57,6 +66,9 @@ type ListenerFluxor struct {
 	rwMutex              sync.RWMutex
 	latestTelemetry      map[string]*entity.Telemetry
 	telemetryMutex       sync.Mutex
+	abnormalBuffers      map[uint64]*AbnormalWindow
+	recoveryBuffers      map[uint64]*AlarmRecoveryWindow
+	alarmMutex           sync.Mutex
 }
 
 func NewListenerFluxor() *ListenerFluxor {
@@ -79,6 +91,8 @@ func NewListenerFluxor() *ListenerFluxor {
 		mqttBrokerRepository: mqttBrokerRepository,
 		mqttTopicRepository:  mqttTopicRepository,
 		latestTelemetry:      latestTelemetry,
+		abnormalBuffers:      make(map[uint64]*AbnormalWindow),
+		recoveryBuffers:      make(map[uint64]*AlarmRecoveryWindow),
 	}
 
 	if err := listenerFluxor.loadInitialConfiguration(); err != nil {
@@ -389,6 +403,7 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 				Value:       parsedMqttValue,
 				Timestamp:   mqttPayload.Timestamp.Time,
 			}
+			listenerFluxor.checkAbnormality(parameterEntity, parsedMqttValue)
 
 		} else {
 			logger.WithError(err).Info("Parameter not exists")
@@ -525,4 +540,101 @@ func (listenerFluxor *ListenerFluxor) saveSnapshot() {
 	} else {
 		logger.Infof("Saved %d telemetry records (snapshot)", len(snapshotPayload))
 	}
+}
+
+func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.Parameter, value float64) {
+	listenerFluxor.alarmMutex.Lock()
+	defer listenerFluxor.alarmMutex.Unlock()
+
+	requiredSamples := int(parameterEntity.AbnormalDuration) * 4
+
+	// Init buffer
+	if _, ok := listenerFluxor.abnormalBuffers[parameterEntity.Id]; !ok {
+		listenerFluxor.abnormalBuffers[parameterEntity.Id] = &AbnormalWindow{}
+	}
+
+	buffer := listenerFluxor.abnormalBuffers[parameterEntity.Id]
+	buffer.Values = append(buffer.Values, value)
+
+	if len(buffer.Values) > requiredSamples {
+		buffer.Values = buffer.Values[1:]
+	}
+
+	// === CHECK CREATE ALARM ===
+	if len(buffer.Values) == requiredSamples && allAbnormal(buffer.Values, parameterEntity) {
+		listenerFluxor.createAlarmIfNotExists(parameterEntity, value)
+		listenerFluxor.recoveryBuffers[parameterEntity.Id] = &AlarmRecoveryWindow{}
+		return
+	}
+
+	// === CHECK RECOVERY ===
+	listenerFluxor.checkRecovery(parameterEntity, value)
+}
+
+func allAbnormal(values []float64, parameterEntity *entity.Parameter) bool {
+	for _, v := range values {
+		if v >= parameterEntity.MinValue && v <= parameterEntity.MaxValue {
+			return false
+		}
+	}
+	return true
+}
+
+func (listenerFluxor *ListenerFluxor) createAlarmIfNotExists(parameterEntity *entity.Parameter, value float64) {
+	var existingLogAlarm entity.LogAlarm
+	err := listenerFluxor.gormDatabase.
+		Where("parameter_id = ? AND is_active = true", parameterEntity.Id).
+		First(&existingLogAlarm).Error
+
+	if err == nil {
+		return // alarm already active
+	}
+
+	alarmType := "HIGH"
+	if value < parameterEntity.MinValue {
+		alarmType = "LOW"
+	}
+
+	alarm := entity.LogAlarm{
+		ParameterId: parameterEntity.Id,
+		Value:       value,
+		Type:        alarmType,
+		Category:    "CRITICAL",
+		IsActive:    true,
+	}
+
+	listenerFluxor.gormDatabase.Create(&alarm)
+	logger.Warn("Alarm triggered for parameter %d", parameterEntity.Id)
+}
+
+func (listenerFluxor *ListenerFluxor) checkRecovery(parameterEntity *entity.Parameter, value float64) {
+	recovery, ok := listenerFluxor.recoveryBuffers[parameterEntity.Id]
+	if !ok {
+		return
+	}
+
+	isNormal := value >= parameterEntity.MinValue && value <= parameterEntity.MaxValue
+
+	if isNormal {
+		recovery.NormalCount++
+	} else {
+		recovery.NormalCount = 0
+	}
+
+	if recovery.NormalCount >= 20 {
+		listenerFluxor.resolveAlarm(parameterEntity.Id)
+		delete(listenerFluxor.recoveryBuffers, parameterEntity.Id)
+		delete(listenerFluxor.abnormalBuffers, parameterEntity.Id)
+	}
+}
+
+func (listenerFluxor *ListenerFluxor) resolveAlarm(parameterId uint64) {
+	listenerFluxor.gormDatabase.Model(&entity.LogAlarm{}).
+		Where("parameter_id = ? AND is_active = true", parameterId).
+		Updates(map[string]interface{}{
+			"is_active":   false,
+			"resolved_at": time.Now(),
+		})
+
+	logger.Infof("Alarm resolved for parameter %d", parameterId)
 }

@@ -133,8 +133,11 @@ SELECT *
 FROM modbus_servers;
 SELECT *
 FROM registers;
-SELECT * FROM dashboard_widgets;
-SELECT * FROM parameters WHERE is_featured = TRUE;
+SELECT *
+FROM dashboard_widgets;
+SELECT *
+FROM parameters
+WHERE is_featured = TRUE;
 DELETE
 FROM check_sheet_values;
 DELETE
@@ -156,3 +159,5 @@ FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
       GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
 
+ALTER TABLE log_alarms
+    RENAME COLUMN notes TO note;

@@ -1,1 +1,0 @@
-DROP TABLE alarm_logs;

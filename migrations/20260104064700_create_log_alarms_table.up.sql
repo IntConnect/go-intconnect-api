@@ -1,4 +1,4 @@
-CREATE TABLE alarm_logs
+CREATE TABLE log_alarms
 (
     id              SERIAL PRIMARY KEY,
     parameter_id    BIGINT REFERENCES parameters (id),
@@ -9,7 +9,7 @@ CREATE TABLE alarm_logs
     status          VARCHAR(255) NOT NULL,
     acknowledged_at TIMESTAMP,
     finished_at     TIMESTAMP,
-    notes           VARCHAR(255),
+    note            VARCHAR(255),
     created_by      VARCHAR(255),
     created_at      TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
