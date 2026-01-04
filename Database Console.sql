@@ -133,7 +133,8 @@ SELECT *
 FROM modbus_servers;
 SELECT *
 FROM registers;
-
+SELECT * FROM dashboard_widgets;
+SELECT * FROM parameters WHERE is_featured = TRUE;
 DELETE
 FROM check_sheet_values;
 DELETE
@@ -154,5 +155,4 @@ FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
         AND timestamp BETWEEN '2025-12-20 15:04:00' AND '2025-12-20 19:04:00'
       GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
-
 

@@ -21,6 +21,7 @@ CREATE TABLE parameters
     is_automatic  BOOLEAN      NOT NULL DEFAULT TRUE,
     is_display    BOOLEAN      NOT NULL DEFAULT FALSE,
     is_watch      BOOLEAN      NOT NULL DEFAULT FALSE,
+    is_featured   BOOLEAN      NOT NULL DEFAULT FALSE,
     created_by    VARCHAR(255),
     created_at    TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,

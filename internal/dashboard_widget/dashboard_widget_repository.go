@@ -11,4 +11,5 @@ type Repository interface {
 	CreateBatch(gormTransaction *gorm.DB, dashboardWidgets []*entity.DashboardWidget) error
 	Update(gormTransaction *gorm.DB, dashboardWidget *entity.DashboardWidget) error
 	DeleteBatchById(gormTransaction *gorm.DB, dashboardWidgetIds []uint64) error
+	DeleteBatchByCode(gormTransaction *gorm.DB, dashboardWidgetCodes []string) error
 }

@@ -7,6 +7,7 @@ import (
 	"go-intconnect-api/internal/entity"
 	machineDocument "go-intconnect-api/internal/machine_document"
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/storage"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
@@ -25,6 +26,7 @@ type ServiceImpl struct {
 	dashboardWidgetRepository dashboardWidget.Repository
 	auditLogService           auditLog.Service
 	machineDocumentRepository machineDocument.Repository
+	parameterRepository       parameter.Repository
 	validatorService          validator.Service
 	dbConnection              *gorm.DB
 	viperConfig               *viper.Viper
@@ -37,6 +39,8 @@ func NewService(machineRepository Repository, validatorService validator.Service
 	machineDocumentRepository machineDocument.Repository,
 	auditLogService auditLog.Service,
 	dashboardWidgetRepository dashboardWidget.Repository,
+	parameterRepository parameter.Repository,
+
 ) *ServiceImpl {
 	return &ServiceImpl{
 		machineRepository:         machineRepository,
@@ -47,6 +51,7 @@ func NewService(machineRepository Repository, validatorService validator.Service
 		machineDocumentRepository: machineDocumentRepository,
 		auditLogService:           auditLogService,
 		dashboardWidgetRepository: dashboardWidgetRepository,
+		parameterRepository:       parameterRepository,
 	}
 }
 
@@ -120,12 +125,17 @@ func (machineService *ServiceImpl) ManageDashboard(ginContext *gin.Context, mach
 	machineService.validatorService.ParseValidationError(valErr, *machineDashboardWidget)
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var dashboardWidgetEntities []*entity.DashboardWidget
-		for _, dashboardWidgetRequest := range machineDashboardWidget.DashboardWidget {
+		for _, dashboardWidgetRequest := range machineDashboardWidget.AddedWidgets {
 			var dashboardWidgetEntity entity.DashboardWidget
 			helper.MapUpdateRequestIntoEntity(dashboardWidgetRequest, &dashboardWidgetEntity)
 			dashboardWidgetEntity.MachineId = machineDashboardWidget.MachineId
 			dashboardWidgetEntities = append(dashboardWidgetEntities, &dashboardWidgetEntity)
 		}
+		fmt.Println(machineDashboardWidget)
+		err := machineService.dashboardWidgetRepository.DeleteBatchByCode(gormTransaction, machineDashboardWidget.RemovedWidgets)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		machineService.changeFeaturedParameter(gormTransaction, machineDashboardWidget.AddedParameterIds, true)
+		machineService.changeFeaturedParameter(gormTransaction, machineDashboardWidget.RemoveParameterIds, false)
 		if len(dashboardWidgetEntities) > 0 {
 			err := machineService.dashboardWidgetRepository.CreateBatch(gormTransaction, dashboardWidgetEntities)
 			helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -298,4 +308,20 @@ func (machineService *ServiceImpl) Delete(ginContext *gin.Context, deleteMachine
 	paginationRequest := model.NewPaginationRequest()
 	paginationResp = machineService.FindAllPagination(&paginationRequest)
 	return paginationResp
+}
+
+func (machineService *ServiceImpl) changeFeaturedParameter(gormTransaction *gorm.DB, parameterIds []uint64, isAppend bool) {
+	parameterEntities, err := machineService.parameterRepository.FindBatchById(gormTransaction, parameterIds)
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	if len(parameterEntities) != len(parameterIds) {
+		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusNotFound, exception.ErrSomeResourceNotFound))
+	}
+	for i, _ := range parameterEntities {
+		parameterEntities[i].IsFeatured = isAppend
+	}
+	if len(parameterIds) > 0 {
+		err = machineService.parameterRepository.UpdateBatch(gormTransaction, parameterEntities)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	}
+
 }

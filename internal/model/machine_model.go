@@ -52,8 +52,11 @@ type MachineResponse struct {
 }
 
 type MachineDashboardWidget struct {
-	MachineId       uint64            `json:"-" validate:"required,exists=machines;id"`
-	DashboardWidget []DashboardWidget `json:"dashboard_widgets" validate:"required,dive"`
+	MachineId          uint64            `json:"-" validate:"required,exists=machines;id"`
+	AddedParameterIds  []uint64          `json:"added_parameter_ids"`
+	RemoveParameterIds []uint64          `json:"removed_parameter_id"`
+	AddedWidgets       []DashboardWidget `json:"added_widgets"`
+	RemovedWidgets     []string          `json:"removed_widgets"`
 }
 
 type DashboardWidget struct {

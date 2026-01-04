@@ -21,6 +21,7 @@ type Parameter struct {
 	IsAutomatic                          bool                                   `gorm:"column:is_automatic;"`
 	IsDisplay                            bool                                   `gorm:"column:is_display;"`
 	IsWatch                              bool                                   `gorm:"column:is_watch;"`
+	IsFeatured                           bool                                   `gorm:"column:is_featured;"`
 	MqttTopic                            *MqttTopic                             `gorm:"foreignKey:MqttTopicId;references:Id"`
 	ReportDocumentTemplates              []*ReportDocumentTemplate              `gorm:"many2many:report_document_templates_parameters;joinForeignKey:ParameterID;joinReferences:ReportDocumentTemplateID"`
 	ParameterOperations                  []*ParameterOperation                  `gorm:"foreignKey:ParameterId;references:Id"`

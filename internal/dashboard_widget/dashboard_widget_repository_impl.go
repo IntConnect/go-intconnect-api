@@ -16,6 +16,10 @@ func (dashboardWidgetRepository *RepositoryImpl) DeleteBatchById(gormTransaction
 	return gormTransaction.Model(&entity.DashboardWidget{}).Where("id IN ?", dashboardWidgetIds).Delete(&entity.DashboardWidget{}).Error
 }
 
+func (dashboardWidgetRepository *RepositoryImpl) DeleteBatchByCode(gormTransaction *gorm.DB, dashboardWidgetCodes []string) error {
+	return gormTransaction.Model(&entity.DashboardWidget{}).Where("code IN ?", dashboardWidgetCodes).Delete(&entity.DashboardWidget{}).Error
+}
+
 func (dashboardWidgetRepository *RepositoryImpl) CreateBatch(gormTransaction *gorm.DB, dashboardWidgets []*entity.DashboardWidget) error {
 	err := gormTransaction.Create(&dashboardWidgets).Error
 	return err

@@ -15,5 +15,6 @@ type Repository interface {
 	Create(gormTransaction *gorm.DB, parameterEntity *entity.Parameter) error
 	CreateBatch(gormTransaction *gorm.DB, parameterEntity []*entity.Parameter) error
 	Update(gormTransaction *gorm.DB, parameterEntity *entity.Parameter) error
+	UpdateBatch(gormTransaction *gorm.DB, parameterEntities []*entity.Parameter) error
 	Delete(gormTransaction *gorm.DB, parameterId uint64) error
 }

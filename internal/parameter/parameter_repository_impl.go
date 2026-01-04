@@ -88,6 +88,10 @@ func (parameterRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, 
 	return gormTransaction.Model(parameterEntity).Save(parameterEntity).Error
 }
 
+func (parameterRepositoryImpl *RepositoryImpl) UpdateBatch(gormTransaction *gorm.DB, parameterEntities []*entity.Parameter) error {
+	return gormTransaction.Model(parameterEntities).Save(parameterEntities).Error
+}
+
 func (parameterRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
 	return gormTransaction.Model(entity.Parameter{}).Where("id = ?", id).Delete(entity.Parameter{}).Error
 }

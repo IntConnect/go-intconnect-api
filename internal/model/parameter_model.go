@@ -15,8 +15,10 @@ type ParameterResponse struct {
 	RotationX         float32                      `json:"rotation_x"`
 	RotationY         float32                      `json:"rotation_y"`
 	RotationZ         float32                      `json:"rotation_z"`
-	IsDisplay         bool                         `json:"is_display"`
 	IsAutomatic       bool                         `json:"is_automatic"`
+	IsDisplay         bool                         `json:"is_display"`
+	IsWatch           bool                         `json:"is_watch"`
+	IsFeatured        bool                         `json:"is_featured"`
 	MqttTopicResponse *MqttTopicResponse           `json:"mqtt_topic" mapstructure:"-"`
 	AuditableResponse *AuditableResponse           `json:"auditable" mapstructure:"-"`
 	Operations        []ParameterOperationResponse `json:"operations" mapstructure:"ParameterOperations"`
@@ -44,6 +46,8 @@ type CreateParameterRequest struct {
 	RotationZ   *float32 `json:"rotation_z,omitempty"`
 	IsDisplay   bool     `json:"is_display"`
 	IsAutomatic bool     `json:"is_automatic"`
+	IsWatch     bool     `json:"is_watch"`
+	IsFeatured  bool     `json:"is_featured"`
 }
 
 type UpdateParameterRequest struct {
@@ -64,6 +68,8 @@ type UpdateParameterRequest struct {
 	RotationZ   *float32 `json:"rotation_z,omitempty"`
 	IsDisplay   bool     `json:"is_display"`
 	IsAutomatic bool     `json:"is_automatic"`
+	IsWatch     bool     `json:"is_watch"`
+	IsFeatured  bool     `json:"is_featured"`
 }
 
 type ManageParameterOperationRequest struct {
@@ -90,6 +96,7 @@ type ParameterFilterRequest struct {
 	IsAutomatic *string `form:"omitempty,is_automatic"`
 	IsDisplay   *string `form:"omitempty,is_display"`
 	IsWatch     *string `form:"omitempty,is_watch"`
+	IsFeatured  *string `form:"omitempty,is_featured"`
 }
 
 func (parameterResponse *ParameterResponse) GetAuditableResponse() *AuditableResponse {
