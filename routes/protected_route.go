@@ -2,6 +2,7 @@ package routes
 
 import (
 	"go-intconnect-api/configs"
+	alarmLog "go-intconnect-api/internal/alarm_log"
 	auditLog "go-intconnect-api/internal/audit_log"
 	checkSheet "go-intconnect-api/internal/check_sheet"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
@@ -45,7 +46,9 @@ type ProtectedRoutes struct {
 	telemetryController                  telemetry.Controller
 	checkSheetController                 checkSheet.Controller
 	registerController                   register.Controller
-	roleService                          role.Service
+	alarmLogController                   alarmLog.Controller
+
+	roleService role.Service
 }
 
 func NewProtectedRoutes(
@@ -68,6 +71,7 @@ func NewProtectedRoutes(
 	telemetryController telemetry.Controller,
 	checkSheetController checkSheet.Controller,
 	registerController register.Controller,
+	alarmLogController alarmLog.Controller,
 	roleService role.Service,
 
 ) *ProtectedRoutes {
@@ -93,6 +97,7 @@ func NewProtectedRoutes(
 		telemetryController:                  telemetryController,
 		checkSheetController:                 checkSheetController,
 		registerController:                   registerController,
+		alarmLogController:                   alarmLogController,
 	}
 }
 
@@ -217,5 +222,10 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	registerRouterGroup.POST("", protectedRoutes.registerController.CreateRegister)
 	registerRouterGroup.PUT("/:id", protectedRoutes.registerController.UpdateRegister)
 	registerRouterGroup.DELETE("/:id", protectedRoutes.registerController.DeleteRegister)
+
+	alarmLogRouterGroup := routerGroup.Group("alarm-logs")
+	alarmLogRouterGroup.GET("pagination", protectedRoutes.alarmLogController.FindAllAlarmLogPagination)
+	alarmLogRouterGroup.GET("", protectedRoutes.alarmLogController.FindAllAlarmLog)
+	alarmLogRouterGroup.PUT("/:id", protectedRoutes.alarmLogController.UpdateAlarmLog)
 
 }

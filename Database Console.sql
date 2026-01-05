@@ -143,6 +143,8 @@ SELECT *
 FROM roles;
 SELECT *
 FROM roles_permissions;
+SELECT *
+FROM alarm_logs;
 
 DELETE
 FROM check_sheet_values;
@@ -152,7 +154,8 @@ DELETE
 FROM parameters;
 DELETE
 FROM telemetries;
-DELETE FROM log_alarms;
+DELETE
+FROM alarm_logs;
 SELECT bucket,
        parameter_id,
        last_value
@@ -165,8 +168,4 @@ FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
       GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
 
-ALTER TABLE log_alarms
-    RENAME COLUMN notes TO note;
 
-SELECT * FROM log_alarms;
-DELETE FROM log_alarms;

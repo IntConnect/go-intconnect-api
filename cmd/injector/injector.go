@@ -2,6 +2,7 @@ package injector
 
 import (
 	"go-intconnect-api/configs"
+	alarmLog "go-intconnect-api/internal/alarm_log"
 	auditLog "go-intconnect-api/internal/audit_log"
 	checkSheet "go-intconnect-api/internal/check_sheet"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
@@ -271,4 +272,10 @@ var RegisterModule = fx.Module("registerFeature",
 	fx.Provide(fx.Annotate(register.NewRepository, fx.As(new(register.Repository)))),
 	fx.Provide(fx.Annotate(register.NewService, fx.As(new(register.Service)))),
 	fx.Provide(fx.Annotate(register.NewHandler, fx.As(new(register.Controller)))),
+)
+
+var AlarmLogModule = fx.Module("alarmLogFeature",
+	fx.Provide(fx.Annotate(alarmLog.NewRepository, fx.As(new(alarmLog.Repository)))),
+	fx.Provide(fx.Annotate(alarmLog.NewService, fx.As(new(alarmLog.Service)))),
+	fx.Provide(fx.Annotate(alarmLog.NewHandler, fx.As(new(alarmLog.Controller)))),
 )

@@ -190,12 +190,12 @@ func (permissionSeeder *PermissionSeeder) Run(gormDatabase *gorm.DB) error {
 			Auditable:   entity.NewAuditable("System"),
 		},
 
-		// LOG ALARM
+		//  ALARM LOG
 		{
-			Code:        "LOG_ALARM_VIEW",
+			Code:        "ALARM_LOG_VIEW",
 			Name:        "View",
-			Category:    "Log Alarm",
-			Description: "Permission to view log alarm",
+			Category:    "Alarm Log",
+			Description: "Permission to view alarm log",
 			Auditable:   entity.NewAuditable("System"),
 		},
 

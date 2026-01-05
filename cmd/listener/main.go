@@ -592,30 +592,31 @@ func allAbnormal(values []float64, parameterEntity *entity.Parameter) bool {
 }
 
 func (listenerFluxor *ListenerFluxor) saveAlarm(parameterEntity *entity.Parameter, value float64) {
-	var logAlarmEntity entity.LogAlarm
+	var alarmLogEntity entity.AlarmLog
 	err := listenerFluxor.gormDatabase.
 		Where("parameter_id = ? AND is_active = true", parameterEntity.Id).
-		First(&logAlarmEntity).Error
+		First(&alarmLogEntity).Error
 
 	if err == nil {
-		logAlarmEntity.Value = value
-		logAlarmEntity.UpdatedAt = time.Now()
+		alarmLogEntity.Value = value
+		alarmLogEntity.UpdatedAt = time.Now()
 	} else {
 		alarmType := "HIGH"
 		if value < parameterEntity.MinValue {
 			alarmType = "LOW"
 		}
 
-		logAlarmEntity = entity.LogAlarm{
+		alarmLogEntity = entity.AlarmLog{
 			ParameterId: parameterEntity.Id,
 			Value:       value,
 			Type:        alarmType,
 			IsActive:    true,
 			Note:        "",
+			Status:      "Open",
 		}
 	}
 
-	listenerFluxor.gormDatabase.Save(&logAlarmEntity)
+	listenerFluxor.gormDatabase.Save(&alarmLogEntity)
 	logger.Warn("Alarm triggered for parameter %d", parameterEntity.Id)
 }
 
@@ -641,10 +642,11 @@ func (listenerFluxor *ListenerFluxor) checkRecovery(parameterEntity *entity.Para
 }
 
 func (listenerFluxor *ListenerFluxor) resolveAlarm(parameterId uint64) {
-	listenerFluxor.gormDatabase.Model(&entity.LogAlarm{}).
+	listenerFluxor.gormDatabase.Model(&entity.AlarmLog{}).
 		Where("parameter_id = ? AND is_active = true", parameterId).
 		Updates(map[string]interface{}{
 			"is_active":   false,
+			"status":      "Resolved",
 			"resolved_at": time.Now(),
 		})
 

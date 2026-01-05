@@ -60,6 +60,7 @@ func main() {
 		injector.CheckSheetDocumentTemplateParameterModule,
 		injector.DashboardWidgetModule,
 		injector.RegisterModule,
+		injector.AlarmLogModule,
 		// Invoker
 		fx.Invoke(Run),
 	)
