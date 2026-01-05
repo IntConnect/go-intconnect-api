@@ -112,6 +112,8 @@ SELECT *
 FROM telemetries;
 SELECT *
 FROM parameters;
+SELECT *
+FROM parameters WHERE is_watch = true;
 
 SELECT *
 FROM report_document_templates;
@@ -138,6 +140,15 @@ FROM dashboard_widgets;
 SELECT *
 FROM parameters
 WHERE is_featured = TRUE;
+SELECT *
+FROM mqtt_topics;
+SELECT *
+FROM users;
+SELECT *
+FROM roles;
+SELECT *
+FROM roles_permissions;
+
 DELETE
 FROM check_sheet_values;
 DELETE
@@ -146,7 +157,7 @@ DELETE
 FROM parameters;
 DELETE
 FROM telemetries;
-
+DELETE FROM log_alarms;
 SELECT bucket,
        parameter_id,
        last_value
@@ -161,3 +172,6 @@ ORDER BY bucket;
 
 ALTER TABLE log_alarms
     RENAME COLUMN notes TO note;
+
+SELECT * FROM log_alarms;
+DELETE FROM log_alarms;

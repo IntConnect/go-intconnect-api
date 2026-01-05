@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/pkg/logger"
 	"os"
 	"os/signal"
@@ -349,22 +350,27 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 		if !isExists {
 
 			newParameters = append(newParameters, &entity.Parameter{
-				MqttTopicId: &mqttTopicId,
-				Name:        mqttKey,
-				Code:        mqttKey,
-				Unit:        "N/A",
-				MinValue:    0,
-				MaxValue:    0,
-				Description: "N/A",
-				PositionX:   0,
-				PositionY:   0,
-				PositionZ:   0,
-				RotationX:   0,
-				RotationY:   0,
-				RotationZ:   0,
-				IsDisplay:   false,
-				IsAutomatic: true,
-				Auditable:   entity.NewAuditable("System"),
+				MqttTopicId:      &mqttTopicId,
+				Name:             mqttKey,
+				Code:             mqttKey,
+				Unit:             "N/A",
+				MinValue:         0,
+				MaxValue:         0,
+				Description:      "N/A",
+				Category:         trait.ParameterCategoryData,
+				PositionX:        0,
+				PositionY:        0,
+				PositionZ:        0,
+				RotationX:        0,
+				RotationY:        0,
+				RotationZ:        0,
+				AbnormalDuration: 1,
+				IsAutomatic:      true,
+				IsDisplay:        false,
+				IsWatch:          false,
+				IsRunningTime:    false,
+				IsFeatured:       false,
+				Auditable:        entity.NewAuditable("System"),
 			})
 		}
 	}
@@ -403,7 +409,10 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 				Value:       parsedMqttValue,
 				Timestamp:   mqttPayload.Timestamp.Time,
 			}
-			listenerFluxor.checkAbnormality(parameterEntity, parsedMqttValue)
+			if parameterEntity.IsWatch {
+				fmt.Println(parameterEntity.Name)
+				listenerFluxor.checkAbnormality(parameterEntity, parsedMqttValue)
+			}
 
 		} else {
 			logger.WithError(err).Info("Parameter not exists")
@@ -509,7 +518,7 @@ func converterMqttTopicsToListenerResponse(mqttTopicEntities []entity.MqttTopic)
 
 func (listenerFluxor *ListenerFluxor) StartSnapshotSaver(ctx context.Context) {
 	go func() {
-		snapshotTicker := time.NewTicker(1 * time.Minute)
+		snapshotTicker := time.NewTicker(3 * time.Second)
 		defer snapshotTicker.Stop()
 
 		for {
@@ -547,9 +556,9 @@ func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.P
 	defer listenerFluxor.alarmMutex.Unlock()
 
 	requiredSamples := int(parameterEntity.AbnormalDuration) * 4
-
+	fmt.Println(parameterEntity.Name)
 	// Init buffer
-	if _, ok := listenerFluxor.abnormalBuffers[parameterEntity.Id]; !ok {
+	if _, isExists := listenerFluxor.abnormalBuffers[parameterEntity.Id]; !isExists {
 		listenerFluxor.abnormalBuffers[parameterEntity.Id] = &AbnormalWindow{}
 	}
 
@@ -560,9 +569,10 @@ func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.P
 		buffer.Values = buffer.Values[1:]
 	}
 
+	fmt.Println(buffer.Values, requiredSamples)
 	// === CHECK CREATE ALARM ===
 	if len(buffer.Values) == requiredSamples && allAbnormal(buffer.Values, parameterEntity) {
-		listenerFluxor.createAlarmIfNotExists(parameterEntity, value)
+		listenerFluxor.saveAlarm(parameterEntity, value)
 		listenerFluxor.recoveryBuffers[parameterEntity.Id] = &AlarmRecoveryWindow{}
 		return
 	}
@@ -573,6 +583,7 @@ func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.P
 
 func allAbnormal(values []float64, parameterEntity *entity.Parameter) bool {
 	for _, v := range values {
+		fmt.Println(parameterEntity.MinValue, parameterEntity.MaxValue, values)
 		if v >= parameterEntity.MinValue && v <= parameterEntity.MaxValue {
 			return false
 		}
@@ -580,30 +591,31 @@ func allAbnormal(values []float64, parameterEntity *entity.Parameter) bool {
 	return true
 }
 
-func (listenerFluxor *ListenerFluxor) createAlarmIfNotExists(parameterEntity *entity.Parameter, value float64) {
-	var existingLogAlarm entity.LogAlarm
+func (listenerFluxor *ListenerFluxor) saveAlarm(parameterEntity *entity.Parameter, value float64) {
+	var logAlarmEntity entity.LogAlarm
 	err := listenerFluxor.gormDatabase.
 		Where("parameter_id = ? AND is_active = true", parameterEntity.Id).
-		First(&existingLogAlarm).Error
+		First(&logAlarmEntity).Error
 
 	if err == nil {
-		return // alarm already active
+		logAlarmEntity.Value = value
+		logAlarmEntity.UpdatedAt = time.Now()
+	} else {
+		alarmType := "HIGH"
+		if value < parameterEntity.MinValue {
+			alarmType = "LOW"
+		}
+
+		logAlarmEntity = entity.LogAlarm{
+			ParameterId: parameterEntity.Id,
+			Value:       value,
+			Type:        alarmType,
+			IsActive:    true,
+			Note:        "",
+		}
 	}
 
-	alarmType := "HIGH"
-	if value < parameterEntity.MinValue {
-		alarmType = "LOW"
-	}
-
-	alarm := entity.LogAlarm{
-		ParameterId: parameterEntity.Id,
-		Value:       value,
-		Type:        alarmType,
-		Category:    "CRITICAL",
-		IsActive:    true,
-	}
-
-	listenerFluxor.gormDatabase.Create(&alarm)
+	listenerFluxor.gormDatabase.Save(&logAlarmEntity)
 	logger.Warn("Alarm triggered for parameter %d", parameterEntity.Id)
 }
 
