@@ -19,6 +19,7 @@ type ParameterResponse struct {
 	IsDisplay         bool                         `json:"is_display"`
 	IsWatch           bool                         `json:"is_watch"`
 	IsFeatured        bool                         `json:"is_featured"`
+	IsRunningTime     bool                         `json:"is_running_time"`
 	MqttTopicResponse *MqttTopicResponse           `json:"mqtt_topic" mapstructure:"-"`
 	AuditableResponse *AuditableResponse           `json:"auditable" mapstructure:"-"`
 	Operations        []ParameterOperationResponse `json:"operations" mapstructure:"ParameterOperations"`
@@ -30,46 +31,48 @@ type ParameterDependency struct {
 }
 
 type CreateParameterRequest struct {
-	MachineId   uint64   `json:"machine_id" validate:"required,number,gte=1,exists=machines;id" property:"Machine"`
-	MqttTopicId *uint64  `json:"mqtt_topic_id" validate:"required,number,gte=1,exists=mqtt_topics;id" property:"MQTT Topic"`
-	Name        string   `json:"name" validate:"required,min=3,max=100"`
-	Code        string   `json:"code" validate:"required,min=3,max=100"`
-	Unit        string   `json:"unit" validate:"required,min=1,max=100"`
-	MinValue    *float32 `json:"min_value,omitempty"`
-	MaxValue    *float32 `json:"max_value,omitempty"`
-	Description string   `json:"description"`
-	PositionX   *float32 `json:"position_x,omitempty"`
-	PositionY   *float32 `json:"position_y,omitempty"`
-	PositionZ   *float32 `json:"position_z,omitempty"`
-	RotationX   *float32 `json:"rotation_x,omitempty"`
-	RotationY   *float32 `json:"rotation_y,omitempty"`
-	RotationZ   *float32 `json:"rotation_z,omitempty"`
-	IsDisplay   bool     `json:"is_display"`
-	IsAutomatic bool     `json:"is_automatic"`
-	IsWatch     bool     `json:"is_watch"`
-	IsFeatured  bool     `json:"is_featured"`
+	MachineId     uint64   `json:"machine_id" validate:"required,number,gte=1,exists=machines;id" property:"Machine"`
+	MqttTopicId   *uint64  `json:"mqtt_topic_id" validate:"required,number,gte=1,exists=mqtt_topics;id" property:"MQTT Topic"`
+	Name          string   `json:"name" validate:"required,min=3,max=100"`
+	Code          string   `json:"code" validate:"required,min=3,max=100"`
+	Unit          string   `json:"unit" validate:"required,min=1,max=100"`
+	MinValue      *float32 `json:"min_value,omitempty"`
+	MaxValue      *float32 `json:"max_value,omitempty"`
+	Description   string   `json:"description"`
+	PositionX     *float32 `json:"position_x,omitempty"`
+	PositionY     *float32 `json:"position_y,omitempty"`
+	PositionZ     *float32 `json:"position_z,omitempty"`
+	RotationX     *float32 `json:"rotation_x,omitempty"`
+	RotationY     *float32 `json:"rotation_y,omitempty"`
+	RotationZ     *float32 `json:"rotation_z,omitempty"`
+	IsDisplay     bool     `json:"is_display"`
+	IsAutomatic   bool     `json:"is_automatic"`
+	IsWatch       bool     `json:"is_watch"`
+	IsFeatured    bool     `json:"is_featured"`
+	IsRunningTime bool     `json:"is_running_time"`
 }
 
 type UpdateParameterRequest struct {
-	Id          uint64   `json:"-" validate:"required,number,gte=1,exists=parameters;id"`
-	MachineId   uint64   `json:"machine_id" validate:"required,number,gte=1,exists=machines;id" property:"Machine"`
-	MqttTopicId *uint64  `json:"mqtt_topic_id" validate:"required,number,gte=1,exists=mqtt_topics;id" property:"MQTT Topic"`
-	Name        string   `json:"name" validate:"required,min=3,max=100"`
-	Code        string   `json:"code" validate:"required,min=3,max=100"`
-	Unit        string   `json:"unit" validate:"required,min=1,max=100"`
-	MinValue    *float32 `json:"min_value,omitempty"`
-	MaxValue    *float32 `json:"max_value,omitempty"`
-	Description string   `json:"description"`
-	PositionX   *float32 `json:"position_x,omitempty"`
-	PositionY   *float32 `json:"position_y,omitempty"`
-	PositionZ   *float32 `json:"position_z,omitempty"`
-	RotationX   *float32 `json:"rotation_x,omitempty"`
-	RotationY   *float32 `json:"rotation_y,omitempty"`
-	RotationZ   *float32 `json:"rotation_z,omitempty"`
-	IsDisplay   bool     `json:"is_display"`
-	IsAutomatic bool     `json:"is_automatic"`
-	IsWatch     bool     `json:"is_watch"`
-	IsFeatured  bool     `json:"is_featured"`
+	Id            uint64   `json:"-" validate:"required,number,gte=1,exists=parameters;id"`
+	MachineId     uint64   `json:"machine_id" validate:"required,number,gte=1,exists=machines;id" property:"Machine"`
+	MqttTopicId   *uint64  `json:"mqtt_topic_id" validate:"required,number,gte=1,exists=mqtt_topics;id" property:"MQTT Topic"`
+	Name          string   `json:"name" validate:"required,min=3,max=100"`
+	Code          string   `json:"code" validate:"required,min=3,max=100"`
+	Unit          string   `json:"unit" validate:"required,min=1,max=100"`
+	MinValue      *float32 `json:"min_value,omitempty"`
+	MaxValue      *float32 `json:"max_value,omitempty"`
+	Description   string   `json:"description"`
+	PositionX     *float32 `json:"position_x,omitempty"`
+	PositionY     *float32 `json:"position_y,omitempty"`
+	PositionZ     *float32 `json:"position_z,omitempty"`
+	RotationX     *float32 `json:"rotation_x,omitempty"`
+	RotationY     *float32 `json:"rotation_y,omitempty"`
+	RotationZ     *float32 `json:"rotation_z,omitempty"`
+	IsDisplay     bool     `json:"is_display"`
+	IsAutomatic   bool     `json:"is_automatic"`
+	IsWatch       bool     `json:"is_watch"`
+	IsFeatured    bool     `json:"is_featured"`
+	IsRunningTime bool     `json:"is_running_time"`
 }
 
 type ManageParameterOperationRequest struct {
