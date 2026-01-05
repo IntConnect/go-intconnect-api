@@ -9,7 +9,7 @@ type MqttTopic struct {
 	MqttBroker   *MqttBroker  `gorm:"foreignKey:MqttBrokerId"`
 	Machine      *Machine     `gorm:"foreignKey:MachineId;references:Id"`
 	Parameters   []*Parameter `gorm:"foreignKey:MqttTopicId;references:Id"`
-	Auditable
+	Auditable    Auditable    `gorm:"embedded"`
 }
 
 func (mqttTopicEntity MqttTopic) GetAuditable() *Auditable {

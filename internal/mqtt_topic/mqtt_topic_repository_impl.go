@@ -23,9 +23,9 @@ func (mqttTopicRepositoryImpl *RepositoryImpl) FindAllPagination(
 	orderClause string,
 	offsetVal, limitPage int,
 	searchQuery string,
-) ([]entity.MqttTopic, int64, error) {
+) ([]*entity.MqttTopic, int64, error) {
 
-	var mqttTopicEntities []entity.MqttTopic
+	var mqttTopicEntities []*entity.MqttTopic
 	var totalItems int64
 
 	// Base query

@@ -79,7 +79,7 @@ func (mqttTopicService *ServiceImpl) FindAllPagination(paginationReq *model.Pagi
 			paginationQuery.Limit,
 			paginationQuery.SearchQuery,
 		)
-		mqttTopicResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.MqttTopic, *model.MqttTopicResponse](
+		mqttTopicResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.MqttTopic, *model.MqttTopicResponse](
 			mqttTopicEntities,
 			mapper.FuncMapAuditable,
 		)

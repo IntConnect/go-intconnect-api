@@ -153,7 +153,7 @@ func MapEntityIntoResponse[S any, R any](
 
 	if len(renderPayloads) > 0 {
 		for _, renderPayload := range renderPayloads {
-			if renderPayload == nil { // <-- cegah panic
+			if renderPayload == nil {
 				continue
 			}
 			renderPayload(entityObject, responseObject)
