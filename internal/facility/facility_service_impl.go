@@ -6,7 +6,6 @@ import (
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/storage"
-	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -110,7 +109,6 @@ func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacili
 	facilityService.validatorService.ParseValidationError(valErr, *createFacilityRequest)
 	err := facilityService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		facilityEntity := helper.MapCreateRequestIntoEntity[model.CreateFacilityRequest, entity.Facility](createFacilityRequest)
-		facilityEntity.Status = trait.FacilityStatusActive
 		thumbnailPath, err := facilityService.localStorageService.Disk().Put(createFacilityRequest.Thumbnail, fmt.Sprintf("facilities/thumbnails/%d-%s", time.Now().UnixNano(), createFacilityRequest.Thumbnail.Filename))
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 		facilityEntity.ThumbnailPath = thumbnailPath

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"go-intconnect-api/internal/entity"
-	"go-intconnect-api/internal/trait"
 
 	"github.com/jaswdr/faker/v2"
 	"gorm.io/gorm"
@@ -21,19 +20,12 @@ func (facilitySeeder *FacilitySeeder) Run(gormDatabase *gorm.DB) error {
 	fake := faker.New()
 	rand.Seed(time.Now().UnixNano())
 
-	statuses := []trait.FacilityStatus{
-		trait.FacilityStatusActive,
-		trait.FacilityStatusMaintenance,
-		trait.FacilityStatusArchived,
-	}
-
 	for i := 1; i <= 15; i++ {
 		facility := entity.Facility{
 			Name:        fmt.Sprintf("Facility %s", fake.Company().Name()),
 			Code:        fmt.Sprintf("FAC-%03d", i),
 			Location:    fake.Address().City(),
 			Description: fake.Lorem().Sentence(10),
-			Status:      statuses[rand.Intn(len(statuses))],
 
 			ThumbnailPath: fmt.Sprintf("thumbnails/facility_%d.png", i),
 			ModelPath:     fmt.Sprintf("models/facility_%d.glb", i),

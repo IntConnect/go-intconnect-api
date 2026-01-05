@@ -1,4 +1,3 @@
-CREATE TYPE facility_status_enum AS ENUM ('Active', 'Maintenance', 'Archived');
 
 
 CREATE TABLE facilities
@@ -8,7 +7,6 @@ CREATE TABLE facilities
     code           VARCHAR(255)         NOT NULL UNIQUE,
     location       VARCHAR(255),
     description    TEXT,
-    status         facility_status_enum NOT NULL,
     thumbnail_path VARCHAR(255)         NOT NULL,
     model_path     VARCHAR(255)         NOT NULL,
     position_x     FLOAT                NOT NULL DEFAULT 0,

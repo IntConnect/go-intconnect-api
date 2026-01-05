@@ -39,7 +39,6 @@ type FacilityResponse struct {
 	Code              string             `json:"code"`
 	Description       string             `json:"description"`
 	Location          string             `json:"location"`
-	Status            string             `json:"status"`
 	ThumbnailPath     string             `json:"thumbnail_path"`
 	ModelPath         string             `json:"model_path"`
 	PositionX         float64            `json:"position_x"`
