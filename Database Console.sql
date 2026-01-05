@@ -92,12 +92,7 @@ FROM machines;
 SELECT *
 FROM parameters;
 SELECT *
-FROM breakdowns;
-SELECT *
 FROM users;
-SELECT *
-FROM breakdown_resources;
-
 SELECT *
 FROM facilities;
 SELECT *

@@ -3,7 +3,6 @@ package routes
 import (
 	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
-	"go-intconnect-api/internal/breakdown"
 	checkSheet "go-intconnect-api/internal/check_sheet"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	"go-intconnect-api/internal/facility"
@@ -42,7 +41,6 @@ type ProtectedRoutes struct {
 	modbusServerController               modbusServer.Controller
 	reportDocumentTemplateController     reportDocumentTemplate.Controller
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller
-	breakdownController                  breakdown.Controller
 	systemSettingController              systemSetting.Controller
 	telemetryController                  telemetry.Controller
 	checkSheetController                 checkSheet.Controller
@@ -66,7 +64,6 @@ func NewProtectedRoutes(
 	smtpServerController smtpServer.Controller,
 	modbusServerController modbusServer.Controller,
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller,
-	breakdownController breakdown.Controller,
 	systemSettingController systemSetting.Controller,
 	telemetryController telemetry.Controller,
 	checkSheetController checkSheet.Controller,
@@ -92,7 +89,6 @@ func NewProtectedRoutes(
 		smtpServerController:                 smtpServerController,
 		modbusServerController:               modbusServerController,
 		checkSheetDocumentTemplateController: checkSheetDocumentTemplateController,
-		breakdownController:                  breakdownController,
 		systemSettingController:              systemSettingController,
 		telemetryController:                  telemetryController,
 		checkSheetController:                 checkSheetController,
@@ -196,14 +192,6 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	checkSheetDocumentTemplateRouterGroup.POST("", protectedRoutes.checkSheetDocumentTemplateController.CreateCheckSheetDocumentTemplate)
 	checkSheetDocumentTemplateRouterGroup.PUT("/:id", protectedRoutes.checkSheetDocumentTemplateController.UpdateCheckSheetDocumentTemplate)
 	checkSheetDocumentTemplateRouterGroup.DELETE("/:id", protectedRoutes.checkSheetDocumentTemplateController.DeleteCheckSheetDocumentTemplate)
-
-	breakdownRouterGroup := routerGroup.Group("breakdowns")
-	breakdownRouterGroup.GET("pagination", protectedRoutes.breakdownController.FindAllBreakdownPagination)
-	breakdownRouterGroup.GET("", protectedRoutes.breakdownController.FindAllBreakdown)
-	breakdownRouterGroup.GET("/:id", protectedRoutes.breakdownController.FindBreakdownById)
-	breakdownRouterGroup.POST("", protectedRoutes.breakdownController.CreateBreakdown)
-	breakdownRouterGroup.PUT("/:id", protectedRoutes.breakdownController.UpdateBreakdown)
-	breakdownRouterGroup.DELETE("/:id", protectedRoutes.breakdownController.DeleteBreakdown)
 
 	systemSettingRouterGroup := routerGroup.Group("system-settings")
 	systemSettingRouterGroup.GET("", protectedRoutes.systemSettingController.FindAllSystemSetting)

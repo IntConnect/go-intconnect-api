@@ -3,8 +3,6 @@ package injector
 import (
 	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
-	"go-intconnect-api/internal/breakdown"
-	breakdownResource "go-intconnect-api/internal/breakdown_resource"
 	checkSheet "go-intconnect-api/internal/check_sheet"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	checkSheetDocumentTemplateParameter "go-intconnect-api/internal/check_sheet_document_template_parameter"
@@ -229,20 +227,10 @@ var ModbusServerModule = fx.Module("modbusServerFeature",
 	fx.Provide(fx.Annotate(modbusServer.NewHandler, fx.As(new(modbusServer.Controller)))),
 )
 
-var BreakdownModule = fx.Module("breakdownFeature",
-	fx.Provide(fx.Annotate(breakdown.NewRepository, fx.As(new(breakdown.Repository)))),
-	fx.Provide(fx.Annotate(breakdown.NewService, fx.As(new(breakdown.Service)))),
-	fx.Provide(fx.Annotate(breakdown.NewHandler, fx.As(new(breakdown.Controller)))),
-)
-
 var CheckSheetDocumentModule = fx.Module("checkSheetDocumentTemplateFeature",
 	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewRepository, fx.As(new(checkSheetDocumentTemplate.Repository)))),
 	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewService, fx.As(new(checkSheetDocumentTemplate.Service)))),
 	fx.Provide(fx.Annotate(checkSheetDocumentTemplate.NewHandler, fx.As(new(checkSheetDocumentTemplate.Controller)))),
-)
-
-var BreakdownResourceModule = fx.Module("breakdownResourceFeature",
-	fx.Provide(fx.Annotate(breakdownResource.NewRepository, fx.As(new(breakdownResource.Repository)))),
 )
 
 var ParameterOperationModule = fx.Module("parameterOperationFeature",

@@ -190,36 +190,6 @@ func (permissionSeeder *PermissionSeeder) Run(gormDatabase *gorm.DB) error {
 			Auditable:   entity.NewAuditable("System"),
 		},
 
-		// BREAKDOWN
-		{
-			Code:        "BREAKDOWN_VIEW",
-			Name:        "View",
-			Category:    "Breakdown",
-			Description: "Permission to view breakdowns",
-			Auditable:   entity.NewAuditable("System"),
-		},
-		{
-			Code:        "BREAKDOWN_CREATE",
-			Name:        "Create",
-			Category:    "Breakdown",
-			Description: "Permission to create breakdowns",
-			Auditable:   entity.NewAuditable("System"),
-		},
-		{
-			Code:        "BREAKDOWN_EDIT",
-			Name:        "Update",
-			Category:    "Breakdown",
-			Description: "Permission to update breakdowns",
-			Auditable:   entity.NewAuditable("System"),
-		},
-		{
-			Code:        "BREAKDOWN_DELETE",
-			Name:        "Delete",
-			Category:    "Breakdown",
-			Description: "Permission to delete breakdowns",
-			Auditable:   entity.NewAuditable("System"),
-		},
-
 		// LOG ALARM
 		{
 			Code:        "LOG_ALARM_VIEW",
