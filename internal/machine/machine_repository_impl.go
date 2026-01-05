@@ -77,8 +77,8 @@ func (machineRepositoryImpl *RepositoryImpl) FindByFacilityId(gormTransaction *g
 	return machineEntities, err
 }
 
-func (machineRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, pipelineEntity *entity.Machine) error {
-	return gormTransaction.Model(pipelineEntity).Create(pipelineEntity).Error
+func (machineRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, machineEntity *entity.Machine) error {
+	return gormTransaction.Model(machineEntity).Create(machineEntity).Error
 
 }
 
