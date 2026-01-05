@@ -57,6 +57,7 @@ func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
+		Preload("MqttTopic.Machine").
 		Preload("ParameterOperations").
 		Order(orderClause).
 		Offset(offsetVal).
@@ -71,7 +72,9 @@ func (parameterRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB
 	var parameterEntity entity.Parameter
 	err := gormTransaction.Model(&entity.Parameter{}).
 		Preload("ParameterOperations").
-		Where("id = ?", parameterId).First(&parameterEntity).Error
+		Preload("MqttTopic.Machine").
+		Where("id = ?", parameterId).
+		First(&parameterEntity).Error
 
 	return &parameterEntity, err
 }

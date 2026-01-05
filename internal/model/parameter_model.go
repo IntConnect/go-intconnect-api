@@ -20,9 +20,9 @@ type ParameterResponse struct {
 	IsWatch           bool                         `json:"is_watch"`
 	IsFeatured        bool                         `json:"is_featured"`
 	IsRunningTime     bool                         `json:"is_running_time"`
-	MqttTopicResponse *MqttTopicResponse           `json:"mqtt_topic" mapstructure:"-"`
-	AuditableResponse *AuditableResponse           `json:"auditable" mapstructure:"-"`
+	MqttTopicResponse MqttTopicResponse            `json:"mqtt_topic" mapstructure:"MqttTopic"`
 	Operations        []ParameterOperationResponse `json:"operations" mapstructure:"ParameterOperations"`
+	AuditableResponse *AuditableResponse           `json:"auditable"`
 }
 
 type ParameterDependency struct {
