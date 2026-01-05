@@ -2,7 +2,6 @@ CREATE TABLE machines
 (
     id             SERIAL PRIMARY KEY,
     facility_id    BIGINT       NOT NULL REFERENCES facilities (id),
-    parameter_id   BIGINT REFERENCES parameters (id),
     name           VARCHAR(255) NOT NULL,
     code           VARCHAR(255) NOT NULL,
     description    VARCHAR(255) NOT NULL,
