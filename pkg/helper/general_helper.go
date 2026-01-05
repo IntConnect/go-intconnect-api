@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"encoding/json"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/pkg/exception"
@@ -99,35 +100,21 @@ func TakePointer[T any](value T) *T {
 }
 
 func DebugArrPointer[T any](arrayOfPointer []*T) {
-	for _, pointerData := range arrayOfPointer {
+	for i, pointerData := range arrayOfPointer {
 		if pointerData == nil {
-			logger.Debug("nil pointer")
+			logger.Debug("[%d] nil pointer", i)
 			continue
 		}
 
-		val := reflect.ValueOf(pointerData)
-		typ := val.Type()
-
-		// cek apakah pointer
-		if typ.Kind() == reflect.Ptr {
-			elemVal := val.Elem()
-			elemType := elemVal.Type()
-
-			// cek apakah pointer ke struct
-			if elemType.Kind() == reflect.Struct {
-				logger.Debug("pointer to struct detected")
-				logger.Debug(elemVal.Interface()) // dereference
-			} else {
-				logger.Debug("pointer to non-struct")
-				logger.Debug(pointerData)
-			}
-		} else {
-			logger.Debug("not a pointer")
-			logger.Debug(pointerData)
+		jsonBytes, err := json.MarshalIndent(pointerData, "", "  ")
+		if err != nil {
+			logger.Debug("[%d] Marshal error: %v", i, err)
+			continue
 		}
+
+		logger.Debug("[%d]\n%s", i, string(jsonBytes))
 	}
 }
-
 func DiffEntity(before interface{}, after interface{}) map[string]map[string]interface{} {
 	diff := make(map[string]map[string]interface{})
 
