@@ -3,6 +3,7 @@ CREATE TYPE parameter_categories_enum AS ENUM ('Data', 'Status', 'Time');
 CREATE TABLE parameters
 (
     id                SERIAL PRIMARY KEY,
+    machine_id        BIGINT REFERENCES machines (id),
     mqtt_topic_id     BIGINT REFERENCES mqtt_topics (id),
     name              VARCHAR(255)              NOT NULL,
     code              VARCHAR(255)              NOT NULL,
@@ -24,6 +25,7 @@ CREATE TABLE parameters
     is_watch          BOOLEAN                   NOT NULL DEFAULT FALSE,
     is_featured       BOOLEAN                   NOT NULL DEFAULT FALSE,
     is_running_time   BOOLEAN                   NOT NULL DEFAULT FALSE,
+    is_processed      BOOLEAN                   NOT NULL DEFAULT FALSE,
     created_by        VARCHAR(255),
     created_at        TIMESTAMP                          DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP                          DEFAULT CURRENT_TIMESTAMP,

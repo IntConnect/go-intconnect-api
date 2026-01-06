@@ -1,28 +1,32 @@
 package model
 
 type ParameterResponse struct {
-	Id                uint64                       `json:"id"`
-	MqttTopicId       *uint64                      `json:"mqtt_topic_id"`
-	Name              string                       `json:"name"`
-	Code              string                       `json:"code"`
-	Unit              string                       `json:"unit"`
-	MinValue          float32                      `json:"min_value"`
-	MaxValue          float32                      `json:"max_value"`
-	Description       string                       `json:"description"`
-	PositionX         float32                      `json:"position_x"`
-	PositionY         float32                      `json:"position_y"`
-	PositionZ         float32                      `json:"position_z"`
-	RotationX         float32                      `json:"rotation_x"`
-	RotationY         float32                      `json:"rotation_y"`
-	RotationZ         float32                      `json:"rotation_z"`
-	IsAutomatic       bool                         `json:"is_automatic"`
-	IsDisplay         bool                         `json:"is_display"`
-	IsWatch           bool                         `json:"is_watch"`
-	IsFeatured        bool                         `json:"is_featured"`
-	IsRunningTime     bool                         `json:"is_running_time"`
-	MqttTopicResponse MqttTopicResponse            `json:"mqtt_topic" mapstructure:"MqttTopic"`
-	Operations        []ParameterOperationResponse `json:"operations" mapstructure:"ParameterOperations"`
-	AuditableResponse *AuditableResponse           `json:"auditable"`
+	Id                         uint64                               `json:"id"`
+	MqttTopicId                *uint64                              `json:"mqtt_topic_id"`
+	MachineId                  *uint64                              `json:"machine_id"`
+	Name                       string                               `json:"name"`
+	Code                       string                               `json:"code"`
+	Unit                       string                               `json:"unit"`
+	MinValue                   float32                              `json:"min_value"`
+	MaxValue                   float32                              `json:"max_value"`
+	Description                string                               `json:"description"`
+	PositionX                  float32                              `json:"position_x"`
+	PositionY                  float32                              `json:"position_y"`
+	PositionZ                  float32                              `json:"position_z"`
+	RotationX                  float32                              `json:"rotation_x"`
+	RotationY                  float32                              `json:"rotation_y"`
+	RotationZ                  float32                              `json:"rotation_z"`
+	IsAutomatic                bool                                 `json:"is_automatic"`
+	IsDisplay                  bool                                 `json:"is_display"`
+	IsWatch                    bool                                 `json:"is_watch"`
+	IsFeatured                 bool                                 `json:"is_featured"`
+	IsRunningTime              bool                                 `json:"is_running_time"`
+	IsProcessed                bool                                 `json:"is_processed"`
+	MachineResponse            MachineResponse                      `json:"machine" mapstructure:"Machine"`
+	MqttTopicResponse          MqttTopicResponse                    `json:"mqtt_topic" mapstructure:"MqttTopic"`
+	ParameterOperationResponse []ParameterOperationResponse         `json:"operations" mapstructure:"ParameterOperations"`
+	ProcessedParameterSequence []ProcessedParameterSequenceResponse `json:"processed_parameter_sequence" mapstructure:"ProcessedParameterSequence"`
+	AuditableResponse          *AuditableResponse                   `json:"auditable"`
 }
 
 type ParameterDependency struct {
@@ -31,48 +35,53 @@ type ParameterDependency struct {
 }
 
 type CreateParameterRequest struct {
-	MachineId     uint64   `json:"machine_id" validate:"required,number,gte=1,exists=machines;id" property:"Machine"`
-	MqttTopicId   *uint64  `json:"mqtt_topic_id" validate:"required,number,gte=1,exists=mqtt_topics;id" property:"MQTT Topic"`
-	Name          string   `json:"name" validate:"required,min=3,max=100"`
-	Code          string   `json:"code" validate:"required,min=3,max=100"`
-	Unit          string   `json:"unit" validate:"required,min=1,max=100"`
-	MinValue      *float32 `json:"min_value,omitempty"`
-	MaxValue      *float32 `json:"max_value,omitempty"`
-	Description   string   `json:"description"`
-	PositionX     *float32 `json:"position_x,omitempty"`
-	PositionY     *float32 `json:"position_y,omitempty"`
-	PositionZ     *float32 `json:"position_z,omitempty"`
-	RotationX     *float32 `json:"rotation_x,omitempty"`
-	RotationY     *float32 `json:"rotation_y,omitempty"`
-	RotationZ     *float32 `json:"rotation_z,omitempty"`
-	IsDisplay     bool     `json:"is_display"`
-	IsAutomatic   bool     `json:"is_automatic"`
-	IsWatch       bool     `json:"is_watch"`
-	IsFeatured    bool     `json:"is_featured"`
-	IsRunningTime bool     `json:"is_running_time"`
+	MachineId                  *uint64                              `json:"machine_id" validate:"omitempty,number,gte=1,exists=machines;id" property:"Machine"`
+	MqttTopicId                *uint64                              `json:"mqtt_topic_id" validate:"omitempty,number,gte=1,exists=mqtt_topics;id" property:"MQTT Topic"`
+	Name                       string                               `json:"name" validate:"required,min=3,max=100"`
+	Code                       string                               `json:"code" validate:"required,min=3,max=100"`
+	Unit                       string                               `json:"unit" validate:"required,min=1,max=100"`
+	MinValue                   *float32                             `json:"min_value,omitempty"`
+	MaxValue                   *float32                             `json:"max_value,omitempty"`
+	Description                string                               `json:"description"`
+	Category                   string                               `json:"category"`
+	PositionX                  *float32                             `json:"position_x,omitempty"`
+	PositionY                  *float32                             `json:"position_y,omitempty"`
+	PositionZ                  *float32                             `json:"position_z,omitempty"`
+	RotationX                  *float32                             `json:"rotation_x,omitempty"`
+	RotationY                  *float32                             `json:"rotation_y,omitempty"`
+	RotationZ                  *float32                             `json:"rotation_z,omitempty"`
+	IsDisplay                  bool                                 `json:"is_display"`
+	IsAutomatic                bool                                 `json:"is_automatic"`
+	IsWatch                    bool                                 `json:"is_watch"`
+	IsFeatured                 bool                                 `json:"is_featured"`
+	IsRunningTime              bool                                 `json:"is_running_time"`
+	IsProcessed                bool                                 `json:"is_processed"`
+	ProcessedParameterSequence []*ProcessedParameterSequenceRequest `json:"processed_parameter_sequence" validate:"omitempty"`
 }
 
 type UpdateParameterRequest struct {
-	Id            uint64   `json:"-" validate:"required,number,gte=1,exists=parameters;id"`
-	MachineId     uint64   `json:"machine_id" validate:"required,number,gte=1,exists=machines;id" property:"Machine"`
-	MqttTopicId   *uint64  `json:"mqtt_topic_id" validate:"required,number,gte=1,exists=mqtt_topics;id" property:"MQTT Topic"`
-	Name          string   `json:"name" validate:"required,min=3,max=100"`
-	Code          string   `json:"code" validate:"required,min=3,max=100"`
-	Unit          string   `json:"unit" validate:"required,min=1,max=100"`
-	MinValue      *float32 `json:"min_value,omitempty"`
-	MaxValue      *float32 `json:"max_value,omitempty"`
-	Description   string   `json:"description"`
-	PositionX     *float32 `json:"position_x,omitempty"`
-	PositionY     *float32 `json:"position_y,omitempty"`
-	PositionZ     *float32 `json:"position_z,omitempty"`
-	RotationX     *float32 `json:"rotation_x,omitempty"`
-	RotationY     *float32 `json:"rotation_y,omitempty"`
-	RotationZ     *float32 `json:"rotation_z,omitempty"`
-	IsDisplay     bool     `json:"is_display"`
-	IsAutomatic   bool     `json:"is_automatic"`
-	IsWatch       bool     `json:"is_watch"`
-	IsFeatured    bool     `json:"is_featured"`
-	IsRunningTime bool     `json:"is_running_time"`
+	Id                         uint64                               `json:"-" validate:"required,number,gte=1,exists=parameters;id"`
+	MachineId                  *uint64                              `json:"machine_id" validate:"omitempty,number,gte=1,exists=machines;id" property:"Machine"`
+	MqttTopicId                *uint64                              `json:"mqtt_topic_id" validate:"omitempty,required,number,gte=1,exists=mqtt_topics;id" property:"MQTT Topic"`
+	Name                       string                               `json:"name" validate:"required,min=3,max=100"`
+	Code                       string                               `json:"code" validate:"required,min=3,max=100"`
+	Unit                       string                               `json:"unit" validate:"required,min=1,max=100"`
+	MinValue                   *float32                             `json:"min_value,omitempty"`
+	MaxValue                   *float32                             `json:"max_value,omitempty"`
+	Description                string                               `json:"description"`
+	PositionX                  *float32                             `json:"position_x,omitempty"`
+	PositionY                  *float32                             `json:"position_y,omitempty"`
+	PositionZ                  *float32                             `json:"position_z,omitempty"`
+	RotationX                  *float32                             `json:"rotation_x,omitempty"`
+	RotationY                  *float32                             `json:"rotation_y,omitempty"`
+	RotationZ                  *float32                             `json:"rotation_z,omitempty"`
+	IsDisplay                  bool                                 `json:"is_display"`
+	IsAutomatic                bool                                 `json:"is_automatic"`
+	IsWatch                    bool                                 `json:"is_watch"`
+	IsFeatured                 bool                                 `json:"is_featured"`
+	IsRunningTime              bool                                 `json:"is_running_time"`
+	IsProcessed                bool                                 `json:"is_processed"`
+	ProcessedParameterSequence []*ProcessedParameterSequenceRequest `json:"processed_parameter_sequence" validate:"omitempty"`
 }
 
 type ManageParameterOperationRequest struct {
@@ -83,7 +92,6 @@ type ManageParameterOperationRequest struct {
 }
 
 type ParameterOperationRequest struct {
-	Id       uint64  `json:"id" validate:"required,number"`
 	Type     string  `json:"type" validate:"required,oneof=ADDITION SUBTRACTION MULTIPLICATION DIVISION"`
 	Value    float32 `json:"value" validate:"required"`
 	Sequence int     `json:"sequence" validate:"required"`
@@ -100,6 +108,21 @@ type ParameterFilterRequest struct {
 	IsDisplay   *string `form:"omitempty,is_display"`
 	IsWatch     *string `form:"omitempty,is_watch"`
 	IsFeatured  *string `form:"omitempty,is_featured"`
+	IsProcessed *string `form:"omitempty,is_processed"`
+}
+
+type ProcessedParameterSequenceRequest struct {
+	ParameterId uint64 `json:"parameter_id" validate:"required,gte=1,exists=parameters;id"`
+	Sequence    int    `json:"sequence" validate:"required;gte=1"`
+	Type        string `json:"type" validate:"required,oneof=ADDITION MULTIPLICATION DIVISION"`
+}
+
+type ProcessedParameterSequenceResponse struct {
+	Id                uint64 `json:"id"`
+	ParentParameterId uint64 `json:"parent_parameter_id"`
+	ParameterId       uint64 `json:"parameter_id"`
+	Sequence          int    `json:"sequence"`
+	Type              string `json:"type"`
 }
 
 func (parameterResponse *ParameterResponse) GetAuditableResponse() *AuditableResponse {

@@ -18,6 +18,7 @@ import (
 	"go-intconnect-api/internal/parameter"
 	parameterOperation "go-intconnect-api/internal/parameter_operation"
 	"go-intconnect-api/internal/permission"
+	processedParameterSequence "go-intconnect-api/internal/processed_parameter_sequence"
 	"go-intconnect-api/internal/register"
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
@@ -278,4 +279,8 @@ var AlarmLogModule = fx.Module("alarmLogFeature",
 	fx.Provide(fx.Annotate(alarmLog.NewRepository, fx.As(new(alarmLog.Repository)))),
 	fx.Provide(fx.Annotate(alarmLog.NewService, fx.As(new(alarmLog.Service)))),
 	fx.Provide(fx.Annotate(alarmLog.NewHandler, fx.As(new(alarmLog.Controller)))),
+)
+
+var ProcessedParameterSequenceModule = fx.Module("processedParameterSequenceFeature",
+	fx.Provide(fx.Annotate(processedParameterSequence.NewRepository, fx.As(new(processedParameterSequence.Repository)))),
 )

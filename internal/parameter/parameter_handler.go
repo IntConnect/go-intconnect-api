@@ -56,8 +56,8 @@ func (parameterHandler *Handler) CreateParameter(ginContext *gin.Context) {
 	var createParameterRequest model.CreateParameterRequest
 	err := ginContext.ShouldBindJSON(&createParameterRequest)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	paginatedResponse := parameterHandler.parameterService.Create(ginContext, &createParameterRequest)
-	ginContext.JSON(http.StatusOK, paginatedResponse)
+	parameterHandler.parameterService.Create(ginContext, &createParameterRequest)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been created", nil))
 }
 
 func (parameterHandler *Handler) UpdateParameter(ginContext *gin.Context) {
@@ -69,7 +69,7 @@ func (parameterHandler *Handler) UpdateParameter(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))
 	updateParameterRequest.Id = parsedParameterId
 	parameterHandler.parameterService.Update(ginContext, &updateParameterRequest)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been created", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Parameter has been updated", nil))
 }
 
 func (parameterHandler *Handler) UpdateParameterOperation(ginContext *gin.Context) {

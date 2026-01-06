@@ -61,6 +61,7 @@ func main() {
 		injector.DashboardWidgetModule,
 		injector.RegisterModule,
 		injector.AlarmLogModule,
+		injector.ProcessedParameterSequenceModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

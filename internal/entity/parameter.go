@@ -4,6 +4,7 @@ import "go-intconnect-api/internal/trait"
 
 type Parameter struct {
 	Id                                   uint64                                 `gorm:"column:id;primaryKey;autoIncrement"`
+	MachineId                            *uint64                                `gorm:"column:machine_id"`
 	MqttTopicId                          *uint64                                `gorm:"column:mqtt_topic_id;"`
 	Name                                 string                                 `gorm:"column:name"`
 	Code                                 string                                 `gorm:"column:code"`
@@ -24,10 +25,13 @@ type Parameter struct {
 	IsWatch                              bool                                   `gorm:"column:is_watch;"`
 	IsRunningTime                        bool                                   `gorm:"column:is_running_time;"`
 	IsFeatured                           bool                                   `gorm:"column:is_featured;"`
+	IsProcessed                          bool                                   `gorm:"column:is_processed;"`
 	MqttTopic                            *MqttTopic                             `gorm:"foreignKey:MqttTopicId;references:Id"`
 	ReportDocumentTemplates              []*ReportDocumentTemplate              `gorm:"many2many:report_document_templates_parameters;joinForeignKey:ParameterID;joinReferences:ReportDocumentTemplateID"`
 	ParameterOperations                  []*ParameterOperation                  `gorm:"foreignKey:ParameterId;references:Id"`
 	CheckSheetDocumentTemplateParameters []*CheckSheetDocumentTemplateParameter `gorm:"foreignKey:ParameterId;references:Id"`
+	Machine                              *Machine                               `gorm:"foreignKey:MachineId;references:Id"`
+	ProcessedParameterSequence           []*ProcessedParameterSequence          `gorm:"foreignKey:ParentParameterId;references:Id" mapstructure:"-"`
 	Auditable                            `gorm:"embedded"`
 }
 

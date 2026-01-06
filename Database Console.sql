@@ -108,7 +108,7 @@ FROM telemetries;
 SELECT *
 FROM parameters;
 SELECT *
-FROM parameters WHERE is_watch = true;
+FROM parameters WHERE id =61;
 
 SELECT *
 FROM report_document_templates;
@@ -145,6 +145,9 @@ SELECT *
 FROM roles_permissions;
 SELECT *
 FROM alarm_logs;
+SELECT *
+FROM processed_parameter_sequences;
+
 
 DELETE
 FROM check_sheet_values;
@@ -168,4 +171,5 @@ FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
       GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
 
-
+ALTER TABLE parameters
+    ADD COLUMN machine_id BIGINT REFERENCES machines (id)

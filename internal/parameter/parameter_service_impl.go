@@ -5,6 +5,7 @@ import (
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	parameterOperation "go-intconnect-api/internal/parameter_operation"
+	processedParameterSequence "go-intconnect-api/internal/processed_parameter_sequence"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -17,26 +18,29 @@ import (
 )
 
 type ServiceImpl struct {
-	parameterRepository          Repository
-	parameterOperationRepository parameterOperation.Repository
-	auditLogService              auditLog.Service
-	validatorService             validator.Service
-	dbConnection                 *gorm.DB
-	viperConfig                  *viper.Viper
+	parameterRepository                  Repository
+	parameterOperationRepository         parameterOperation.Repository
+	processedParameterSequenceRepository processedParameterSequence.Repository
+	auditLogService                      auditLog.Service
+	validatorService                     validator.Service
+	dbConnection                         *gorm.DB
+	viperConfig                          *viper.Viper
 }
 
 func NewService(parameterRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper,
 	auditLogService auditLog.Service,
 	parameterOperationRepository parameterOperation.Repository,
+	processedParameterSequenceRepository processedParameterSequence.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
-		parameterRepository:          parameterRepository,
-		validatorService:             validatorService,
-		dbConnection:                 dbConnection,
-		viperConfig:                  viperConfig,
-		auditLogService:              auditLogService,
-		parameterOperationRepository: parameterOperationRepository,
+		parameterRepository:                  parameterRepository,
+		validatorService:                     validatorService,
+		dbConnection:                         dbConnection,
+		viperConfig:                          viperConfig,
+		auditLogService:                      auditLogService,
+		parameterOperationRepository:         parameterOperationRepository,
+		processedParameterSequenceRepository: processedParameterSequenceRepository,
 	}
 }
 
@@ -108,12 +112,14 @@ func (parameterService *ServiceImpl) FindById(ginContext *gin.Context, parameter
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntity, err := parameterService.parameterRepository.FindById(gormTransaction, parameterId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		helper.DebugArrPointer(parameterEntity.ProcessedParameterSequence)
 		parameterResponse = helper.MapEntityIntoResponse[
 			*entity.Parameter,
 			*model.ParameterResponse,
 		](
 			parameterEntity,
 			mapper.FuncMapAuditable[*entity.Parameter, *model.ParameterResponse],
+			mapper.FuncMapParameter,
 		)
 		return nil
 	})
@@ -122,17 +128,25 @@ func (parameterService *ServiceImpl) FindById(ginContext *gin.Context, parameter
 }
 
 // Create - Membuat parameter baru
-func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParameterRequest *model.CreateParameterRequest) *model.PaginatedResponse[*model.ParameterResponse] {
-	var parameterResponses *model.PaginatedResponse[*model.ParameterResponse]
+func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParameterRequest *model.CreateParameterRequest) {
 	valErr := parameterService.validatorService.ValidateStruct(createParameterRequest)
 	parameterService.validatorService.ParseValidationError(valErr, *createParameterRequest)
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntity := helper.MapCreateRequestIntoEntity[model.CreateParameterRequest, entity.Parameter](createParameterRequest)
-		if !parameterEntity.IsAutomatic {
-			parameterEntity.MqttTopicId = nil
-		}
 		err := parameterService.parameterRepository.Create(gormTransaction, parameterEntity)
+		var processedParameterSequences []*entity.ProcessedParameterSequence
+		for _, processedParameterSequenceRequest := range createParameterRequest.ProcessedParameterSequence {
+			processedParameterSequences = append(processedParameterSequences, &entity.ProcessedParameterSequence{
+				ParentParameterId: parameterEntity.Id,
+				ParameterId:       processedParameterSequenceRequest.ParameterId,
+				Sequence:          processedParameterSequenceRequest.Sequence,
+				Type:              processedParameterSequenceRequest.Type,
+			})
+		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		err = parameterService.processedParameterSequenceRepository.CreateBatch(gormTransaction, processedParameterSequences)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
 		auditPayload := parameterService.auditLogService.Build(
 			nil,             // before entity
 			parameterEntity, // after entity
@@ -143,12 +157,9 @@ func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParam
 			model.AUDIT_LOG_CREATE,
 			model.AUDIT_LOG_FEATURE_PARAMETER,
 			auditPayload)
-		paginationRequest := model.NewPaginationRequest()
-		parameterResponses = parameterService.FindAllPagination(&paginationRequest)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return parameterResponses
 }
 
 func (parameterService *ServiceImpl) Update(ginContext *gin.Context, updateParameterRequest *model.UpdateParameterRequest) {

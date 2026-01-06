@@ -73,6 +73,8 @@ func (parameterRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB
 	err := gormTransaction.Model(&entity.Parameter{}).
 		Preload("ParameterOperations").
 		Preload("MqttTopic.Machine").
+		Preload("Machine").
+		Preload("ProcessedParameterSequence").
 		Where("id = ?", parameterId).
 		First(&parameterEntity).Error
 
