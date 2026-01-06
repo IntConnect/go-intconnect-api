@@ -54,22 +54,24 @@ type AlarmRecoveryWindow struct {
 }
 
 type ListenerFluxor struct {
-	gormDatabase         *gorm.DB
-	mqttBrokersMap       map[uint64]entity.MqttBroker
-	parametersMap        map[string]*entity.Parameter
-	insertionChan        chan []*entity.Telemetry
-	waitGroup            *sync.WaitGroup
-	telemetryRepository  telemetry.Repository
-	parameterRepository  parameter.Repository
-	mqttBrokerRepository mqttBroker.Repository
-	mqttTopicRepository  mqttTopic.Repository
-	mqttClient           mqtt.Client
-	rwMutex              sync.RWMutex
-	latestTelemetry      map[string]*entity.Telemetry
-	telemetryMutex       sync.Mutex
-	abnormalBuffers      map[uint64]*AbnormalWindow
-	recoveryBuffers      map[uint64]*AlarmRecoveryWindow
-	alarmMutex           sync.Mutex
+	gormDatabase                   *gorm.DB
+	mqttBrokersMap                 map[uint64]entity.MqttBroker
+	parametersMap                  map[string]*entity.Parameter
+	processedParametersMap         map[uint64]*entity.Parameter
+	processedParameterSequencesMap map[uint64][]entity.ProcessedParameterSequence
+	insertionChan                  chan []*entity.Telemetry
+	waitGroup                      *sync.WaitGroup
+	telemetryRepository            telemetry.Repository
+	parameterRepository            parameter.Repository
+	mqttBrokerRepository           mqttBroker.Repository
+	mqttTopicRepository            mqttTopic.Repository
+	mqttClient                     mqtt.Client
+	rwMutex                        sync.RWMutex
+	latestTelemetry                map[string]*entity.Telemetry
+	telemetryMutex                 sync.Mutex
+	abnormalBuffers                map[uint64]*AbnormalWindow
+	recoveryBuffers                map[uint64]*AlarmRecoveryWindow
+	alarmMutex                     sync.Mutex
 }
 
 func NewListenerFluxor() *ListenerFluxor {
@@ -82,18 +84,20 @@ func NewListenerFluxor() *ListenerFluxor {
 	mqttTopicRepository := mqttTopic.NewRepository()
 	latestTelemetry := make(map[string]*entity.Telemetry)
 	listenerFluxor := &ListenerFluxor{
-		gormDatabase:         gormDatabase,
-		mqttBrokersMap:       make(map[uint64]entity.MqttBroker),
-		parametersMap:        make(map[string]*entity.Parameter),
-		insertionChan:        make(chan []*entity.Telemetry, InsertionQueueSize),
-		waitGroup:            &sync.WaitGroup{},
-		telemetryRepository:  telemetryRepository,
-		parameterRepository:  parameterRepository,
-		mqttBrokerRepository: mqttBrokerRepository,
-		mqttTopicRepository:  mqttTopicRepository,
-		latestTelemetry:      latestTelemetry,
-		abnormalBuffers:      make(map[uint64]*AbnormalWindow),
-		recoveryBuffers:      make(map[uint64]*AlarmRecoveryWindow),
+		gormDatabase:                   gormDatabase,
+		mqttBrokersMap:                 make(map[uint64]entity.MqttBroker),
+		parametersMap:                  make(map[string]*entity.Parameter),
+		processedParametersMap:         make(map[uint64]*entity.Parameter),
+		processedParameterSequencesMap: make(map[uint64][]entity.ProcessedParameterSequence),
+		insertionChan:                  make(chan []*entity.Telemetry, InsertionQueueSize),
+		waitGroup:                      &sync.WaitGroup{},
+		telemetryRepository:            telemetryRepository,
+		parameterRepository:            parameterRepository,
+		mqttBrokerRepository:           mqttBrokerRepository,
+		mqttTopicRepository:            mqttTopicRepository,
+		latestTelemetry:                latestTelemetry,
+		abnormalBuffers:                make(map[uint64]*AbnormalWindow),
+		recoveryBuffers:                make(map[uint64]*AlarmRecoveryWindow),
 	}
 
 	if err := listenerFluxor.loadInitialConfiguration(); err != nil {
@@ -118,15 +122,40 @@ func (listenerFluxor *ListenerFluxor) loadInitialConfiguration() error {
 		return err
 	}
 
+	// Load processed parameter sequences
+	var processedSequences []entity.ProcessedParameterSequence
+	if err := listenerFluxor.gormDatabase.Model(&entity.ProcessedParameterSequence{}).Preload("Parameter").Find(&processedSequences).Error; err != nil {
+		logger.WithError(err).Warn("Failed to load processed parameter sequences")
+	}
+
 	listenerFluxor.rwMutex.Lock()
 	defer listenerFluxor.rwMutex.Unlock()
+
 	for _, mqttBrokerEntity := range mqttBrokerEntities {
 		listenerFluxor.mqttBrokersMap[mqttBrokerEntity.Id] = mqttBrokerEntity
 	}
+
 	for _, parameterEntity := range parameterEntities {
 		listenerFluxor.parametersMap[parameterEntity.Code] = parameterEntity
+
+		// Track processed parameters separately
+		if parameterEntity.IsProcessed {
+			listenerFluxor.processedParametersMap[parameterEntity.Id] = parameterEntity
+		}
 	}
-	logger.Infof("Loaded %d mqtt brokers and %d parameters", len(listenerFluxor.mqttBrokersMap), len(listenerFluxor.parametersMap))
+
+	// Group sequences by parent parameter ID
+	for _, seq := range processedSequences {
+		listenerFluxor.processedParameterSequencesMap[seq.ParentParameterId] = append(
+			listenerFluxor.processedParameterSequencesMap[seq.ParentParameterId],
+			seq,
+		)
+	}
+
+	logger.Infof("Loaded %d mqtt brokers, %d parameters, %d processed parameters",
+		len(listenerFluxor.mqttBrokersMap),
+		len(listenerFluxor.parametersMap),
+		len(listenerFluxor.processedParametersMap))
 	return nil
 }
 
@@ -191,14 +220,33 @@ func (listenerFluxor *ListenerFluxor) CheckConfigurationPeriodically() {
 		return
 	}
 
+	// Reload processed parameter sequences
+	var processedSequences []entity.ProcessedParameterSequence
+	if err := listenerFluxor.gormDatabase.Preload("Parameter").Find(&processedSequences).Error; err != nil {
+		logger.WithError(err).Warn("Failed to reload processed parameter sequences")
+	}
+
 	newMqttBrokersMap := make(map[uint64]entity.MqttBroker)
 	newParametersMap := make(map[string]*entity.Parameter)
+	newProcessedParametersMap := make(map[uint64]*entity.Parameter)
+	newProcessedSequencesMap := make(map[uint64][]entity.ProcessedParameterSequence)
 
 	for _, mqttBrokerEntity := range mqttBrokerEntities {
 		newMqttBrokersMap[mqttBrokerEntity.Id] = mqttBrokerEntity
 	}
+
 	for _, parameterEntity := range parameterEntities {
 		newParametersMap[parameterEntity.Code] = parameterEntity
+		if parameterEntity.IsProcessed {
+			newProcessedParametersMap[parameterEntity.Id] = parameterEntity
+		}
+	}
+
+	for _, seq := range processedSequences {
+		newProcessedSequencesMap[seq.ParentParameterId] = append(
+			newProcessedSequencesMap[seq.ParentParameterId],
+			seq,
+		)
 	}
 
 	listenerFluxor.rwMutex.RLock()
@@ -210,12 +258,16 @@ func (listenerFluxor *ListenerFluxor) CheckConfigurationPeriodically() {
 		listenerFluxor.rwMutex.Lock()
 		listenerFluxor.mqttBrokersMap = newMqttBrokersMap
 		listenerFluxor.parametersMap = newParametersMap
+		listenerFluxor.processedParametersMap = newProcessedParametersMap
+		listenerFluxor.processedParameterSequencesMap = newProcessedSequencesMap
 		listenerFluxor.rwMutex.Unlock()
 
 		listenerFluxor.RestartMqttBroker()
 	} else {
 		listenerFluxor.rwMutex.Lock()
 		listenerFluxor.parametersMap = newParametersMap
+		listenerFluxor.processedParametersMap = newProcessedParametersMap
+		listenerFluxor.processedParameterSequencesMap = newProcessedSequencesMap
 		listenerFluxor.rwMutex.Unlock()
 	}
 }
@@ -370,6 +422,7 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 				IsWatch:          false,
 				IsRunningTime:    false,
 				IsFeatured:       false,
+				IsProcessed:      false,
 				Auditable:        entity.NewAuditable("System"),
 			})
 		}
@@ -410,7 +463,6 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 				Timestamp:   mqttPayload.Timestamp.Time,
 			}
 			if parameterEntity.IsWatch {
-				fmt.Println(parameterEntity.Name)
 				listenerFluxor.checkAbnormality(parameterEntity, parsedMqttValue)
 			}
 
@@ -534,10 +586,17 @@ func (listenerFluxor *ListenerFluxor) StartSnapshotSaver(ctx context.Context) {
 
 func (listenerFluxor *ListenerFluxor) saveSnapshot() {
 	listenerFluxor.telemetryMutex.Lock()
+
+	// Create snapshot of current telemetry data
 	snapshotPayload := make([]*entity.Telemetry, 0, len(listenerFluxor.latestTelemetry))
-	for _, t := range listenerFluxor.latestTelemetry {
-		snapshotPayload = append(snapshotPayload, t)
+	for _, latestTelemetry := range listenerFluxor.latestTelemetry {
+		snapshotPayload = append(snapshotPayload, latestTelemetry)
 	}
+
+	// Calculate processed parameters before saving
+	processedTelemetry := listenerFluxor.calculateProcessedParameters()
+	snapshotPayload = append(snapshotPayload, processedTelemetry...)
+
 	listenerFluxor.telemetryMutex.Unlock()
 
 	if len(snapshotPayload) == 0 {
@@ -551,12 +610,101 @@ func (listenerFluxor *ListenerFluxor) saveSnapshot() {
 	}
 }
 
+// calculateProcessedParameters computes values for all processed parameters
+func (listenerFluxor *ListenerFluxor) calculateProcessedParameters() []*entity.Telemetry {
+	listenerFluxor.rwMutex.RLock()
+	defer listenerFluxor.rwMutex.RUnlock()
+
+	var processedTelemetry []*entity.Telemetry
+
+	// Create a map for quick lookup by parameter code
+	telemetryByCode := make(map[string]float64)
+	for parameterCode, latestTelemetry := range listenerFluxor.latestTelemetry {
+		telemetryByCode[parameterCode] = latestTelemetry.Value
+	}
+
+	// Process each processed parameter
+	for parentParamId, parentParam := range listenerFluxor.processedParametersMap {
+		sequences, exists := listenerFluxor.processedParameterSequencesMap[parentParamId]
+		if !exists || len(sequences) == 0 {
+			logger.Warn("No sequences found for processed parameter %d", parentParamId)
+			continue
+		}
+
+		// Sort sequences by sequence number
+		sortedSequences := make([]entity.ProcessedParameterSequence, len(sequences))
+		copy(sortedSequences, sequences)
+		for i := 0; i < len(sortedSequences); i++ {
+			for j := i + 1; j < len(sortedSequences); j++ {
+				if sortedSequences[i].Sequence > sortedSequences[j].Sequence {
+					sortedSequences[i], sortedSequences[j] = sortedSequences[j], sortedSequences[i]
+				}
+			}
+		}
+
+		// Calculate the processed value
+		result := 0.0
+		timestamp := time.Now()
+
+		for _, seq := range sortedSequences {
+			if seq.Parameter == nil {
+				logger.Warn("Sequence %d has nil Parameter", seq.Id)
+				continue
+			}
+
+			// Get the value from current telemetry snapshot
+			value, exists := telemetryByCode[seq.Parameter.Code]
+			if !exists {
+				logger.Debug("Parameter %s not found in current telemetry", seq.Parameter.Code)
+				continue
+			}
+
+			// Apply operation based on Type
+			switch seq.Type {
+			case "ADDITION":
+				result += value
+			case "SUBTRACTION":
+				result -= value
+			case "MULTIPLICATION":
+				result *= value
+			case "DIVISION":
+				if value != 0 {
+					result /= value
+				} else {
+					logger.Warn("Division by zero attempted for processed parameter %d", parentParamId)
+					result = 0
+				}
+			default:
+				logger.Warn("Unknown operation type: %s for sequence %d", seq.Type, seq.Id)
+			}
+
+			// Update timestamp from latest telemetry
+			if tel, ok := listenerFluxor.latestTelemetry[seq.Parameter.Code]; ok {
+				timestamp = tel.Timestamp
+			}
+		}
+		if parentParam.IsWatch {
+			listenerFluxor.checkAbnormality(parentParam, result)
+		}
+		// Create telemetry entry for the processed parameter
+		processedTelemetry = append(processedTelemetry, &entity.Telemetry{
+			ParameterId: parentParam.Id,
+			Value:       result,
+			Timestamp:   timestamp,
+		})
+
+		logger.Debug("Calculated processed parameter %s (ID: %d) = %.2f",
+			parentParam.Code, parentParam.Id, result)
+	}
+
+	return processedTelemetry
+}
+
 func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.Parameter, value float64) {
 	listenerFluxor.alarmMutex.Lock()
 	defer listenerFluxor.alarmMutex.Unlock()
 
 	requiredSamples := int(parameterEntity.AbnormalDuration) * 4
-	fmt.Println(parameterEntity.Name)
 	// Init buffer
 	if _, isExists := listenerFluxor.abnormalBuffers[parameterEntity.Id]; !isExists {
 		listenerFluxor.abnormalBuffers[parameterEntity.Id] = &AbnormalWindow{}
@@ -569,7 +717,6 @@ func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.P
 		buffer.Values = buffer.Values[1:]
 	}
 
-	fmt.Println(buffer.Values, requiredSamples)
 	// === CHECK CREATE ALARM ===
 	if len(buffer.Values) == requiredSamples && allAbnormal(buffer.Values, parameterEntity) {
 		listenerFluxor.saveAlarm(parameterEntity, value)
@@ -583,7 +730,6 @@ func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.P
 
 func allAbnormal(values []float64, parameterEntity *entity.Parameter) bool {
 	for _, v := range values {
-		fmt.Println(parameterEntity.MinValue, parameterEntity.MaxValue, values)
 		if v >= parameterEntity.MinValue && v <= parameterEntity.MaxValue {
 			return false
 		}
