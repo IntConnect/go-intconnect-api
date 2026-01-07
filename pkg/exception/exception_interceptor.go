@@ -3,6 +3,7 @@ package exception
 import (
 	"go-intconnect-api/internal/model"
 	"net/http"
+	"runtime/debug"
 
 	"go-intconnect-api/pkg/logger"
 
@@ -14,6 +15,8 @@ func Interceptor() gin.HandlerFunc {
 		defer func() {
 			if occurredError := recover(); occurredError != nil {
 				logger.Debug("panic occurred", occurredError)
+				logger.Debug("stack trace:\n" + string(debug.Stack()))
+
 				// Check if it's our custom error
 				if clientError, ok := occurredError.(*ApplicationError); ok {
 					ginContext.AbortWithStatusJSON(
