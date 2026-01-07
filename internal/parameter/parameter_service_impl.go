@@ -112,7 +112,6 @@ func (parameterService *ServiceImpl) FindById(ginContext *gin.Context, parameter
 	err := parameterService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntity, err := parameterService.parameterRepository.FindById(gormTransaction, parameterId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		helper.DebugArrPointer(parameterEntity.ProcessedParameterSequence)
 		parameterResponse = helper.MapEntityIntoResponse[
 			*entity.Parameter,
 			*model.ParameterResponse,

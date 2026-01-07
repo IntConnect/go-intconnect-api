@@ -22,10 +22,10 @@ type ParameterResponse struct {
 	IsFeatured                 bool                                 `json:"is_featured"`
 	IsRunningTime              bool                                 `json:"is_running_time"`
 	IsProcessed                bool                                 `json:"is_processed"`
-	MachineResponse            *MachineResponse                     `json:"machine" mapstructure:"Machine"`
-	MqttTopicResponse          *MqttTopicResponse                   `json:"mqtt_topic" mapstructure:"MqttTopic"`
-	ParameterOperationResponse []ParameterOperationResponse         `json:"operations" mapstructure:"ParameterOperations"`
-	ProcessedParameterSequence []ProcessedParameterSequenceResponse `json:"processed_parameter_sequence" mapstructure:"ProcessedParameterSequence"`
+	MqttTopic                  *MqttTopicResponse                   `json:"mqtt_topic" mapstructure:"MqttTopic"`
+	Machine                    *MachineResponse                     `json:"machine" mapstructure:"Machine"`
+	ProcessedParameterSequence []ProcessedParameterSequenceResponse `json:"processed_parameter_sequence" mapstructure:"-"`
+	ParameterOperation         []ParameterOperationRequest          `json:"parameter_operation" mapstructure:"-c"`
 	AuditableResponse          *AuditableResponse                   `json:"auditable"`
 }
 

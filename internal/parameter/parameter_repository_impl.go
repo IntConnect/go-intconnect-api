@@ -71,9 +71,17 @@ func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (parameterRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, parameterId uint64) (*entity.Parameter, error) {
 	var parameterEntity entity.Parameter
 	err := gormTransaction.Model(&entity.Parameter{}).
+		Select("id, name, mqtt_topic_id").
 		Preload("ParameterOperations").
-		Preload("MqttTopic.Machine").
-		Preload("Machine").
+		Preload("MqttTopic", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.Select("id, name, mqtt_broker_id, machine_id")
+		}).
+		Preload("MqttTopic.MqttBroker", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.Select("id, host_name")
+		}).
+		Preload("MqttTopic.Machine", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.Select("id, name")
+		}).
 		Preload("ProcessedParameterSequence").
 		Where("id = ?", parameterId).
 		First(&parameterEntity).Error
