@@ -1,15 +1,15 @@
 package model
 
 type MqttTopicResponse struct {
-	Id           uint64              `json:"id"`
-	MachineId    uint64              `json:"machine_id"`
-	MqttBrokerId uint64              `json:"mqtt_broker_id"`
-	Name         string              `json:"name"`
-	QoS          int                 `json:"qos"`
-	MqttBroker   MqttBrokerResponse  `json:"mqtt_broker" mapstructure:"MqttBroker"`
-	Machine      MachineResponse     `json:"machine" mapstructure:"Machine"`
-	Parameters   []ParameterResponse `json:"parameters" mapstructure:"Parameters"`
-	Auditable    *AuditableResponse  `json:"auditable"`
+	Id                uint64               `json:"id"`
+	MachineId         uint64               `json:"machine_id"`
+	MqttBrokerId      uint64               `json:"mqtt_broker_id"`
+	Name              string               `json:"name"`
+	QoS               int                  `json:"qos"`
+	MqttBroker        *MqttBrokerResponse  `json:"mqtt_broker" mapstructure:"MqttBroker"`
+	Machine           *MachineResponse     `json:"machine" mapstructure:"Machine"`
+	Parameters        []*ParameterResponse `json:"parameters" mapstructure:"Parameters"`
+	AuditableResponse *AuditableResponse   `json:"auditable"`
 }
 
 type MqttTopicDependency struct {
@@ -41,9 +41,9 @@ type TopicParameter map[string]map[string]uint64
 type SubscribeMultiple map[string]byte
 
 func (mqttTopicResponse *MqttTopicResponse) GetAuditableResponse() *AuditableResponse {
-	return mqttTopicResponse.Auditable
+	return mqttTopicResponse.AuditableResponse
 }
 
 func (mqttTopicResponse *MqttTopicResponse) SetAuditableResponse(auditableResponse *AuditableResponse) {
-	mqttTopicResponse.Auditable = auditableResponse
+	mqttTopicResponse.AuditableResponse = auditableResponse
 }

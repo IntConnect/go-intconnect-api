@@ -100,8 +100,7 @@ func (machineService *ServiceImpl) FindById(ginContext *gin.Context, machineId u
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		machineEntity, err := machineService.machineRepository.FindById(gormTransaction, machineId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		machineResponseRequest = helper.MapEntityIntoResponse[*entity.Machine, *model.MachineResponse](machineEntity,
-			mapper.FuncMapAuditable, mapper.MapMachineDocument)
+		machineResponseRequest = helper.MapEntityIntoResponse[*entity.Machine, *model.MachineResponse](machineEntity)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -131,7 +130,21 @@ func (machineService *ServiceImpl) ManageDashboard(ginContext *gin.Context, mach
 			dashboardWidgetEntity.MachineId = machineDashboardWidget.MachineId
 			dashboardWidgetEntities = append(dashboardWidgetEntities, &dashboardWidgetEntity)
 		}
-		fmt.Println(machineDashboardWidget)
+
+		var deletedWidget []uint64
+		for _, editedWidget := range machineDashboardWidget.EditedWidgets {
+			deletedWidget = append(deletedWidget, editedWidget.Id)
+		}
+		if len(deletedWidget) > 0 {
+			err := machineService.dashboardWidgetRepository.DeleteBatchById(gormTransaction, deletedWidget)
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		}
+		for _, dashboardWidgetRequest := range machineDashboardWidget.EditedWidgets {
+			var dashboardWidgetEntity entity.DashboardWidget
+			helper.MapUpdateRequestIntoEntity(dashboardWidgetRequest, &dashboardWidgetEntity)
+			dashboardWidgetEntity.MachineId = machineDashboardWidget.MachineId
+			dashboardWidgetEntities = append(dashboardWidgetEntities, &dashboardWidgetEntity)
+		}
 		err := machineService.dashboardWidgetRepository.DeleteBatchByCode(gormTransaction, machineDashboardWidget.RemovedWidgets)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		machineService.changeFeaturedParameter(gormTransaction, machineDashboardWidget.AddedParameterIds, true)

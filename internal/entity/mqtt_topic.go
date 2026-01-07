@@ -12,6 +12,6 @@ type MqttTopic struct {
 	Auditable    Auditable    `gorm:"embedded"`
 }
 
-func (mqttTopicEntity MqttTopic) GetAuditable() *Auditable {
+func (mqttTopicEntity *MqttTopic) GetAuditable() *Auditable {
 	return &mqttTopicEntity.Auditable
 }

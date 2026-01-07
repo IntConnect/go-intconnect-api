@@ -13,7 +13,6 @@ import (
 )
 
 func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
-
 	switch to {
 	case reflect.TypeOf(uint64(0)):
 		if str, ok := data.(string); ok {
@@ -63,8 +62,58 @@ func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}
 	}
 	return data, nil
 }
+func PointerDecodeHookFunc() mapstructure.DecodeHookFunc {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		// Debug log
 
+		// 1. Handle nil data
+		if data == nil {
+			if t.Kind() == reflect.Ptr {
+				return nil, nil
+			}
+			return data, nil
+		}
+
+		// 2. Handle pointer source (dereference)
+		dataValue := reflect.ValueOf(data)
+		if dataValue.IsValid() && dataValue.Kind() == reflect.Ptr {
+			if dataValue.IsNil() {
+				return nil, nil
+			}
+			// Sudah di-dereference, jangan handle lagi
+			// Biarkan mapstructure decode field by field
+			return data, nil
+		}
+
+		// 3. Handle target pointer dengan source struct zero value
+		if t.Kind() == reflect.Ptr && f.Kind() == reflect.Struct {
+			v := reflect.ValueOf(data)
+			if v.IsValid() && v.IsZero() {
+				return nil, nil
+			}
+		}
+
+		// 4. PENTING: Untuk struct-to-struct atau primitive-to-primitive
+		//    Jangan ubah apapun, langsung return data
+		return data, nil
+	}
+}
 func DecodeFromSource[S any, T any](sourceMapping S, targetMapping T) T {
+	decoderConfig := &mapstructure.DecoderConfig{
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			PointerDecodeHookFunc(),
+			StringIntoTypeHookFunc,
+		), Result: &targetMapping,
+		TagName:          "mapstructure",
+		WeaklyTypedInput: true,
+	}
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	err = decoder.Decode(sourceMapping)
+	return targetMapping
+}
+
+func DecodeIntoSource[S any, T any](sourceMapping S, targetMapping T) T {
 	decoderConfig := &mapstructure.DecoderConfig{
 		DecodeHook:       StringIntoTypeHookFunc,
 		Result:           &targetMapping,
@@ -164,12 +213,12 @@ func MapEntityIntoResponse[S any, R any](
 
 func MapCreateRequestIntoEntity[S any, R any](createRequest *S) *R {
 	var entityObject R
-	DecodeFromSource[*S, *R](createRequest, &entityObject)
+	DecodeIntoSource[*S, *R](createRequest, &entityObject)
 	return &entityObject
 }
 
 func MapUpdateRequestIntoEntity[S any, R any](updateRequest S, existingEntity *R) {
-	existingEntity = DecodeFromSource[S, *R](updateRequest, existingEntity)
+	existingEntity = DecodeIntoSource[S, *R](updateRequest, existingEntity)
 }
 
 func ParsingHashMapIntoStruct[R any](sourceHashMap map[string]interface{}, rawStruct R) *R {

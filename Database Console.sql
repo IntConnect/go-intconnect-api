@@ -96,7 +96,7 @@ FROM users;
 SELECT *
 FROM facilities;
 SELECT *
-FROM machines;
+FROM mqtt_topics;
 SELECT *
 FROM system_settings;
 SELECT *
@@ -108,8 +108,9 @@ FROM telemetries;
 SELECT *
 FROM parameters;
 SELECT *
-FROM parameters WHERE id =61;
-
+FROM parameters WHERE id = 31;
+SELECT *
+FROM telemetries WHERE parameter_id = 31;
 SELECT *
 FROM report_document_templates;
 SELECT *
@@ -125,6 +126,8 @@ FROM check_sheets;
 SELECT *
 FROM check_sheet_values;
 SELECT *
+FROM dashboard_widgets;
+DELETE 
 FROM dashboard_widgets;
 SELECT *
 FROM modbus_servers;
@@ -159,6 +162,8 @@ DELETE
 FROM telemetries;
 DELETE
 FROM alarm_logs;
+DELETE
+FROM dashboard_widgets;
 SELECT bucket,
        parameter_id,
        last_value

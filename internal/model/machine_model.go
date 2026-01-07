@@ -2,6 +2,25 @@ package model
 
 import "mime/multipart"
 
+type MachineResponse struct {
+	Id                uint64                     `json:"id"`
+	FacilityId        uint64                     `json:"facility_id"`
+	ParameterId       uint64                     `json:"parameter_id"`
+	Name              string                     `json:"name"`
+	Code              string                     `json:"code"`
+	Description       string                     `json:"description"`
+	CameraX           float64                    `json:"camera_x"`
+	CameraY           float64                    `json:"camera_y"`
+	CameraZ           float64                    `json:"camera_z"`
+	ThumbnailPath     string                     `json:"thumbnail_path"`
+	ModelPath         string                     `json:"model_path"`
+	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic"`
+	Parameter         *ParameterResponse         `json:"parameter" mapstructure:"Parameter"`
+	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
+	DashboardWidget   []DashboardWidgetResponse  `json:"widgets" mapstructure:"DashboardWidget"`
+	Facility          *FacilityResponse          `json:"facility" `
+	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"Auditable"`
+}
 type CreateMachineRequest struct {
 	FacilityId       uint64                         `form:"facility_id" validate:"required,exists=facilities;id"`
 	Name             string                         `form:"name" validate:"required,min=3,max=100,unique=machines;name"`
@@ -31,36 +50,25 @@ type UpdateMachineRequest struct {
 	DeletedMachineDocumentIds []uint64                       `form:"deleted_machine_document_ids" validate:"omitempty,dive"`
 }
 
-type MachineResponse struct {
-	Id                uint64                     `json:"id"`
-	FacilityId        uint64                     `json:"facility_id"`
-	ParameterId       uint64                     `json:"parameter_id"`
-	Name              string                     `json:"name"`
-	Code              string                     `json:"code"`
-	Description       string                     `json:"description"`
-	CameraX           float64                    `json:"camera_x"`
-	CameraY           float64                    `json:"camera_y"`
-	CameraZ           float64                    `json:"camera_z"`
-	ThumbnailPath     string                     `json:"thumbnail_path"`
-	ModelPath         string                     `json:"model_path"`
-	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic" mapstructure:"MqttTopic"`
-	ParameterResponse *ParameterResponse         `json:"parameter_response" mapstructure:"Parameter"`
-	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
-	DashboardWidget   []*DashboardWidget         `json:"widgets" mapstructure:"DashboardWidget"`
-	Facility          *FacilityResponse          `json:"facility" mapstructure:"Facility"`
-	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"Auditable"`
-}
-
 type MachineDashboardWidget struct {
 	MachineId          uint64            `json:"-" validate:"required,exists=machines;id"`
 	AddedParameterIds  []uint64          `json:"added_parameter_ids"`
 	RemoveParameterIds []uint64          `json:"removed_parameter_id"`
 	AddedWidgets       []DashboardWidget `json:"added_widgets"`
+	EditedWidgets      []DashboardWidget `json:"edited_widgets"`
 	RemovedWidgets     []string          `json:"removed_widgets"`
 }
 
 type DashboardWidget struct {
+	Id     uint64                 `json:"id" `
 	Code   string                 `json:"code" validate:"required"`
+	Layout map[string]interface{} `json:"layout"`
+	Config map[string]interface{} `json:"config"`
+}
+
+type DashboardWidgetResponse struct {
+	Id     uint64                 `json:"id"`
+	Code   string                 `json:"code"`
 	Layout map[string]interface{} `json:"layout"`
 	Config map[string]interface{} `json:"config"`
 }

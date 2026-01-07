@@ -7,9 +7,9 @@ import (
 )
 
 type AuditLog struct {
-	Id              uint64                 `gorm:"column:id;primaryKey;autoIncrement"`
-	UserId          uint64                 `gorm:"column:user_id"`
-	Action          string                 `gorm:"column:action"`
+	Id              uint64                 `gorm:"column:id;primaryKey;autoIncrement" mapstructure:"Id"`
+	UserId          uint64                 `gorm:"column:user_id" mapstructure:"UserId"`
+	Action          string                 `gorm:"column:action" mapstructure:"Action"`
 	Feature         string                 `gorm:"column:feature"`
 	Description     string                 `gorm:"column:description"`
 	Before          map[string]interface{} `gorm:"-:all"`
