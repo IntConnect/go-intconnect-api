@@ -44,10 +44,14 @@ func (alarmLogRepositoryImpl *RepositoryImpl) FindAllPagination(
 
 	// Fetch paginated data
 	if err := rawQuery.
-		Preload("AcknowledgedByUser").
-		Preload("Parameter").
-		Preload("Parameter.MqttTopic.Machine", func(gormTransaction *gorm.DB) *gorm.DB {
-			return gormTransaction.Select("id, name")
+		Preload("AcknowledgedByUser", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, name")
+		}).
+		Preload("Parameter", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.Select("id, name, code, machine_id").
+				Preload("Machine", func(db *gorm.DB) *gorm.DB {
+					return db.Select("id, name")
+				})
 		}).
 		Order(orderClause).
 		Offset(offsetVal).

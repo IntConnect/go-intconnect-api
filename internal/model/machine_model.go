@@ -5,7 +5,6 @@ import "mime/multipart"
 type MachineResponse struct {
 	Id                uint64                     `json:"id"`
 	FacilityId        uint64                     `json:"facility_id"`
-	ParameterId       uint64                     `json:"parameter_id"`
 	Name              string                     `json:"name"`
 	Code              string                     `json:"code"`
 	Description       string                     `json:"description"`
@@ -14,13 +13,14 @@ type MachineResponse struct {
 	CameraZ           float64                    `json:"camera_z"`
 	ThumbnailPath     string                     `json:"thumbnail_path"`
 	ModelPath         string                     `json:"model_path"`
-	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic"`
+	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic" mapstructure:"MqttTopic"`
 	Parameter         *ParameterResponse         `json:"parameter" mapstructure:"Parameter"`
-	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
-	DashboardWidget   []DashboardWidgetResponse  `json:"widgets" mapstructure:"DashboardWidget"`
+	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"-"`
+	DashboardWidget   []*DashboardWidgetResponse `json:"widgets" mapstructure:"DashboardWidget"`
 	Facility          *FacilityResponse          `json:"facility" `
-	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"Auditable"`
+	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"-"`
 }
+
 type CreateMachineRequest struct {
 	FacilityId       uint64                         `form:"facility_id" validate:"required,exists=facilities;id"`
 	Name             string                         `form:"name" validate:"required,min=3,max=100,unique=machines;name"`

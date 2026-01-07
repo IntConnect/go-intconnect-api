@@ -9,7 +9,7 @@ type MqttTopicResponse struct {
 	MqttBroker        *MqttBrokerResponse  `json:"mqtt_broker" mapstructure:"MqttBroker"`
 	Machine           *MachineResponse     `json:"machine" mapstructure:"Machine"`
 	Parameters        []*ParameterResponse `json:"parameters" mapstructure:"Parameters"`
-	AuditableResponse *AuditableResponse   `json:"auditable"`
+	AuditableResponse *AuditableResponse   `json:"auditable" mappstructure:"-"`
 }
 
 type MqttTopicDependency struct {

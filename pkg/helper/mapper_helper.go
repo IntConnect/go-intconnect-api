@@ -62,10 +62,9 @@ func StringIntoTypeHookFunc(from reflect.Type, to reflect.Type, data interface{}
 	}
 	return data, nil
 }
+
 func PointerDecodeHookFunc() mapstructure.DecodeHookFunc {
 	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
-		// Debug log
-
 		// 1. Handle nil data
 		if data == nil {
 			if t.Kind() == reflect.Ptr {
@@ -74,42 +73,57 @@ func PointerDecodeHookFunc() mapstructure.DecodeHookFunc {
 			return data, nil
 		}
 
-		// 2. Handle pointer source (dereference)
+		// 2. Dereference pointer source jika perlu
 		dataValue := reflect.ValueOf(data)
-		if dataValue.IsValid() && dataValue.Kind() == reflect.Ptr {
+		if !dataValue.IsValid() {
+			return nil, nil
+		}
+
+		// Handle pointer-to-pointer atau pointer-to-struct
+		if dataValue.Kind() == reflect.Ptr {
 			if dataValue.IsNil() {
+				if t.Kind() == reflect.Ptr {
+					return nil, nil
+				}
+				return data, nil
+			}
+
+			// PENTING: Jika target juga pointer dan source adalah pointer ke struct
+			// Biarkan mapstructure handle nested decoding
+			if t.Kind() == reflect.Ptr && dataValue.Elem().Kind() == reflect.Struct {
+				// Jangan return langsung, biarkan mapstructure decode field by field
+				return data, nil
+			}
+		}
+
+		// 3. Handle zero value struct -> nil pointer
+		if t.Kind() == reflect.Ptr && f.Kind() == reflect.Struct {
+			if dataValue.IsValid() && dataValue.IsZero() {
 				return nil, nil
 			}
-			// Sudah di-dereference, jangan handle lagi
-			// Biarkan mapstructure decode field by field
+		}
+
+		// 4. Handle map to struct (untuk nested objects)
+		if f.Kind() == reflect.Map && t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
+			// Biarkan mapstructure handle conversion
 			return data, nil
 		}
 
-		// 3. Handle target pointer dengan source struct zero value
-		if t.Kind() == reflect.Ptr && f.Kind() == reflect.Struct {
-			v := reflect.ValueOf(data)
-			if v.IsValid() && v.IsZero() {
-				return nil, nil
-			}
-		}
-
-		// 4. PENTING: Untuk struct-to-struct atau primitive-to-primitive
-		//    Jangan ubah apapun, langsung return data
 		return data, nil
 	}
 }
 func DecodeFromSource[S any, T any](sourceMapping S, targetMapping T) T {
+
 	decoderConfig := &mapstructure.DecoderConfig{
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			PointerDecodeHookFunc(),
 			StringIntoTypeHookFunc,
 		), Result: &targetMapping,
-		TagName:          "mapstructure",
-		WeaklyTypedInput: true,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
 	CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	err = decoder.Decode(sourceMapping)
+
 	return targetMapping
 }
 
