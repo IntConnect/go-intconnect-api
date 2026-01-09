@@ -21,9 +21,9 @@ type CreateCheckSheetRequest struct {
 }
 
 type CheckSheetValue struct {
-	CheckSheetDocumentTemplateParameterId uint64 `json:"check_sheet_document_template_parameter_id"  validate:"required"`
-	Timestamp                             string `json:"timestamp" validate:"required"`
-	Value                                 string `json:"value"`
+	ParameterId uint64 `json:"parameter_id"  validate:"required"`
+	Timestamp   string `json:"timestamp" validate:"required"`
+	Value       string `json:"value"`
 }
 
 type ApprovalCheckSheet struct {
@@ -33,11 +33,11 @@ type ApprovalCheckSheet struct {
 }
 
 type CheckSheetValueResponse struct {
-	Id                                    uint64 `json:"id"`
-	CheckSheetId                          uint64 `json:"check_sheet_id"`
-	CheckSheetDocumentTemplateParameterId uint64 `json:"check_sheet_document_template_parameter_id"`
-	Timestamp                             string `json:"timestamp"`
-	Value                                 string `json:"value"`
+	Id           uint64 `json:"id"`
+	CheckSheetId uint64 `json:"check_sheet_id"`
+	ParameterId  uint64 `json:"parameter_id"`
+	Timestamp    string `json:"timestamp"`
+	Value        string `json:"value"`
 }
 
 type UpdateCheckSheetRequest struct {
@@ -55,5 +55,5 @@ func (checkSheetResponse *CheckSheetResponse) SetAuditableResponse(auditableResp
 }
 
 func (checkSheetValue *CheckSheetValue) GetId() uint64 {
-	return checkSheetValue.CheckSheetDocumentTemplateParameterId
+	return checkSheetValue.ParameterId
 }

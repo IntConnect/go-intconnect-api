@@ -121,8 +121,6 @@ func (checkSheetService *ServiceImpl) Create(ginContext *gin.Context, createChec
 		checkSheetEntity.ReportedBy = userJwtClaims.Id
 		checkSheetEntity.Timestamp = time.Now()
 		checkSheetEntity.Status = "Draft"
-		checkSheetValueEntities := helper.MapEntitiesIntoResponses[*model.CheckSheetValue, *entity.CheckSheetValue](createCheckSheetRequest.CheckSheetValues)
-		checkSheetEntity.CheckSheetValues = checkSheetValueEntities
 		err := checkSheetService.checkSheetRepository.Create(gormTransaction, checkSheetEntity)
 
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -211,9 +209,9 @@ func (checkSheetService *ServiceImpl) Update(ginContext *gin.Context, updateChec
 		var checkSheetValueEntities []entity.CheckSheetValue
 		for _, checkSheetValueEntity := range updateCheckSheetRequest.CheckSheetValues {
 			checkSheetValueEntities = append(checkSheetValueEntities, entity.CheckSheetValue{
-				CheckSheetId:                          checkSheetEntity.Id,
-				CheckSheetDocumentTemplateParameterId: checkSheetValueEntity.CheckSheetDocumentTemplateParameterId,
-				Value:                                 checkSheetValueEntity.Value,
+				CheckSheetId: checkSheetEntity.Id,
+				ParameterId:  checkSheetValueEntity.ParameterId,
+				Value:        checkSheetValueEntity.Value,
 			})
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))

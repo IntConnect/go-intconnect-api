@@ -63,9 +63,12 @@ func (checkSheetValueRepositoryImpl *RepositoryImpl) FindById(gormTransaction *g
 	return &checkSheetValueEntity, err
 }
 
-func (checkSheetValueRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, currencyEntity *entity.CheckSheetValue) error {
-	return gormTransaction.Model(currencyEntity).Create(currencyEntity).Error
+func (checkSheetValueRepositoryImpl *RepositoryImpl) Create(gormTransaction *gorm.DB, checkSheetValueEntity *entity.CheckSheetValue) error {
+	return gormTransaction.Model(checkSheetValueEntity).Create(checkSheetValueEntity).Error
+}
 
+func (checkSheetValueRepositoryImpl *RepositoryImpl) CreateBatch(gormTransaction *gorm.DB, checkSheetValueEntities []*entity.CheckSheetValue) error {
+	return gormTransaction.Model(checkSheetValueEntities).Create(checkSheetValueEntities).Error
 }
 
 func (checkSheetValueRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
