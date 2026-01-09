@@ -1,0 +1,220 @@
+@startuml
+title **Class Diagram – Facility Management System**
+
+'=====================================================
+' STYLE
+'=====================================================
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
+skinparam RoundCorner 10
+skinparam Shadowing false
+skinparam ClassBorderThickness 1.2
+skinparam ArrowThickness 1.5
+
+skinparam class {
+  BackgroundColor<<entity>> #E3F2FD
+  BorderColor<<entity>> #64B5F6
+}
+
+'=====================================================
+' ENTITY
+'=====================================================
+class AlarmLogs <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +ParameterId: Uint64 <<FK>>
+  +AcknowledgedBy: Uint64 <<FK>>
+  +Value: Float64
+  +Type: String
+  +IsActive: Boolean
+  +Status: String
+  +Note: String
+  +AcknowledgedAt: time.Time
+  +ResolvedAt: time.Time
+  +AcknowledgedByUser: User
+  +Parameter: Parameter
+  +CreatedAt: time.Time
+  +UpdatedAt: time.Time
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+}
+
+class AuditLog <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +UserId: Uint64 <<FK>>
+  +Action: String
+  +Feature: String
+  +Description: String
+  +Before: map[string]interface{}
+  +After: map[string]interface{}
+  +Relation: map[string]interface{}
+  +BeforeRaw: byte[]
+  +AfterRaw: byte[]
+  +RelationRaw: byte[]
+  +IpAddress: String
+  +UserAgent: String
+  +User: User
+  +SimpleAuditable: Auditable
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+}
+
+class Auditable <<entity>> {
+  +CreatedAt: time.Time
+  +CreatedBy: string
+  +UpdatedAt: time.Time
+  +UpdatedBy: string
+  +DeletedAt: time.Time
+  +DeletedBy: string
+}
+
+
+class SimpleAuditable <<entity>> {
+  +CreatedAt: time.Time
+  +CreatedBy: string
+}
+
+class CheckSheet <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +CheckSheetDocumentTemplateId: Uint64 <<FK>>
+  +ReportedBy: Uint64 <<FK>>
+  +VerifiedBy: Uint64 <<FK>>
+  +Timestamp: time.Time
+  +Note: String
+  +Status: String
+  +CheckSheetValues: []*CheckSheetValues
+  +VerifiedByUser: *User
+  +ReportedByUser: User
+  +CheckSheetDocumentTemplate: CheckSheetDocumentTemplate
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class CheckSheetDocumentTemplate <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>>
+  +Name: String
+  +No: String
+  +Description: String
+  +Category: CheckSheetDocumentTemplateCategory
+  +Interval: Int
+  +IntervalType: Int
+  +RotationType: Int
+  +RevisionNumber: Int
+  +EffectiveDate: time.Time
+  +StartingHour: String
+  +Machine: Machine
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class CheckSheetValue <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +CheckSheetId: Uint64 <<FK>>
+  +ParameterId: Uint64 <<FK>>
+  +Timestamp: String
+  +Value: String
+  +Parameter: Parameter
+  +CheckSheet: CheckSheet
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +CreateBatch()
+  +DeleteBatch()
+  +DeleteBatchById()
+}
+
+
+class DashboardWidget <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>>
+  +Code: String
+  +Layout: map[string]interface{}
+  +Config: map[string]interface{}
+  +LayoutRaw: []byte
+  +ConfigRam: []byte
+  +Machine: Machine
+  --
+  +FindBatchById()
+  +CreateBatch()
+  +Update()
+  +DeleteBatchById()
+  +DeleteBatchByCode()
+}
+
+class Facility <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +Name: String
+  +Code: String
+  +Description: String
+  +Location: String
+  +ThumbnailPath: String
+  +ModelPath: String
+  +PositionX: Float64
+  +PositionY: Float64
+  +PositionZ: Float64
+  +CameraX: Float64
+  +CameraY: Float64
+  +CameraZ: Float64
+  +Auditable: Auditable
+  --
+  +FindBatchById()
+  +CreateBatch()
+  +Update()
+  +DeleteBatchById()
+  +DeleteBatchByCode()
+}
+
+class Machine <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +FacilityId: Uint64
+  +Name: Uint64
+  +Code: Uint64
+  +Description: String
+  +CameraX: Float64
+  +CameraY: Float64
+  +CameraZ: Float64
+  +ThumbnailPath: String
+  +ModelPath: String
+  +Facility: Float64
+  +CameraY: Float64
+  +CameraZ: Float64
+  +Auditable: Auditable
+  --
+  +FindBatchById()
+  +CreateBatch()
+  +Update()
+  +DeleteBatchById()
+  +DeleteBatchByCode()
+}
+
+
+@enduml
