@@ -54,12 +54,9 @@ func NewRedisInstance(redisConfig configs.RedisConfig) *configs.RedisInstance {
 	return redisInstance
 }
 
-func NewRedisConfig() configs.RedisConfig {
-	return configs.RedisConfig{
-		IPAddress: "localhost:6379",
-		Password:  "",
-		Database:  0,
-	}
+func InitRedisConfig(viperConfig *viper.Viper) configs.RedisConfig {
+	redisHostName, redisPassword, parsedRedisDatabaseIndex := configs.LoadRedisConfigFromEnvironment(viperConfig)
+	return configs.NewRedisConfig(redisHostName, redisPassword, int(parsedRedisDatabaseIndex))
 }
 
 func NewValidator(gormDatabase *gorm.DB) (*validator.Validate, universalTranslator.Translator) {
@@ -124,7 +121,7 @@ var CoreModule = fx.Module("coreModule", fx.Provide(
 	NewDatabaseConnection,
 	NewValidator,
 	NewGinEngine,
-	NewRedisConfig,
+	InitRedisConfig,
 	NewRedisInstance,
 	NewStorageManager,
 ))
@@ -240,6 +237,9 @@ var ParameterOperationModule = fx.Module("parameterOperationFeature",
 
 var SystemSettingModule = fx.Module("systemSettingFeature",
 	fx.Provide(fx.Annotate(systemSetting.NewRepository, fx.As(new(systemSetting.Repository)))),
+	fx.Provide(
+		systemSetting.NewRegistry,
+	),
 	fx.Provide(fx.Annotate(systemSetting.NewService, fx.As(new(systemSetting.Service)))),
 	fx.Provide(fx.Annotate(systemSetting.NewHandler, fx.As(new(systemSetting.Controller)))),
 )

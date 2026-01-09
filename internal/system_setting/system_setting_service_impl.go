@@ -6,11 +6,10 @@ import (
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/storage"
+	"go-intconnect-api/internal/system_setting/processor"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
-	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -24,13 +23,22 @@ type ServiceImpl struct {
 	validatorService        validator.Service
 	dbConnection            *gorm.DB
 	viperConfig             *viper.Viper
+	systemSettingRegistry   *Registry
 }
 
 func NewService(systemSettingRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
 	viperConfig *viper.Viper, auditLogService auditLog.Service,
 	localStorageService *storage.Manager,
-
+	systemSettingRegistry *Registry,
 ) *ServiceImpl {
+	systemSettingRegistry.Register(
+		"DASHBOARD_SETTINGS",
+		processor.NewDashboardSettingHandler(localStorageService, validatorService),
+	)
+	systemSettingRegistry.Register(
+		"LISTENER_SETTINGS",
+		processor.NewListenerSettingHandler(validatorService),
+	)
 	return &ServiceImpl{
 		systemSettingRepository: systemSettingRepository,
 		auditLogService:         auditLogService,
@@ -38,6 +46,7 @@ func NewService(systemSettingRepository Repository, validatorService validator.S
 		dbConnection:            dbConnection,
 		viperConfig:             viperConfig,
 		localStorageService:     localStorageService,
+		systemSettingRegistry:   systemSettingRegistry,
 	}
 }
 
@@ -57,8 +66,8 @@ func (systemSettingService *ServiceImpl) FindByKey(systemSettingKey string, isMi
 	var systemSettingResponsesRequest *model.SystemSettingResponse
 
 	err := systemSettingService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		systemSettingEntities, err := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, systemSettingKey)
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		systemSettingEntities, _ := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, systemSettingKey)
+
 		if isMinimal {
 			systemSettingResponsesRequest = helper.MapEntityIntoResponse[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities)
 		} else {
@@ -71,45 +80,31 @@ func (systemSettingService *ServiceImpl) FindByKey(systemSettingKey string, isMi
 	return systemSettingResponsesRequest
 }
 
-// Create - Membuat systemSetting baru
-func (systemSettingService *ServiceImpl) Manage(ginContext *gin.Context, createSystemSettingRequest *model.ManageSystemSettingRequest) []*model.SystemSettingResponse {
-	valErr := systemSettingService.validatorService.ValidateStruct(createSystemSettingRequest)
-	systemSettingService.validatorService.ParseValidationError(valErr, *createSystemSettingRequest)
+func (systemSettingService *ServiceImpl) Manage(
+	ginContext *gin.Context,
+	manageSystemSettingRequest *model.ManageSystemSettingRequest,
+) []*model.SystemSettingResponse {
+
+	valErr := systemSettingService.validatorService.ValidateStruct(manageSystemSettingRequest)
+	systemSettingService.validatorService.ParseValidationError(valErr, *manageSystemSettingRequest)
+
 	err := systemSettingService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		resolvedSchema, isExists := model.SystemSettingSchemas[createSystemSettingRequest.Key]
-		if !isExists {
-			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrSystemSettingKeyNotMatch))
-		}
-		loadedStruct := resolvedSchema.NewPayload
-		systemSettingEntity, err := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, createSystemSettingRequest.Key)
-		parsedPayload := helper.ParsingHashMapIntoStruct[*model.DashboardSettingPayload](createSystemSettingRequest.Value, loadedStruct().(*model.DashboardSettingPayload))
-		modelFile, _ := ginContext.FormFile("value[model]")
-		if modelFile != nil {
-			(*parsedPayload).ModelFile = modelFile
-			newPath, err := systemSettingService.localStorageService.Disk().Put(modelFile, fmt.Sprintf("system-settings/models/%d-%s", time.Now().UnixNano(), modelFile.Filename))
-			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
-			createSystemSettingRequest.Value["model_path"] = newPath
-		} else {
-			var modelFileErr error
-			if err == nil {
-				modelFileErr = systemSettingService.validatorService.ValidateVar((*parsedPayload).ModelFile, "omitempty")
-				createSystemSettingRequest.Value["model_path"] = systemSettingEntity.Value["model_path"]
-			} else {
-				modelFileErr = systemSettingService.validatorService.ValidateVar((*parsedPayload).ModelFile, "required")
-			}
-			systemSettingService.validatorService.ParseValidationError(valErr, modelFileErr)
+
+		existingSystemSettingEntity, err := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, manageSystemSettingRequest.Key)
+		systemSettingProcessor := systemSettingService.systemSettingRegistry.Resolve(manageSystemSettingRequest.Key)
+		systemSettingEntity, err := systemSettingProcessor.Handle(ginContext, gormTransaction, existingSystemSettingEntity, manageSystemSettingRequest)
+		fmt.Println(err)
+		if err != nil {
+			return err
 		}
 
-		fmt.Println(*parsedPayload)
-		valErr = systemSettingService.validatorService.ValidateStruct(*(parsedPayload))
-		systemSettingService.validatorService.ParseValidationError(valErr, *parsedPayload)
-		systemSettingEntity = helper.MapCreateRequestIntoEntity[model.ManageSystemSettingRequest, entity.SystemSetting](createSystemSettingRequest)
-		systemSettingEntity.Value = createSystemSettingRequest.Value
-		err = systemSettingService.systemSettingRepository.Manage(gormTransaction, systemSettingEntity)
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		if err := systemSettingService.systemSettingRepository.Manage(gormTransaction, systemSettingEntity); err != nil {
+			return exception.ParseGormError(err)
+		}
 
 		return nil
 	})
+
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return systemSettingService.FindAll()
 }

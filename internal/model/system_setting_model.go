@@ -12,6 +12,11 @@ var SystemSettingSchemas = map[string]SettingSchema{
 			return &DashboardSettingPayload{}
 		},
 	},
+	"LISTENER_SETTINGS": {
+		NewPayload: func() interface{} {
+			return &ListenerSettingPayload{}
+		},
+	},
 }
 
 type ManageSystemSettingRequest struct {
@@ -28,6 +33,14 @@ type DashboardSettingPayload struct {
 	CameraZ       float64               `json:"camera_z" mapstructure:"camera_z" validate:"required"`
 	PinObjectName string                `json:"pin_object_name" mapstructure:"pin_object_name" validate:""`
 	ModelFile     *multipart.FileHeader `json:"model_file" mapstructure:"model_file"`
+}
+
+type ListenerSettingPayload struct {
+	InsertionWorkersAmount *uint64 `mapstructure:"insertion_workers_amount" validate:"required,gte=1"`
+	InsertionQueueSize     *uint64 `mapstructure:"insertion_queue_size" validate:"required,gte=1"`
+	ParameterRecoveryCount uint64  `mapstructure:"parameter_recovery_count" validate:"required,gte=1"`
+	SnapshotTicker         uint64  `mapstructure:"snapshot_ticker" validate:"required,gte=1"`
+	SnapshotTickerType     string  `mapstructure:"snapshot_ticker_type" validate:"required"`
 }
 
 type SystemSettingResponse struct {

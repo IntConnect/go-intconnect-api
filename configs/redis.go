@@ -3,15 +3,38 @@ package configs
 import (
 	"context"
 	"fmt"
+	"go-intconnect-api/pkg/logger"
+	"strconv"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 type RedisConfig struct {
-	IPAddress string
-	Password  string
-	Database  int
+	HostName string
+	Password string
+	Database int
+}
+
+func NewRedisConfig(hostName, password string, database int) RedisConfig {
+	return RedisConfig{
+		HostName: hostName,
+		Password: password,
+		Database: database,
+	}
+}
+
+func LoadRedisConfigFromEnvironment(viperConfig *viper.Viper) (string, string, int) {
+	redisHostName := viperConfig.GetString("REDIS_HOST_NAME")
+	redisPassword := viperConfig.GetString("REDIS_PASSWORD")
+	redisDatabaseIndex := viperConfig.GetString("REDIS_DATABASE")
+	parsedRedisDatabaseIndex, err := strconv.ParseInt(redisDatabaseIndex, 10, 32)
+	if err != nil {
+		logger.WithError(err).Fatal("failed to parse redis database index")
+	}
+	return redisHostName, redisPassword, int(parsedRedisDatabaseIndex)
+
 }
 
 type RedisInstance struct {
@@ -22,7 +45,7 @@ type RedisInstance struct {
 func InitRedisInstance(redisConfig RedisConfig) (*RedisInstance, error) {
 	redisContext := context.Background()
 	redisDatabase := redis.NewClient(&redis.Options{
-		Addr:     redisConfig.IPAddress,
+		Addr:     redisConfig.HostName,
 		Password: redisConfig.Password,
 		DB:       redisConfig.Database,
 	})

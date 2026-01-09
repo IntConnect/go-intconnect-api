@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go-intconnect-api/configs"
 	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/pkg/logger"
 	"os"
@@ -29,8 +30,8 @@ import (
 )
 
 const (
-	NumInsertionWorkers = 25
-	InsertionQueueSize  = 1000
+	InsertionWorkersAmount = 25
+	InsertionQueueSize     = 1000
 )
 
 func main() {
@@ -72,6 +73,7 @@ type ListenerFluxor struct {
 	abnormalBuffers                map[uint64]*AbnormalWindow
 	recoveryBuffers                map[uint64]*AlarmRecoveryWindow
 	alarmMutex                     sync.Mutex
+	redisInstance                  *configs.RedisInstance
 }
 
 func NewListenerFluxor() *ListenerFluxor {
@@ -82,6 +84,12 @@ func NewListenerFluxor() *ListenerFluxor {
 	parameterRepository := parameter.NewRepository()
 	mqttBrokerRepository := mqttBroker.NewRepository()
 	mqttTopicRepository := mqttTopic.NewRepository()
+	redisHostName, redisPassword, redisDatabaseIndex := configs.LoadRedisConfigFromEnvironment(viperConfig)
+	redisConfig := configs.NewRedisConfig(redisHostName, redisPassword, redisDatabaseIndex)
+	redisInstance, err := configs.InitRedisInstance(redisConfig)
+	if err != nil {
+		logger.WithError(err).Fatal("failed to init redis instance")
+	}
 	latestTelemetry := make(map[string]*entity.Telemetry)
 	listenerFluxor := &ListenerFluxor{
 		gormDatabase:                   gormDatabase,
@@ -98,6 +106,7 @@ func NewListenerFluxor() *ListenerFluxor {
 		latestTelemetry:                latestTelemetry,
 		abnormalBuffers:                make(map[uint64]*AbnormalWindow),
 		recoveryBuffers:                make(map[uint64]*AlarmRecoveryWindow),
+		redisInstance:                  redisInstance,
 	}
 
 	if err := listenerFluxor.loadInitialConfiguration(); err != nil {
@@ -322,7 +331,7 @@ func (listenerFluxor *ListenerFluxor) resubscribeTopics(ctx context.Context) err
 }
 
 func (listenerFluxor *ListenerFluxor) StartWorkers(ctx context.Context) {
-	for i := 1; i <= NumInsertionWorkers; i++ {
+	for i := 1; i <= InsertionWorkersAmount; i++ {
 		listenerFluxor.waitGroup.Add(1)
 		go insertionWorker(i, ctx, listenerFluxor.insertionChan, listenerFluxor.telemetryRepository, listenerFluxor.waitGroup, listenerFluxor.gormDatabase)
 	}
