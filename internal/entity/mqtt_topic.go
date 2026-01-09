@@ -6,7 +6,7 @@ type MqttTopic struct {
 	MqttBrokerId uint64       `gorm:"column:mqtt_broker_id"`
 	Name         string       `gorm:"column:name"`
 	QoS          int          `gorm:"column:qos"`
-	MqttBroker   *MqttBroker  `gorm:"foreignKey:MqttBrokerId"`
+	MqttBroker   MqttBroker   `gorm:"foreignKey:MqttBrokerId"`
 	Machine      *Machine     `gorm:"foreignKey:MachineId;references:Id"`
 	Parameters   []*Parameter `gorm:"foreignKey:MqttTopicId;references:Id"`
 	Auditable    Auditable    `gorm:"embedded"`

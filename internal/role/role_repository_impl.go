@@ -29,8 +29,8 @@ func NewRepository(
 	}
 }
 
-func (roleRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Role, error) {
-	var roleEntities []entity.Role
+func (roleRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.Role, error) {
+	var roleEntities []*entity.Role
 	err := gormTransaction.Preload("Permissions").Find(&roleEntities).Error
 	return roleEntities, err
 }
@@ -61,7 +61,7 @@ func (roleRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, id ui
 	return gormTransaction.Model(&entity.Role{}).Where("id = ?", id).Delete(&entity.Role{}).Error
 }
 
-func (roleRepositoryImpl *RepositoryImpl) FindAllCache(context context.Context) ([]entity.Role, error) {
+func (roleRepositoryImpl *RepositoryImpl) FindAllCache(context context.Context) ([]*entity.Role, error) {
 	data, err := roleRepositoryImpl.redisInstance.RedisClient.Get(context, roleRepositoryImpl.redisRolesCacheKey).Result()
 	if err == redis.Nil {
 		return nil, nil // cache miss
@@ -70,14 +70,14 @@ func (roleRepositoryImpl *RepositoryImpl) FindAllCache(context context.Context) 
 		return nil, err
 	}
 
-	var roles []entity.Role
+	var roles []*entity.Role
 	if err := json.Unmarshal([]byte(data), &roles); err != nil {
 		return nil, err
 	}
 	return roles, nil
 }
 
-func (roleRepositoryImpl *RepositoryImpl) SetAllCache(ctx context.Context, roles []entity.Role) error {
+func (roleRepositoryImpl *RepositoryImpl) SetAllCache(ctx context.Context, roles []*entity.Role) error {
 	data, err := json.Marshal(roles)
 	if err != nil {
 		return err

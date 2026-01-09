@@ -63,7 +63,6 @@ func (registerService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 		registerResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.Register, *model.RegisterResponse](
 			registerEntities,
 			mapper.FuncMapAuditable,
-			mapper.FuncMapRegister,
 		)
 		totalItems = total
 

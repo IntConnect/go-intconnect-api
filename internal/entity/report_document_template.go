@@ -5,8 +5,8 @@ type ReportDocumentTemplate struct {
 	Name            string       `gorm:"column:name"`
 	Code            string       `gorm:"column:code"`
 	DocumentVersion int          `gorm:"column:document_version"`
-	Parameters      []*Parameter `gorm:"many2many:report_document_templates_parameters;joinForeignKey:ReportDocumentTemplateID;joinReferences:ParameterID"`
-	Auditable       `gorm:"embedded"`
+	Parameters      []*Parameter `gorm:"many2many:report_document_templates_parameters;joinForeignKey:ReportDocumentTemplateId;joinReferences:ParameterId"`
+	Auditable       Auditable    `gorm:"embedded"`
 }
 
 func (reportDocumentTemplateEntity ReportDocumentTemplate) GetAuditable() *Auditable {

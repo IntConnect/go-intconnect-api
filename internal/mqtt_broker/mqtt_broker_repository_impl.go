@@ -12,8 +12,8 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (mqttBrokerRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.MqttBroker, error) {
-	var mqttBrokerEntities []entity.MqttBroker
+func (mqttBrokerRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.MqttBroker, error) {
+	var mqttBrokerEntities []*entity.MqttBroker
 	err := gormTransaction.Find(&mqttBrokerEntities).Error
 	return mqttBrokerEntities, err
 }
@@ -23,9 +23,9 @@ func (mqttBrokerRepositoryImpl *RepositoryImpl) FindAllPagination(
 	orderClause string,
 	offsetVal, limitPage int,
 	searchQuery string,
-) ([]entity.MqttBroker, int64, error) {
+) ([]*entity.MqttBroker, int64, error) {
 
-	var mqttBrokerEntities []entity.MqttBroker
+	var mqttBrokerEntities []*entity.MqttBroker
 	var totalItems int64
 
 	// Base query

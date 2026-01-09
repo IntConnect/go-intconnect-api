@@ -22,8 +22,7 @@ func MapMachineDocument(machineEntity *entity.Machine, machineResponse *model.Ma
 		machineDocument := machineEntity.MachineDocuments[i]
 
 		mapped := helper.MapEntityIntoResponse[*entity.MachineDocument, *model.MachineDocumentResponse](
-			machineDocument,
-			FuncMapAuditable)
+			machineDocument)
 
 		result = append(result, mapped)
 	}

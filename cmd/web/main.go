@@ -57,7 +57,6 @@ func main() {
 		injector.TelemetryModule,
 		injector.CheckSheetModule,
 		injector.CheckSheetValueModule,
-		injector.CheckSheetDocumentTemplateParameterModule,
 		injector.DashboardWidgetModule,
 		injector.RegisterModule,
 		injector.AlarmLogModule,

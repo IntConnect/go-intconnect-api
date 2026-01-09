@@ -239,7 +239,6 @@ func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachine
 			newPath, err := machineService.localStorageService.Disk().MoveFile(machineDocumentEntity.FilePath, "machines/documents")
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
 			machineDocuments[i].FilePath = newPath
-			machineDocuments[i].Auditable = entity.DeleteAuditable(userJwtClaims.Username)
 		}
 		var machineDocumentEntities []*entity.MachineDocument
 		for _, createMachineDocumentRequest := range updateMachineRequest.MachineDocuments {
@@ -291,7 +290,6 @@ func (machineService *ServiceImpl) Delete(ginContext *gin.Context, deleteMachine
 			newPath, err := machineService.localStorageService.Disk().MoveFile(machineDocumentEntity.FilePath, "machines/documents")
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
 			machineEntity.MachineDocuments[i].FilePath = newPath
-			machineEntity.MachineDocuments[i].Auditable = entity.DeleteAuditable(userJwtClaims.Username)
 		}
 		newPath, err := machineService.localStorageService.Disk().MoveFile(machineEntity.ThumbnailPath, "machines/thumbnails")
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))

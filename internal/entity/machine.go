@@ -11,7 +11,7 @@ type Machine struct {
 	CameraZ          float64            `gorm:"column:camera_z;"`
 	ThumbnailPath    string             `gorm:"column:thumbnail_path"`
 	ModelPath        string             `gorm:"column:model_path"`
-	Facility         *Facility          `gorm:"foreignKey:FacilityId;references:Id"`
+	Facility         Facility           `gorm:"foreignKey:FacilityId;references:Id"`
 	MqttTopic        *MqttTopic         `gorm:"foreignKey:MachineId;"`
 	MachineDocuments []*MachineDocument `gorm:"foreignKey:MachineId;references:Id"`
 	DashboardWidget  []*DashboardWidget `gorm:"foreignKey:MachineId;references:Id"`

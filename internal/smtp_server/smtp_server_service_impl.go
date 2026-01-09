@@ -39,7 +39,7 @@ func (smtpServerService *ServiceImpl) FindAll() []*model.SmtpServerResponse {
 	err := smtpServerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		smtpServerEntities, err := smtpServerService.smtpServerRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		smtpServerResponsesRequest = helper.MapEntitiesIntoResponses[entity.SmtpServer, *model.SmtpServerResponse](smtpServerEntities)
+		smtpServerResponsesRequest = helper.MapEntitiesIntoResponses[*entity.SmtpServer, *model.SmtpServerResponse](smtpServerEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -60,7 +60,7 @@ func (smtpServerService *ServiceImpl) FindAllPagination(paginationReq *model.Pag
 		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		smtpServerResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.SmtpServer, *model.SmtpServerResponse](
+		smtpServerResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.SmtpServer, *model.SmtpServerResponse](
 			smtpServerEntities,
 			mapper.FuncMapAuditable,
 		)

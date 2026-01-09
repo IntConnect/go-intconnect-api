@@ -16,7 +16,7 @@ type CheckSheet struct {
 	VerifiedByUser               *User                      `gorm:"foreignKey:VerifiedBy;references:Id"`
 	ReportedByUser               User                       `gorm:"foreignKey:ReportedBy;references:Id"`
 	CheckSheetDocumentTemplate   CheckSheetDocumentTemplate `gorm:"foreignKey:CheckSheetDocumentTemplateId;references:Id"`
-	Auditable                    `gorm:"embedded"`
+	Auditable                    Auditable                  `gorm:"embedded"`
 }
 
 func (checkSheetEntity *CheckSheet) GetAuditable() *Auditable {

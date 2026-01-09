@@ -8,10 +8,10 @@ type CheckSheetDocumentTemplateResponse struct {
 	Description       string             `json:"description"`
 	Category          string             `json:"category"`
 	Interval          int                `json:"interval"`
-	IntervalType      string             `json:"interval_type"`
 	RotationType      string             `json:"rotation_type"`
 	RevisionNumber    int                `json:"revision_number"`
 	EffectiveDate     string             `json:"effective_date"`
+	StartingHour      string             `json:"starting_hour"`
 	AuditableResponse *AuditableResponse `json:"auditable"`
 }
 
@@ -22,10 +22,10 @@ type CreateCheckSheetDocumentTemplateRequest struct {
 	Description    string `json:"description"`
 	Category       string `json:"category" validate:"required"`
 	Interval       int    `json:"interval" validate:"required,gte=1"`
-	IntervalType   string `json:"interval_type" validate:"required,oneof=Hours Minutes"`
 	RotationType   string `json:"rotation_type" validate:"required,oneof=Daily Weekly Monthly"`
 	RevisionNumber int    `json:"revision_number"`
 	EffectiveDate  string `json:"effective_date" validate:"required,date"`
+	StartingHour   string `json:"starting_hour" validate:"required,time"`
 }
 
 type UpdateCheckSheetDocumentTemplateRequest struct {
@@ -36,10 +36,10 @@ type UpdateCheckSheetDocumentTemplateRequest struct {
 	Description    string `json:"description"`
 	Category       string `json:"category" validate:"required"`
 	Interval       int    `json:"interval" validate:"required,gte=1"`
-	IntervalType   string `json:"interval_type" validate:"required,oneof=Hours Minutes"`
 	RotationType   string `json:"rotation_type" validate:"required,oneof=Daily Weekly Monthly"`
 	RevisionNumber int    `json:"revision_number"`
 	EffectiveDate  string `json:"effective_date" validate:"required,date"`
+	StartingHour   string `json:"starting_hour" validate:"required,time"`
 }
 
 func (checkSheetDocumentTemplateResponse *CheckSheetDocumentTemplateResponse) GetAuditableResponse() *AuditableResponse {

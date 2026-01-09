@@ -12,7 +12,7 @@ type SystemSetting struct {
 	Description string                 `gorm:"column:description"`
 	Value       map[string]interface{} `gorm:"-:all"`
 	ValueRaw    []byte                 `gorm:"column:value;type:jsonb"`
-	Auditable   `gorm:"embedded"`
+	Auditable   Auditable              `gorm:"embedded"`
 }
 
 func (systemSettingEntity *SystemSetting) AfterFind(gormTransaction *gorm.DB) (err error) {

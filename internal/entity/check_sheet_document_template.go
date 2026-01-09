@@ -13,12 +13,12 @@ type CheckSheetDocumentTemplate struct {
 	Description    string                                   `gorm:"column:description"`
 	Category       trait.CheckSheetDocumentTemplateCategory `gorm:"column:category"`
 	Interval       int                                      `gorm:"column:interval"`
-	IntervalType   string                                   `gorm:"column:interval_type"`
 	RotationType   string                                   `gorm:"column:rotation_type"`
 	RevisionNumber int                                      `gorm:"column:revision_number"`
 	EffectiveDate  time.Time                                `gorm:"column:effective_date"`
-	Machine        *Machine                                 `gorm:"foreignKey:MachineId;references:Id"`
-	Auditable      `gorm:"embedded"`
+	StartingHour   string                                   `gorm:"column:starting_hour"`
+	Machine        Machine                                  `gorm:"foreignKey:MachineId;references:Id"`
+	Auditable      Auditable                                `gorm:"embedded"`
 }
 
 func (checkSheetDocumentTemplateEntity *CheckSheetDocumentTemplate) GetAuditable() *Auditable {

@@ -39,7 +39,7 @@ func (mqttBrokerService *ServiceImpl) FindAll() []*model.MqttBrokerResponse {
 	err := mqttBrokerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		mqttBrokerEntities, err := mqttBrokerService.mqttBrokerRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		mqttBrokerResponsesRequest = helper.MapEntitiesIntoResponses[entity.MqttBroker, *model.MqttBrokerResponse](mqttBrokerEntities)
+		mqttBrokerResponsesRequest = helper.MapEntitiesIntoResponses[*entity.MqttBroker, *model.MqttBrokerResponse](mqttBrokerEntities)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -60,7 +60,7 @@ func (mqttBrokerService *ServiceImpl) FindAllPagination(paginationReq *model.Pag
 		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		mqttBrokerResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.MqttBroker, *model.MqttBrokerResponse](
+		mqttBrokerResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.MqttBroker, *model.MqttBrokerResponse](
 			mqttBrokerEntities,
 			mapper.FuncMapAuditable,
 		)

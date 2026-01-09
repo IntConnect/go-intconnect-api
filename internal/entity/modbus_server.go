@@ -10,6 +10,6 @@ type ModbusServer struct {
 	Auditable Auditable `gorm:"embedded"`
 }
 
-func (mqttTopicEntity ModbusServer) GetAuditable() *Auditable {
+func (mqttTopicEntity *ModbusServer) GetAuditable() *Auditable {
 	return &mqttTopicEntity.Auditable
 }

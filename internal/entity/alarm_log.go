@@ -14,7 +14,7 @@ type AlarmLog struct {
 	AcknowledgedAt     *time.Time `gorm:"column:acknowledged_at"`
 	ResolvedAt         *time.Time `gorm:"column:resolved_at"`
 	AcknowledgedByUser *User      `gorm:"foreignKey:AcknowledgedBy;references:Id"`
-	Parameter          *Parameter `gorm:"foreignKey:ParameterId;references:Id"`
+	Parameter          Parameter  `gorm:"foreignKey:ParameterId;references:Id"`
 	CreatedAt          time.Time  `gorm:"column:created_at;<-:create" json:"created_at"`
 	UpdatedAt          time.Time  `gorm:"column:updated_at"`
 }

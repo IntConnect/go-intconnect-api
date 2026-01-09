@@ -58,7 +58,7 @@ func (userService *ServiceImpl) FindAll() []*model.UserResponse {
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userResponse, err := userService.userRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allUser = helper.MapEntitiesIntoResponsesWithFunc[entity.User, *model.UserResponse](userResponse, mapper.FuncMapAuditable)
+		allUser = helper.MapEntitiesIntoResponsesWithFunc[*entity.User, *model.UserResponse](userResponse, mapper.FuncMapAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -80,7 +80,7 @@ func (userService *ServiceImpl) FindAllPagination(paginationReq *model.Paginatio
 		)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
-		userResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.User, *model.UserResponse](
+		userResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.User, *model.UserResponse](
 			userEntities,
 			mapper.FuncMapAuditable,
 		)

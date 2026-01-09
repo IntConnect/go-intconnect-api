@@ -41,7 +41,7 @@ func (modbusServerService *ServiceImpl) FindAll() []*model.ModbusServerResponse 
 	err := modbusServerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		modbusServerResponse, err := modbusServerService.modbusServerRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allModbusServer = helper.MapEntitiesIntoResponses[entity.ModbusServer, *model.ModbusServerResponse](modbusServerResponse)
+		allModbusServer = helper.MapEntitiesIntoResponses[*entity.ModbusServer, *model.ModbusServerResponse](modbusServerResponse)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -62,7 +62,7 @@ func (modbusServerService *ServiceImpl) FindAllPagination(paginationReq *model.P
 			paginationQuery.Limit,
 			paginationQuery.SearchQuery,
 		)
-		modbusServerResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.ModbusServer, *model.ModbusServerResponse](
+		modbusServerResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.ModbusServer, *model.ModbusServerResponse](
 			modbusServerEntities,
 			mapper.FuncMapAuditable,
 		)

@@ -12,8 +12,8 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (userRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.User, error) {
-	var userEntities []entity.User
+func (userRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.User, error) {
+	var userEntities []*entity.User
 	err := gormTransaction.Preload("Role").Find(&userEntities).Error
 	return userEntities, err
 }
@@ -23,9 +23,9 @@ func (userRepositoryImpl *RepositoryImpl) FindAllPagination(
 	orderClause string,
 	offsetVal, limitPage int,
 	searchQuery string,
-) ([]entity.User, int64, error) {
+) ([]*entity.User, int64, error) {
 
-	var userEntities []entity.User
+	var userEntities []*entity.User
 	var totalItems int64
 
 	// Base query

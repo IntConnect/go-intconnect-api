@@ -12,8 +12,8 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (modbusServerRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.ModbusServer, error) {
-	var modbusServerEntities []entity.ModbusServer
+func (modbusServerRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.ModbusServer, error) {
+	var modbusServerEntities []*entity.ModbusServer
 	err := gormTransaction.Find(&modbusServerEntities).Error
 	return modbusServerEntities, err
 }
@@ -23,9 +23,9 @@ func (modbusServerRepositoryImpl *RepositoryImpl) FindAllPagination(
 	orderClause string,
 	offsetVal, limitPage int,
 	searchQuery string,
-) ([]entity.ModbusServer, int64, error) {
+) ([]*entity.ModbusServer, int64, error) {
 
-	var modbusServerEntities []entity.ModbusServer
+	var modbusServerEntities []*entity.ModbusServer
 	var totalItems int64
 
 	// Base query

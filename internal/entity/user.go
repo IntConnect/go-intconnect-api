@@ -11,11 +11,11 @@ type User struct {
 	Password   string           `gorm:"column:password"`
 	AvatarPath string           `gorm:"column:avatar_path"`
 	Status     trait.UserStatus `gorm:"column:status"`
-	Role       *Role            `gorm:"foreignKey:RoleId;references:Id"`
+	Role       Role             `gorm:"foreignKey:RoleId;references:Id"`
 	AuditLog   []*AuditLog      `gorm:"foreignKey:UserId;references:Id"`
-	Auditable
+	Auditable  Auditable        `gorm:"embedded"`
 }
 
-func (userEntity User) GetAuditable() *Auditable {
+func (userEntity *User) GetAuditable() *Auditable {
 	return &userEntity.Auditable
 }

@@ -90,7 +90,8 @@ FROM machine_documents;
 SELECT *
 FROM machines;
 SELECT *
-FROM parameters;
+FROM parameters
+WHERE id = 1;
 SELECT *
 FROM users;
 SELECT *
@@ -108,9 +109,11 @@ FROM telemetries;
 SELECT *
 FROM parameters;
 SELECT *
-FROM parameters WHERE id = 31;
+FROM parameters
+WHERE id = 31;
 SELECT *
-FROM telemetries WHERE parameter_id = 31;
+FROM telemetries
+WHERE parameter_id = 31;
 SELECT *
 FROM report_document_templates;
 SELECT *
@@ -127,7 +130,7 @@ SELECT *
 FROM check_sheet_values;
 SELECT *
 FROM dashboard_widgets;
-DELETE 
+DELETE
 FROM dashboard_widgets;
 SELECT *
 FROM modbus_servers;
@@ -176,5 +179,29 @@ FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
       GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
 
-ALTER TABLE parameters
-    ADD COLUMN machine_id BIGINT REFERENCES machines (id)
+ALTER TABLE check_sheet_document_templates
+    ADD COLUMN starting_hour TIME NOT NULL default CURRENT_TIMESTAMP;
+
+SELECT *
+FROM telemetries
+WHERE parameter_id = 1
+ORDER BY id DESC;
+SELECT *
+FROM check_sheet_document_templates;
+
+UPDATE check_sheet_document_templates
+SET starting_hour = '08:00:00'
+
+SELECT bucket,
+       parameter_id,
+       last_value
+FROM (SELECT time_bucket_gapfill('1 hours'::interval, timestamp, '2026-01-09 08:00:00'::timestamptz,
+                                 '2026-01-10 08:00:00'::timestamptz) AS bucket,
+             parameter_id,
+             last(value, timestamp)                                  AS last_value
+      FROM telemetries
+      WHERE parameter_id IN (2)
+        AND timestamp BETWEEN '2026-01-09 08:00:00' AND '2026-01-10 08:00:00'
+      GROUP BY bucket, parameter_id) q
+ORDER BY bucket;
+

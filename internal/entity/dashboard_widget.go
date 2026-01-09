@@ -14,7 +14,7 @@ type DashboardWidget struct {
 	Config    map[string]interface{} `gorm:"-:all"`
 	LayoutRaw []byte                 `gorm:"column:layout;type:jsonb"`
 	ConfigRaw []byte                 `gorm:"column:config;type:jsonb"`
-	Machine   *Machine               `gorm:"foreignKey:MachineId;references:Id"`
+	Machine   Machine                `gorm:"foreignKey:MachineId;references:Id"`
 }
 
 func (dashboardWidgetEntity *DashboardWidget) AfterFind(gormTransaction *gorm.DB) (err error) {

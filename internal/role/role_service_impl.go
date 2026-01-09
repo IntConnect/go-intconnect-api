@@ -46,7 +46,7 @@ func (roleService *ServiceImpl) FindAll(ginContext *gin.Context) []*model.RoleRe
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
 	if roleEntities != nil && len(roleEntities) > 0 {
 		roleResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
-			entity.Role,
+			*entity.Role,
 			*model.RoleResponse,
 		](roleEntities, mapper.FuncMapAuditable)
 		return roleResponsesRequest
@@ -57,16 +57,16 @@ func (roleService *ServiceImpl) FindAll(ginContext *gin.Context) []*model.RoleRe
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = roleService.roleRepository.SetAllCache(backgroundContext, roleEntities)
 		for _, roleEntity := range roleEntities {
-			err = roleService.roleRepository.SetByIdCache(ginContext.Request.Context(), roleEntity.Id, &roleEntity)
+			err = roleService.roleRepository.SetByIdCache(ginContext.Request.Context(), roleEntity.Id, roleEntity)
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
 		}
 		helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.StatusInternalError))
 		roleResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
-			entity.Role,
+			*entity.Role,
 			*model.RoleResponse,
 		](
 			roleEntities,
-			mapper.FuncMapAuditable[entity.Role, *model.RoleResponse],
+			mapper.FuncMapAuditable,
 		)
 		return nil
 	})

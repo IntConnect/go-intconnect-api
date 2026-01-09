@@ -12,6 +12,6 @@ type SmtpServer struct {
 	Auditable   Auditable `gorm:"embedded"`
 }
 
-func (smtpServerEntity SmtpServer) GetAuditable() *Auditable {
+func (smtpServerEntity *SmtpServer) GetAuditable() *Auditable {
 	return &smtpServerEntity.Auditable
 }
