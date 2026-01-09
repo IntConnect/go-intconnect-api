@@ -43,6 +43,7 @@ func InitializeValidator(dbConnection *gorm.DB) (*validator.Validate, ut.Transla
 	validate.RegisterValidation("exists", existsValidator(dbConnection))
 	validate.RegisterValidation("date", dateValidator("2006-01-02"))
 	validate.RegisterValidation("datetime", dateValidator("2006-01-02 15:04"))
+	validate.RegisterValidation("time", timeValidator("15:04"))
 	validate.RegisterValidation("matchPassword", matchPasswordValidator(dbConnection))
 	validate.RegisterStructValidation(CreateParameterRequestValidation, model.CreateParameterRequest{})
 	validate.RegisterStructValidation(UpdateParameterRequestValidation, model.UpdateParameterRequest{})
@@ -207,6 +208,26 @@ func dateValidator(format string) validator.Func {
 		}
 		_, err := time.Parse(format, fl.Field().String())
 		return err == nil
+	}
+}
+
+func timeValidator(format string) validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		value := fl.Field().String()
+
+		// allow empty value (optional field)
+		if value == "" {
+			return true
+		}
+
+		// strict time validation (HH:mm)
+		parsedTime, err := time.Parse(format, value)
+		if err != nil {
+			return false
+		}
+
+		// enforce exact format (no auto-correction by time.Parse)
+		return parsedTime.Format(format) == value
 	}
 }
 
