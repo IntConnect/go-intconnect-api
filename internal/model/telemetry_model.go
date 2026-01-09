@@ -15,6 +15,13 @@ type TelemetryReportFilterRequest struct {
 	EndDate                  string `json:"end_date" validate:"required,datetime"`
 }
 
+type TelemetryIntervalFilterRequest struct {
+	Interval     int      `json:"interval" validate:"required"`
+	Timestamp    string   `json:"timestamp" validate:"required"`
+	StartingHour string   `json:"starting_hour" validate:"required"`
+	ParameterIds []uint64 `json:"parameter_ids" validate:"required,dive"`
+}
+
 type TelemetryGrouped struct {
 	Timestamp time.Time               `json:"timestamp"`
 	Entries   []*TelemetryReportValue `json:"entries"`
@@ -27,4 +34,16 @@ type TelemetryReportValue struct {
 	MachineCode string    `json:"machine_code"`
 	ParameterId uint64    `json:"parameter_id"`
 	Value       *float64  `json:"value"`
+}
+
+type TelemetryIntervalValues struct {
+	Meta TelemetryMeta                  `json:"meta"`
+	Data map[string]map[uint64]*float64 `json:"data"`
+}
+
+type TelemetryMeta struct {
+	Date         string `json:"date"`
+	Interval     int    `json:"interval"`
+	Timezone     string `json:"timezone"`
+	StartingHour string `json:"starting_hour"`
 }

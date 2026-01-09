@@ -38,6 +38,44 @@ ORDER BY bucket;
 	err := gormTransaction.Raw(sqlQuery, intervalVal, searchedParameterIds, startDate, endDate).Scan(&telemetryEntities).Error
 	return telemetryEntities, err
 }
+func (telemetryRepositoryImpl *RepositoryImpl) FindAllInterval(
+	gormTransaction *gorm.DB,
+	searchedParameterIds []uint64,
+	intervalVal string,
+	startDate, endDate time.Time,
+) ([]*entity.TelemetryQuery, error) {
+
+	sqlQuery := `
+	SELECT
+	  bucket,
+	  parameter_id,
+	  last_value
+	FROM (
+	  SELECT
+	    time_bucket_gapfill(?::interval, timestamp, ?::timestamptz, ?::timestamptz) AS bucket,
+	    parameter_id,
+	    last(value, timestamp) AS last_value
+	  FROM telemetries
+	  WHERE parameter_id IN (?)
+	    AND timestamp BETWEEN ? AND ?
+	  GROUP BY bucket, parameter_id
+	) q
+	ORDER BY bucket;
+	`
+
+	var telemetryEntities []*entity.TelemetryQuery
+	err := gormTransaction.Debug().Raw(
+		sqlQuery,
+		intervalVal,
+		startDate,
+		endDate,
+		searchedParameterIds,
+		startDate,
+		endDate,
+	).Scan(&telemetryEntities).Error
+
+	return telemetryEntities, err
+}
 
 func (telemetryRepositoryImpl *RepositoryImpl) FindAllPagination(
 	gormTransaction *gorm.DB,

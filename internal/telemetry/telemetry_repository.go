@@ -9,5 +9,6 @@ import (
 
 type Repository interface {
 	FindAllFilter(gormTransaction *gorm.DB, searchedParameterIds []uint64, intervalVal string, startDate, endDate time.Time) ([]*entity.TelemetryQuery, error)
+	FindAllInterval(gormTransaction *gorm.DB, searchedParameterIds []uint64, intervalVal string, startDate, endDate time.Time) ([]*entity.TelemetryQuery, error)
 	CreateBatch(gormTransaction *gorm.DB, telemetryEntities []*entity.Telemetry) error
 }

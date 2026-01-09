@@ -8,4 +8,5 @@ import (
 
 type Service interface {
 	GenerateReport(ginContext *gin.Context, telemetryReportFilterRequest *model.TelemetryReportFilterRequest) []*model.TelemetryGrouped
+	IntervalReport(ginContext *gin.Context, telemetryIntervalFilterRequest *model.TelemetryIntervalFilterRequest) *model.TelemetryIntervalValues
 }

@@ -29,3 +29,11 @@ func (telemetryHandler *Handler) GenerateReport(ginContext *gin.Context) {
 	telemetryResponses := telemetryHandler.telemetryService.GenerateReport(ginContext, &telemetryReportFilterRequest)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Parameters has been fetched", telemetryResponses))
 }
+
+func (telemetryHandler *Handler) IntervalReport(ginContext *gin.Context) {
+	var telemetryIntervalFilterRequest model.TelemetryIntervalFilterRequest
+	err := ginContext.ShouldBindBodyWithJSON(&telemetryIntervalFilterRequest)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	telemetryResponses := telemetryHandler.telemetryService.IntervalReport(ginContext, &telemetryIntervalFilterRequest)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Parameters has been fetched", telemetryResponses))
+}
