@@ -64,7 +64,7 @@ func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, 
 				})
 		}).
 		Preload("MqttTopic.MqttBroker").
-		Preload("DashboardWidget").
+		Preload("DashboardWidgets").
 		Preload("Facility").
 		Where("id = ?", machineId).
 		First(&machineEntity).Error

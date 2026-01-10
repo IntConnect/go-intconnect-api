@@ -14,7 +14,7 @@ type Machine struct {
 	Facility         Facility           `gorm:"foreignKey:FacilityId;references:Id"`
 	MqttTopic        *MqttTopic         `gorm:"foreignKey:MachineId;"`
 	MachineDocuments []*MachineDocument `gorm:"foreignKey:MachineId;references:Id"`
-	DashboardWidget  []*DashboardWidget `gorm:"foreignKey:MachineId;references:Id"`
+	DashboardWidgets []*DashboardWidget `gorm:"foreignKey:MachineId;references:Id"`
 	Auditable        Auditable          `gorm:"embedded"`
 }
 

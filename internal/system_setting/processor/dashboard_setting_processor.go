@@ -8,6 +8,7 @@ import (
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -35,12 +36,13 @@ func (dashboardSettingHandler *DashboardSettingHandler) Handle(
 	systemSettingEntity *entity.SystemSetting,
 	manageSystemSettingRequest *model.ManageSystemSettingRequest,
 ) (*entity.SystemSetting, error) {
+	resolvedSchema, isExists := model.SystemSettingSchemas[manageSystemSettingRequest.Key]
+	if !isExists {
+		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrSystemSettingKeyNotMatch))
+	}
+	loadedStruct := resolvedSchema.NewPayload
+	parsedPayload := helper.ParsingHashMapIntoStruct[*model.DashboardSettingPayload](manageSystemSettingRequest.Value, loadedStruct().(*model.DashboardSettingPayload))
 
-	dashboardSettingPayload := &model.DashboardSettingPayload{}
-	parsedPayload := helper.ParsingHashMapIntoStruct(
-		manageSystemSettingRequest.Value,
-		dashboardSettingPayload,
-	)
 	modelFile, _ := ginContext.FormFile("value[model]")
 	if modelFile != nil {
 		(*parsedPayload).ModelFile = modelFile
@@ -54,10 +56,6 @@ func (dashboardSettingHandler *DashboardSettingHandler) Handle(
 		manageSystemSettingRequest.Value["model_path"] = path
 	} else if systemSettingEntity != nil {
 		manageSystemSettingRequest.Value["model_path"] = systemSettingEntity.Value["model_path"]
-	}
-
-	if err := dashboardSettingHandler.validatorService.ValidateStruct(parsedPayload); err != nil {
-		dashboardSettingHandler.validatorService.ParseValidationError(err, parsedPayload)
 	}
 
 	updatedSystemSettingEntity := helper.MapCreateRequestIntoEntity[
