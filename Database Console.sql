@@ -109,11 +109,9 @@ FROM telemetries;
 SELECT *
 FROM parameters;
 SELECT *
-FROM parameters
-WHERE id = 31;
+FROM parameters;
 SELECT *
-FROM telemetries
-WHERE parameter_id = 31;
+FROM telemetries;
 SELECT *
 FROM report_document_templates;
 SELECT *
@@ -167,6 +165,11 @@ DELETE
 FROM alarm_logs;
 DELETE
 FROM dashboard_widgets;
+DELETE
+FROM facilities;
+DELETE
+FROM machines;
+
 SELECT bucket,
        parameter_id,
        last_value

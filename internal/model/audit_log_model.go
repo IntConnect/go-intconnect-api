@@ -13,17 +13,17 @@ type CreateAuditLogRequest struct {
 }
 
 type AuditLogResponse struct {
-	Id                      uint64                   `json:"id"`
-	UserId                  uint64                   `json:"user_id"`
-	Action                  string                   `json:"action"`
-	Feature                 string                   `json:"feature"`
-	Description             string                   `json:"description"`
-	Before                  map[string]interface{}   `json:"before"`
-	After                   map[string]interface{}   `json:"after"`
-	IpAddress               string                   `json:"ip_address"`
-	UserAgent               string                   `json:"user_agent"`
-	UserResponse            *UserResponse            `json:"user,omitempty" mapstructure:"user"`
-	SimpleAuditableResponse *SimpleAuditableResponse `json:"auditable"`
+	Id              uint64                   `json:"id"`
+	UserId          uint64                   `json:"user_id"`
+	Action          string                   `json:"action"`
+	Feature         string                   `json:"feature"`
+	Description     string                   `json:"description"`
+	Before          map[string]interface{}   `json:"before"`
+	After           map[string]interface{}   `json:"after"`
+	IpAddress       string                   `json:"ip_address"`
+	UserAgent       string                   `json:"user_agent"`
+	User            *UserResponse            `json:"user" mapstructure:"User"`
+	SimpleAuditable *SimpleAuditableResponse `json:"auditable" mapstructure:"-"`
 }
 
 type AuditLogPayload struct {
@@ -34,11 +34,11 @@ type AuditLogPayload struct {
 }
 
 func (auditLogResponse *AuditLogResponse) GetSimpleAuditableResponse() *SimpleAuditableResponse {
-	return auditLogResponse.SimpleAuditableResponse
+	return auditLogResponse.SimpleAuditable
 }
 
 func (auditLogResponse *AuditLogResponse) SetSimpleAuditableResponse(simpleAuditableResponse *SimpleAuditableResponse) {
-	auditLogResponse.SimpleAuditableResponse = simpleAuditableResponse
+	auditLogResponse.SimpleAuditable = simpleAuditableResponse
 }
 
 const (

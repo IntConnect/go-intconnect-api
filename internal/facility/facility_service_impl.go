@@ -102,7 +102,6 @@ func (facilityService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 	)
 }
 
-// Create - Membuat facility baru
 func (facilityService *ServiceImpl) Create(ginContext *gin.Context, createFacilityRequest *model.CreateFacilityRequest) {
 	userJwtClaim := helper.ExtractJwtClaimFromContext(ginContext)
 	valErr := facilityService.validatorService.ValidateStruct(createFacilityRequest)
