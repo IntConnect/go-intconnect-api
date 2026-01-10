@@ -52,7 +52,7 @@ func (telemetryService *ServiceImpl) GenerateReport(ginContext *gin.Context, tel
 		var mapOfParameterMachine = make(map[uint64]*entity.Machine)
 		for _, parameterEntity := range reportDocumentTemplateEntity.Parameters {
 			searchedParameterIds = append(searchedParameterIds, parameterEntity.Id)
-			mapOfParameterMachine[parameterEntity.Id] = parameterEntity.MqttTopic.Machine
+			mapOfParameterMachine[parameterEntity.Id] = &parameterEntity.MqttTopic.Machine
 		}
 		dateTimeLayout := "2006-01-02 15:04"
 		startDate, _ := time.Parse(dateTimeLayout, telemetryReportFilterRequest.StartDate)
