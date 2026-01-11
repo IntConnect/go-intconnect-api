@@ -1,0 +1,78 @@
+@startuml
+title Activity Diagram – Perubahan Data Pada Fitur-Fitur di Menu Connection
+
+'================================================
+' STYLING
+'================================================
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
+
+skinparam Padding 3
+skinparam PartitionHeaderFontStyle bold
+
+skinparam ArrowColor #2E2E2E
+skinparam ArrowThickness 2
+
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #7A7A7A
+
+skinparam StartColor #4CAF50
+skinparam EndColor #E53935
+
+skinparam DiamondBackgroundColor #FFF7CC
+skinparam DiamondBorderColor #C5A600
+
+!define ROLES Administrator
+!define SYSTEM #AntiqueWhite|System
+
+'================================================
+' PAGE 1 – ACCESS & MENU
+'================================================
+|ROLES|
+start
+:Login;
+:Sorot Menu\nConnection;
+:Pilih Menu;
+:Tekan Tombol Edit;
+note
+Tombol dengan
+Icon Pencil
+endnote
+|SYSTEM|
+:Mengambil Data Existing;
+:Menampilkan Drawer Formulir\nPengubahan Data;
+|ROLES|
+
+if (MQTT Broker?) then (Ya)
+:Ubah Data MQTT Broker;
+elseif (MQTT Topic)  then (Ya)
+:Ubah Data MQTT Topic;
+elseif (SMTP Server)  then (Ya)
+:Ubah Data SMTP Server;
+elseif (Modbus Server)  then (Ya)
+:Ubah Data Modbus Server;
+else (No)
+end
+endif
+
+|ROLES|
+repeat
+:Submit Data;
+
+|SYSTEM|
+  :Validasi Data;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?)
+
+title **Activity – Create Master Data (Persistence & Result)**
+
+'================================================
+' PAGE 3 – SAVE & RESULT
+'================================================
+|SYSTEM|
+:Mengubah Data;
+:Menampilkan Pesan Sukses;
+:Menutup Drawer Formulir\nPengubahan Data;
+stop
+@enduml

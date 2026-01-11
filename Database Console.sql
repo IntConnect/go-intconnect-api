@@ -208,3 +208,4 @@ FROM (SELECT time_bucket_gapfill('1 hours'::interval, timestamp, '2026-01-09 08:
       GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
 
+ALTER TABLE machine_documents DROP COLUMN code;

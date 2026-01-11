@@ -1,0 +1,71 @@
+@startuml
+title Activity Diagram – Penambahan Data Pada Fitur-Fitur di Menu Configuration
+
+'================================================
+' STYLING
+'================================================
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
+
+skinparam Padding 3
+skinparam PartitionHeaderFontStyle bold
+
+skinparam ArrowColor #2E2E2E
+skinparam ArrowThickness 2
+
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #7A7A7A
+
+skinparam StartColor #4CAF50
+skinparam EndColor #E53935
+
+skinparam DiamondBackgroundColor #FFF7CC
+skinparam DiamondBorderColor #C5A600
+
+!define ROLES Administrator
+!define SYSTEM #AntiqueWhite|System
+
+'================================================
+' PAGE 1 – ACCESS & MENU
+'================================================
+|ROLES|
+start
+:Login;
+:Sorot Menu Configuration;
+:Pilih Menu;
+
+if (Facility?) then (Ya)
+:Tekan Tombol \n New Facility;
+elseif (Machine)  then (Ya)
+:Tekan Tombol \n New Machine;
+elseif (Parameter)  then (Ya)
+:Tekan Tombol \n New Parameter;
+elseif (Register)  then (Ya)
+:Tekan Tombol \n New Register;
+else (No)
+end
+endif
+
+|SYSTEM|
+:Redirect ke Halaman \n    Pembuatan Data;
+:Menampilkan Formulir;
+|ROLES|
+repeat
+:Input & Submit Data;
+
+|SYSTEM|
+  :Validasi Data;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?)
+
+
+'================================================
+' PAGE 3 – SAVE & RESULT
+'================================================
+|SYSTEM|
+:Simpan Data;
+:Menampilkan Pesan Sukses;
+:Redirect ke Halaman Daftar Data;
+stop
+@enduml

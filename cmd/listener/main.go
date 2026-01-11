@@ -56,7 +56,7 @@ type AlarmRecoveryWindow struct {
 
 type ListenerFluxor struct {
 	gormDatabase                   *gorm.DB
-	mqttBrokersMap                 map[uint64]entity.MqttBroker
+	mqttBrokersMap                 map[uint64]*entity.MqttBroker
 	parametersMap                  map[string]*entity.Parameter
 	processedParametersMap         map[uint64]*entity.Parameter
 	processedParameterSequencesMap map[uint64][]entity.ProcessedParameterSequence
@@ -93,7 +93,7 @@ func NewListenerFluxor() *ListenerFluxor {
 	latestTelemetry := make(map[string]*entity.Telemetry)
 	listenerFluxor := &ListenerFluxor{
 		gormDatabase:                   gormDatabase,
-		mqttBrokersMap:                 make(map[uint64]entity.MqttBroker),
+		mqttBrokersMap:                 make(map[uint64]*entity.MqttBroker),
 		parametersMap:                  make(map[string]*entity.Parameter),
 		processedParametersMap:         make(map[uint64]*entity.Parameter),
 		processedParameterSequencesMap: make(map[uint64][]entity.ProcessedParameterSequence),
@@ -235,7 +235,7 @@ func (listenerFluxor *ListenerFluxor) CheckConfigurationPeriodically() {
 		logger.WithError(err).Warn("Failed to reload processed parameter sequences")
 	}
 
-	newMqttBrokersMap := make(map[uint64]entity.MqttBroker)
+	newMqttBrokersMap := make(map[uint64]*entity.MqttBroker)
 	newParametersMap := make(map[string]*entity.Parameter)
 	newProcessedParametersMap := make(map[uint64]*entity.Parameter)
 	newProcessedSequencesMap := make(map[uint64][]entity.ProcessedParameterSequence)
@@ -522,7 +522,7 @@ func (listenerFluxor *ListenerFluxor) WaitForShutdown() {
 	logger.Info("Shutdown complete.")
 }
 
-func isMqttBrokerMapChanged(oldMap, newMap map[uint64]entity.MqttBroker) bool {
+func isMqttBrokerMapChanged(oldMap, newMap map[uint64]*entity.MqttBroker) bool {
 	if len(oldMap) != len(newMap) {
 		return true
 	}
@@ -656,10 +656,6 @@ func (listenerFluxor *ListenerFluxor) calculateProcessedParameters() []*entity.T
 		timestamp := time.Now()
 
 		for _, seq := range sortedSequences {
-			if seq.Parameter == nil {
-				logger.Warn("Sequence %d has nil Parameter", seq.Id)
-				continue
-			}
 
 			// Get the value from current telemetry snapshot
 			value, exists := telemetryByCode[seq.Parameter.Code]

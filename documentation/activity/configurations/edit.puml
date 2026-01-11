@@ -1,5 +1,5 @@
 @startuml
-title **Activity – Create Master Data (Overview)**
+title Activity Diagram – Perubahan Data Pada Fitur-Fitur di Menu Configuration
 
 '================================================
 ' STYLING
@@ -34,32 +34,37 @@ start
 :Login;
 :Sorot Menu Configuration;
 :Pilih Menu;
+:Tekan Tombol Edit;
+note
+Tombol dengan
+Icon Pencil
+endnote
+|SYSTEM|
+:Mengambil Data Existing;
+:Redirect ke Halaman\nPengubahan Data;
+|ROLES|
 
 if (Facility?) then (Ya)
-:Tekan Tombol \n New Facility;
+:Ubah Data Facility;
 elseif (Machine)  then (Ya)
-:Tekan Tombol \n New Machine;
+:Ubah Data Machine;
 elseif (Parameter)  then (Ya)
-:Tekan Tombol \n New Parameter;
+:Ubah Data Parameter;
 elseif (Register)  then (Ya)
-:Tekan Tombol \n New Register;
+:Ubah Data Register;
 else (No)
 end
 endif
 
-|SYSTEM|
-:Redirect ke Halaman \n    Pembuatan Data;
-:Menampilkan Formulir;
 |ROLES|
 repeat
-:Input & Submit Data;
+:Submit Data;
 
 |SYSTEM|
   :Validasi Data;
   backward:Menampilkan\nPesan Error;
 repeat while (Valid?)
 
-title **Activity – Create Master Data (Persistence & Result)**
 
 '================================================
 ' PAGE 3 – SAVE & RESULT

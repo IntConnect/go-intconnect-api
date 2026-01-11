@@ -1,7 +1,6 @@
 @startuml
 
 ' Font configuration
-skinparam defaultFontSize 13
 skinparam defaultFontName Times New Roman
 
 ' Participant styling
@@ -9,7 +8,6 @@ skinparam participant {
     BackgroundColor #ECF0F1
     BorderColor #34495E
     FontColor Black
-    FontSize 13
     FontName Times New Roman
 }
 
@@ -17,9 +15,27 @@ skinparam sequence {
     ArrowColor #34495E
     LifeLineBorderColor #34495E
     LifeLineBackgroundColor #ECF0F1
-    ArrowFontSize 11
     ArrowFontName Times New Roman
+    ArrowFontSize 112
 }
+
+' === GLOBAL FONT SIZE (+2) ===
+skinparam defaultFontSize 15
+
+skinparam actorFontSize 15
+skinparam participantFontSize 15
+
+skinparam sequenceMessageFontSize 15
+skinparam sequenceMessageFontName "Times New Roman"
+
+skinparam noteFontSize 15
+skinparam noteFontName "Times New Roman"
+
+skinparam titleFontSize 2
+skinparam titleFontName "Times New Roman"
+
+skinparam  arrowFontSize 20
+
 
 ' Actors and components
 actor "Administrator" as admin #E74C3C

@@ -1,5 +1,5 @@
 @startuml
-title **Activity – Create Master Data (Overview)**
+title Activity Diagram – Melihat Data Pada Fitur-Fitur di Menu Connection
 
 '================================================
 ' STYLING
@@ -32,47 +32,30 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu Configuration;
+:Sorot Menu\nConnection;
 :Pilih Menu;
-:Tekan Tombol Edit;
-note
-Tombol dengan
-Icon Pencil
-endnote
-|SYSTEM|
-:Mengambil Data Existing;
-:Redirect ke Halaman\nPengubahan Data;
-|ROLES|
 
-if (Facility?) then (Ya)
-:Ubah Informasi Facility;
-elseif (Machine)  then (Ya)
-:Ubah Informasi Machine;
-elseif (Parameter)  then (Ya)
-:Ubah Informasi Parameter;
-elseif (Register)  then (Ya)
-:Ubah Informasi Register;
+if (MQTT Broker?) then (Ya)
+elseif (MQTT Topic)  then (Ya)
+elseif (SMTP Server)  then (Ya)
+elseif (Modbus Server)  then (Ya)
 else (No)
 end
 endif
 
-|ROLES|
-repeat
-:Submit Data;
-
 |SYSTEM|
-  :Validasi Data;
-  backward:Menampilkan\nPesan Error;
-repeat while (Valid?)
-
-title **Activity – Create Master Data (Persistence & Result)**
-
-'================================================
-' PAGE 3 – SAVE & RESULT
-'================================================
+:Redirect ke Halaman\nDaftar Data;
 |SYSTEM|
-:Simpan Data;
-:Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman\nDaftar Data;
+
+else (Tidak)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
+
+:Menampilkan Halaman\nDaftar Data;
+
+
 stop
 @enduml
