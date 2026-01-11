@@ -104,7 +104,7 @@ func NewProtectedRoutes(
 func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	routerGroup.Use(middleware.AuthMiddleware(protectedRoutes.viperConfig, protectedRoutes.redisInstance, protectedRoutes.roleService))
 	userRouterGroup := routerGroup.Group("users")
-	userRouterGroup.GET("pagination", middleware.HasPermission("ROLE_ROLE_USER_VIEW"), protectedRoutes.userController.FindAllUserPagination)
+	userRouterGroup.GET("pagination", middleware.HasPermission("ROLE_USER_VIEW"), protectedRoutes.userController.FindAllUserPagination)
 	userRouterGroup.GET("profile", protectedRoutes.userController.FindSelf)
 	userRouterGroup.GET("/:id", middleware.HasPermission("ROLE_USER_VIEW"), protectedRoutes.userController.FindById)
 	userRouterGroup.POST("", middleware.HasPermission("ROLE_USER_CREATE"), protectedRoutes.userController.CreateUser)
