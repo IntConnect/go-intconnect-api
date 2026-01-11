@@ -6,69 +6,23 @@ title **Class Diagram – Facility Management System**
 '=====================================================
 skinparam backgroundColor #FAFAFA
 skinparam DefaultFontName "Times New Roman"
-skinparam defaultFontSize 14
+skinparam defaultFontSize 20
 skinparam RoundCorner 10
 skinparam Shadowing false
 skinparam ClassBorderThickness 1.2
 skinparam ArrowThickness 1.5
+skinparam linetype ortho
 
 skinparam class {
   BackgroundColor<<entity>> #E3F2FD
   BorderColor<<entity>> #64B5F6
 }
 
+' Mengatur jarak label dari garis
+
 '=====================================================
 ' ENTITY
 '=====================================================
-class AlarmLogs <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +ParameterId: Uint64 <<FK>>
-  +AcknowledgedBy: Uint64 <<FK>>
-  +Value: Float64
-  +Type: String
-  +IsActive: Boolean
-  +Status: String
-  +Note: String
-  +AcknowledgedAt: time.Time
-  +ResolvedAt: time.Time
-  +AcknowledgedByUser: User
-  +Parameter: Parameter
-  +CreatedAt: time.Time
-  +UpdatedAt: time.Time
-  --
-  +FindAll()
-  +FindAllPagination()
-  +FindById()
-  +Create()
-  +Update()
-}
-
-class AuditLog <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +UserId: Uint64 <<FK>>
-  +Action: String
-  +Feature: String
-  +Description: String
-  +Before: map[string]interface{}
-  +After: map[string]interface{}
-  +Relation: map[string]interface{}
-  +BeforeRaw: byte[]
-  +AfterRaw: byte[]
-  +RelationRaw: byte[]
-  +IpAddress: String
-  +UserAgent: String
-  +User: User
-  +SimpleAuditable: Auditable
-  --
-  +FindAll()
-  +FindAllPagination()
-  +FindById()
-  +Create()
-  +Update()
-}
-
 class Auditable <<entity>> {
   +CreatedAt: time.Time
   +CreatedBy: string
@@ -78,94 +32,9 @@ class Auditable <<entity>> {
   +DeletedBy: string
 }
 
-
 class SimpleAuditable <<entity>> {
   +CreatedAt: time.Time
   +CreatedBy: string
-}
-
-class CheckSheet <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +CheckSheetDocumentTemplateId: Uint64 <<FK>>
-  +ReportedBy: Uint64 <<FK>>
-  +VerifiedBy: Uint64 <<FK>>
-  +Timestamp: time.Time
-  +Note: String
-  +Status: String
-  +CheckSheetValues: []*CheckSheetValues
-  +VerifiedByUser: *User
-  +ReportedByUser: User
-  +CheckSheetDocumentTemplate: CheckSheetDocumentTemplate
-  --
-  +FindAll()
-  +FindAllPagination()
-  +FindById()
-  +Create()
-  +Update()
-  +Delete()
-}
-
-class CheckSheetDocumentTemplate <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +MachineId: Uint64 <<FK>>
-  +Name: String
-  +No: String
-  +Description: String
-  +Category: CheckSheetDocumentTemplateCategory
-  +Interval: Int
-  +IntervalType: Int
-  +RotationType: Int
-  +RevisionNumber: Int
-  +EffectiveDate: time.Time
-  +StartingHour: String
-  +Machine: Machine
-  --
-  +FindAll()
-  +FindAllPagination()
-  +FindById()
-  +Create()
-  +Update()
-  +Delete()
-}
-
-class CheckSheetValue <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +CheckSheetId: Uint64 <<FK>>
-  +ParameterId: Uint64 <<FK>>
-  +Timestamp: String
-  +Value: String
-  +Parameter: Parameter
-  +CheckSheet: CheckSheet
-  --
-  +FindAll()
-  +FindAllPagination()
-  +FindById()
-  +Create()
-  +CreateBatch()
-  +DeleteBatch()
-  +DeleteBatchById()
-}
-
-
-class DashboardWidget <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +MachineId: Uint64 <<FK>>
-  +Code: String
-  +Layout: map[string]interface{}
-  +Config: map[string]interface{}
-  +LayoutRaw: []byte
-  +ConfigRam: []byte
-  +Machine: Machine
-  --
-  +FindBatchById()
-  +CreateBatch()
-  +Update()
-  +DeleteBatchById()
-  +DeleteBatchByCode()
 }
 
 class Facility <<entity>> {
@@ -183,7 +52,6 @@ class Facility <<entity>> {
   +CameraX: Float64
   +CameraY: Float64
   +CameraZ: Float64
-  +Auditable: Auditable
   --
   +FindBatchById()
   +CreateBatch()
@@ -195,7 +63,7 @@ class Facility <<entity>> {
 class Machine <<entity>> {
   +Id: Uint64 <<PK>>
   --
-  +FacilityId: Uint64 <<FK>
+  +FacilityId: Uint64 <<FK>>
   +Name: String
   +Code: String
   +Description: String
@@ -204,94 +72,12 @@ class Machine <<entity>> {
   +CameraZ: Float64
   +ThumbnailPath: String
   +ModelPath: String
-  +Facility: Facility
-  +MqttTopic: *MqttTopic
-  +MachineDocuments: []*MachineDocument
-  +DashboardWidgets: []*DashboardWidget
-  +Auditable: Auditable
   --
   +FindAll()
   +FindAllPagination()
   +FindById()
   +FindByFacilityId()
   +FindBatchById()
-  +Create()
-  +Update()
-  +Delete()
-}
-
-class MachineDocument <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +MachineId: Uint64 <<FK>
-  +Code: String
-  +Name: String
-  +FilePath: String
-  +Description: String
-  +Machine: Machine
-  --
-  +FindAll()
-  +FindById()
-  +FindBatchById()
-  +Create()
-  +CreateBatch()
-  +Delete()
-}
-
-
-class ModbusServer <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +IpAddress: String
-  +Port: String
-  +SlaveId: String
-  +Timeout: Int
-  +IsActive: Boolean
-  +Auditable: Auditable
-  --
-  +FindAll()
-  +FindAllPagination()
-  +FindById()
-  +Create()
-  +Update()
-  +Delete()
-}
-
-class MqttBroker <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +HostName: String
-  +MqttPort: String
-  +WsPort: String
-  +Username: Int
-  +Password: Boolean
-  +IsActive: Boolean
-  +Auditable: Auditable
-  --
-  +FindAll()
-  +FindAllPagination()
-  +FindById()
-  +Create()
-  +Update()
-  +Delete()
-}
-
-
-class MqttTopic <<entity>> {
-  +Id: Uint64 <<PK>>
-  --
-  +MachineId: Uint64 <<FK>>
-  +MqttBrokerId: Uint64 <<FK>>
-  +Name: String
-  +QoS: Int
-  +MqttBroker: MqttBroker
-  +Machine: Machine
-  +Parameters: []*Parameters
-  +Auditable: Auditable
-  --
-  +FindAll()
-  +FindAllPagination()
-  +FindById()
   +Create()
   +Update()
   +Delete()
@@ -318,4 +104,413 @@ class Parameter <<entity>> {
   +Update()
   +Delete()
 }
+
+class User <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +RoleId: Uint64 <<FK>>
+  +Username: String
+  +Name: String
+  +Email: String
+  +Password: String
+  +AvatarPath: String
+  +Status: UserStatus
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +FindByIdentifier()
+  +FindByName()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class Role <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +Name: String
+  +Description: String
+  --
+  +FindAll()
+  +FindAllCache()
+  +FindRoleCacheById()
+  +FindById()
+  +Create()
+  +SetAllCache()
+  +SetByIdCache()
+  +Update()
+  +Delete()
+  +DeleteAllCache()
+  +DeleteByIdCache()
+}
+
+class Permission <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +Code: String
+  +Name: String
+  +Category: String
+  +Description: String
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +FindBatchById()
+}
+
+class RolePermission <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +RoleId: Uint64 <<FK>>
+  +PermissionId: Uint64 <<FK>>
+}
+
+class AlarmLogs <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +ParameterId: Uint64 <<FK>>
+  +AcknowledgedBy: Uint64 <<FK>>
+  +Value: Float64
+  +Type: String
+  +IsActive: Boolean
+  +Status: String
+  +Note: String
+  +AcknowledgedAt: time.Time
+  +ResolvedAt: time.Time
+  +CreatedAt: time.Time
+  +UpdatedAt: time.Time
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+}
+
+class AuditLog <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +UserId: Uint64 <<FK>>
+  +Action: String
+  +Feature: String
+  +Description: String
+  +Before: map[string]interface{}
+  +After: map[string]interface{}
+  +Relation: map[string]interface{}
+  +BeforeRaw: byte[]
+  +AfterRaw: byte[]
+  +RelationRaw: byte[]
+  +IpAddress: String
+  +UserAgent: String
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+}
+
+class CheckSheet <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +CheckSheetDocumentTemplateId: Uint64 <<FK>>
+  +ReportedBy: Uint64 <<FK>>
+  +VerifiedBy: Uint64 <<FK>>
+  +Timestamp: time.Time
+  +Note: String
+  +Status: String
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class CheckSheetDocumentTemplate <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>>
+  +Name: String
+  +No: String
+  +Description: String
+  +Category: CheckSheetDocumentTemplateCategory
+  +Interval: Int
+  +IntervalType: Int
+  +RotationType: Int
+  +RevisionNumber: Int
+  +EffectiveDate: time.Time
+  +StartingHour: String
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class CheckSheetValue <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +CheckSheetId: Uint64 <<FK>>
+  +ParameterId: Uint64 <<FK>>
+  +Timestamp: String
+  +Value: String
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +CreateBatch()
+  +DeleteBatch()
+  +DeleteBatchById()
+}
+
+class DashboardWidget <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>>
+  +Code: String
+  +Layout: map[string]interface{}
+  +Config: map[string]interface{}
+  +LayoutRaw: []byte
+  +ConfigRaw: []byte
+  --
+  +FindBatchById()
+  +CreateBatch()
+  +Update()
+  +DeleteBatchById()
+  +DeleteBatchByCode()
+}
+
+class MachineDocument <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>>
+  +Code: String
+  +Name: String
+  +FilePath: String
+  +Description: String
+  --
+  +FindAll()
+  +FindById()
+  +FindBatchById()
+  +Create()
+  +CreateBatch()
+  +Delete()
+}
+
+class MqttBroker <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +HostName: String
+  +MqttPort: String
+  +WsPort: String
+  +Username: String
+  +Password: String
+  +IsActive: Boolean
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class MqttTopic <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>>
+  +MqttBrokerId: Uint64 <<FK>>
+  +Name: String
+  +QoS: Int
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class ModbusServer <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +IpAddress: String
+  +Port: String
+  +SlaveId: String
+  +Timeout: Int
+  +IsActive: Boolean
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class Register <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>>
+  +ModbusServerId: Uint64 <<FK>>
+  +MemoryLocation: String
+  +Name: String
+  +Description: String
+  +DataType: String
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class ParameterOperation <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +ParameterId: Uint64 <<FK>>
+  +Type: String
+  +Value: Float32
+  +Sequence: Int
+  --
+  +FindBatchById()
+  +CreateBatch()
+  +Update()
+  +DeleteBatchById()
+}
+
+class ReportDocumentTemplate <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +Name: String
+  +Code: String
+  +DocumentVersion: Int
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class Telemetry <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +ParameterId: Uint64 <<FK>>
+  +Value: Float64
+  +Timestamp: time.Time
+  --
+  +FindAllFilter()
+  +FindAllInterval()
+  +CreateBatch()
+}
+
+class SmtpServer <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +Host: String
+  +Port: String
+  +Username: String
+  +Password: String
+  +MailAddress: String
+  +MailName: String
+  +IsActive: Bool
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class SystemSetting <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +Key: String
+  +Description: String
+  +Value: map[string]interface{}
+  +ValueRaw: []byte
+  --
+  +FindAll()
+  +FindByKey()
+  +Manage()
+}
+
+'=====================================================
+' RELATIONSHIPS
+'=====================================================
+
+' Composition - Auditable
+Facility *-- Auditable
+Machine *-- Auditable
+User *-- Auditable
+Role *-- Auditable
+Permission *-- Auditable
+MqttBroker *-- Auditable
+MqttTopic *-- Auditable
+ModbusServer *-- Auditable
+Register *-- Auditable
+ReportDocumentTemplate *-- Auditable
+SmtpServer *-- Auditable
+SystemSetting *-- Auditable
+
+' Composition - SimpleAuditable
+AuditLog *-- SimpleAuditable
+
+' Core Relationships
+Facility "1" --o "0..*" Machine
+
+Machine "1" --o "0..*" Parameter
+Machine "1" --o "0..1" MqttTopic
+Machine "1" --o "0..*" MachineDocument
+Machine "1" --o "0..*" DashboardWidget
+Machine "1" --o "0..*" CheckSheetDocumentTemplate
+Machine "1" --o "0..*" Register
+
+User "1" --o "0..*" AuditLog
+User "0..1" --o "0..*" AlarmLogs
+User "1" --> "1" Role
+
+Role "1" --o "0..*" User
+Role "0..*" -- "0..*" Permission
+RolePermission "1" --> "1" Role
+RolePermission "1" --> "1" Permission
+
+Parameter "1" --o "0..*" AlarmLogs
+Parameter "1" --o "0..*" CheckSheetValue
+Parameter "1" --o "0..*" Telemetry
+Parameter "1" --o "0..*" ParameterOperation
+Parameter "0..*" --> "0..1" MqttTopic
+Parameter "0..*" -- "0..*" ReportDocumentTemplate
+
+MqttTopic "1" --> "1" MqttBroker
+MqttTopic "1" --> "1" Machine
+MqttTopic "1" --o "0..*" Parameter
+
+CheckSheet "1" --> "1" CheckSheetDocumentTemplate
+CheckSheet "1" --o "0..*" CheckSheetValue
+CheckSheet "*" --> "1" User : reportedBy
+CheckSheet "*" --> "0..1" User : verifiedBy
+
+CheckSheetDocumentTemplate "1" --> "1" Machine
+CheckSheetDocumentTemplate "1" --o "0..*" CheckSheet
+
+CheckSheetValue "1" --> "1" CheckSheet
+CheckSheetValue "1" --> "1" Parameter
+
+Register "1" --> "1" Machine
+Register "1" --> "1" ModbusServer
+
+ModbusServer "1" --o "0..*" Register
+MqttBroker "1" --o "0..*" MqttTopic
+
 @enduml

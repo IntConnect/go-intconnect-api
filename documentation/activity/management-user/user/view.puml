@@ -1,5 +1,5 @@
 @startuml
-title Activity – Menghapus Data Fitur-Fitur Kategori Connection
+title Activity Diagram – Melihat Data Pada Fitur-Fitur di Menu Connection
 
 '================================================
 ' STYLING
@@ -32,33 +32,30 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu Configuration;
+:Sorot Menu\nConnection;
 :Pilih Menu;
-:Tekan Tombol Hapus;
-note
-Tombol dengan
-Icon Trash
-endnote
-|SYSTEM|
-:Menampilkan Dialog \nKonfirmasi Penghapusan;
-|ROLES|
-:Mengisi Alasan\nPenghapusan;
-|ROLES|
-repeat
-:Submit Data;
+
+if (MQTT Broker?) then (Ya)
+elseif (MQTT Topic)  then (Ya)
+elseif (SMTP Server)  then (Ya)
+elseif (Modbus Server)  then (Ya)
+else (No)
+end
+endif
 
 |SYSTEM|
-  :Validasi Data;
-  backward:Menampilkan\nPesan Error;
-repeat while (Valid?)
-
-
-'================================================
-' PAGE 3 – SAVE & RESULT
-'================================================
+:Redirect ke Halaman\nDaftar Data;
 |SYSTEM|
-:Simpan Data;
-:Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman\nDaftar Data;
+
+else (Tidak)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
+
+:Menampilkan Halaman\nDaftar Data;
+
+
 stop
 @enduml

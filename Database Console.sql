@@ -151,7 +151,8 @@ SELECT *
 FROM alarm_logs;
 SELECT *
 FROM processed_parameter_sequences;
-
+SELECT *
+FROM permissions;
 
 DELETE
 FROM check_sheet_values;
