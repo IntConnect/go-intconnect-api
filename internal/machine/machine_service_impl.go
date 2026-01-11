@@ -172,6 +172,7 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 		machineEntity.ModelPath = modelPath
 		machineEntity.ThumbnailPath = thumbnailPath
 		machineEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
+		machineEntity.MachineDocuments = nil
 		err = machineService.machineRepository.Create(gormTransaction, machineEntity)
 		var machineDocumentEntities []*entity.MachineDocument
 		for _, createMachineDocumentRequest := range createMachineRequest.MachineDocuments {
@@ -180,6 +181,7 @@ func (machineService *ServiceImpl) Create(ginContext *gin.Context, createMachine
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrSavingResources))
 			machineDocumentEntity.FilePath = machineDocumentFilePath
 			machineDocumentEntity.MachineId = machineEntity.Id
+			machineDocumentEntity.Auditable = entity.NewAuditable(userJwtClaims.Username)
 			machineDocumentEntities = append(machineDocumentEntities, machineDocumentEntity)
 		}
 		if len(machineDocumentEntities) > 0 {
@@ -229,6 +231,7 @@ func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachine
 			machineEntity.ThumbnailPath = thumbnailPath
 		}
 		machineEntity.Auditable = entity.UpdateAuditable(userJwtClaims.Username)
+		machineEntity.MachineDocuments = nil
 		err := machineService.machineRepository.Update(gormTransaction, machineEntity)
 		machineDocuments, err := machineService.machineDocumentRepository.FindBatchById(gormTransaction, updateMachineRequest.DeletedMachineDocumentIds)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -238,6 +241,7 @@ func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachine
 		for i, machineDocumentEntity := range machineDocuments {
 			newPath, err := machineService.localStorageService.Disk().MoveFile(machineDocumentEntity.FilePath, "machines/documents")
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
+			machineDocuments[i].Auditable = entity.DeleteAuditable(userJwtClaims.Username)
 			machineDocuments[i].FilePath = newPath
 		}
 		var machineDocumentEntities []*entity.MachineDocument

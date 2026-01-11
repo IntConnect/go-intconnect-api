@@ -11,6 +11,7 @@ type Repository interface {
 	FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.MachineDocument, error)
 	FindBatchById(gormTransaction *gorm.DB, machineIds []uint64) ([]*entity.MachineDocument, error)
 	Create(gormTransaction *gorm.DB, machineDocumentEntity *entity.MachineDocument) error
-	CreateBatch(gormTransaction *gorm.DB, machineDocumentEntity []*entity.MachineDocument) error
+	CreateBatch(gormTransaction *gorm.DB, machineDocumentEntities []*entity.MachineDocument) error
+	UpdateBatch(gormTransaction *gorm.DB, machineDocumentEntities []*entity.MachineDocument) error
 	Delete(gormTransaction *gorm.DB, machineDocumentId uint64) error
 }

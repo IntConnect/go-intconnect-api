@@ -55,7 +55,10 @@ func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.Machine, error) {
 	var machineEntity entity.Machine
 	err := gormTransaction.Model(&entity.Machine{}).
-		Preload("MachineDocuments").
+		Preload("MachineDocuments", func(db *gorm.DB) *gorm.DB {
+			return db.
+				Select("id", "description", "machine_id", "name", "file_path")
+		}).
 		Preload("MqttTopic", func(db *gorm.DB) *gorm.DB {
 			return db.
 				Select("id", "name", "mqtt_broker_id", "machine_id").

@@ -34,8 +34,12 @@ func (machineDocumentRepository *RepositoryImpl) Create(gormTransaction *gorm.DB
 	return gormTransaction.Create(machineDocumentEntity).Error
 }
 
-func (machineDocumentRepository *RepositoryImpl) CreateBatch(gormTransaction *gorm.DB, machineDocumentEntity []*entity.MachineDocument) error {
-	return gormTransaction.Create(machineDocumentEntity).Error
+func (machineDocumentRepository *RepositoryImpl) CreateBatch(gormTransaction *gorm.DB, machineDocumentEntities []*entity.MachineDocument) error {
+	return gormTransaction.Create(machineDocumentEntities).Error
+}
+
+func (machineDocumentRepository *RepositoryImpl) UpdateBatch(gormTransaction *gorm.DB, machineDocumentEntities []*entity.MachineDocument) error {
+	return gormTransaction.Save(machineDocumentEntities).Error
 }
 
 func (machineDocumentRepository *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {

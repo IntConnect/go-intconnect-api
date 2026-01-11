@@ -15,7 +15,7 @@ type MachineResponse struct {
 	ModelPath         string                     `json:"model_path"`
 	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic" mapstructure:"MqttTopic"`
 	Parameter         *ParameterResponse         `json:"parameter" mapstructure:"Parameter"`
-	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"-"`
+	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
 	DashboardWidget   []*DashboardWidgetResponse `json:"widgets" mapstructure:"DashboardWidgets"`
 	Facility          *FacilityResponse          `json:"facility" `
 	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"-"`

@@ -80,6 +80,7 @@ func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 	thumbnailFile, _ := ginContext.FormFile("thumbnail")
 	createMachineModel.Model = modelFile
 	createMachineModel.Thumbnail = thumbnailFile
+	fmt.Println(createMachineModel.MachineDocuments)
 	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents[", "].document_file", len(createMachineModel.MachineDocuments))
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	for i, machineDocument := range createMachineModel.MachineDocuments {
