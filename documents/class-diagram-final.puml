@@ -195,26 +195,127 @@ class Facility <<entity>> {
 class Machine <<entity>> {
   +Id: Uint64 <<PK>>
   --
-  +FacilityId: Uint64
-  +Name: Uint64
-  +Code: Uint64
+  +FacilityId: Uint64 <<FK>
+  +Name: String
+  +Code: String
   +Description: String
   +CameraX: Float64
   +CameraY: Float64
   +CameraZ: Float64
   +ThumbnailPath: String
   +ModelPath: String
-  +Facility: Float64
-  +CameraY: Float64
-  +CameraZ: Float64
+  +Facility: Facility
+  +MqttTopic: *MqttTopic
+  +MachineDocuments: []*MachineDocument
+  +DashboardWidgets: []*DashboardWidget
   +Auditable: Auditable
   --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +FindByFacilityId()
   +FindBatchById()
-  +CreateBatch()
+  +Create()
   +Update()
-  +DeleteBatchById()
-  +DeleteBatchByCode()
+  +Delete()
+}
+
+class MachineDocument <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>
+  +Code: String
+  +Name: String
+  +FilePath: String
+  +Description: String
+  +Machine: Machine
+  --
+  +FindAll()
+  +FindById()
+  +FindBatchById()
+  +Create()
+  +CreateBatch()
+  +Delete()
 }
 
 
+class ModbusServer <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +IpAddress: String
+  +Port: String
+  +SlaveId: String
+  +Timeout: Int
+  +IsActive: Boolean
+  +Auditable: Auditable
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class MqttBroker <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +HostName: String
+  +MqttPort: String
+  +WsPort: String
+  +Username: Int
+  +Password: Boolean
+  +IsActive: Boolean
+  +Auditable: Auditable
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+
+class MqttTopic <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: Uint64 <<FK>>
+  +MqttBrokerId: Uint64 <<FK>>
+  +Name: String
+  +QoS: Int
+  +MqttBroker: MqttBroker
+  +Machine: Machine
+  +Parameters: []*Parameters
+  +Auditable: Auditable
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
+
+class Parameter <<entity>> {
+  +Id: Uint64 <<PK>>
+  --
+  +MachineId: *Uint64 <<FK>>
+  +MqttTopicId: *Uint64 <<FK>>
+  +Name: String
+  +Code: String
+  +Unit: String
+  +MinValue: Float64
+  +MaxValue: Float64
+  +Description: Float64
+  +Category: ParameterCategory
+  +PositionX: Float32
+  --
+  +FindAll()
+  +FindAllPagination()
+  +FindById()
+  +Create()
+  +Update()
+  +Delete()
+}
 @enduml

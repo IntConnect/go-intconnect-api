@@ -1,0 +1,78 @@
+@startuml
+title **Activity – Create Master Data (Overview)**
+
+'================================================
+' STYLING
+'================================================
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
+
+skinparam Padding 3
+skinparam PartitionHeaderFontStyle bold
+
+skinparam ArrowColor #2E2E2E
+skinparam ArrowThickness 2
+
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #7A7A7A
+
+skinparam StartColor #4CAF50
+skinparam EndColor #E53935
+
+skinparam DiamondBackgroundColor #FFF7CC
+skinparam DiamondBorderColor #C5A600
+
+!define ROLES Administrator
+!define SYSTEM #AntiqueWhite|System
+
+'================================================
+' PAGE 1 – ACCESS & MENU
+'================================================
+|ROLES|
+start
+:Login;
+:Sorot Menu Configuration;
+:Pilih Menu;
+:Tekan Tombol Edit;
+note
+Tombol dengan
+Icon Pencil
+endnote
+|SYSTEM|
+:Mengambil Data Existing;
+:Redirect ke Halaman\nPengubahan Data;
+|ROLES|
+
+if (Facility?) then (Ya)
+:Ubah Informasi Facility;
+elseif (Machine)  then (Ya)
+:Ubah Informasi Machine;
+elseif (Parameter)  then (Ya)
+:Ubah Informasi Parameter;
+elseif (Register)  then (Ya)
+:Ubah Informasi Register;
+else (No)
+end
+endif
+
+|ROLES|
+repeat
+:Submit Data;
+
+|SYSTEM|
+  :Validasi Data;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?)
+
+title **Activity – Create Master Data (Persistence & Result)**
+
+'================================================
+' PAGE 3 – SAVE & RESULT
+'================================================
+|SYSTEM|
+:Simpan Data;
+:Menampilkan Pesan Sukses;
+:Redirect ke Halaman Daftar Data;
+stop
+@enduml

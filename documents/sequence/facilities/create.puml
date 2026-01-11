@@ -1,7 +1,7 @@
 @startuml
 
 ' Definisi ukuran font (bisa diatur sesuai kebutuhan)
-skinparam defaultFontSize 13
+skinparam defaultFontSize 18
 skinparam defaultFontName Times New Roman
 
 ' Definisi warna dan style untuk participant
@@ -9,7 +9,7 @@ skinparam participant {
     BackgroundColor #ECF0F1
     BorderColor #34495E
     FontColor Black
-    FontSize 13
+    FontSize 17
     FontName Times New Roman
 }
 
