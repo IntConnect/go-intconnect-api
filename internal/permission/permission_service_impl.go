@@ -36,11 +36,11 @@ func (permissionService *ServiceImpl) FindAll() []*model.PermissionResponse {
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		permissionResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[
-			entity.Permission,
+			*entity.Permission,
 			*model.PermissionResponse,
 		](
 			permissionEntities,
-			mapper.FuncMapAuditable[entity.Permission, *model.PermissionResponse],
+			mapper.FuncMapAuditable,
 		)
 		return nil
 	})
@@ -66,7 +66,7 @@ func (permissionService *ServiceImpl) FindAllPagination(paginationReq *model.Pag
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		// Map entities ke responses
-		permissionResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Permission, *model.PermissionResponse](
+		permissionResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.Permission, *model.PermissionResponse](
 			permissionEntities,
 			mapper.FuncMapAuditable,
 		)

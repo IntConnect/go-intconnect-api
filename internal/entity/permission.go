@@ -10,6 +10,6 @@ type Permission struct {
 	Auditable   Auditable `gorm:"embedded"`
 }
 
-func (permissionEntity Permission) GetAuditable() *Auditable {
+func (permissionEntity *Permission) GetAuditable() *Auditable {
 	return &permissionEntity.Auditable
 }

@@ -12,14 +12,14 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (permissionRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Permission, error) {
-	var permissionEntities []entity.Permission
+func (permissionRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.Permission, error) {
+	var permissionEntities []*entity.Permission
 	err := gormTransaction.Find(&permissionEntities).Error
 	return permissionEntities, err
 }
 
-func (permissionRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]entity.Permission, int64, error) {
-	var permissionEntities []entity.Permission
+func (permissionRepositoryImpl *RepositoryImpl) FindAllPagination(gormTransaction *gorm.DB, orderClause string, offsetVal, limitPage int, searchQuery string) ([]*entity.Permission, int64, error) {
+	var permissionEntities []*entity.Permission
 	var totalItems int64
 
 	if searchQuery != "" {
