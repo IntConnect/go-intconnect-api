@@ -1,7 +1,6 @@
 package system_setting
 
 import (
-	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -93,7 +92,6 @@ func (systemSettingService *ServiceImpl) Manage(
 		existingSystemSettingEntity, err := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, manageSystemSettingRequest.Key)
 		systemSettingProcessor := systemSettingService.systemSettingRegistry.Resolve(manageSystemSettingRequest.Key)
 		systemSettingEntity, err := systemSettingProcessor.Handle(ginContext, gormTransaction, existingSystemSettingEntity, manageSystemSettingRequest)
-		fmt.Println(err)
 		if err != nil {
 			return err
 		}

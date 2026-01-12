@@ -1,7 +1,6 @@
 package check_sheet
 
 import (
-	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
 	checkSheetValue "go-intconnect-api/internal/check_sheet_value"
@@ -102,7 +101,6 @@ func (checkSheetService *ServiceImpl) FindById(ginContext *gin.Context, checkShe
 		checkSheetEntity, err := checkSheetService.checkSheetRepository.FindById(gormTransaction, checkSheetId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		helper.DebugArrPointer(checkSheetEntity.CheckSheetValues)
-		fmt.Println(checkSheetEntity.CheckSheetValues)
 		checkSheetResponse = helper.MapEntityIntoResponse[*entity.CheckSheet, *model.CheckSheetResponse](checkSheetEntity, mapper.FuncMapAuditable)
 		checkSheetResponse.CheckSheetValues = helper.MapEntitiesIntoResponses[*entity.CheckSheetValue, *model.CheckSheetValueResponse](checkSheetEntity.CheckSheetValues)
 		return nil

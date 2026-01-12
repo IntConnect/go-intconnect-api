@@ -96,7 +96,6 @@ func (telemetryService *ServiceImpl) IntervalReport(ginContext *gin.Context, tel
 	var telemetryIntervalValues *model.TelemetryIntervalValues
 
 	err := telemetryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		fmt.Println(*telemetryIntervalFilterRequest)
 
 		// 1. Parse ISO timestamp
 		baseTime, err := time.Parse(time.RFC3339, telemetryIntervalFilterRequest.Timestamp)
@@ -136,7 +135,6 @@ func (telemetryService *ServiceImpl) IntervalReport(ginContext *gin.Context, tel
 		endDate := startDate.Add(24 * time.Hour)
 
 		intervalVal := fmt.Sprintf("%d hours", telemetryIntervalFilterRequest.Interval)
-		fmt.Println(intervalVal, startDate, endDate, telemetryIntervalFilterRequest.ParameterIds)
 
 		// 6. Query data dari database
 		telemetryEntities, err := telemetryService.telemetryRepository.FindAllInterval(

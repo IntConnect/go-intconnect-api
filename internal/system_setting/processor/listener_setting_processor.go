@@ -1,7 +1,6 @@
 package processor
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
@@ -38,7 +37,6 @@ func (listenerSettingHandler *ListenerSettingHandler) Handle(
 	loadedStruct := resolvedSchema.NewPayload
 	parsedPayload := helper.ParsingHashMapIntoStruct[*model.ListenerSettingPayload](manageSystemSettingRequest.Value, loadedStruct().(*model.ListenerSettingPayload))
 
-	fmt.Println(manageSystemSettingRequest.Value)
 	err := listenerSettingHandler.validatorService.ValidateStruct(*(parsedPayload))
 	listenerSettingHandler.validatorService.ParseValidationError(err, *parsedPayload)
 	updatedSystemSettingEntity := helper.MapCreateRequestIntoEntity[

@@ -1,7 +1,6 @@
 package alarm_log
 
 import (
-	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/parameter"
@@ -109,7 +108,6 @@ func (alarmLogService *ServiceImpl) FindByMachineId(ginContext *gin.Context, mac
 		for _, parameterEntity := range parameterEntities {
 			parameterIds = append(parameterIds, parameterEntity.Id)
 		}
-		fmt.Println(parameterIds)
 		alarmLogResponse, err := alarmLogService.alarmLogRepository.FindByParameterIds(gormTransaction, parameterIds)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		allAlarmLog = helper.MapEntitiesIntoResponsesWithFunc[*entity.AlarmLog, *model.AlarmLogResponse](alarmLogResponse, mapper.FuncMapAlarmLog)

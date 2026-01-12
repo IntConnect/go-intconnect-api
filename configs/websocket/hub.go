@@ -25,7 +25,6 @@ func (websocketHub *Hub) Run() {
 	for {
 		select {
 		case client := <-websocketHub.register:
-			fmt.Println(client)
 			websocketHub.clients[client] = true
 
 		case client := <-websocketHub.unregister:
@@ -48,6 +47,5 @@ func (websocketHub *Hub) Run() {
 }
 
 func (websocketHub *Hub) Broadcast(message []byte) {
-	fmt.Println("Brodcast message")
 	websocketHub.broadcast <- message
 }

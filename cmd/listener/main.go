@@ -482,7 +482,6 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 				Timestamp:   mqttPayload.Timestamp.Time,
 			}
 			if parameterEntity.IsWatch {
-				fmt.Println(parameterEntity.Name)
 				listenerFluxor.checkAbnormality(parameterEntity, parsedMqttValue)
 			}
 
@@ -734,7 +733,6 @@ func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.P
 	}
 
 	// === CHECK CREATE ALARM ===
-	fmt.Println(buffer.Values)
 	if len(buffer.Values) == requiredSamples && allAbnormal(buffer.Values, parameterEntity) {
 		listenerFluxor.saveAlarm(parameterEntity, value)
 		listenerFluxor.recoveryBuffers[parameterEntity.Id] = &AlarmRecoveryWindow{}
@@ -783,7 +781,7 @@ func (listenerFluxor *ListenerFluxor) saveAlarm(parameterEntity *entity.Paramete
 
 	listenerFluxor.gormDatabase.Save(&alarmLogEntity)
 
-	fmt.Println(isNewAlarm)
+	ofmt.Println(isNewAlarm)
 	// Hanya broadcast jika alarm benar-benar baru
 	if isNewAlarm {
 		payload, _ := json.Marshal(model.AlarmEvent{

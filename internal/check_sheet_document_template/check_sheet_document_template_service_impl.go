@@ -1,7 +1,6 @@
 package check_sheet_document_template
 
 import (
-	"fmt"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -125,7 +124,6 @@ func (checkSheetDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Con
 		checkSheetDocumentTemplate.RevisionNumber += 1
 		// Map field biasa
 		helper.MapUpdateRequestIntoEntity(updateCheckSheetDocumentTemplateRequest, checkSheetDocumentTemplate)
-		fmt.Println(checkSheetDocumentTemplate)
 		err = checkSheetDocumentTemplateService.checkSheetDocumentTemplateRepository.Update(gormTransaction, checkSheetDocumentTemplate)
 
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
