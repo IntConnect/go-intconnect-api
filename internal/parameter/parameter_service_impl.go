@@ -143,9 +143,10 @@ func (parameterService *ServiceImpl) Create(ginContext *gin.Context, createParam
 			})
 		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		err = parameterService.processedParameterSequenceRepository.CreateBatch(gormTransaction, processedParameterSequences)
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
+		if len(processedParameterSequences) > 0 {
+			err = parameterService.processedParameterSequenceRepository.CreateBatch(gormTransaction, processedParameterSequences)
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		}
 		auditPayload := parameterService.auditLogService.Build(
 			nil,             // before entity
 			parameterEntity, // after entity
