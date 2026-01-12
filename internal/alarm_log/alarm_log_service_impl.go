@@ -1,8 +1,10 @@
 package alarm_log
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
+	"go-intconnect-api/internal/parameter"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -15,19 +17,23 @@ import (
 )
 
 type ServiceImpl struct {
-	alarmLogRepository Repository
-	validatorService   validator.Service
-	dbConnection       *gorm.DB
-	viperConfig        *viper.Viper
+	alarmLogRepository  Repository
+	parameterRepository parameter.Repository
+	validatorService    validator.Service
+	dbConnection        *gorm.DB
+	viperConfig         *viper.Viper
 }
 
 func NewService(alarmLogRepository Repository, validatorService validator.Service, dbConnection *gorm.DB,
-	viperConfig *viper.Viper) *ServiceImpl {
+	viperConfig *viper.Viper,
+	parameterRepository parameter.Repository,
+) *ServiceImpl {
 	return &ServiceImpl{
-		alarmLogRepository: alarmLogRepository,
-		validatorService:   validatorService,
-		dbConnection:       dbConnection,
-		viperConfig:        viperConfig,
+		alarmLogRepository:  alarmLogRepository,
+		validatorService:    validatorService,
+		dbConnection:        dbConnection,
+		viperConfig:         viperConfig,
+		parameterRepository: parameterRepository,
 	}
 }
 
@@ -93,4 +99,22 @@ func (alarmLogService *ServiceImpl) Update(ginContext *gin.Context, updateAlarmL
 	paginationRequest := model.NewPaginationRequest()
 	paginatedResp = alarmLogService.FindAllPagination(&paginationRequest)
 	return paginatedResp
+}
+
+func (alarmLogService *ServiceImpl) FindByMachineId(ginContext *gin.Context, machineId uint64) []*model.AlarmLogResponse {
+	var allAlarmLog []*model.AlarmLogResponse
+	err := alarmLogService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		parameterEntities, err := alarmLogService.parameterRepository.FindBatchByMachineId(gormTransaction, machineId)
+		var parameterIds []uint64
+		for _, parameterEntity := range parameterEntities {
+			parameterIds = append(parameterIds, parameterEntity.Id)
+		}
+		fmt.Println(parameterIds)
+		alarmLogResponse, err := alarmLogService.alarmLogRepository.FindByParameterIds(gormTransaction, parameterIds)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		allAlarmLog = helper.MapEntitiesIntoResponsesWithFunc[*entity.AlarmLog, *model.AlarmLogResponse](alarmLogResponse, mapper.FuncMapAlarmLog)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return allAlarmLog
 }

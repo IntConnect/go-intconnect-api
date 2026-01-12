@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type AlarmLogResponse struct {
 	Id                 uint64             `json:"id"`
 	ParameterId        uint64             `json:"parameter_id"`
@@ -18,4 +20,21 @@ type AlarmLogResponse struct {
 type UpdateAlarmLogRequest struct {
 	Id   uint64 `json:"-" validate:"required,exists=alarm_logs;id"`
 	Note string `json:"note" validate:"required"`
+}
+
+type AlarmEventType string
+
+const (
+	AlarmOpen     AlarmEventType = "OPEN"
+	AlarmResolved AlarmEventType = "RESOLVED"
+	AlarmFinished AlarmEventType = "FINISHED"
+)
+
+type AlarmEvent struct {
+	Id          uint64         `json:"id"`
+	Type        AlarmEventType `json:"type"`
+	ParameterId uint64         `json:"parameter_id"`
+	Value       float64        `json:"value,omitempty"`
+	Status      string         `json:"status"`
+	Timestamp   time.Time      `json:"timestamp"`
 }

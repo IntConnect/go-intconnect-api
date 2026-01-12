@@ -47,3 +47,11 @@ func (alarmLogHandler *Handler) UpdateAlarmLog(ginContext *gin.Context) {
 	paginatedResponse := alarmLogHandler.alarmLogService.Update(ginContext, &updateAlarmLogRequest)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
+
+func (alarmLogHandler *Handler) FindAlarmLogByMachineId(ginContext *gin.Context) {
+	machineId := ginContext.Param("id")
+	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	alarmLogResponses := alarmLogHandler.alarmLogService.FindByMachineId(ginContext, parsedMachineId)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Alarm log fetch successfully", alarmLogResponses))
+}

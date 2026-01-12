@@ -12,4 +12,5 @@ type Repository interface {
 	FindById(gormTransaction *gorm.DB, alarmLogId uint64) (*entity.AlarmLog, error)
 	Create(gormTransaction *gorm.DB, alarmLogEntity *entity.AlarmLog) error
 	Update(gormTransaction *gorm.DB, alarmLogEntity *entity.AlarmLog) error
+	FindByParameterIds(gormTransaction *gorm.DB, parameterIds []uint64) ([]*entity.AlarmLog, error)
 }

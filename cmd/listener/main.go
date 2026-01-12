@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-intconnect-api/configs"
+	websocketConfig "go-intconnect-api/configs/websocket"
 	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/pkg/logger"
+	"net/http"
 	"os"
 	"os/signal"
 	"reflect"
@@ -42,7 +44,11 @@ func main() {
 	listenerFluxorInstance.StartWorkers(contextWithCancel)
 	listenerFluxorInstance.StartTopicHandler(contextWithCancel)
 	listenerFluxorInstance.StartSnapshotSaver(contextWithCancel)
+	go listenerFluxorInstance.websocketHub.Run()
+	go startWebSocketServer(listenerFluxorInstance.websocketHub)
+
 	listenerFluxorInstance.WaitForShutdown()
+
 }
 
 type AbnormalWindow struct {
@@ -74,6 +80,7 @@ type ListenerFluxor struct {
 	recoveryBuffers                map[uint64]*AlarmRecoveryWindow
 	alarmMutex                     sync.Mutex
 	redisInstance                  *configs.RedisInstance
+	websocketHub                   *websocketConfig.Hub
 }
 
 func NewListenerFluxor() *ListenerFluxor {
@@ -87,6 +94,8 @@ func NewListenerFluxor() *ListenerFluxor {
 	redisHostName, redisPassword, redisDatabaseIndex := configs.LoadRedisConfigFromEnvironment(viperConfig)
 	redisConfig := configs.NewRedisConfig(redisHostName, redisPassword, redisDatabaseIndex)
 	redisInstance, err := configs.InitRedisInstance(redisConfig)
+	websocketHub := websocketConfig.NewHub()
+
 	if err != nil {
 		logger.WithError(err).Fatal("failed to init redis instance")
 	}
@@ -107,6 +116,7 @@ func NewListenerFluxor() *ListenerFluxor {
 		abnormalBuffers:                make(map[uint64]*AbnormalWindow),
 		recoveryBuffers:                make(map[uint64]*AlarmRecoveryWindow),
 		redisInstance:                  redisInstance,
+		websocketHub:                   websocketHub,
 	}
 
 	if err := listenerFluxor.loadInitialConfiguration(); err != nil {
@@ -472,6 +482,7 @@ func (listenerFluxor *ListenerFluxor) onMessageReceived(mqttMessage mqtt.Message
 				Timestamp:   mqttPayload.Timestamp.Time,
 			}
 			if parameterEntity.IsWatch {
+				fmt.Println(parameterEntity.Name)
 				listenerFluxor.checkAbnormality(parameterEntity, parsedMqttValue)
 			}
 
@@ -723,6 +734,7 @@ func (listenerFluxor *ListenerFluxor) checkAbnormality(parameterEntity *entity.P
 	}
 
 	// === CHECK CREATE ALARM ===
+	fmt.Println(buffer.Values)
 	if len(buffer.Values) == requiredSamples && allAbnormal(buffer.Values, parameterEntity) {
 		listenerFluxor.saveAlarm(parameterEntity, value)
 		listenerFluxor.recoveryBuffers[parameterEntity.Id] = &AlarmRecoveryWindow{}
@@ -741,17 +753,19 @@ func allAbnormal(values []float64, parameterEntity *entity.Parameter) bool {
 	}
 	return true
 }
-
 func (listenerFluxor *ListenerFluxor) saveAlarm(parameterEntity *entity.Parameter, value float64) {
 	var alarmLogEntity entity.AlarmLog
 	err := listenerFluxor.gormDatabase.
-		Where("parameter_id = ? AND is_active = true", parameterEntity.Id).
+		Where("parameter_id = ? AND is_active = ?", parameterEntity.Id, true).
 		First(&alarmLogEntity).Error
+	eventType := model.AlarmOpen
+	isNewAlarm := false // Flag untuk alarm baru
 
 	if err == nil {
 		alarmLogEntity.Value = value
 		alarmLogEntity.UpdatedAt = time.Now()
 	} else {
+		isNewAlarm = true // Ini alarm baru
 		alarmType := "HIGH"
 		if value < parameterEntity.MinValue {
 			alarmType = "LOW"
@@ -768,9 +782,22 @@ func (listenerFluxor *ListenerFluxor) saveAlarm(parameterEntity *entity.Paramete
 	}
 
 	listenerFluxor.gormDatabase.Save(&alarmLogEntity)
-	logger.Warn("Alarm triggered for parameter %d", parameterEntity.Id)
-}
 
+	fmt.Println(isNewAlarm)
+	// Hanya broadcast jika alarm benar-benar baru
+	if isNewAlarm {
+		payload, _ := json.Marshal(model.AlarmEvent{
+			Id:          alarmLogEntity.Id,
+			Type:        eventType,
+			ParameterId: parameterEntity.Id,
+			Value:       value,
+			Status:      alarmLogEntity.Status,
+			Timestamp:   time.Now(),
+		})
+		listenerFluxor.websocketHub.Broadcast(payload)
+		logger.Warn("New alarm triggered for parameter %d", parameterEntity.Id)
+	}
+}
 func (listenerFluxor *ListenerFluxor) checkRecovery(parameterEntity *entity.Parameter, value float64) {
 	recovery, ok := listenerFluxor.recoveryBuffers[parameterEntity.Id]
 	if !ok {
@@ -801,5 +828,24 @@ func (listenerFluxor *ListenerFluxor) resolveAlarm(parameterId uint64) {
 			"resolved_at": time.Now(),
 		})
 
+	payload, _ := json.Marshal(model.AlarmEvent{
+		Type:        model.AlarmResolved,
+		ParameterId: parameterId,
+		Status:      "Resolved",
+		Timestamp:   time.Now(),
+	})
+	listenerFluxor.websocketHub.Broadcast(payload)
+
 	logger.Infof("Alarm resolved for parameter %d", parameterId)
+}
+
+func startWebSocketServer(hub *websocketConfig.Hub) {
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		websocketConfig.ServeWS(hub, w, r)
+	})
+
+	logger.Info("WebSocket server running on :8181")
+	if err := http.ListenAndServe(":8181", nil); err != nil {
+		logger.WithError(err).Fatal("Error starting WebSocket server")
+	}
 }

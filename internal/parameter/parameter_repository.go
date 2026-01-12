@@ -17,4 +17,5 @@ type Repository interface {
 	Update(gormTransaction *gorm.DB, parameterEntity *entity.Parameter) error
 	UpdateBatch(gormTransaction *gorm.DB, parameterEntities []*entity.Parameter) error
 	Delete(gormTransaction *gorm.DB, parameterId uint64) error
+	FindBatchByMachineId(gormTransaction *gorm.DB, machineId uint64) ([]*entity.Parameter, error)
 }

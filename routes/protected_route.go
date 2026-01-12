@@ -228,5 +228,6 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	alarmLogRouterGroup.GET("pagination", protectedRoutes.alarmLogController.FindAllAlarmLogPagination)
 	alarmLogRouterGroup.GET("", protectedRoutes.alarmLogController.FindAllAlarmLog)
 	alarmLogRouterGroup.PUT("/:id", protectedRoutes.alarmLogController.UpdateAlarmLog)
+	alarmLogRouterGroup.GET("/machine/:id", protectedRoutes.alarmLogController.FindAlarmLogByMachineId)
 
 }

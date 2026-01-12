@@ -2,6 +2,7 @@ package alarm_log
 
 import (
 	"go-intconnect-api/internal/entity"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -61,6 +62,21 @@ func (alarmLogRepositoryImpl *RepositoryImpl) FindAllPagination(
 	}
 
 	return alarmLogEntities, totalItems, nil
+}
+
+func (alarmLogRepositoryImpl *RepositoryImpl) FindByParameterIds(gormTransaction *gorm.DB, parameterIds []uint64) ([]*entity.AlarmLog, error) {
+	var alarmLogEntities []*entity.AlarmLog
+	twentyFourHoursAgo := time.Now().Add(-24 * time.Hour)
+
+	err := gormTransaction.
+		Where(
+			"parameter_id IN ? AND (created_at >= ? OR is_active = ?)",
+			parameterIds,
+			twentyFourHoursAgo,
+			true,
+		).
+		Find(&alarmLogEntities).Error
+	return alarmLogEntities, err
 }
 
 func (alarmLogRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, alarmLogId uint64) (*entity.AlarmLog, error) {

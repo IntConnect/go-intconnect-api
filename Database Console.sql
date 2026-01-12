@@ -2,96 +2,12 @@
 DROP DATABASE IF EXISTS go_intconnect_system;
 CREATE DATABASE go_intconnect_system;
 
-
-INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, component_name, default_config,
-                   created_by,
-                   deleted_at)
-VALUES (1,
-        'input',
-        'MQTT Source Input',
-        'mqtt_input',
-        'Node to receive data from MQTT broker',
-        'This node connects to an MQTT broker and receives data from a specified topic.',
-        '#FF5733',
-        'tabler-database-heart',
-        'MqttInModal',
-        '{
-            "action": "single_sub",
-            "topic": "sensor/data",
-            "qos": "0", "output": "auto-detect-1", "name": "MQTT In"
-        }',
-        'system',
-        NULL);
-
--- Node 2: JSON Parser
-
-INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, component_name, default_config,
-                   created_by,
-                   deleted_at)
-VALUES (2,
-        'processor',
-        'JSON Parser',
-        'json_parser',
-        'Node to parse JSON data',
-        'This node parses incoming JSON data and prepares it for further processing.',
-        '#33FF57',
-        'tabler-database-heart',
-        'JsonParserModal',
-        '{}',
-        'system',
-        NULL);
-
-
--- Node 3: MQTT Out
-
-INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, component_name, default_config,
-                   created_by,
-                   deleted_at)
-VALUES (3,
-        'output',
-        'MQTT Sink Output',
-        'mqtt_output',
-        'Node to send data to MQTT broker',
-        'This node connects to an MQTT broker and sends processed data to a specified topic.',
-        '#3357FF',
-        'tabler-database-heart',
-        'MqttOutModal',
-        '{}',
-        'system',
-        NULL);
-
-INSERT INTO nodes (id, type, label, name, description, help_text, color, icon, component_name, default_config,
-                   created_by,
-                   deleted_at)
-VALUES (4,
-        'output',
-        'Database Sink Output',
-        'db_output',
-        'Node to send data to database',
-        'This node send to an database',
-        '#3357FF',
-        'tabler-database-heart',
-        'DatabaseModal',
-        '{}',
-        'system',
-        NULL);
-
-INSERT INTO mqtt_topics (mqtt_broker_id, name, qos)
-VALUES (1, 'sensor/data', 0);
-SELECT *
-FROM parameters;
-INSERT INTO mqtt_brokers(host_name, mqtt_port, ws_port, is_active)
-VALUES ('10.175.16.39', '1883', '9001', true);
-
 SELECT *
 FROM audit_logs;
 SELECT *
 FROM machine_documents;
 SELECT *
 FROM machines;
-SELECT *
-FROM parameters
-WHERE id = 1;
 SELECT *
 FROM users;
 SELECT *
@@ -153,7 +69,7 @@ SELECT *
 FROM processed_parameter_sequences;
 SELECT *
 FROM permissions;
-
+DELETE FROM alarm_logs;
 DELETE
 FROM check_sheet_values;
 DELETE
