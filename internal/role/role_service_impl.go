@@ -52,7 +52,6 @@ func (roleService *ServiceImpl) FindAll(ginContext *gin.Context) []*model.RoleRe
 		return roleResponsesRequest
 	}
 	err = roleService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-
 		roleEntities, err = roleService.roleRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = roleService.roleRepository.SetAllCache(backgroundContext, roleEntities)
@@ -85,9 +84,9 @@ func (roleService *ServiceImpl) Create(ginContext *gin.Context, createRoleReques
 		if len(permissionEntities) != len(createRoleRequest.PermissionIds) {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 		}
+		roleEntity.Permissions = permissionEntities
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = roleService.roleRepository.Create(gormTransaction, roleEntity)
-		processedId = roleEntity.Id
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
@@ -114,7 +113,11 @@ func (roleService *ServiceImpl) Update(ginContext *gin.Context, updateRoleReques
 		if len(permissionEntities) != len(updateRoleRequest.PermissionIds) {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 		}
-		err = gormTransaction.Model(roleEntity).Association("Permissions").Replace(permissionEntities)
+
+		err = gormTransaction.Model(roleEntity).
+			Preload("Permissions").
+			Association("Permissions").
+			Replace(permissionEntities)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 
 		return nil

@@ -109,7 +109,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	userRouterGroup.GET("/:id", middleware.HasPermission("ROLE_USER_VIEW"), protectedRoutes.userController.FindById)
 	userRouterGroup.POST("", middleware.HasPermission("ROLE_USER_CREATE"), protectedRoutes.userController.CreateUser)
 	userRouterGroup.PUT("/profile", protectedRoutes.userController.UpdateProfile)
-	userRouterGroup.PUT("/:id", middleware.HasPermission("ROLE_USER_UPDATE"), protectedRoutes.userController.UpdateUser)
+	userRouterGroup.PUT("/:id", middleware.HasPermission("ROLE_USER_EDIT"), protectedRoutes.userController.UpdateUser)
 	userRouterGroup.DELETE("/:id", middleware.HasPermission("ROLE_USER_DELETE"), protectedRoutes.userController.DeleteUser)
 	userRouterGroup.GET("/logout", protectedRoutes.userController.LogoutUser)
 

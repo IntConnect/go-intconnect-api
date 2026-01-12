@@ -40,6 +40,10 @@ func (roleHandler *Handler) UpdateRole(ginContext *gin.Context) {
 	var updateRoleModel model.UpdateRoleRequest
 	err := ginContext.ShouldBindBodyWithJSON(&updateRoleModel)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	roleId := ginContext.Param("id")
+	parsedRoleId, err := strconv.ParseUint(roleId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	updateRoleModel.Id = parsedRoleId
 	paginatedResponses := roleHandler.roleService.Update(ginContext, &updateRoleModel)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Role has been created", paginatedResponses))
 }

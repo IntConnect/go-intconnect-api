@@ -129,20 +129,33 @@ func (userService *ServiceImpl) FindSelf(ginContext *gin.Context) *model.UserRes
 
 // Create - Membuat user baru
 func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserRequest *model.CreateUserRequest) *model.PaginatedResponse[*model.UserResponse] {
+	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	var paginationResp *model.PaginatedResponse[*model.UserResponse]
 	valErr := userService.validatorService.ValidateStruct(createUserRequest)
 	userService.validatorService.ParseValidationError(valErr, *createUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userEntity := helper.MapCreateRequestIntoEntity[model.CreateUserRequest, entity.User](createUserRequest)
 		userEntity.Status = trait.UserStatusActive
-		userEntity.Auditable = entity.NewAuditable("Administrator")
+		userEntity.Auditable = entity.NewAuditable(userJwtClaims.Name)
 		err := userService.userRepository.Create(gormTransaction, userEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginationResp = userService.FindAllPagination(&paginationRequest)
+		auditPayload := userService.auditLogService.Build(
+			nil,
+			userEntity,
+			nil,
+			"",
+		)
+
+		err = userService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_CREATE,
+				model.AUDIT_LOG_FEATURE_USER,
+				auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = userService.FindAllPagination(&paginationRequest)
 	return paginationResp
 }
 
@@ -212,16 +225,29 @@ func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserReques
 	valErr := userService.validatorService.ValidateStruct(updateUserRequest)
 	userService.validatorService.ParseValidationError(valErr, *updateUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		user, err := userService.userRepository.FindById(gormTransaction, updateUserRequest.Id)
+		userEntity, err := userService.userRepository.FindById(gormTransaction, updateUserRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		helper.MapUpdateRequestIntoEntity(updateUserRequest, user)
-		err = userService.userRepository.Update(gormTransaction, user)
+		pastUserEntity := *userEntity
+		helper.MapUpdateRequestIntoEntity(updateUserRequest, userEntity)
+		err = userService.userRepository.Update(gormTransaction, userEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginationResp = userService.FindAllPagination(&paginationRequest)
+		auditPayload := userService.auditLogService.Build(
+			&pastUserEntity,
+			userEntity,
+			nil,
+			"",
+		)
+
+		err = userService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_UPDATE,
+				model.AUDIT_LOG_FEATURE_USER,
+				auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = userService.FindAllPagination(&paginationRequest)
 	return paginationResp
 }
 
@@ -262,12 +288,27 @@ func (userService *ServiceImpl) Delete(ginContext *gin.Context, deleteUserReques
 	valErr := userService.validatorService.ValidateStruct(deleteUserRequest)
 	userService.validatorService.ParseValidationError(valErr, *deleteUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := userService.userRepository.Delete(gormTransaction, deleteUserRequest.Id)
+		userEntity, err := userService.userRepository.FindById(gormTransaction, deleteUserRequest.Id)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		paginationRequest := model.NewPaginationRequest()
-		paginationResp = userService.FindAllPagination(&paginationRequest)
+		err = userService.userRepository.Delete(gormTransaction, deleteUserRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+		auditPayload := userService.auditLogService.Build(
+			userEntity,
+			nil,
+			nil,
+			deleteUserRequest.Reason,
+		)
+
+		err = userService.auditLogService.
+			Record(ginContext,
+				model.AUDIT_LOG_DELETE,
+				model.AUDIT_LOG_FEATURE_USER,
+				auditPayload)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	paginationRequest := model.NewPaginationRequest()
+	paginationResp = userService.FindAllPagination(&paginationRequest)
 	return paginationResp
 }

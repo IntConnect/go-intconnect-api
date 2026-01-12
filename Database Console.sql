@@ -192,10 +192,7 @@ WHERE parameter_id = 1
 ORDER BY id DESC;
 SELECT *
 FROM check_sheet_document_templates;
-
-UPDATE check_sheet_document_templates
-SET starting_hour = '08:00:00'
-
+SELECT * FROM roles_permissions;
 SELECT bucket,
        parameter_id,
        last_value

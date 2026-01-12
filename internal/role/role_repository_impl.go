@@ -77,22 +77,22 @@ func (roleRepositoryImpl *RepositoryImpl) FindAllCache(context context.Context) 
 	return roles, nil
 }
 
-func (roleRepositoryImpl *RepositoryImpl) SetAllCache(ctx context.Context, roles []*entity.Role) error {
+func (roleRepositoryImpl *RepositoryImpl) SetAllCache(backgroundContext context.Context, roles []*entity.Role) error {
 	data, err := json.Marshal(roles)
 	if err != nil {
 		return err
 	}
-	return roleRepositoryImpl.redisInstance.RedisClient.Set(ctx, roleRepositoryImpl.redisRolesCacheKey, data, 0).Err()
+	return roleRepositoryImpl.redisInstance.RedisClient.Set(backgroundContext, roleRepositoryImpl.redisRolesCacheKey, data, 0).Err()
 }
 
-func (roleRepositoryImpl *RepositoryImpl) DeleteAllCache(ctx context.Context) error {
-	return roleRepositoryImpl.redisInstance.RedisClient.Del(ctx, roleRepositoryImpl.redisRolesCacheKey).Err()
+func (roleRepositoryImpl *RepositoryImpl) DeleteAllCache(backgroundContext context.Context) error {
+	return roleRepositoryImpl.redisInstance.RedisClient.Del(backgroundContext, roleRepositoryImpl.redisRolesCacheKey).Err()
 }
 
-func (roleRepositoryImpl *RepositoryImpl) FindRoleCacheById(ctx context.Context, roleId uint64) (*entity.Role, error) {
+func (roleRepositoryImpl *RepositoryImpl) FindRoleCacheById(backgroundContext context.Context, roleId uint64) (*entity.Role, error) {
 	redisKey := fmt.Sprintf("%s%d", roleRepositoryImpl.redisRoleCacheKey, roleId)
 
-	rolePayload, err := roleRepositoryImpl.redisInstance.RedisClient.Get(ctx, redisKey).Result()
+	rolePayload, err := roleRepositoryImpl.redisInstance.RedisClient.Get(backgroundContext, redisKey).Result()
 	if err == redis.Nil {
 		return nil, nil // cache miss
 	}
@@ -108,7 +108,7 @@ func (roleRepositoryImpl *RepositoryImpl) FindRoleCacheById(ctx context.Context,
 	return &roleEntity, nil
 }
 
-func (roleRepositoryImpl *RepositoryImpl) SetByIdCache(ctx context.Context, roleId uint64, roleEntity *entity.Role) error {
+func (roleRepositoryImpl *RepositoryImpl) SetByIdCache(backgroundContext context.Context, roleId uint64, roleEntity *entity.Role) error {
 	redisKey := fmt.Sprintf("%s%d", roleRepositoryImpl.redisRoleCacheKey, roleId)
 
 	roleEntityPayload, err := json.Marshal(roleEntity)
@@ -116,9 +116,9 @@ func (roleRepositoryImpl *RepositoryImpl) SetByIdCache(ctx context.Context, role
 		return err
 	}
 
-	return roleRepositoryImpl.redisInstance.RedisClient.Set(ctx, redisKey, roleEntityPayload, 0).Err()
+	return roleRepositoryImpl.redisInstance.RedisClient.Set(backgroundContext, redisKey, roleEntityPayload, 0).Err()
 }
-func (roleRepositoryImpl *RepositoryImpl) DeleteByIdCache(ctx context.Context, roleId uint64) error {
+func (roleRepositoryImpl *RepositoryImpl) DeleteByIdCache(backgroundContext context.Context, roleId uint64) error {
 	redisKey := fmt.Sprintf("%s%d", roleRepositoryImpl.redisRoleCacheKey, roleId)
-	return roleRepositoryImpl.redisInstance.RedisClient.Del(ctx, redisKey).Err()
+	return roleRepositoryImpl.redisInstance.RedisClient.Del(backgroundContext, redisKey).Err()
 }
