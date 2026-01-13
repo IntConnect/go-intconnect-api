@@ -29,7 +29,6 @@ type Parameter struct {
 	MqttTopic                  *MqttTopic                    `gorm:"foreignKey:MqttTopicId;references:Id"`
 	ReportDocumentTemplates    []*ReportDocumentTemplate     `gorm:"many2many:report_document_templates_parameters;joinForeignKey:ParameterId;joinReferences:ReportDocumentTemplateId"`
 	ParameterOperations        []*ParameterOperation         `gorm:"foreignKey:ParameterId;references:Id"`
-	CheckSheetValues           []*CheckSheetValue            `gorm:"foreignKey:ParameterId;references:Id"`
 	ProcessedParameterSequence []*ProcessedParameterSequence `gorm:"foreignKey:ParentParameterId;references:Id" mapstructure:"-"`
 	Machine                    *Machine                      `gorm:"foreignKey:MachineId;references:Id"`
 	Auditable                  Auditable                     `gorm:"embedded"`

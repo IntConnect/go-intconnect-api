@@ -1,0 +1,1 @@
+DROP TABLE check_sheet_check_point_values;

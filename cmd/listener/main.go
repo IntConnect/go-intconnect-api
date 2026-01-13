@@ -762,6 +762,17 @@ func (listenerFluxor *ListenerFluxor) saveAlarm(parameterEntity *entity.Paramete
 	if err == nil {
 		alarmLogEntity.Value = value
 		alarmLogEntity.UpdatedAt = time.Now()
+		payload, _ := json.Marshal(model.AlarmEvent{
+			Id:          alarmLogEntity.Id,
+			Type:        eventType,
+			ParameterId: parameterEntity.Id,
+			Value:       value,
+			Status:      alarmLogEntity.Status,
+			Timestamp:   time.Now(),
+		})
+		listenerFluxor.websocketHub.Broadcast(payload)
+		logger.Warn("New alarm triggered for parameter %d", parameterEntity.Id)
+
 	} else {
 		isNewAlarm = true // Ini alarm baru
 		alarmType := "HIGH"

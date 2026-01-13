@@ -56,11 +56,12 @@ func main() {
 		injector.ParameterOperationModule,
 		injector.TelemetryModule,
 		injector.CheckSheetModule,
-		injector.CheckSheetValueModule,
+		injector.CheckSheetCheckPointModule,
 		injector.DashboardWidgetModule,
 		injector.RegisterModule,
 		injector.AlarmLogModule,
 		injector.ProcessedParameterSequenceModule,
+		injector.CheckSheetCheckPointValueModule,
 		// Invoker
 		fx.Invoke(Run),
 	)

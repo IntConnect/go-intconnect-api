@@ -11,19 +11,40 @@ type CheckSheetResponse struct {
 	VerifiedByUser               *UserResponse                      `json:"verified_by_user"`
 	ReportedByUser               UserResponse                       `json:"reported_by_user"`
 	CheckSheetDocumentTemplate   CheckSheetDocumentTemplateResponse `json:"check_sheet_document_template"`
-	CheckSheetValues             []*CheckSheetValueResponse         `json:"check_sheet_values"`
+	CheckSheetCheckPoints        []*CheckSheetCheckPointResponse    `json:"check_sheet_check_points"`
 	AuditableResponse            *AuditableResponse                 `json:"auditable"`
 }
 
 type CreateCheckSheetRequest struct {
-	CheckSheetDocumentTemplateId uint64             `json:"check_sheet_document_template_id" validate:"required,gte=1,exists=check_sheet_document_templates;id"`
-	CheckSheetValues             []*CheckSheetValue `json:"check_sheet_values" validate:"required,min=1,dive,required"`
+	CheckSheetDocumentTemplateId uint64                  `json:"check_sheet_document_template_id" validate:"required,gte=1,exists=check_sheet_document_templates;id"`
+	CheckSheetCheckPoints        []*CheckSheetCheckPoint `json:"check_sheet_check_points" validate:"required,dive"`
+}
+
+type CheckSheetCheckPoint struct {
+	Id               uint64             `json:"id"`
+	CheckSheetId     uint64             `json:"check_sheet_id"`
+	ParameterId      uint64             `json:"parameter_id"`
+	Name             string             `json:"name"`
+	CheckSheetValues []*CheckSheetValue `json:"check_sheet_values" validate:"required,min=1,dive,required"`
+}
+
+type CheckSheetCheckPointResponse struct {
+	Id                        uint64                               `json:"id"`
+	CheckSheetId              uint64                               `json:"check_sheet_id;"`
+	ParameterId               uint64                               `json:"parameter_id"`
+	Name                      string                               `json:"name"`
+	CheckSheetCheckPointValue []*CheckSheetCheckPointValueResponse `json:"check_sheet_check_point_value"`
 }
 
 type CheckSheetValue struct {
-	ParameterId uint64 `json:"parameter_id"  validate:"required"`
-	Timestamp   string `json:"timestamp" validate:"required"`
-	Value       string `json:"value"`
+	Timestamp string `json:"timestamp" validate:"required"`
+	Value     string `json:"value"`
+}
+
+type CheckSheetCheckPointValueResponse struct {
+	Id        uint64 `json:"id"`
+	Timestamp string `json:"timestamp" `
+	Value     string `json:"value"`
 }
 
 type ApprovalCheckSheet struct {
@@ -41,9 +62,10 @@ type CheckSheetValueResponse struct {
 }
 
 type UpdateCheckSheetRequest struct {
-	Id                           uint64             `json:"-" validate:"required,gte=1,exists=check_sheets;id"`
-	CheckSheetDocumentTemplateId uint64             `json:"check_sheet_document_template_id" validate:"required,gte=1,exists=check_sheet_document_templates;id"`
-	CheckSheetValues             []*CheckSheetValue `json:"check_sheet_values" validate:"required,min=1,dive,required"`
+	Id                           uint64                  `json:"-" validate:"required,gte=1,exists=check_sheets;id"`
+	CheckSheetDocumentTemplateId uint64                  `json:"check_sheet_document_template_id" validate:"required,gte=1,exists=check_sheet_document_templates;id"`
+	CheckSheetCheckPoint         []*CheckSheetCheckPoint `json:"check_sheet_check_point" validate:"required,gt=0"`
+	CheckSheetValues             []*CheckSheetValue      `json:"check_sheet_values" validate:"required,min=1,dive,required"`
 }
 
 func (checkSheetResponse *CheckSheetResponse) GetAuditableResponse() *AuditableResponse {
@@ -54,6 +76,6 @@ func (checkSheetResponse *CheckSheetResponse) SetAuditableResponse(auditableResp
 	checkSheetResponse.AuditableResponse = auditableResponse
 }
 
-func (checkSheetValue *CheckSheetValue) GetId() uint64 {
-	return checkSheetValue.ParameterId
+func (checkSheetCheckPoint *CheckSheetCheckPoint) GetId() uint64 {
+	return checkSheetCheckPoint.Id
 }

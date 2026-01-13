@@ -107,7 +107,9 @@ FROM telemetries
 WHERE parameter_id = 1
 ORDER BY id DESC;
 SELECT *
-FROM check_sheet_document_templates;
+FROM check_sheet_check_points;
+SELECT *
+FROM check_sheet_check_point_values;
 SELECT * FROM roles_permissions;
 SELECT bucket,
        parameter_id,
@@ -123,3 +125,5 @@ FROM (SELECT time_bucket_gapfill('1 hours'::interval, timestamp, '2026-01-09 08:
 ORDER BY bucket;
 
 ALTER TABLE machine_documents DROP COLUMN code;
+
+DROP TABLE check_sheet_values;

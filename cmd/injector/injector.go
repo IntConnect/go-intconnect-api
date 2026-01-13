@@ -5,8 +5,9 @@ import (
 	alarmLog "go-intconnect-api/internal/alarm_log"
 	auditLog "go-intconnect-api/internal/audit_log"
 	checkSheet "go-intconnect-api/internal/check_sheet"
+	checkSheetCheckPoint "go-intconnect-api/internal/check_sheet_check_point"
+	checkSheetCheckPointValue "go-intconnect-api/internal/check_sheet_check_point_value"
 	checkSheetDocumentTemplate "go-intconnect-api/internal/check_sheet_document_template"
-	checkSheetValue "go-intconnect-api/internal/check_sheet_value"
 	dashboardWidget "go-intconnect-api/internal/dashboard_widget"
 	"go-intconnect-api/internal/facility"
 	"go-intconnect-api/internal/machine"
@@ -256,8 +257,8 @@ var CheckSheetModule = fx.Module("checkSheetFeature",
 	fx.Provide(fx.Annotate(checkSheet.NewHandler, fx.As(new(checkSheet.Controller)))),
 )
 
-var CheckSheetValueModule = fx.Module("checkSheetValueFeature",
-	fx.Provide(fx.Annotate(checkSheetValue.NewRepository, fx.As(new(checkSheetValue.Repository)))),
+var CheckSheetCheckPointModule = fx.Module("checkSheetCheckPointFeature",
+	fx.Provide(fx.Annotate(checkSheetCheckPoint.NewRepository, fx.As(new(checkSheetCheckPoint.Repository)))),
 )
 
 var DashboardWidgetModule = fx.Module("dashboardWidgetFeature",
@@ -278,4 +279,8 @@ var AlarmLogModule = fx.Module("alarmLogFeature",
 
 var ProcessedParameterSequenceModule = fx.Module("processedParameterSequenceFeature",
 	fx.Provide(fx.Annotate(processedParameterSequence.NewRepository, fx.As(new(processedParameterSequence.Repository)))),
+)
+
+var CheckSheetCheckPointValueModule = fx.Module("checkSheetCheckPointValueFeature",
+	fx.Provide(fx.Annotate(checkSheetCheckPointValue.NewRepository, fx.As(new(checkSheetCheckPointValue.Repository)))),
 )

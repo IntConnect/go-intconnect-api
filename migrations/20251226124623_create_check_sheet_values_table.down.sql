@@ -1,1 +1,0 @@
-DROP TABLE check_sheet_values;
