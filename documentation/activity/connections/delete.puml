@@ -1,5 +1,5 @@
 @startuml
-title Activity – Menghapus Data Fitur-Fitur Kategori Connection
+title Activity Diagram – Penghapusan Data Pada Fitur-Fitur di Menu Connection
 
 '================================================
 ' STYLING
@@ -57,7 +57,7 @@ repeat while (Valid?)
 ' PAGE 3 – SAVE & RESULT
 '================================================
 |SYSTEM|
-:Simpan Data;
+:Soft-delete Data;
 :Menampilkan Pesan Sukses;
 :Redirect ke Halaman Daftar Data;
 stop

@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Penghapusan Data Pada Fitur-Fitur di Menu Configuration
+title Activity Diagram – Menambah Data Pada Fitur Role & User
 
 '================================================
 ' STYLING
@@ -32,17 +32,29 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu Configuration;
-:Pilih Menu;
-:Tekan Tombol Hapus;
-note
-Tombol dengan
-Icon Trash
-endnote
+:Sorot Menu\nUser Management;
+:Pilih Role & User;
+:Pilih Aksi;
+
+if (Membuat Data\nUser?) then (Ya)
+:Tekan Tombol \n New User;
 |SYSTEM|
-:Menampilkan Dialog \nKonfirmasi Penghapusan;
+:Menampilkan Drawer\nFormulir Tambah Data;
 |ROLES|
-:Mengisi Alasan\nPenghapusan;
+:Mengisi Field;
+elseif (Membuat Data\nRole)  then (Ya)
+:Tekan Tombol \n Add New Role;
+|SYSTEM|
+:Menampilkan Dialog\nFormulir Tambah Data;
+|ROLES|
+:Mengisi Field;
+:Memilih Permission\nyang Diberikan;
+else (No)
+|ROLES|
+end
+endif
+
+|SYSTEM|
 |ROLES|
 repeat
 :Submit Data;
@@ -57,8 +69,16 @@ repeat while (Valid?)
 ' PAGE 3 – SAVE & RESULT
 '================================================
 |SYSTEM|
-:Soft-delete Data;
+:Simpan Data;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
+
+if (Membuat Data\nUser?) then (Ya)
+:Menutup Drawer;
+elseif (Membuat Data\nRole)  then (Ya)
+:Menutup Dialog;
+else (No)
+|SYSTEM|
+end
+endif
 stop
 @enduml

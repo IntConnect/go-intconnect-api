@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Penghapusan Data Pada Fitur-Fitur di Menu Configuration
+title Activity Diagram – Membuat Data Check Sheet
 
 '================================================
 ' STYLING
@@ -23,7 +23,7 @@ skinparam EndColor #E53935
 skinparam DiamondBackgroundColor #FFF7CC
 skinparam DiamondBorderColor #C5A600
 
-!define ROLES Administrator
+!define ROLES Administrator|
 !define SYSTEM #AntiqueWhite|System
 
 '================================================
@@ -32,20 +32,21 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu Configuration;
-:Pilih Menu;
-:Tekan Tombol Hapus;
-note
-Tombol dengan
-Icon Trash
-endnote
+:Sorot Menu\nDocument;
+:Pilih Menu\nCheck Sheet;
+:Tekan Tombol\nNew Check Sheet;
 |SYSTEM|
-:Menampilkan Dialog \nKonfirmasi Penghapusan;
+:Redirect ke Halaman\nFormulir Pengisian\nCheck Sheet;
 |ROLES|
-:Mengisi Alasan\nPenghapusan;
-|ROLES|
+:Mendefinisikan\nCheck Point;
+:Mengisi Nilai Pada\nSetiap Check Point;
+if (Apakah Sudah\nSelesai?) then (Ya)
+:Simpan Sebagai\nDraft;
+else (Tidak)
+:Ajukan untuk\nPeninjauan;
+endif
 repeat
-:Submit Data;
+:Input & Submit Data;
 
 |SYSTEM|
   :Validasi Data;
@@ -53,12 +54,15 @@ repeat
 repeat while (Valid?)
 
 
+
 '================================================
 ' PAGE 3 – SAVE & RESULT
 '================================================
 |SYSTEM|
-:Soft-delete Data;
+:Simpan Data;
 :Menampilkan Pesan Sukses;
 :Redirect ke Halaman Daftar Data;
+
+
 stop
 @enduml

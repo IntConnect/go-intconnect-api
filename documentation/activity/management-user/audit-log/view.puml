@@ -1,5 +1,5 @@
 @startuml
-title Activity – Create Data
+title Activity Diagram – Melihat Data Role & User
 
 '================================================
 ' STYLING
@@ -33,30 +33,22 @@ skinparam DiamondBorderColor #C5A600
 start
 :Login;
 :Sorot Menu\nUser Management;
-:Pilih Menu Role & User;
-:Tekan Tombol\nEdit;
-note
-Tombol dengan
-Icon Pencil
-endnote
-|SYSTEM|
-:Menampilkan Drawer\nFormulir Pengubahan Data;
-|ROLES|
-repeat
-:Input & Submit Data;
-
-|SYSTEM|
-  :Validasi Data;
-  backward:Menampilkan\nPesan Error;
-repeat while (Valid?)
+:Pilih Menu Audit Log;
 
 
-'================================================
-' PAGE 3 – SAVE & RESULT
-'================================================
 |SYSTEM|
-:Mengubah Data;
-:Menampilkan Pesan Sukses;
-:Menutup Drawer \nFormulir Penambahan Data;
+:Redirect ke Halaman\nDaftar Data;
+|SYSTEM|
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman\nDaftar Data;
+
+else (Tidak)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
+
+:Menampilkan Halaman\nDaftar Data;
+
+
 stop
 @enduml

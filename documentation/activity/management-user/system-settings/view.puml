@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Melihat Data Pada Fitur-Fitur di Menu Connection
+title Activity Diagram – Mengubah Data System Setting
 
 '================================================
 ' STYLING
@@ -32,30 +32,27 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu\nConnection;
-:Pilih Menu;
+:Pilih System Setting;
+:Pilih Jenis Sytem Setting;
 
-if (MQTT Broker?) then (Ya)
-elseif (MQTT Topic)  then (Ya)
-elseif (SMTP Server)  then (Ya)
-elseif (Modbus Server)  then (Ya)
-else (No)
-end
-endif
 
 |SYSTEM|
-:Redirect ke Halaman\nDaftar Data;
+|ROLES|
+repeat
+:Mengisi Formulir;
+:Submit Data;
+
 |SYSTEM|
-if (Memiliki Akses?) then (Ya)
-:Menampilkan Halaman\nDaftar Data;
-
-else (Tidak)
-:Menampilkan Halaman
-401 Unauthorized;
-endif
-
-:Menampilkan Halaman\nDaftar Data;
+  :Validasi Data;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?)
 
 
+'================================================
+' PAGE 3 – SAVE & RESULT
+'================================================
+|SYSTEM|
+:Simpan Data;
+:Menampilkan Pesan Sukses;
 stop
 @enduml

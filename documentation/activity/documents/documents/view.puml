@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Melihat Data Role
+title Activity Diagram – Melihat Data Role & User
 
 '================================================
 ' STYLING
@@ -32,9 +32,13 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu\nUser Management;
-:Pilih Menu Role & User;
-
+:Sorot Menu\nDocuments;
+:Pilih Menu;
+if (Report Document\nTemplate?) then (Ya)
+elseif (Check Sheet\nDocument Template)  then (Ya)
+else (No)
+end
+endif
 
 |SYSTEM|
 :Redirect ke Halaman\nDaftar Data;

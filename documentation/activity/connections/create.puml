@@ -1,5 +1,5 @@
 @startuml
-title Activity – Create Data
+title Activity Diagram – Menambah Data Pada Fitur-Fitur di Menu Connection
 
 '================================================
 ' STYLING
@@ -48,7 +48,7 @@ end
 endif
 
 |SYSTEM|
-:Menampilkan Drawer \nFormulir Penambahan Data;
+:Menampilkan Drawer \nFormulir Tambah Data;
 |ROLES|
 repeat
 :Input & Submit Data;
@@ -65,6 +65,6 @@ repeat while (Valid?)
 |SYSTEM|
 :Simpan Data;
 :Menampilkan Pesan Sukses;
-:Menutup Drawer \nFormulir Penambahan Data;
+:Menutup Drawer \nFormulir Tambah Data;
 stop
 @enduml

@@ -781,7 +781,6 @@ func (listenerFluxor *ListenerFluxor) saveAlarm(parameterEntity *entity.Paramete
 
 	listenerFluxor.gormDatabase.Save(&alarmLogEntity)
 
-	ofmt.Println(isNewAlarm)
 	// Hanya broadcast jika alarm benar-benar baru
 	if isNewAlarm {
 		payload, _ := json.Marshal(model.AlarmEvent{

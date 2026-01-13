@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Penghapusan Data Pada Fitur-Fitur di Menu Configuration
+title Activity Diagram – Menambah Data Pada Fitur Kategori Document
 
 '================================================
 ' STYLING
@@ -32,20 +32,29 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu Configuration;
+:Sorot Menu\nDocument;
 :Pilih Menu;
-:Tekan Tombol Hapus;
-note
-Tombol dengan
-Icon Trash
-endnote
+
+if (Report Document\nTemplate?) then (Ya)
+:Tekan Tombol New Report\nDocument Template;
+
+
+elseif (Check Sheet\nDocument Template)  then (Ya)
+:Tekan Tombol New Check \nSheet Document Template;
 |SYSTEM|
-:Menampilkan Dialog \nKonfirmasi Penghapusan;
 |ROLES|
-:Mengisi Alasan\nPenghapusan;
+
+else (No)
+|ROLES|
+end
+endif
+
+|SYSTEM|
+:Menampilkan Drawer\nFormulir Tambah Data;
+
 |ROLES|
 repeat
-:Submit Data;
+:Input & Submit Data;
 
 |SYSTEM|
   :Validasi Data;
@@ -57,8 +66,10 @@ repeat while (Valid?)
 ' PAGE 3 – SAVE & RESULT
 '================================================
 |SYSTEM|
-:Soft-delete Data;
+:Simpan Data;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
+:Menutup Drawer\nFormulir Tambah Data;
+
+
 stop
 @enduml

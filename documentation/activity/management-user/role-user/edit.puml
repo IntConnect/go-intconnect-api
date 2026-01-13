@@ -1,5 +1,5 @@
 @startuml
-title Activity – Create Data
+title Activity Diagram – Mengubah Data Pada Fitur Role & User
 
 '================================================
 ' STYLING
@@ -33,14 +33,35 @@ skinparam DiamondBorderColor #C5A600
 start
 :Login;
 :Sorot Menu\nUser Management;
-:Pilih Menu Role & User;
-:Tekan Tombol\nNew User;
+:Pilih Role & User;
+:Pilih Aksi;
+
+if (Mengubah Data\nUser?) then (Ya)
+:Tekan Tombol \nEdit;
+note
+Tombol Dengan
+Icon Pencil
+endnote
+|SYSTEM|
+:Menampilkan Drawer\nFormulir Tambah Data;
+|ROLES|
+:Mengubah Field;
+elseif (Mengubah Data\nRole)  then (Ya)
+:Tekan Tombol\nEdit Role;
+|SYSTEM|
+:Menampilkan Dialog\nFormulir Tambah Data;
+|ROLES|
+:Mengubah Field;
+:Memilih Permission\nyang Diberikan;
+else (No)
+|ROLES|
+end
+endif
 
 |SYSTEM|
-:Menampilkan Drawer\nFormulir Penambahan Data;
 |ROLES|
 repeat
-:Input & Submit Data;
+:Submit Data;
 
 |SYSTEM|
   :Validasi Data;
@@ -52,8 +73,16 @@ repeat while (Valid?)
 ' PAGE 3 – SAVE & RESULT
 '================================================
 |SYSTEM|
-:Simpan Data;
+:Mengubah Data;
 :Menampilkan Pesan Sukses;
-:Menutup Drawer \nFormulir Penambahan Data;
+
+if (Mengubah Data\nUser?) then (Ya)
+:Menutup Drawer;
+elseif (Mengubah Data\nRole)  then (Ya)
+:Menutup Dialog;
+else (No)
+|SYSTEM|
+end
+endif
 stop
 @enduml

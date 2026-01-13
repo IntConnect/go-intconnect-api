@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Penghapusan Data Pada Fitur-Fitur di Menu Configuration
+title Activity Diagram – Mengubah Data Pada Fitur Role & User
 
 '================================================
 ' STYLING
@@ -32,8 +32,8 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu Configuration;
-:Pilih Menu;
+:Sorot Menu\nUser Management;
+:Pilih Role & User;
 :Tekan Tombol Hapus;
 note
 Tombol dengan

@@ -1,5 +1,5 @@
 @startuml
-title Activity – Menghapus Data User
+title Activity Diagram – Melihat Data Role & User
 
 '================================================
 ' STYLING
@@ -32,33 +32,23 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu Configuration;
-:Pilih Menu;
-:Tekan Tombol Hapus;
-note
-Tombol dengan
-Icon Trash
-endnote
-|SYSTEM|
-:Menampilkan Dialog \nKonfirmasi Penghapusan;
-|ROLES|
-:Mengisi Alasan\nPenghapusan;
-|ROLES|
-repeat
-:Submit Data;
-
-|SYSTEM|
-  :Validasi Data;
-  backward:Menampilkan\nPesan Error;
-repeat while (Valid?)
+:Sorot Menu\nUser Management;
+:Pilih Menu Role & User;
 
 
-'================================================
-' PAGE 3 – SAVE & RESULT
-'================================================
 |SYSTEM|
-:Simpan Data;
-:Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
+:Redirect ke Halaman\nDaftar Data;
+|SYSTEM|
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman\nDaftar Data;
+
+else (Tidak)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
+
+:Menampilkan Halaman\nDaftar Data;
+
+
 stop
 @enduml

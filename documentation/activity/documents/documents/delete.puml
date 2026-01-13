@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Penghapusan Data Pada Fitur-Fitur di Menu Configuration
+title Activity Diagram – Mengubah Data Pada Fitur-Fitur Kategori Document
 
 '================================================
 ' STYLING
@@ -32,8 +32,8 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu Configuration;
-:Pilih Menu;
+:Sorot Menu\nUser Management;
+:Pilih Role & User;
 :Tekan Tombol Hapus;
 note
 Tombol dengan
@@ -59,6 +59,6 @@ repeat while (Valid?)
 |SYSTEM|
 :Soft-delete Data;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
+:Menutup Dialog Konfirmasi\nPenghapusan Data;
 stop
 @enduml
