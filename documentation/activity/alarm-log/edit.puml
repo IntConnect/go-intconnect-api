@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Membuat Data Check Sheet
+title Activity Diagram – Resolve Alarm Log
 
 '================================================
 ' STYLING
@@ -32,39 +32,19 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu\nDocument;
-:Pilih Menu\nCheck Sheet;
-:Pilih Aksi;
-
-if (Menambah Data?) then (Ya)
-:Tekan Tombol\nNew Check Sheet;
-
-|ROLES|
-elseif (Mengubah Data)  then (Ya)
-:Tekan Tombol\nEdit;
+:Pilih Menu Alarm Log;
+:Tekan Tombol Resolve;
 note
-Tombol Dengan
-Icon Pencil
+Tombol dengan
+Icon Ceklis
 endnote
 |SYSTEM|
+:Menampilkan Dialog \nKonfirmasi Resolve;
 |ROLES|
-else (No)
+:Mengisi Notes\nResolve;
 |ROLES|
-end
-endif
-
-|SYSTEM|
-:Redirect ke Halaman\nFormulir Pengisian\nCheck Sheet;
-|ROLES|
-:Mendefinisikan\nCheck Point;
-:Mengisi Nilai Pada\nSetiap Check Point;
-if (Apakah Sudah\nSelesai?) then (Ya)
-:Simpan Sebagai\nDraft;
-else (Tidak)
-:Ajukan untuk\nPeninjauan;
-endif
 repeat
-:Input & Submit Data;
+:Submit Data;
 
 |SYSTEM|
   :Validasi Data;
@@ -72,15 +52,12 @@ repeat
 repeat while (Valid?)
 
 
-
 '================================================
 ' PAGE 3 – SAVE & RESULT
 '================================================
 |SYSTEM|
-:Simpan Data;
+:Mengubah Status Alarm Log;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
-
-
+:Menutup Dialog Konfirmasi \nResolve;
 stop
 @enduml

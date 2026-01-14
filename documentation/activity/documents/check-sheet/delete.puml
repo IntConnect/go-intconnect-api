@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Mengubah Data System Setting
+title Activity Diagram – Penghapusan Data Pada Fitur Check Sheet
 
 '================================================
 ' STYLING
@@ -23,7 +23,7 @@ skinparam EndColor #E53935
 skinparam DiamondBackgroundColor #FFF7CC
 skinparam DiamondBorderColor #C5A600
 
-!define ROLES Administrator
+!define ROLES Administrator\nOperator
 !define SYSTEM #AntiqueWhite|System
 
 '================================================
@@ -32,14 +32,19 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Pilih System Setting;
-:Pilih Jenis Sytem Setting;
-
-
+:Sorot Menu Document;
+:Pilih Menu Check Sheet;
+:Tekan Tombol Hapus;
+note
+Tombol dengan
+Icon Trash
+endnote
 |SYSTEM|
+:Menampilkan Dialog \nKonfirmasi Penghapusan;
+|ROLES|
+:Mengisi Alasan\nPenghapusan;
 |ROLES|
 repeat
-:Mengisi Formulir;
 :Submit Data;
 
 |SYSTEM|
@@ -52,7 +57,8 @@ repeat while (Valid?)
 ' PAGE 3 – SAVE & RESULT
 '================================================
 |SYSTEM|
-:Simpan Data;
+:Soft-delete Data;
 :Menampilkan Pesan Sukses;
+:Menutup Dialog Konfirmasi\nPenghapusan;
 stop
 @enduml

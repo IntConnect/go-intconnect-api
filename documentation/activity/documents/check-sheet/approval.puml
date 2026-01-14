@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Membuat Data Check Sheet
+title Activity Diagram – Resolve Alarm Log
 
 '================================================
 ' STYLING
@@ -23,7 +23,7 @@ skinparam EndColor #E53935
 skinparam DiamondBackgroundColor #FFF7CC
 skinparam DiamondBorderColor #C5A600
 
-!define ROLES Administrator\nOperator
+!define ROLES Administrator\nManager\nSupervisor
 !define SYSTEM #AntiqueWhite|System
 
 '================================================
@@ -32,39 +32,37 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu\nDocument;
-:Pilih Menu\nCheck Sheet;
-:Pilih Aksi;
-
-if (Menambah Data?) then (Ya)
-:Tekan Tombol\nNew Check Sheet;
-
-|ROLES|
-elseif (Mengubah Data)  then (Ya)
-:Tekan Tombol\nEdit;
+:Pilih Menu Document;
+:Pilih Menu Check Sheet;
+:Tekan Tombol Aprooval;
 note
-Tombol Dengan
-Icon Pencil
+Tombol dengan
+Icon Ceklis
 endnote
 |SYSTEM|
+:Redirect ke Halaman\nPreview Data;
 |ROLES|
+:Mengecek Nilai-Nilai\nPada Check Sheet;
+if (Approve?) then (Ya)
+:Menekan Tombol Approve;
+
+|SYSTEM|
+:Menampilkan Dialog\nApprove;
+|ROLES|
+:Mengisi Catatan;
+elseif (Reject)  then (Ya)
+:Menekan Tombol Reject;
+|SYSTEM|
+:Menampilkan Dialog\nReject;
+|ROLES|
+:Mengisi Alasan Reject;
 else (No)
 |ROLES|
 end
 endif
-
-|SYSTEM|
-:Redirect ke Halaman\nFormulir Pengisian\nCheck Sheet;
 |ROLES|
-:Mendefinisikan\nCheck Point;
-:Mengisi Nilai Pada\nSetiap Check Point;
-if (Apakah Sudah\nSelesai?) then (Ya)
-:Simpan Sebagai\nDraft;
-else (Tidak)
-:Ajukan untuk\nPeninjauan;
-endif
 repeat
-:Input & Submit Data;
+:Submit Data;
 
 |SYSTEM|
   :Validasi Data;
@@ -72,15 +70,13 @@ repeat
 repeat while (Valid?)
 
 
-
 '================================================
 ' PAGE 3 – SAVE & RESULT
 '================================================
 |SYSTEM|
-:Simpan Data;
+:Mengubah Status Check Sheet;
+:Mengubah Note Check Sheet;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
-
-
+:Menutup Dialog Konfirmasi \nResolve;
 stop
 @enduml

@@ -1,0 +1,53 @@
+@startuml
+title Activity Diagram – Melihat Data Alarm Log
+
+'================================================
+' STYLING
+'================================================
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
+
+skinparam Padding 3
+skinparam PartitionHeaderFontStyle bold
+
+skinparam ArrowColor #2E2E2E
+skinparam ArrowThickness 2
+
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #7A7A7A
+
+skinparam StartColor #4CAF50
+skinparam EndColor #E53935
+
+skinparam DiamondBackgroundColor #FFF7CC
+skinparam DiamondBorderColor #C5A600
+
+!define ROLES Administrator
+!define SYSTEM #AntiqueWhite|System
+
+'================================================
+' PAGE 1 – ACCESS & MENU
+'================================================
+|ROLES|
+start
+:Login;
+:Pilih Menu\nAlarm Log;
+
+
+|SYSTEM|
+:Redirect ke Halaman\nDaftar Data;
+|SYSTEM|
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman\nDaftar Data;
+
+else (Tidak)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
+
+:Menampilkan Halaman\nDaftar Data;
+
+
+stop
+@enduml

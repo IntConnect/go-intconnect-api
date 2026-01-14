@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Melihat Data Role & User
+title Activity Diagram – Mengubah Data System Setting
 
 '================================================
 ' STYLING
@@ -32,23 +32,39 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu\nUser Management;
-:Pilih Menu Alarm Log;
-
+:Pilih System Setting;
+:Pilih Jenis Sytem Setting;
+if (Dashboard Setting?) then (Ya)
 
 |SYSTEM|
-:Redirect ke Halaman\nDaftar Data;
+|ROLES|
+elseif (Listener Settings)  then (Ya)
 |SYSTEM|
-if (Memiliki Akses?) then (Ya)
-:Menampilkan Halaman\nDaftar Data;
-
-else (Tidak)
-:Menampilkan Halaman
-401 Unauthorized;
+|ROLES|
+else (No)
+|ROLES|
+end
 endif
+|ROLES|
+:Menekan Tombol Manage;
+|SYSTEM|
+|ROLES|
+repeat
+:Mengisi Formulir;
+:Submit Data;
 
-:Menampilkan Halaman\nDaftar Data;
+|SYSTEM|
+  :Validasi Data;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?)
 
 
+'================================================
+' PAGE 3 – SAVE & RESULT
+'================================================
+|SYSTEM|
+:Simpan Data;
+:Menampilkan Pesan Sukses;
+:Redirect ke Halaman\nJenis Setting;
 stop
 @enduml

@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Membuat Data Check Sheet
+title Activity Diagram – Mengubah Data User Profile
 
 '================================================
 ' STYLING
@@ -23,7 +23,7 @@ skinparam EndColor #E53935
 skinparam DiamondBackgroundColor #FFF7CC
 skinparam DiamondBorderColor #C5A600
 
-!define ROLES Administrator\nOperator
+!define ROLES Administrator
 !define SYSTEM #AntiqueWhite|System
 
 '================================================
@@ -32,45 +32,24 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Sorot Menu\nDocument;
-:Pilih Menu\nCheck Sheet;
-:Pilih Aksi;
-
-if (Menambah Data?) then (Ya)
-:Tekan Tombol\nNew Check Sheet;
-
-|ROLES|
-elseif (Mengubah Data)  then (Ya)
-:Tekan Tombol\nEdit;
+:Sorot Menu User;
 note
-Tombol Dengan
-Icon Pencil
+Menu dengan
+Photo Profile
 endnote
+:Tekan Menu Profile;
 |SYSTEM|
-|ROLES|
-else (No)
-|ROLES|
-end
-endif
-
-|SYSTEM|
-:Redirect ke Halaman\nFormulir Pengisian\nCheck Sheet;
-|ROLES|
-:Mendefinisikan\nCheck Point;
-:Mengisi Nilai Pada\nSetiap Check Point;
-if (Apakah Sudah\nSelesai?) then (Ya)
-:Simpan Sebagai\nDraft;
-else (Tidak)
-:Ajukan untuk\nPeninjauan;
-endif
+:Redirect ke Halaman\nUser Profile;
 repeat
-:Input & Submit Data;
+|ROLES|
+:Mengubah Data;
+|ROLES|
+:Submit Data;
 
 |SYSTEM|
   :Validasi Data;
   backward:Menampilkan\nPesan Error;
 repeat while (Valid?)
-
 
 
 '================================================
@@ -79,8 +58,5 @@ repeat while (Valid?)
 |SYSTEM|
 :Simpan Data;
 :Menampilkan Pesan Sukses;
-:Redirect ke Halaman Daftar Data;
-
-
 stop
 @enduml
