@@ -1,0 +1,237 @@
+@startuml
+
+' Font configuration
+skinparam defaultFontName Times New Roman
+skinparam defaultFontSize 15
+
+' Participant styling
+skinparam participant {
+    BackgroundColor #ECF0F1
+    BorderColor #34495E
+    FontColor Black
+    FontName Times New Roman
+    FontSize 15
+}
+
+skinparam sequence {
+    ArrowColor #34495E
+    LifeLineBorderColor #34495E
+    LifeLineBackgroundColor #ECF0F1
+    ArrowFontName Times New Roman
+    ArrowFontSize 15
+}
+
+skinparam actorFontSize 15
+skinparam noteFontSize 15
+skinparam noteFontName "Times New Roman"
+
+' Actors and components
+actor "Administrator" as admin #E74C3C
+boundary "Edit Page" as boundEdit #3498DB
+control "Auth\nMiddleware" as authMiddleware #9B59B6
+control "Layer\nController" as controller #2ECC71
+control "Layer\nService" as service #F39C12
+control "Layer\nRepository" as repository #E67E22
+control "File\nService" as fileService #16A085
+database "Redis Cache" as dbRedis #C0392B
+database "PostgreSQL" as dbPsql #2980B9
+database "Local Storage" as localStorage #7F8C8D
+
+title
+<size:20><b>Sequence Diagram - Update Configuration Data</b></size>
+<size:14>(Facility, Machine, Parameter, Register)</size>
+----
+end title
+
+autonumber
+
+note over admin, localStorage
+    **Placeholder Mapping:**
+
+    <b><resource></b> = facility | machine | parameter | register
+    <b><Resource></b> = Facility | Machine | Parameter | Register
+    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
+    <b>{id}</b> = Resource Identifier (e.g., 1, 2, 3)
+
+    <b>Examples:</b>
+    • Facility  → GET/PUT {endpoint}/{id} = /facilities/1
+    • Machine   → GET/PUT {endpoint}/{id} = /machines/4
+    • Parameter → GET/PUT {endpoint}/{id} = /parameters/7
+    • Register  → GET/PUT {endpoint}/{id} = /registers/9
+end note
+
+' === FETCH EXISTING DATA ===
+admin -> boundEdit: Click Edit Button
+activate boundEdit
+
+boundEdit -> authMiddleware: GET {endpoint}/{id}
+activate authMiddleware
+
+authMiddleware -> dbRedis: Validate JWT Token
+activate dbRedis
+dbRedis --> authMiddleware: Token Status
+deactivate dbRedis
+
+alt #LightPink Unauthorized (401)
+    authMiddleware --> boundEdit: Authentication Failed
+    boundEdit --> admin: **Redirect to Login**
+    deactivate authMiddleware
+    deactivate boundEdit
+
+else #LightPink Forbidden (403)
+    authMiddleware --> boundEdit: Insufficient Permission
+    boundEdit --> admin: **Redirect to Forbidden Page**
+    deactivate authMiddleware
+    deactivate boundEdit
+
+else #LightGreen Authenticated
+
+    authMiddleware -> controller: Forward Request
+    deactivate authMiddleware
+    activate controller
+
+    controller -> controller: Parsing ID from Param
+    controller -> service: Forward Id
+    activate service
+
+    service -> repository: Find By Id
+    activate repository
+
+    repository -> dbPsql: Query Data By Id
+    activate dbPsql
+
+    alt #LightPink Data Not Found
+        dbPsql --> repository: No Data
+        deactivate dbPsql
+        repository --> service: nil
+        deactivate repository
+        service --> controller: 404 Not Found
+        controller --> boundEdit: Error Response
+        boundEdit --> admin: **Show Error Message**
+        deactivate service
+        deactivate controller
+        deactivate boundEdit
+
+    else #LightGreen Data Found
+        dbPsql --> repository: Existing  Data
+        deactivate dbPsql
+
+        repository --> service: <Resource> Entity
+        deactivate repository
+
+        service --> controller: Return <resource> Data
+        deactivate service
+
+        controller --> boundEdit: 200 OK + Data
+        deactivate controller
+
+        boundEdit --> admin: Display Edit Form\nwith Existing Data
+
+        ' === UPDATE PROCESS ===
+        admin -> boundEdit: Modify & Submit Data
+
+        boundEdit -> authMiddleware: PUT {endpoint}/{id}
+        activate authMiddleware
+
+        authMiddleware -> dbRedis: Validate JWT Token
+        activate dbRedis
+        dbRedis --> authMiddleware: Token Status
+        deactivate dbRedis
+
+        authMiddleware -> controller: Forward Request
+        deactivate authMiddleware
+        activate controller
+
+        controller -> controller: Validate Request
+
+        controller -> service: Process Update
+        activate service
+
+        service -> service: Business Validation\n(Duplication, Rules)
+
+        alt #LightPink Validation Failed
+            service --> controller: 422 Validation Error
+            controller --> boundEdit: Error Response
+            boundEdit --> admin: **Show Validation Error**
+            deactivate service
+            deactivate controller
+
+        else #LightGreen Validation Success
+
+            ' === FILE UPLOAD (if exists) ===
+            opt New File Uploaded
+                service -> fileService: Upload New File
+                activate fileService
+
+                fileService -> localStorage: Save New File
+                activate localStorage
+                localStorage --> fileService: New File Path
+                deactivate localStorage
+
+                fileService --> service: New File Path
+                deactivate fileService
+
+                ' Delete old file if exists
+                opt Old File Exists
+                    service -> fileService: Delete Old File
+                    activate fileService
+                    fileService -> localStorage: Delete Old File
+                    activate localStorage
+                    deactivate localStorage
+                    deactivate fileService
+                end
+            end
+
+            ' === UPDATE DATABASE ===
+            service -> repository: Update Data
+            activate repository
+
+            repository -> dbPsql: Update <resource> Data
+            activate dbPsql
+
+            alt #LightPink Database Error
+                dbPsql --> repository: SQLException
+                deactivate dbPsql
+
+                repository --> service: Database Error
+                service -> service: Parsing Error
+                deactivate repository
+
+                ' Rollback: Delete new file & restore old
+                opt New File Was Uploaded
+                    service -> fileService: Delete New File (Rollback)
+                    activate fileService
+                    fileService -> localStorage: Delete New File
+                    activate localStorage
+                    deactivate localStorage
+                    deactivate fileService
+                end
+
+                service --> controller: 500 Internal Server Error
+                controller --> boundEdit: Error Response
+                boundEdit --> admin: **Show Error Message**
+                deactivate service
+                deactivate controller
+
+            else #LightGreen Success
+                dbPsql --> repository: Success
+                deactivate dbPsql
+
+                repository --> service: Success
+                deactivate repository
+
+                service --> controller: Success Response
+                deactivate service
+
+                controller --> boundEdit: 200 OK
+                deactivate controller
+
+                boundEdit --> admin: **Show Success Message**
+                boundEdit --> admin: **Redirect to {endpoint}**
+                deactivate boundEdit
+            end
+        end
+    end
+end
+
+@enduml

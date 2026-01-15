@@ -1,0 +1,129 @@
+@startuml
+
+' Font configuration
+skinparam defaultFontName Times New Roman
+skinparam defaultFontSize 15
+
+' Participant styling
+skinparam participant {
+    BackgroundColor #ECF0F1
+    BorderColor #34495E
+    FontColor Black
+    FontName Times New Roman
+    FontSize 15
+}
+
+skinparam sequence {
+    ArrowColor #34495E
+    LifeLineBorderColor #34495E
+    LifeLineBackgroundColor #ECF0F1
+    ArrowFontName Times New Roman
+    ArrowFontSize 15
+}
+
+skinparam actorFontSize 15
+skinparam noteFontSize 15
+skinparam noteFontName "Times New Roman"
+
+' Actors and components
+actor "Administrator" as admin #E74C3C
+boundary "Edit Data\nPage" as boundEdit #3498DB
+control "Auth\nMiddleware" as authMiddleware #9B59B6
+control "Layer\nController" as controller #2ECC71
+control "Layer\nService" as service #F39C12
+control "Layer\nRepository" as repository #F39C12
+control "File\nService" as fileService #16A085
+database "Redis Cache" as dbRedis #C0392B
+database "PostgreSQL" as dbPsql #2980B9
+database "Local Storage" as localStorage #7F8C8D
+
+title
+<size:20><b>Sequence Diagram - Delete Configuration Data</b></size>
+<size:14>(Facility, Machine, Parameter, Register)</size>
+----
+end title
+
+autonumber
+
+note over admin, localStorage
+    **Generic Flow for:**
+    • Update Facility
+    • Update Machine
+    • Update Parameter
+    • Update Register
+end note
+
+' === FETCH EXISTING DATA ===
+admin -> boundEdit: Click Trash Button
+note over admin, boundEdit
+Tombol dengan Icon Trash
+end note
+activate boundEdit
+
+boundEdit -> authMiddleware: Send DELETE Request
+activate authMiddleware
+
+authMiddleware -> dbRedis: Validate JWT Token
+activate dbRedis
+dbRedis --> authMiddleware: Token Status
+deactivate dbRedis
+
+alt #LightPink Unauthorized 401
+    authMiddleware --> boundEdit: Authentication Failed
+    boundEdit --> admin: **Redirect to Login/Unauthorized Page**
+    deactivate authMiddleware
+    deactivate boundEdit
+
+else #LightGreen Authenticated
+
+    authMiddleware -> controller: Forward Request
+    deactivate authMiddleware
+    activate controller
+
+    controller -> controller: Parsing Id and Request
+    controller -> service: Forward Id and Request
+    activate service
+
+service -> service: Validate Request
+    service -> repository: Query Existing Data
+    repository -> dbPsql: Find By Id
+    activate dbPsql
+
+    alt #LightPink Data Not Found
+        dbPsql --> service: No Data
+        deactivate dbPsql
+        service --> controller: 404 Not Found
+        controller --> boundEdit: Error Response
+        boundEdit --> admin: **Show Error Message**
+        deactivate service
+        deactivate controller
+        deactivate boundEdit
+
+    else #LightGreen Data Found
+        dbPsql --> service: Existing Data
+        opt  File Exists
+                        service -> localStorage: Move File into Trash Folder
+        localStorage --> service: Return New Path
+                end
+
+        service -> repository: Delete
+        repository -> dbPsql: Update deleted_at
+        service -> repository: Query Data
+        repository -> dbPsql: Find Data with Pagination
+        repository --> service: Parsing Into Model
+        deactivate dbPsql
+
+        service --> controller: Parsing Into Response
+        deactivate service
+
+        controller --> boundEdit: 200 OK + Data
+        deactivate controller
+
+        boundEdit --> admin: Show Success Message
+        boundEdit --> admin: Render Data
+
+
+    end
+end
+
+@enduml

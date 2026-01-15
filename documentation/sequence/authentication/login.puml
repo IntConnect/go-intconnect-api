@@ -2,6 +2,7 @@
 
 ' Font configuration
 skinparam defaultFontName Times New Roman
+skinparam defaultFontSize 15
 
 ' Participant styling
 skinparam participant {
@@ -9,6 +10,7 @@ skinparam participant {
     BorderColor #34495E
     FontColor Black
     FontName Times New Roman
+    FontSize 15
 }
 
 skinparam sequence {
@@ -16,26 +18,12 @@ skinparam sequence {
     LifeLineBorderColor #34495E
     LifeLineBackgroundColor #ECF0F1
     ArrowFontName Times New Roman
-    ArrowFontSize 112
+    ArrowFontSize 15
 }
 
-' === GLOBAL FONT SIZE (+2) ===
-skinparam defaultFontSize 15
-
 skinparam actorFontSize 15
-skinparam participantFontSize 15
-
-skinparam sequenceMessageFontSize 15
-skinparam sequenceMessageFontName "Times New Roman"
-
 skinparam noteFontSize 15
 skinparam noteFontName "Times New Roman"
-
-skinparam titleFontSize 2
-skinparam titleFontName "Times New Roman"
-
-skinparam  arrowFontSize 20
-
 
 ' Actors and components
 actor "Administrator" as admin #E74C3C
@@ -46,9 +34,8 @@ actor "Operator" as op #9B59B6
 boundary "Login Page" as boundLogin #3498DB
 control "User\nController" as userController #2ECC71
 control "User\nService" as userService #F39C12
-control "User\nRepository" as userRepository #E67E22
-database "Redis" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
+database "Redis Cache" as dbRedis #C0392B
 
 title
 <size:20><b>Sequence Diagram - Login</b></size>
@@ -61,126 +48,63 @@ autonumber
 admin -> boundLogin: Enter Credentials
 activate boundLogin
 
-boundLogin -> userController: Send Request
+boundLogin -> userController: POST /login
 activate userController
 
-' === REQUEST VALIDATION ===
-userController -> userController: Validate Request\n(Required Fields, Format)
+userController -> userController: Validate Request
 
-alt #LightPink Invalid Request
-    userController --> boundLogin: Return 400 Bad Request
-    boundLogin --> admin: **Show Validation Error**
-    deactivate userController
-    deactivate boundLogin
+userController -> userService: Authenticate User
+activate userService
 
-else #LightGreen Valid Request
+' === FIND USER ===
+userService -> dbPsql: Find User by\nUsername/Email
+activate dbPsql
+dbPsql --> userService: User Data
+deactivate dbPsql
 
-    userController -> userService: Parse & Authenticate user
-    activate userService
+' === ERROR SCENARIOS ===
+alt #LightPink User Not Found
+    userService --> userController: 404 User Not Found
+    userController --> boundLogin: Error Response
+    boundLogin --> admin: **Show Error Message**
+  
 
-    ' === FIND USER IN DATABASE ===
-    userService -> userRepository: Find by Username or Email
-    activate userRepository
+else #LightPink Invalid Credentials
+    userService -> userService: Verify Password
+    userService --> userController: 401 Unauthorized
+    userController --> boundLogin: Error Response
+    boundLogin --> admin: **Show Error Message**
 
-    userRepository -> dbPsql: Query Data
+else #LightPink User Inactive/Suspended
+    userService -> userService: Check User Status
+    userService --> userController: 403 Forbidden
+    userController --> boundLogin: Error Response
+    boundLogin --> admin: **Show Account Status Error**
+
+else #LightGreen Success
+    ' === AUTHENTICATION SUCCESS ===
+    userService -> userService: Generate JWT Token
+
+    userService -> dbRedis: Store Token
+    activate dbRedis
+    dbRedis --> userService: OK
+    deactivate dbRedis
+
+    userService -> dbPsql: Update Last Login
     activate dbPsql
-    dbPsql --> userRepository: Return User Data / Error
+    dbPsql --> userService: OK
     deactivate dbPsql
 
-    userRepository --> userService: Return User Entity
-    deactivate userRepository
+    userService --> userController: Token & User Data
+    deactivate userService
 
-    ' === USER VALIDATION ===
-    alt #LightPink User Not Found
-        userService --> userController: Throw UserNotFoundException
-        deactivate userService
-        userController --> boundLogin: Return 404 Not Found
-        boundLogin --> admin: **Show Error Message**
-        deactivate userController
-        deactivate boundLogin
+    userController --> boundLogin: 200 OK + Token
+    deactivate userController
 
-    else #LightYellow User Found
+    boundLogin -> boundLogin: Store Token in Cookie
+    boundLogin --> admin: **Redirect to Dashboard**
+    deactivate boundLogin
 
-        ' === PASSWORD VERIFICATION ===
-        userService -> userService: Verify Password\n(Hash Comparison)
-
-        alt #LightPink Invalid Password
-            userService --> userController: Throw InvalidCredentialsException
-            deactivate userService
-            userController --> boundLogin: Return 401 Unauthorized
-            boundLogin --> admin: **Show Error Message**
-            deactivate userController
-            deactivate boundLogin
-
-        else #LightYellow Password Valid
-
-            ' === CHECK USER STATUS ===
-            userService -> userService: Check User Status\n(Active/Inactive/Suspended)
-
-            alt #LightPink User Inactive/Suspended
-                userService --> userController: Throw UserInactiveException
-                deactivate userService
-                userController --> boundLogin: Return 403 Forbidden
-                boundLogin --> admin: **Show Account Status Error**
-                deactivate userController
-                deactivate boundLogin
-
-            else #LightGreen User Active
-
-                ' === GENERATE JWT TOKEN ===
-                userService -> userService: Generate JWT Token
-
-                note right of userService
-                    Token contains:
-                    - User Id
-                    - Email/Username
-                    - Name
-                    - Role Id
-                    - Role Name
-                    - Expiry Time
-                end note
-
-                ' === SAVE TOKEN TO REDIS ===
-                userService -> dbRedis: Save Token
-                activate dbRedis
-
-                alt #LightPink Redis Error
-                    dbRedis --> userService: Connection Error
-                    deactivate dbRedis
-                    userService --> userController: Throw CacheException
-                    deactivate userService
-                    userController --> boundLogin: Return 500 Internal Server Error
-                    boundLogin --> admin: **Show Error Message**
-                    deactivate userController
-                    deactivate boundLogin
-
-                else #LightGreen Token Saved
-                    dbRedis --> userService: Token Stored Successfully
-
-                    ' === UPDATE LAST LOGIN ===
-                    userService -> userRepository: Set Last Login
-                    activate userRepository
-                    userRepository -> dbPsql: Update Last Login
-                    activate dbPsql
-                    dbPsql --> userRepository: Return Error State
-                    deactivate dbPsql
-                    deactivate userRepository
-
-                    ' === RETURN SUCCESS RESPONSE ===
-                    userService --> userController: Return Token
-                    deactivate userService
-
-                    userController --> boundLogin: Return 200 OK
-                    deactivate userController
-
-                    boundLogin --> admin: **Store Token in Cookie**
-                    boundLogin --> admin: **Redirect to Dashboard**
-                    deactivate boundLogin
-
-                end
-            end
-        end
-    end
 end
 
 @enduml

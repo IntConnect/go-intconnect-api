@@ -1,0 +1,75 @@
+@startuml
+
+' Font configuration
+skinparam defaultFontName Times New Roman
+skinparam defaultFontSize 15
+
+' Participant styling
+skinparam participant {
+    BackgroundColor #ECF0F1
+    BorderColor #34495E
+    FontColor Black
+    FontName Times New Roman
+    FontSize 15
+}
+
+skinparam sequence {
+    ArrowColor #34495E
+    LifeLineBorderColor #34495E
+    LifeLineBackgroundColor #ECF0F1
+    ArrowFontName Times New Roman
+    ArrowFontSize 15
+}
+
+skinparam actorFontSize 15
+skinparam noteFontSize 15
+skinparam noteFontName "Times New Roman"
+
+' Actors and components
+actor "Administrator" as admin #E74C3C
+actor "Manager" as mgr #3498DB
+actor "Supervisor" as spv #2ECC71
+actor "Maintenance" as mtn #F39C12
+actor "Operator" as op #9B59B6
+boundary "Logout Button" as boundLogout #3498DB
+control "Auth\nMiddleware" as authMiddleware #2ECC71
+control "User\nController" as userController #2ECC71
+control "User\nService" as userService #F39C12
+database "Redis Cache" as dbRedis #C0392B
+
+title
+<size:15><b>Sequence Diagram - Logout</b></size>
+----
+end title
+
+autonumber
+
+' === MAIN FLOW ===
+admin -> boundLogout: Press Logout Button
+activate boundLogout
+
+boundLogout -> authMiddleware: GET /logout
+
+activate authMiddleware
+authMiddleware->authMiddleware: Validate Permission
+
+alt #LightPink Insufficient Permission
+    authMiddleware->admin: Redirect Into 401 Page
+    authMiddleware->admin: Show Error Message
+else #LightGreen Success
+deactivate authMiddleware
+activate userController
+userController -> userService: Forward Request
+activate userService
+
+' === FIND USER ===
+userService -> dbRedis: Delete Token
+userService -> userController: Return nil
+deactivate userService
+userController -> admin:  **Redirect to Dashboard**
+deactivate userController
+deactivate boundLogout
+
+end
+
+@enduml

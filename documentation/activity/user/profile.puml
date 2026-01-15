@@ -23,7 +23,7 @@ skinparam EndColor #E53935
 skinparam DiamondBackgroundColor #FFF7CC
 skinparam DiamondBorderColor #C5A600
 
-!define ROLES Administrator
+!define ROLES Administrator\nMaintenance\nSupervisor\nOperator\nManager
 !define SYSTEM #AntiqueWhite|System
 
 '================================================

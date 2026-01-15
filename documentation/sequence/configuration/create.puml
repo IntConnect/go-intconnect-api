@@ -1,0 +1,172 @@
+@startuml
+
+' Font configuration
+skinparam defaultFontName Times New Roman
+skinparam defaultFontSize 15
+
+' Participant styling
+skinparam participant {
+    BackgroundColor #ECF0F1
+    BorderColor #34495E
+    FontColor Black
+    FontName Times New Roman
+    FontSize 15
+}
+
+skinparam sequence {
+    ArrowColor #34495E
+    LifeLineBorderColor #34495E
+    LifeLineBackgroundColor #ECF0F1
+    ArrowFontName Times New Roman
+    ArrowFontSize 15
+}
+
+skinparam actorFontSize 15
+skinparam noteFontSize 15
+skinparam noteFontName "Times New Roman"
+
+' Actors and components
+actor "Administrator" as admin #E74C3C
+boundary "Create Page" as boundCreate #3498DB
+control "Auth\nMiddleware" as authMiddleware #9B59B6
+control "Layer\nController" as controller #2ECC71
+control "Layer\nService" as service #F39C12
+control "Layer\nRepository" as repository #E67E22
+control "File\nService" as fileService #16A085
+database "Redis Cache" as dbRedis #C0392B
+database "PostgreSQL" as dbPsql #2980B9
+database "Local Storage" as localStorage #7F8C8D
+
+title
+<size:20><b>Sequence Diagram - Create Configuration Data</b></size>
+<size:14>(Generic Flow for Multiple Resources)</size>
+----
+end title
+
+autonumber
+
+note over admin, localStorage
+    **Placeholder Mapping:**
+
+    <b><resource></b> = facility | machine | parameter | register
+    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
+
+    <b>Examples:</b>
+    • Facility  → POST /facilities
+    • Machine   → POST /machines
+    • Parameter → POST /parameters
+    • Register  → POST /registers
+end note
+
+' === MAIN FLOW ===
+admin -> boundCreate: Input <resource> Data
+activate boundCreate
+
+boundCreate -> authMiddleware: POST {endpoint}
+activate authMiddleware
+
+' === AUTHENTICATION ===
+authMiddleware -> dbRedis: Validate JWT Token
+activate dbRedis
+dbRedis --> authMiddleware: Token Status
+deactivate dbRedis
+
+alt #LightPink Unauthorized (401)
+    authMiddleware --> boundCreate: Authentication Failed
+    boundCreate --> admin: **Redirect to Login**
+    deactivate authMiddleware
+    deactivate boundCreate
+else #LightPink Forbidden (403)
+    authMiddleware --> boundCreate: Insufficient Permission
+    boundCreate --> admin: **Redirect to Forbidden Page**
+    deactivate authMiddleware
+    deactivate boundCreate
+else #LightGreen Authenticated
+
+    authMiddleware -> controller: Forward Request
+    deactivate authMiddleware
+    activate controller
+
+    ' === VALIDATION ===
+    controller -> controller: Validate Request
+
+    controller -> service: Process Create <resource>
+    activate service
+
+    service -> service: Business Validation\n(Duplication, Rules)
+
+    alt #LightPink Validation Failed
+        service --> controller: 422 Validation Error
+        controller --> boundCreate: Error Response
+        boundCreate --> admin: **Show Validation Error**
+        deactivate service
+        deactivate controller
+        deactivate boundCreate
+
+    else #LightGreen Validation Success
+
+        ' === FILE UPLOAD (if exists) ===
+        opt File Uploaded
+            service -> fileService: Upload File
+            activate fileService
+
+            fileService -> localStorage: Save File
+            activate localStorage
+            localStorage --> fileService: File Path
+            deactivate localStorage
+
+            fileService --> service: File Path
+            deactivate fileService
+        end
+
+        ' === SAVE TO DATABASE ===
+        service -> repository: Save <resource>
+        activate repository
+
+        repository -> dbPsql: Store <resource> Data
+        activate dbPsql
+
+        alt #LightPink Database Error
+            dbPsql --> repository: SQLException
+            deactivate dbPsql
+            repository --> service: Database Error
+            deactivate repository
+
+            ' Rollback: Delete uploaded file
+            opt File Was Uploaded
+                service -> fileService: Delete File (Rollback)
+                activate fileService
+                fileService -> localStorage: Delete File
+                activate localStorage
+                deactivate localStorage
+                deactivate fileService
+            end
+
+            service --> controller: 500 Internal Server Error
+            controller --> boundCreate: Error Response
+            boundCreate --> admin: **Show Error Message**
+            deactivate service
+            deactivate controller
+            deactivate boundCreate
+
+        else #LightGreen Success
+            dbPsql --> repository: Success
+            deactivate dbPsql
+
+            repository --> service: Success
+            deactivate repository
+
+            service --> controller: Success Response
+            deactivate service
+
+            controller --> boundCreate: 201 Created
+            deactivate controller
+
+            boundCreate --> admin: **Show Success Message**
+            boundCreate --> admin: **Redirect to {endpoint}**
+            deactivate boundCreate
+        end
+    end
+end
+
+@enduml
