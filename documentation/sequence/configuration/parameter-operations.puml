@@ -28,6 +28,7 @@ skinparam noteFontName "Times New Roman"
 ' Actors and components
 actor "Administrator" as admin #E74C3C
 boundary "List Data\nPage" as boundListData #3498DB
+boundary "Dialog Edit" as boundEdit #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Layer\nController" as controller #2ECC71
 control "Layer\nService" as service #F39C12
@@ -35,31 +36,25 @@ control "Layer\nRepository" as repository #F39C12
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Delete Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - Delete Parameter Operations Data</b></size>
 ----
 end title
 
 autonumber
 
-note over admin, localStorage
-    **Placeholder Mapping:**
 
-    <b><resource></b> = facility | machine | parameter | register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
-end note
 
 ' === FETCH EXISTING DATA ===
-admin -> boundListData: Click Trash Button
+admin -> boundListData: Click Operations Button
 note over admin, boundListData
-Tombol dengan Icon Trash
+Tombol dengan Icon Math
 end note
 activate boundListData
+boundListData -> boundEdit: Mengisi Tipe Operasi\ndan Nilai Operand
 
-boundListData -> authMiddleware: DELETE {endpoint}
+boundEdit -> authMiddleware: POST /parameters/operation/{id}
 activate authMiddleware
 
 authMiddleware -> dbRedis: Validate JWT Token
@@ -84,7 +79,7 @@ else #LightGreen Authenticated
     activate controller
 
     controller -> controller: Parsing Id and Request
-    controller -> service: Delete <resource>
+    controller -> service: Update Parameter Operation
     activate service
 
 service -> service: Validate Request
@@ -104,17 +99,31 @@ service -> service: Validate Request
 
     else #LightGreen Data Found
         dbPsql --> service: Existing Data
-        opt  File Exists
-                        service -> localStorage: Move File into Trash Folder
-        localStorage --> service: Return New Path
-        service -> service: Update File Path
-        end
 
-        service -> repository: Delete By Id
-        repository -> dbPsql: Update deleted_at
-        service -> repository: Query Data
-        repository -> dbPsql: Find Data with Pagination
-        repository --> service: Parsing Into Model
+
+        service -> repository: Create New Parameter
+        repository -> dbPsql: Store New Parameter
+        dbPsql --> service: Return nil
+         service -> repository: Update Existing Parameter
+        repository -> dbPsql: Update By Id
+        dbPsql --> service: Return nil
+ opt Has Delete Parameter Request
+         service -> repository: Delete Parameter
+        repository -> dbPsql: Delete Existing Parameter By Id
+        dbPsql --> service: Return nil
+end
+
+        service -> service: Record Audit Log
+                    service -> repository: Find All Data
+                    activate repository
+
+                    repository -> dbPsql: Query Check Sheet Data\n(Pagination, Filter, Sort)
+                    activate dbPsql
+                    dbPsql --> repository: Data Result
+
+deactivate dbPsql
+                  repository --> service: Return Parameter List
+                    deactivate repository
         deactivate dbPsql
 
         service --> controller: Parsing Into Response

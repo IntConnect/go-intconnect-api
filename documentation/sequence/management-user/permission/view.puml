@@ -36,8 +36,7 @@ database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
 
 title
-<size:20><b>Sequence Diagram - Read Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - View Permission Data</b></size>
 ----
 end title
 
@@ -45,11 +44,9 @@ autonumber
 
 note over admin, dbPsql
     **Placeholder Mapping:**
-    
-    <b><resource></b> = facility | machine | parameter | register
-    <b><Resource></b> = Facility | Machine | Parameter | Register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
 
+    <b><resource></b> = user | role
+    <b>{endpoint}</b> = /users | /roles
 end note
 
 ' === MAIN FLOW ===

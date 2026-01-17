@@ -35,25 +35,17 @@ control "Layer\nRepository" as repository #E67E22
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Update Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - Create Check Sheet Data</b></size>
 ----
 end title
 
 autonumber
 
-note over admin, localStorage
-    **Placeholder Mapping:**
-
-    <b><resource></b> = facility | machine | parameter | register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
-end note
 
 ' === MAIN FLOW ===
-admin -> boundCreate: Input <resource> Data
+admin -> boundCreate: Input Check Sheet Data
 activate boundCreate
 
 boundCreate -> authMiddleware: POST {endpoint}
@@ -70,12 +62,12 @@ alt #LightPink Unauthorized (401)
     boundCreate --> admin: **Redirect to Login**
     deactivate authMiddleware
     deactivate boundCreate
-else #LightPink Forbidden (403)
-    authMiddleware --> boundCreate: Insufficient Permission
-    boundCreate --> admin: **Redirect to Forbidden Page**
-    deactivate authMiddleware
-    deactivate boundCreate
-else #LightGreen Authenticated
+    else #LightPink Forbidden (403)
+        authMiddleware --> boundCreate: Insufficient Permission
+        boundCreate --> admin: **Redirect to Forbidden Page**
+        deactivate authMiddleware
+        deactivate boundCreate
+    else #LightGreen Authenticated
 
     authMiddleware -> controller: Forward Request
     deactivate authMiddleware
@@ -83,7 +75,7 @@ else #LightGreen Authenticated
 
     ' === VALIDATION ===
     controller -> controller: Parsing Request
-    controller -> service: Process Create <resource>
+    controller -> service: Process Create Check Sheet
     activate service
 
     service -> service: Business Validation\n(Duplication, Rules)
@@ -98,25 +90,13 @@ else #LightGreen Authenticated
 
     else #LightGreen Validation Success
 
-        ' === FILE UPLOAD (if exists) ===
-        opt File Uploaded
-            service -> fileService: Upload File
-            activate fileService
 
-            fileService -> localStorage: Save File
-            activate localStorage
-            localStorage --> fileService: File Path
-            deactivate localStorage
-
-            fileService --> service: File Path
-            deactivate fileService
-        end
 
         ' === SAVE TO DATABASE ===
-        service -> repository: Save <resource>
+        service -> repository: Save Check Sheet
         activate repository
 
-        repository -> dbPsql: Store <resource> Data
+        repository -> dbPsql: Store Check Sheet Data
         activate dbPsql
 
         alt #LightPink Database Error
@@ -125,15 +105,7 @@ else #LightGreen Authenticated
             repository --> service: Database Error
             deactivate repository
 
-            ' Rollback: Delete uploaded file
-            opt File Was Uploaded
-                service -> fileService: Delete File (Rollback)
-                activate fileService
-                fileService -> localStorage: Delete File
-                activate localStorage
-                deactivate localStorage
-                deactivate fileService
-            end
+
 
             service --> controller: 500 Internal Server Error
             controller --> boundCreate: Error Response
@@ -146,19 +118,28 @@ else #LightGreen Authenticated
             dbPsql --> repository: Success
             deactivate dbPsql
 
-            repository --> service: Success
-            deactivate repository
+             service -> service: Record Audit Log
+                    service -> repository: Find All Data
+                    activate repository
 
-            service --> controller: Success Response
-            deactivate service
+                    repository -> dbPsql: Query Check Sheet Data\n(Pagination, Filter, Sort)
+                    activate dbPsql
+                    dbPsql --> repository: Data Result
+deactivate dbPsql
 
-            controller --> boundCreate: 200 Created
-            deactivate controller
+                  repository --> service: Return Check Sheet List
+                    deactivate repository
 
-            boundCreate --> admin: **Show Success Message**
-            boundCreate --> admin: **Redirect to {endpoint}**
-            deactivate boundCreate
-        end
+                    deactivate dbPsql
+                    service --> controller: Return Data List
+
+                    deactivate service
+                        controller --> boundCreate: 200 OK + Data
+                    deactivate controller
+                    boundCreate --> admin: **Display Check Sheet List**
+                    deactivate boundCreate
+
+                end
     end
 end
 

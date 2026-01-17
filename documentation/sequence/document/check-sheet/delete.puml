@@ -35,22 +35,15 @@ control "Layer\nRepository" as repository #F39C12
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorage #7F8C8D
+database "Local Storage" as localStorge #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Delete Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - Delete Check Sheet Data</b></size>
 ----
 end title
 
 autonumber
 
-note over admin, localStorage
-    **Placeholder Mapping:**
-
-    <b><resource></b> = facility | machine | parameter | register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
-end note
 
 ' === FETCH EXISTING DATA ===
 admin -> boundListData: Click Trash Button
@@ -59,7 +52,7 @@ Tombol dengan Icon Trash
 end note
 activate boundListData
 
-boundListData -> authMiddleware: DELETE {endpoint}
+boundListData -> authMiddleware: POST /check-sheets
 activate authMiddleware
 
 authMiddleware -> dbRedis: Validate JWT Token
@@ -94,7 +87,6 @@ service -> service: Validate Request
 
     alt #LightPink Data Not Found
         dbPsql --> service: No Data
-        deactivate dbPsql
         service --> controller: 404 Not Found
         controller --> boundListData: Error Response
         boundListData --> admin: **Show Error Message**
@@ -104,30 +96,42 @@ service -> service: Validate Request
 
     else #LightGreen Data Found
         dbPsql --> service: Existing Data
-        opt  File Exists
-                        service -> localStorage: Move File into Trash Folder
-        localStorage --> service: Return New Path
-        service -> service: Update File Path
-        end
-
-        service -> repository: Delete By Id
-        repository -> dbPsql: Update deleted_at
-        service -> repository: Query Data
-        repository -> dbPsql: Find Data with Pagination
-        repository --> service: Parsing Into Model
         deactivate dbPsql
 
-        service --> controller: Parsing Into Response
-        deactivate service
 
-        controller --> boundListData: Return Data
-        deactivate controller
+            service -> repository: Delete By Id
+            activate service
+            activate repository
+            repository -> dbPsql: Update deleted_at
+             activate dbPsql
 
-        boundListData --> admin: Show Success Message
-        boundListData --> admin: Render Data
+            dbPsql --> repository: Success
+            deactivate dbPsql
+            repository --> service: Return nil
+            deactivate repository
 
+            service -> service: Record Audit Log
+                    service -> repository: Find All Data
+                    activate repository
 
-    end
+                    repository -> dbPsql: Query Check Sheet Data\n(Pagination, Filter, Sort)
+                    activate dbPsql
+                    dbPsql --> repository: Data Result
+deactivate dbPsql
+
+                  repository --> service: Return Check Sheet List
+                    deactivate repository
+
+                    deactivate dbPsql
+                    service --> controller: Return Data List
+
+                    deactivate service
+                        controller --> boundListData: 200 OK + Data
+                    deactivate controller
+                    boundListData --> admin: **Display Check Sheet List**
+                    deactivate boundListData
+
+                end
 end
 
 @enduml

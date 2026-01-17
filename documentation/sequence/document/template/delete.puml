@@ -38,8 +38,8 @@ database "PostgreSQL" as dbPsql #2980B9
 database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Delete Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - Create Role & User Data</b></size>
+<size:14>(Role, User)</size>
 ----
 end title
 
@@ -48,10 +48,9 @@ autonumber
 note over admin, localStorage
     **Placeholder Mapping:**
 
-    <b><resource></b> = facility | machine | parameter | register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
+    <b><resource></b> = user | role
+    <b>{endpoint}</b> = /users | /roles
 end note
-
 ' === FETCH EXISTING DATA ===
 admin -> boundListData: Click Trash Button
 note over admin, boundListData
@@ -59,7 +58,7 @@ Tombol dengan Icon Trash
 end note
 activate boundListData
 
-boundListData -> authMiddleware: DELETE {endpoint}
+boundListData -> authMiddleware: POST {endpoint}
 activate authMiddleware
 
 authMiddleware -> dbRedis: Validate JWT Token
@@ -104,11 +103,7 @@ service -> service: Validate Request
 
     else #LightGreen Data Found
         dbPsql --> service: Existing Data
-        opt  File Exists
-                        service -> localStorage: Move File into Trash Folder
-        localStorage --> service: Return New Path
-        service -> service: Update File Path
-        end
+
 
         service -> repository: Delete By Id
         repository -> dbPsql: Update deleted_at

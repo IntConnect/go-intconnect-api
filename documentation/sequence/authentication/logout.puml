@@ -51,24 +51,30 @@ activate boundLogout
 boundLogout -> authMiddleware: GET /logout
 
 activate authMiddleware
-authMiddleware->authMiddleware: Validate Permission
+authMiddleware->authMiddleware: Validate Token
 
-alt #LightPink Insufficient Permission
-    authMiddleware->admin: Redirect Into 401 Page
-    authMiddleware->admin: Show Error Message
-else #LightGreen Success
-deactivate authMiddleware
-activate userController
-userController -> userService: Forward Request
-activate userService
+alt #LightPink Unauthorized (401)
+    authMiddleware --> boundLogout: Authentication Failed
+    boundLogout --> admin: **Redirect to Login**
+    else #LightGreen Success
+    authMiddleware -> userController: Forward Request
+    deactivate authMiddleware
+   activate userController
+    userController -> userService: Forward Request
+    activate userService
+    userService -> userService: Parsing Id\nFrom Token
+   userService -> dbRedis: Delete Token
+   deactivate userService
+    userService -> userController: Return nil
+    deactivate userService
+    userController -> admin:  **Redirect to Dashboard**
+    deactivate boundLogout
+deactivate userController
+    activate userService
+
 
 ' === FIND USER ===
-userService -> dbRedis: Delete Token
-userService -> userController: Return nil
-deactivate userService
-userController -> admin:  **Redirect to Dashboard**
-deactivate userController
-deactivate boundLogout
+
 
 end
 

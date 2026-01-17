@@ -27,7 +27,7 @@ skinparam noteFontName "Times New Roman"
 
 ' Actors and components
 actor "Administrator" as admin #E74C3C
-boundary "<resource> List\nPage" as boundList #3498DB
+boundary "Check Sheet List\nPage" as boundList #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Layer\nController" as controller #2ECC71
 control "Layer\nService" as service #F39C12
@@ -36,24 +36,15 @@ database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
 
 title
-<size:20><b>Sequence Diagram - Read Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - View Check Sheet Data</b></size>
 ----
 end title
 
 autonumber
 
-note over admin, dbPsql
-    **Placeholder Mapping:**
-    
-    <b><resource></b> = facility | machine | parameter | register
-    <b><Resource></b> = Facility | Machine | Parameter | Register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
-
-end note
 
 ' === MAIN FLOW ===
-admin -> boundList: Access <resource> List Page
+admin -> boundList: Access Check Sheet List Page
 activate boundList
 
 boundList -> authMiddleware: GET {endpoint}
@@ -83,19 +74,19 @@ else #LightGreen Authenticated
     deactivate authMiddleware
     activate controller
 
-    controller -> service: Get <resource> List
+    controller -> service: Get Check Sheet List
     activate service
 
     ' === FETCH DATA FROM DATABASE ===
     service -> repository: Find All with Filters
     activate repository
     
-    repository -> dbPsql: Query <resource> Data\n(Pagination, Filter, Sort)
+    repository -> dbPsql: Query Check Sheet Data\n(Pagination, Filter, Sort)
     activate dbPsql
     dbPsql --> repository: Data Result
     deactivate dbPsql
     
-    repository --> service: Return <resource> List
+    repository --> service: Return Check Sheet List
     deactivate repository
 
     service --> controller: Return Data List
@@ -104,7 +95,7 @@ else #LightGreen Authenticated
     controller --> boundList: 200 OK + Data
     deactivate controller
 
-    boundList --> admin: **Display <resource> List**
+    boundList --> admin: **Display Check Sheet List**
     deactivate boundList
 
 end

@@ -36,8 +36,8 @@ database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
 
 title
-<size:20><b>Sequence Diagram - Read Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - Read Connection Data</b></size>
+<size:14>(MQTT Broker, MQTT Topic, SMTP Server, Modbus Server)</size>
 ----
 end title
 
@@ -45,11 +45,9 @@ autonumber
 
 note over admin, dbPsql
     **Placeholder Mapping:**
-    
-    <b><resource></b> = facility | machine | parameter | register
-    <b><Resource></b> = Facility | Machine | Parameter | Register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
 
+    <b><resource></b> = mqtt-broker | mqtt-topic | smtp-server | modbus-server
+    <b>{endpoint}</b> = /mqtt-brokers | /mqtt-topics | /smtp-servers | /modbus-servers
 end note
 
 ' === MAIN FLOW ===

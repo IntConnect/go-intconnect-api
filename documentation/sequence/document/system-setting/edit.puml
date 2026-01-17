@@ -38,27 +38,22 @@ database "PostgreSQL" as dbPsql #2980B9
 database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Update Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - Update System Setting Data</b></size>
 ----
 end title
 
 autonumber
-
 note over admin, localStorage
     **Placeholder Mapping:**
 
-    <b><resource></b> = facility | machine | parameter | register
-    <b><Resource></b> = Facility | Machine | Parameter | Register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
-    <b>{id}</b> = Resource Identifier (e.g., 1, 2, 3)
+    <b>{KEY}</b> = DASHBOARD_SETTINGS | LISTENER_SETTINGS
 end note
 
 ' === FETCH EXISTING DATA ===
 admin -> boundEdit: Click Edit Button
 activate boundEdit
 
-boundEdit -> authMiddleware: GET {endpoint}/{id}
+boundEdit -> authMiddleware: GET system-settings/{KEY}
 activate authMiddleware
 
 authMiddleware -> dbRedis: Validate JWT Token
@@ -110,10 +105,10 @@ else #LightGreen Authenticated
         dbPsql --> repository: Existing  Data
         deactivate dbPsql
 
-        repository --> service: <Resource> Entity
+        repository --> service: System Setting Entity
         deactivate repository
 
-        service --> controller: Return <resource> Data
+        service --> controller: Return System Setting Data
         deactivate service
 
         controller --> boundEdit: Return Data
@@ -124,7 +119,7 @@ else #LightGreen Authenticated
         ' === UPDATE PROCESS ===
         admin -> boundEdit: Modify & Submit Data
 
-        boundEdit -> authMiddleware: PUT {endpoint}/{id}
+        boundEdit -> authMiddleware: PUT system-settings/{id}
         activate authMiddleware
 
         authMiddleware -> dbRedis: Validate JWT Token
@@ -180,7 +175,7 @@ else #LightGreen Authenticated
             service -> repository: Update Data
             activate repository
 
-            repository -> dbPsql: Update <resource> Data
+            repository -> dbPsql: Update System Setting Data
             activate dbPsql
 
             alt #LightPink Database Error
@@ -221,7 +216,7 @@ else #LightGreen Authenticated
                 deactivate controller
 
                 boundEdit --> admin: **Show Success Message**
-                boundEdit --> admin: **Redirect to {endpoint}**
+                boundEdit --> admin: **Redirect to system-settings**
                 deactivate boundEdit
             end
         end

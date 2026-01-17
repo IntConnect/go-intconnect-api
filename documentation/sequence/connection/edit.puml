@@ -39,7 +39,7 @@ database "Local Storage" as localStorage #7F8C8D
 
 title
 <size:20><b>Sequence Diagram - Update Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:14>(MQTT Broker, MQTT Topic, SMTP Server, Modbus Server)</size>
 ----
 end title
 
@@ -48,12 +48,10 @@ autonumber
 note over admin, localStorage
     **Placeholder Mapping:**
 
-    <b><resource></b> = facility | machine | parameter | register
-    <b><Resource></b> = Facility | Machine | Parameter | Register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
+    <b><resource></b> = mqtt-broker | mqtt-topic | smtp-server | modbus-server
+    <b>{endpoint}</b> = /mqtt-brokers | /mqtt-topics | /smtp-servers | /modbus-servers
     <b>{id}</b> = Resource Identifier (e.g., 1, 2, 3)
 end note
-
 ' === FETCH EXISTING DATA ===
 admin -> boundEdit: Click Edit Button
 activate boundEdit

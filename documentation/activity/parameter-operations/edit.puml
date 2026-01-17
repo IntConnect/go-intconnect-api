@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Melihat Machine Dashboard
+title Activity Diagram – Mengubah Parameter Operation
 
 '================================================
 ' STYLING
@@ -33,28 +33,29 @@ skinparam DiamondBorderColor #C5A600
 start
 :Login;
 :Sorot Menu\nConfiguration;
-:Pilih Menu\nMachine;
-|SYSTEM|
-if (Memiliki Akses?) then (Ya)
-:Menampilkan Halaman\nDaftar Data;
-
-else (Tidak)
-:Menampilkan Halaman
-401 Unauthorized;
-endif
-
-:Redirect ke Halaman\nMachine Dashboard;
-|ROLES|
-:Menekan Tombol Dashboard;
+:Pilih Menu\nParameter;
+:Menekan Tombol Operations;
 note
 Tombol dengan
-Icon Gauge
+Icon Math
 endnote
-|SYSTEM|
-:Menampilkan Halaman\nDashboard Machine;
 
 |SYSTEM|
+:Menampilkan Dialog\nPengaturan Operations;
+|ROLES|
+:Memilih Tipe Operasi;
+:Mengisi Nilai Operand;
+repeat
+:Menekan Tombol\nSubmit;
 
+|SYSTEM|
+  :Validasi Data;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?)
+|SYSTEM|
 
+:Menyimpan Data;
+:Menampilkan Pesan Sukses;
+:Menutup Dialog;
 stop
 @enduml

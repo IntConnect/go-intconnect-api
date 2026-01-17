@@ -38,8 +38,8 @@ database "PostgreSQL" as dbPsql #2980B9
 database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Update Configuration Data</b></size>
-<size:14>(Facility, Machine, Parameter, Register)</size>
+<size:20><b>Sequence Diagram - Create Role & User Data</b></size>
+<size:14>(Role, User)</size>
 ----
 end title
 
@@ -48,8 +48,8 @@ autonumber
 note over admin, localStorage
     **Placeholder Mapping:**
 
-    <b><resource></b> = facility | machine | parameter | register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
+    <b><resource></b> = user | role
+    <b>{endpoint}</b> = /users | /roles
 end note
 
 ' === MAIN FLOW ===
@@ -98,19 +98,7 @@ else #LightGreen Authenticated
 
     else #LightGreen Validation Success
 
-        ' === FILE UPLOAD (if exists) ===
-        opt File Uploaded
-            service -> fileService: Upload File
-            activate fileService
 
-            fileService -> localStorage: Save File
-            activate localStorage
-            localStorage --> fileService: File Path
-            deactivate localStorage
-
-            fileService --> service: File Path
-            deactivate fileService
-        end
 
         ' === SAVE TO DATABASE ===
         service -> repository: Save <resource>
@@ -125,15 +113,7 @@ else #LightGreen Authenticated
             repository --> service: Database Error
             deactivate repository
 
-            ' Rollback: Delete uploaded file
-            opt File Was Uploaded
-                service -> fileService: Delete File (Rollback)
-                activate fileService
-                fileService -> localStorage: Delete File
-                activate localStorage
-                deactivate localStorage
-                deactivate fileService
-            end
+
 
             service --> controller: 500 Internal Server Error
             controller --> boundCreate: Error Response

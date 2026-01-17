@@ -18,7 +18,7 @@ skinparam sequence {
     LifeLineBorderColor #34495E
     LifeLineBackgroundColor #ECF0F1
     ArrowFontName Times New Roman
-    ArrowFontSize 15
+    ArrowFontSize 18
 }
 
 skinparam actorFontSize 15
@@ -34,6 +34,7 @@ actor "Operator" as op #9B59B6
 boundary "Login Page" as boundLogin #3498DB
 control "User\nController" as userController #2ECC71
 control "User\nService" as userService #F39C12
+control "User\nRepository" as userRepository #E67E22
 database "PostgreSQL" as dbPsql #2980B9
 database "Redis Cache" as dbRedis #C0392B
 
@@ -51,59 +52,58 @@ activate boundLogin
 boundLogin -> userController: POST /login
 activate userController
 
-userController -> userController: Validate Request
+userController -> userController: Parsing Request
 
-userController -> userService: Authenticate User
+userController -> userService: Forward Request
 activate userService
 
 ' === FIND USER ===
-userService -> dbPsql: Find User by\nUsername/Email
+userService -> userService: Validate Request
+userService -> userRepository: Find by Username/Email
+activate userRepository
+
+userRepository -> dbPsql: Find User by\nUsername/Email
 activate dbPsql
-dbPsql --> userService: User Data
+dbPsql --> userRepository: User Data
 deactivate dbPsql
+
+userRepository --> userService: User Data
+deactivate userRepository
 
 ' === ERROR SCENARIOS ===
 alt #LightPink User Not Found
     userService --> userController: 404 User Not Found
     userController --> boundLogin: Error Response
     boundLogin --> admin: **Show Error Message**
-  
 
-else #LightPink Invalid Credentials
-    userService -> userService: Verify Password
-    userService --> userController: 401 Unauthorized
-    userController --> boundLogin: Error Response
-    boundLogin --> admin: **Show Error Message**
+else #LightGreen User Found
+        userService -> userService: Verify Password
 
-else #LightPink User Inactive/Suspended
-    userService -> userService: Check User Status
-    userService --> userController: 403 Forbidden
-    userController --> boundLogin: Error Response
-    boundLogin --> admin: **Show Account Status Error**
+    alt #LightPink Invalid Credentials
+        userService --> userController: 401 Unauthorized
+        userController --> boundLogin: Error Response
+        boundLogin --> admin: **Show Error Message**
+    else #LightGreen Success
+        ' === AUTHENTICATION SUCCESS ===
+        userService -> userService: Generate JWT Token
 
-else #LightGreen Success
-    ' === AUTHENTICATION SUCCESS ===
-    userService -> userService: Generate JWT Token
+        userService -> dbRedis: Store Token
+        activate dbRedis
+        dbRedis --> userService: OK
+        deactivate dbRedis
 
-    userService -> dbRedis: Store Token
-    activate dbRedis
-    dbRedis --> userService: OK
-    deactivate dbRedis
+        userService -> userService: Record Audit Log
 
-    userService -> dbPsql: Update Last Login
-    activate dbPsql
-    dbPsql --> userService: OK
-    deactivate dbPsql
+        userService --> userController: Token & User Data
+        deactivate userService
 
-    userService --> userController: Token & User Data
-    deactivate userService
+        userController --> boundLogin: 200 OK + Token
+        deactivate userController
 
-    userController --> boundLogin: 200 OK + Token
-    deactivate userController
-
-    boundLogin -> boundLogin: Store Token in Cookie
-    boundLogin --> admin: **Redirect to Dashboard**
-    deactivate boundLogin
+        boundLogin -> boundLogin: Store Token in Cookie
+        boundLogin --> admin: **Redirect to Dashboard**
+        deactivate boundLogin
+      end
 
 end
 
