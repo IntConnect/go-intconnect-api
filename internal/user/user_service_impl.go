@@ -214,11 +214,8 @@ func (userService *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserRe
 func (userService *ServiceImpl) HandleLogout(ginContext *gin.Context) {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	redisKey := fmt.Sprintf("auth:token:%d", userJwtClaims.Id)
-	deletedKey, err := userService.redisInstance.RedisClient.Del(ginContext.Request.Context(), redisKey).Result()
+	_, err := userService.redisInstance.RedisClient.Del(ginContext.Request.Context(), redisKey).Result()
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
-	if deletedKey <= 0 {
-		exception.ThrowApplicationError(exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
-	}
 }
 func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserRequest *model.UpdateUserRequest) *model.PaginatedResponse[*model.UserResponse] {
 	var paginationResp *model.PaginatedResponse[*model.UserResponse]
