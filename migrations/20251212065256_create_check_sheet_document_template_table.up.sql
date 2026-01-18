@@ -7,6 +7,7 @@ CREATE TABLE check_sheet_document_templates
     description     VARCHAR(255),
     category        VARCHAR(255)                    NOT NULL,
     interval        INT                             NOT NULL DEFAULT 1,
+    interval_type   VARCHAR(255)                    NOT NULL DEFAULT 'Hour',
     rotation_type   VARCHAR                         NOT NULL DEFAULT 'Daily',
     revision_number INT                             NOT NULL DEFAULT 0,
     effective_date  DATE                            NOT NULL,

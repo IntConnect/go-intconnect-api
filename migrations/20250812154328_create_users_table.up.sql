@@ -1,5 +1,3 @@
-CREATE TYPE user_status_enum AS ENUM ('Active', 'Inactive', 'Pending');
-
 CREATE TABLE users
 (
     id          SERIAL PRIMARY KEY,
@@ -9,7 +7,6 @@ CREATE TABLE users
     email       VARCHAR(255)                 NOT NULL UNIQUE,
     password    VARCHAR(255)                 NOT NULL,
     avatar_path VARCHAR(255)                 NOT NULL,
-    status      user_status_enum             NOT NULL,
     created_by  VARCHAR(255),
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
