@@ -35,7 +35,6 @@ control "Layer\nRepository" as repository #E67E22
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorage #7F8C8D
 
 title
 <size:20><b>Sequence Diagram - Create Connection Data</b></size>
@@ -45,7 +44,7 @@ end title
 
 autonumber
 
-note over admin, localStorage
+note over admin, dbPsql
     **Placeholder Mapping:**
 
     <b><resource></b> = mqtt-broker | mqtt-topic | smtp-server | modbus-server
@@ -97,21 +96,6 @@ else #LightGreen Authenticated
         deactivate boundCreate
 
     else #LightGreen Validation Success
-
-        ' === FILE UPLOAD (if exists) ===
-        opt File Uploaded
-            service -> fileService: Upload File
-            activate fileService
-
-            fileService -> localStorage: Save File
-            activate localStorage
-            localStorage --> fileService: File Path
-            deactivate localStorage
-
-            fileService --> service: File Path
-            deactivate fileService
-        end
-
         ' === SAVE TO DATABASE ===
         service -> repository: Save <resource>
         activate repository
@@ -124,16 +108,6 @@ else #LightGreen Authenticated
             deactivate dbPsql
             repository --> service: Database Error
             deactivate repository
-
-            ' Rollback: Delete uploaded file
-            opt File Was Uploaded
-                service -> fileService: Delete File (Rollback)
-                activate fileService
-                fileService -> localStorage: Delete File
-                activate localStorage
-                deactivate localStorage
-                deactivate fileService
-            end
 
             service --> controller: 500 Internal Server Error
             controller --> boundCreate: Error Response

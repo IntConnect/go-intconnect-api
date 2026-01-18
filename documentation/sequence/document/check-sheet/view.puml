@@ -47,7 +47,7 @@ autonumber
 admin -> boundList: Access Check Sheet List Page
 activate boundList
 
-boundList -> authMiddleware: GET {endpoint}
+boundList -> authMiddleware: GET /check-sheets
 activate authMiddleware
 
 ' === AUTHENTICATION ===

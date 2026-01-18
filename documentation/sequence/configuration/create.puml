@@ -18,7 +18,7 @@ skinparam sequence {
     LifeLineBorderColor #34495E
     LifeLineBackgroundColor #ECF0F1
     ArrowFontName Times New Roman
-    ArrowFontSize 15
+    ArrowFontSize 18
 }
 
 skinparam actorFontSize 15

@@ -27,7 +27,9 @@ skinparam noteFontName "Times New Roman"
 
 ' Actors and components
 actor "Administrator" as admin #E74C3C
-boundary "<resource> List\nPage" as boundList #3498DB
+actor "Manager" as mgr #3498DB
+actor "Supervisor" as spv #2ECC71
+boundary "Check Sheet\nList Page" as boundList #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Layer\nController" as controller #2ECC71
 control "Layer\nService" as service #F39C12
@@ -43,10 +45,15 @@ end title
 autonumber
 
 ' === MAIN FLOW ===
-admin -> boundList: Access <resource> List Page
+admin -> boundList: Access Check Sheet List Page
+admin -> boundList: Press Approval Button
+admin -> boundList: Fill Notes
+note over admin, spv
+Button with Check Icon
+end note
 activate boundList
 
-boundList -> authMiddleware: GET {endpoint}
+boundList -> authMiddleware: POST /approval/{id}
 activate authMiddleware
 
 ' === AUTHENTICATION ===

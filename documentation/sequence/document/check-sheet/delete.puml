@@ -35,7 +35,6 @@ control "Layer\nRepository" as repository #F39C12
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorge #7F8C8D
 
 title
 <size:20><b>Sequence Diagram - Delete Check Sheet Data</b></size>

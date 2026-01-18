@@ -35,21 +35,20 @@ control "Layer\nRepository" as repository #E67E22
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Create Role & User Data</b></size>
-<size:14>(Role, User)</size>
+<size:20><b>Sequence Diagram - Create Document Data</b></size>
+<size:14>(Report Document template, Check Sheet Document Template)</size>
 ----
 end title
 
 autonumber
 
-note over admin, localStorage
+note over admin, dbPsql
     **Placeholder Mapping:**
 
-    <b><resource></b> = user | role
-    <b>{endpoint}</b> = /users | /roles
+    <b><resource></b> = report-document-templates | check-sheet-document-templates
+    <b>{endpoint}</b> = /report-document-templates | /check-sheet-document-templates
 end note
 
 ' === MAIN FLOW ===

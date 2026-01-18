@@ -27,7 +27,7 @@ skinparam noteFontName "Times New Roman"
 
 ' Actors and components
 actor "Administrator" as admin #E74C3C
-boundary "Edit Page" as boundEdit #3498DB
+boundary "List Page" as boundList #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Layer\nController" as controller #2ECC71
 control "Layer\nService" as service #F39C12
@@ -43,83 +43,40 @@ end title
 
 autonumber
 
+
 ' === FETCH EXISTING DATA ===
-admin -> boundEdit: Click Edit Button
-activate boundEdit
+admin -> boundList: Access Machine List Page
+admin -> boundList: Press Dashboard Button
+note over admin, boundList
+Button with Gauge Icon
+end note
+admin -> boundList: Add Featured Parameter
+admin -> boundList: Change Chart
 
-boundEdit -> authMiddleware: GET machines/{id}
-activate authMiddleware
+activate boundList
 
+boundList -> authMiddleware: PUT\n/machines/dashboard/{id}
+
+' === AUTHENTICATION ===
 authMiddleware -> dbRedis: Validate JWT Token
 activate dbRedis
 dbRedis --> authMiddleware: Token Status
 deactivate dbRedis
 
 alt #LightPink Unauthorized (401)
-    authMiddleware --> boundEdit: Authentication Failed
-    boundEdit --> admin: **Redirect to Login**
+    authMiddleware --> boundList: Authentication Failed
+    boundList --> admin: **Redirect to Login**
     deactivate authMiddleware
-    deactivate boundEdit
-
+    deactivate boundList
 else #LightPink Forbidden (403)
-    authMiddleware --> boundEdit: Insufficient Permission
-    boundEdit --> admin: **Redirect to Forbidden Page**
+    authMiddleware --> boundList: Insufficient Permission
+    boundList --> admin: **Redirect to Forbidden Page**
     deactivate authMiddleware
-    deactivate boundEdit
-
+    deactivate boundList
 else #LightGreen Authenticated
-
-    authMiddleware -> controller: Forward Request
-    deactivate authMiddleware
-    activate controller
-
-    controller -> controller: Parsing ID from Param
-    controller -> service: Forward Id
-    activate service
-
-    service -> repository: Find By Id
-    activate repository
-
-    repository -> dbPsql: Query Data By Id
-    activate dbPsql
-
-    alt #LightPink Data Not Found
-        dbPsql --> repository: No Data
-        deactivate dbPsql
-        repository --> service: nil
-        deactivate repository
-        service --> controller: 404 Not Found
-        controller --> boundEdit: Error Response
-        boundEdit --> admin: **Show Error Message**
-        deactivate service
-        deactivate controller
-        deactivate boundEdit
-
-    else #LightGreen Data Found
-        dbPsql --> repository: Existing  Data
-        deactivate dbPsql
-
-        repository --> service: <Resource> Entity
-        deactivate repository
-
-        service --> controller: Return <resource> Data
-        deactivate service
-
-        controller --> boundEdit: Return Data
-        deactivate controller
-
-        boundEdit --> admin: Display Edit Form\nwith Existing Data
-
         ' === UPDATE PROCESS ===
-        admin -> boundEdit: Modify & Submit Data
 
-        boundEdit -> authMiddleware: PUT machines/dashboard/{id}
-        activate authMiddleware
 
-        authMiddleware -> dbRedis: Validate JWT Token
-        activate dbRedis
-        dbRedis --> authMiddleware: Token Status
-        deactivate dbRedis
 
         authMiddleware -> controller: Forward Request
         deactivate authMiddleware
@@ -134,22 +91,22 @@ else #LightGreen Authenticated
 
         alt #LightPink Validation Failed
             service --> controller: 422 Validation Error
-            controller --> boundEdit: Error Response
-            boundEdit --> admin: **Show Validation Error**
+            controller --> boundList: Error Response
+            boundList --> admin: **Show Validation Error**
             deactivate service
             deactivate controller
 
         else #LightGreen Validation Success
 
-            ' === FILE UPLOAD (if exists) ===
 
 
             ' === UPDATE DATABASE ===
-            service -> repository: Update Data
+            service -> repository: Update Existing Data
             activate repository
 
-            repository -> dbPsql: Update Machine Dashboard Data
+            repository -> dbPsql: Update <resource> Data
             activate dbPsql
+
 
             alt #LightPink Database Error
                 dbPsql --> repository: SQLException
@@ -157,12 +114,12 @@ else #LightGreen Authenticated
 
                 repository --> service: Database Error
                 service -> service: Parsing Error
-                deactivate repository
+
 
 
                 service --> controller: 500 Internal Server Error
-                controller --> boundEdit: Error Response
-                boundEdit --> admin: **Show Error Message**
+                controller --> boundList: Error Response
+                boundList --> admin: **Show Error Message**
                 deactivate service
                 deactivate controller
 
@@ -176,14 +133,13 @@ else #LightGreen Authenticated
                 service --> controller: Success Response
                 deactivate service
 
-                controller --> boundEdit: 200 OK
+                controller --> boundList: 200 OK
                 deactivate controller
 
-                boundEdit --> admin: **Show Success Message**
-                deactivate boundEdit
+                boundList --> admin: **Show Success Message**
+                boundList --> admin: **Redirect to /machines/dashboard/{id}**
+                deactivate boundList
             end
         end
-    end
 end
-
 @enduml

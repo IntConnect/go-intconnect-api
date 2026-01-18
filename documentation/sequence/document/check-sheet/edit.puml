@@ -47,7 +47,7 @@ autonumber
 admin -> boundEdit: Click Edit Button
 activate boundEdit
 
-boundEdit -> authMiddleware: GET {endpoint}/{id}
+boundEdit -> authMiddleware: GET /check-sheets/{id}
 activate authMiddleware
 
 authMiddleware -> dbRedis: Validate JWT Token
@@ -110,7 +110,7 @@ else #LightGreen Authenticated
         ' === UPDATE PROCESS ===
         admin -> boundEdit: Modify & Submit Data
 
-        boundEdit -> authMiddleware: PUT {endpoint}/{id}
+        boundEdit -> authMiddleware: PUT /check-sheets/{id}
         activate authMiddleware
 
         authMiddleware -> dbRedis: Validate JWT Token

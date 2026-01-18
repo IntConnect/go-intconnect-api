@@ -35,7 +35,6 @@ control "Layer\nRepository" as repository #F39C12
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorage #7F8C8D
 
 title
 <size:20><b>Sequence Diagram - Delete Configuration Data</b></size>
@@ -45,7 +44,7 @@ end title
 
 autonumber
 
-note over admin, localStorage
+note over admin, dbPsql
     **Placeholder Mapping:**
 
     <b><resource></b> = mqtt-broker | mqtt-topic | smtp-server | modbus-server
@@ -104,11 +103,6 @@ service -> service: Validate Request
 
     else #LightGreen Data Found
         dbPsql --> service: Existing Data
-        opt  File Exists
-                        service -> localStorage: Move File into Trash Folder
-        localStorage --> service: Return New Path
-        service -> service: Update File Path
-        end
 
         service -> repository: Delete By Id
         repository -> dbPsql: Update deleted_at

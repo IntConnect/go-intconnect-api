@@ -48,7 +48,7 @@ autonumber
 admin -> boundCreate: Input Check Sheet Data
 activate boundCreate
 
-boundCreate -> authMiddleware: POST {endpoint}
+boundCreate -> authMiddleware: POST /check-sheets
 activate authMiddleware
 
 ' === AUTHENTICATION ===

@@ -27,7 +27,11 @@ skinparam noteFontName "Times New Roman"
 
 ' Actors and components
 actor "Administrator" as admin #E74C3C
-boundary "<resource> List\nPage" as boundList #3498DB
+actor "Manager" as mgr #3498DB
+actor "Supervisor" as spv #2ECC71
+actor "Maintenance" as mtn #F39C12
+actor "Operator" as op #9B59B6
+boundary "Generate Report " as boundList #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Layer\nController" as controller #2ECC71
 control "Layer\nService" as service #F39C12
@@ -36,7 +40,7 @@ database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
 
 title
-<size:20><b>Sequence Diagram - View Audit Log Data</b></size>
+<size:20><b>Sequence Diagram - Generate Report</b></size>
 ----
 end title
 
@@ -45,10 +49,16 @@ autonumber
 
 
 ' === MAIN FLOW ===
-admin -> boundList: Access <resource> List Page
+admin -> boundList: Access Generate Report List Page
 activate boundList
-
-boundList -> authMiddleware: GET {endpoint}
+admin -> boundList: Fill Filtering Data
+note over admin, op
+- Start Date
+- End Date
+- Interval
+- Record Document Template
+end note
+boundList -> authMiddleware: GET /telemetries/report
 activate authMiddleware
 
 ' === AUTHENTICATION ===
@@ -75,21 +85,22 @@ else #LightGreen Authenticated
     deactivate authMiddleware
     activate controller
 
-    controller -> service: Get <resource> List
+    controller -> service: Generate Report
     activate service
 
     ' === FETCH DATA FROM DATABASE ===
     service -> repository: Find All with Filters
     activate repository
     
-    repository -> dbPsql: Query <resource> Data\n(Pagination, Filter, Sort)
+    repository -> dbPsql: Query <resource> Data\n With Filter
     activate dbPsql
     dbPsql --> repository: Data Result
     deactivate dbPsql
-    
+
     repository --> service: Return <resource> List
     deactivate repository
 
+service -> service: Grouped By Timestamp
     service --> controller: Return Data List
     deactivate service
 

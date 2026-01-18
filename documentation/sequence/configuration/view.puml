@@ -47,7 +47,6 @@ note over admin, dbPsql
     **Placeholder Mapping:**
     
     <b><resource></b> = facility | machine | parameter | register
-    <b><Resource></b> = Facility | Machine | Parameter | Register
     <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
 
 end note

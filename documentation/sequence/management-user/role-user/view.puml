@@ -36,7 +36,7 @@ database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
 
 title
-<size:20><b>Sequence Diagram - Create Role & User Data</b></size>
+<size:20><b>Sequence Diagram - View Role & User Data</b></size>
 <size:14>(Role, User)</size>
 ----
 end title

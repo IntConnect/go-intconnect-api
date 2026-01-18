@@ -101,13 +101,18 @@ service -> service: Validate Request
         dbPsql --> service: Existing Data
 
 
+opt Has New Parameter Operation Request
         service -> repository: Create New Parameter
         repository -> dbPsql: Store New Parameter
         dbPsql --> service: Return nil
+        end
+opt Has Update Parameter Operation Request
+
          service -> repository: Update Existing Parameter
         repository -> dbPsql: Update By Id
         dbPsql --> service: Return nil
- opt Has Delete Parameter Request
+        end
+ opt Has Delete Parameter Operation Request
          service -> repository: Delete Parameter
         repository -> dbPsql: Delete Existing Parameter By Id
         dbPsql --> service: Return nil

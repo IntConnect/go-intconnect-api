@@ -35,17 +35,16 @@ control "Layer\nRepository" as repository #E67E22
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Create Role & User Data</b></size>
+<size:20><b>Sequence Diagram - Edit Role & User Data</b></size>
 <size:14>(Role, User)</size>
 ----
 end title
 
 autonumber
 
-note over admin, localStorage
+note over admin, dbPsql
     **Placeholder Mapping:**
 
     <b><resource></b> = user | role
@@ -165,16 +164,6 @@ else #LightGreen Authenticated
                 repository --> service: Database Error
                 service -> service: Parsing Error
                 deactivate repository
-
-                ' Rollback: Delete new file & restore old
-                opt New File Was Uploaded
-                    service -> fileService: Delete New File (Rollback)
-                    activate fileService
-                    fileService -> localStorage: Delete New File
-                    activate localStorage
-                    deactivate localStorage
-                    deactivate fileService
-                end
 
                 service --> controller: 500 Internal Server Error
                 controller --> boundEdit: Error Response

@@ -42,12 +42,7 @@ end title
 
 autonumber
 
-note over admin, dbPsql
-    **Placeholder Mapping:**
 
-    <b><resource></b> = user | role
-    <b>{endpoint}</b> = /users | /roles
-end note
 
 ' === MAIN FLOW ===
 admin -> boundList: Access <resource> List Page

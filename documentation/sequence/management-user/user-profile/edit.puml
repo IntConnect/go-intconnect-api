@@ -27,6 +27,10 @@ skinparam noteFontName "Times New Roman"
 
 ' Actors and components
 actor "Administrator" as admin #E74C3C
+actor "Manager" as mgr #3498DB
+actor "Supervisor" as spv #2ECC71
+actor "Maintenance" as mtn #F39C12
+actor "Operator" as op #9B59B6
 boundary "Edit Page" as boundEdit #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Layer\nController" as controller #2ECC71
@@ -35,25 +39,21 @@ control "Layer\nRepository" as repository #E67E22
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
-database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Update System Setting Data</b></size>
+<size:20><b>Sequence Diagram - Update Configuration Data</b></size>
+<size:14>(MQTT Broker, MQTT Topic, SMTP Server, Modbus Server)</size>
 ----
 end title
 
 autonumber
-note over admin, localStorage
-    **Placeholder Mapping:**
 
-    <b>{KEY}</b> = DASHBOARD_SETTINGS | LISTENER_SETTINGS
-end note
 
 ' === FETCH EXISTING DATA ===
-admin -> boundEdit: Click Edit Button
+admin -> boundEdit: Click Profile Button
 activate boundEdit
 
-boundEdit -> authMiddleware: GET system-settings/{KEY}
+boundEdit -> authMiddleware: GET /users/{id}
 activate authMiddleware
 
 authMiddleware -> dbRedis: Validate JWT Token
@@ -79,14 +79,14 @@ else #LightGreen Authenticated
     deactivate authMiddleware
     activate controller
 
-    controller -> controller: Parsing Key from Param
-    controller -> service: Forward Key
+    controller -> controller: Parsing ID from Param
+    controller -> service: Forward Id
     activate service
 
-    service -> repository: Find By Key
+    service -> repository: Find By Id
     activate repository
 
-    repository -> dbPsql: Query Data By Key
+    repository -> dbPsql: Query Data By Id
     activate dbPsql
 
     alt #LightPink Data Not Found
@@ -105,10 +105,10 @@ else #LightGreen Authenticated
         dbPsql --> repository: Existing  Data
         deactivate dbPsql
 
-        repository --> service: System Setting Entity
+        repository --> service: <Resource> Entity
         deactivate repository
 
-        service --> controller: Return System Setting Data
+        service --> controller: Return <resource> Data
         deactivate service
 
         controller --> boundEdit: Return Data
@@ -119,7 +119,7 @@ else #LightGreen Authenticated
         ' === UPDATE PROCESS ===
         admin -> boundEdit: Modify & Submit Data
 
-        boundEdit -> authMiddleware: PUT system-settings/{id}
+        boundEdit -> authMiddleware: PUT /users/{id}
         activate authMiddleware
 
         authMiddleware -> dbRedis: Validate JWT Token
@@ -147,35 +147,13 @@ else #LightGreen Authenticated
 
         else #LightGreen Validation Success
 
-            ' === FILE UPLOAD (if exists) ===
-            opt New File Uploaded
-                service -> fileService: Upload New File
-                activate fileService
 
-                fileService -> localStorage: Save New File
-                activate localStorage
-                localStorage --> fileService: New File Path
-                deactivate localStorage
-
-                fileService --> service: New File Path
-                deactivate fileService
-
-                ' Delete old file if exists
-                opt Old File Exists
-                    service -> fileService: Delete Old File
-                    activate fileService
-                    fileService -> localStorage: Delete Old File
-                    activate localStorage
-                    deactivate localStorage
-                    deactivate fileService
-                end
-            end
 
             ' === UPDATE DATABASE ===
             service -> repository: Update Data
             activate repository
 
-            repository -> dbPsql: Update System Setting Data
+            repository -> dbPsql: Update <resource> Data
             activate dbPsql
 
             alt #LightPink Database Error
@@ -186,15 +164,7 @@ else #LightGreen Authenticated
                 service -> service: Parsing Error
                 deactivate repository
 
-                ' Rollback: Delete new file & restore old
-                opt New File Was Uploaded
-                    service -> fileService: Delete New File (Rollback)
-                    activate fileService
-                    fileService -> localStorage: Delete New File
-                    activate localStorage
-                    deactivate localStorage
-                    deactivate fileService
-                end
+
 
                 service --> controller: 500 Internal Server Error
                 controller --> boundEdit: Error Response
@@ -216,7 +186,7 @@ else #LightGreen Authenticated
                 deactivate controller
 
                 boundEdit --> admin: **Show Success Message**
-                boundEdit --> admin: **Redirect to system-settings**
+                boundEdit --> admin: **Redirect to /users**
                 deactivate boundEdit
             end
         end
