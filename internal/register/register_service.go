@@ -10,6 +10,7 @@ type Service interface {
 	Create(ginContext *gin.Context, createRegisterRequest *model.CreateRegisterRequest) *model.PaginatedResponse[*model.RegisterResponse]
 	FindAll() []*model.RegisterResponse
 	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.RegisterResponse]
+	FindById(ginContext *gin.Context, parameterId uint64) *model.RegisterResponse
 	Update(ginContext *gin.Context, updateRegisterRequest *model.UpdateRegisterRequest) *model.PaginatedResponse[*model.RegisterResponse]
 	Delete(ginContext *gin.Context, deleteRegisterRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.RegisterResponse]
 	FindDependency() *model.RegisterDependency

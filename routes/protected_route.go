@@ -16,7 +16,6 @@ import (
 	"go-intconnect-api/internal/register"
 	reportDocumentTemplate "go-intconnect-api/internal/report_document_template"
 	"go-intconnect-api/internal/role"
-	smtpServer "go-intconnect-api/internal/smtp_server"
 	systemSetting "go-intconnect-api/internal/system_setting"
 	"go-intconnect-api/internal/telemetry"
 	"go-intconnect-api/internal/user"
@@ -38,7 +37,6 @@ type ProtectedRoutes struct {
 	parameterController                  parameter.Controller
 	mqttTopicController                  mqttTopic.Controller
 	auditLogController                   auditLog.Controller
-	smtpServerController                 smtpServer.Controller
 	modbusServerController               modbusServer.Controller
 	reportDocumentTemplateController     reportDocumentTemplate.Controller
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller
@@ -64,7 +62,6 @@ func NewProtectedRoutes(
 	parameterController parameter.Controller,
 	mqttTopicController mqttTopic.Controller, reportDocumentTemplateController reportDocumentTemplate.Controller,
 	auditLogController auditLog.Controller,
-	smtpServerController smtpServer.Controller,
 	modbusServerController modbusServer.Controller,
 	checkSheetDocumentTemplateController checkSheetDocumentTemplate.Controller,
 	systemSettingController systemSetting.Controller,
@@ -90,7 +87,6 @@ func NewProtectedRoutes(
 		auditLogController:                   auditLogController,
 		redisInstance:                        redisInstance,
 		roleService:                          roleService,
-		smtpServerController:                 smtpServerController,
 		modbusServerController:               modbusServerController,
 		checkSheetDocumentTemplateController: checkSheetDocumentTemplateController,
 		systemSettingController:              systemSettingController,
@@ -177,13 +173,6 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	auditLogRouterGroup.GET("pagination", protectedRoutes.auditLogController.FindAllAuditLogPagination)
 	auditLogRouterGroup.GET("", protectedRoutes.auditLogController.FindAllAuditLog)
 
-	smtpServerRouterGroup := routerGroup.Group("smtp-servers")
-	smtpServerRouterGroup.GET("pagination", protectedRoutes.smtpServerController.FindAllSmtpServerPagination)
-	smtpServerRouterGroup.GET("", protectedRoutes.smtpServerController.FindAllSmtpServer)
-	smtpServerRouterGroup.POST("", protectedRoutes.smtpServerController.CreateSmtpServer)
-	smtpServerRouterGroup.PUT("/:id", protectedRoutes.smtpServerController.UpdateSmtpServer)
-	smtpServerRouterGroup.DELETE("/:id", protectedRoutes.smtpServerController.DeleteSmtpServer)
-
 	modbusServerRouterGroup := routerGroup.Group("modbus-servers")
 	modbusServerRouterGroup.GET("pagination", protectedRoutes.modbusServerController.FindAllModbusServerPagination)
 	modbusServerRouterGroup.GET("", protectedRoutes.modbusServerController.FindAllModbusServer)
@@ -218,6 +207,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 
 	registerRouterGroup := routerGroup.Group("registers")
 	registerRouterGroup.GET("", protectedRoutes.registerController.FindAllRegister)
+	registerRouterGroup.GET("/:id", protectedRoutes.registerController.FindRegisterById)
 	registerRouterGroup.GET("/pagination", protectedRoutes.registerController.FindAllRegisterPagination)
 	registerRouterGroup.GET("/dependency", protectedRoutes.registerController.FindRegisterDependency)
 	registerRouterGroup.POST("", protectedRoutes.registerController.CreateRegister)

@@ -78,7 +78,24 @@ func (registerService *ServiceImpl) FindAllPagination(paginationReq *model.Pagin
 	)
 }
 
-// Create - Membuat register baru
+func (registerService *ServiceImpl) FindById(ginContext *gin.Context, registerId uint64) *model.RegisterResponse {
+	var registerResponse *model.RegisterResponse
+	err := registerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		registerEntity, err := registerService.registerRepository.FindById(gormTransaction, registerId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		registerResponse = helper.MapEntityIntoResponse[
+			*entity.Register,
+			*model.RegisterResponse,
+		](
+			registerEntity,
+			mapper.FuncMapAuditable[*entity.Register, *model.RegisterResponse],
+		)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return registerResponse
+}
+
 func (registerService *ServiceImpl) Create(ginContext *gin.Context, createRegisterRequest *model.CreateRegisterRequest) *model.PaginatedResponse[*model.RegisterResponse] {
 	userJwtClaims := helper.ExtractJwtClaimFromContext(ginContext)
 	var paginationResp *model.PaginatedResponse[*model.RegisterResponse]

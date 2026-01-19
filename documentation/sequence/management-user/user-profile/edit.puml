@@ -39,9 +39,10 @@ control "Layer\nRepository" as repository #E67E22
 control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
+database "Local Storage" as localStorage #7F8C8D
 
 title
-<size:20><b>Sequence Diagram - Update Configuration Data</b></size>
+<size:20><b>Sequence Diagram - Update User Profile</b></size>
 <size:14>(MQTT Broker, MQTT Topic, SMTP Server, Modbus Server)</size>
 ----
 end title
@@ -147,6 +148,28 @@ else #LightGreen Authenticated
 
         else #LightGreen Validation Success
 
+  opt New Profile Uploaded
+                service -> fileService: Upload New Profile
+                activate fileService
+
+                fileService -> localStorage: Save New Profile
+                activate localStorage
+                localStorage --> fileService: New Profile Path
+                deactivate localStorage
+
+                fileService --> service: New Profile Path
+                deactivate fileService
+
+                ' Delete old file if exists
+                opt Old Profile Exists
+                    service -> fileService: Delete Old Profile
+                    activate fileService
+                    fileService -> localStorage: Delete Old Profile
+                    activate localStorage
+                    deactivate localStorage
+                    deactivate fileService
+                end
+            end
 
 
             ' === UPDATE DATABASE ===
@@ -163,6 +186,15 @@ else #LightGreen Authenticated
                 repository --> service: Database Error
                 service -> service: Parsing Error
                 deactivate repository
+                  ' Rollback: Delete new file & restore old
+                opt New Profile Was Uploaded
+                    service -> fileService: Delete New Profile (Rollback)
+                    activate fileService
+                    fileService -> localStorage: Delete New Profile
+                    activate localStorage
+                    deactivate localStorage
+                    deactivate fileService
+                end
 
 
 

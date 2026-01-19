@@ -30,6 +30,7 @@ actor "Administrator" as admin #E74C3C
 actor "Manager" as mgr #3498DB
 actor "Supervisor" as spv #2ECC71
 boundary "Check Sheet\nList Page" as boundList #3498DB
+boundary "Check Sheet\nDetail Page" as boundDetail #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Layer\nController" as controller #2ECC71
 control "Layer\nService" as service #F39C12
@@ -46,14 +47,24 @@ autonumber
 
 ' === MAIN FLOW ===
 admin -> boundList: Access Check Sheet List Page
-admin -> boundList: Press Approval Button
-admin -> boundList: Fill Notes
-note over admin, spv
-Button with Check Icon
-end note
 activate boundList
 
-boundList -> authMiddleware: POST /approval/{id}
+admin -> boundList: Press Approval Button
+deactivate boundList
+note over admin, boundList
+Button with Check Icon
+end note
+boundList -> boundDetail: Redirect Into\nDetail page
+admin -> boundDetail: Review Data
+alt #LightGreen Reject Check Sheet
+admin -> boundDetail: Press Reject Button
+else #PaleGreen Approve Check Sheet
+admin -> boundDetail: Press Approve Button
+end
+admin -> boundDetail: Fill Notes
+
+
+boundDetail -> authMiddleware: POST\n/check-sheets/approval/{id}
 activate authMiddleware
 
 ' === AUTHENTICATION ===
@@ -63,16 +74,16 @@ dbRedis --> authMiddleware: Token Status
 deactivate dbRedis
 
 alt #LightPink Unauthorized (401)
-    authMiddleware --> boundList: Authentication Failed
-    boundList --> admin: **Redirect to Login**
+    authMiddleware --> boundDetail: Authentication Failed
+    boundDetail --> admin: **Redirect to Login**
     deactivate authMiddleware
-    deactivate boundList
+    deactivate boundDetail
     
 else #LightPink Forbidden (403)
-    authMiddleware --> boundList: Insufficient Permission
-    boundList --> admin: **Show 403 Forbidden Page**
+    authMiddleware --> boundDetail: Insufficient Permission
+    boundDetail --> admin: **Show 403 Forbidden Page**
     deactivate authMiddleware
-    deactivate boundList
+    deactivate boundDetail
     
 else #LightGreen Authenticated
 
@@ -113,7 +124,7 @@ else #LightGreen Authenticated
     service --> controller: Return Data List
 
     deactivate service
-        controller --> boundList: 200 OK + Data
+        controller --> boundDetail: 200 OK + Data
     deactivate controller
     boundList --> admin: **Display <resource> List**
     deactivate boundList

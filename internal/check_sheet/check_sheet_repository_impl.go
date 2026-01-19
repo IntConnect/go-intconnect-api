@@ -64,6 +64,7 @@ func (checkSheetImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, checkSh
 		Preload("VerifiedByUser").
 		Preload("CheckSheetDocumentTemplate").
 		Preload("CheckSheetCheckPoint").
+		Preload("CheckSheetCheckPoint.Parameter").
 		Preload("CheckSheetCheckPoint.CheckSheetCheckPointValue").
 		Where("id = ?", checkSheetId).First(&checkSheetEntity).Error
 

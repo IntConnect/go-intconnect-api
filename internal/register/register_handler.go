@@ -36,6 +36,14 @@ func (registerHandler *Handler) FindAllRegisterPagination(ginContext *gin.Contex
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
 
+func (registerHandler *Handler) FindRegisterById(ginContext *gin.Context) {
+	registerId := ginContext.Param("id")
+	parsedParameterId, err := strconv.ParseUint(registerId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	registerResponses := registerHandler.registerService.FindById(ginContext, parsedParameterId)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse("Registers has been fetched", registerResponses))
+}
+
 func (registerHandler *Handler) FindRegisterDependency(ginContext *gin.Context) {
 	mqttTopicDependency := registerHandler.registerService.FindDependency()
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse(model.RESPONSE_SUCCESS, mqttTopicDependency))

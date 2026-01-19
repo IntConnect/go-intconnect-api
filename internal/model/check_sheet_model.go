@@ -33,6 +33,7 @@ type CheckSheetCheckPointResponse struct {
 	CheckSheetId              uint64                               `json:"check_sheet_id;"`
 	ParameterId               uint64                               `json:"parameter_id"`
 	Name                      string                               `json:"name"`
+	Parameter                 *ParameterResponse                   `json:"parameter" mapstructure:"Parameter"`
 	CheckSheetCheckPointValue []*CheckSheetCheckPointValueResponse `json:"check_sheet_check_point_value"`
 }
 

@@ -6,6 +6,7 @@ type CheckSheetCheckPoint struct {
 	ParameterId               uint64                       `gorm:"column:parameter_id"`
 	Name                      string                       `gorm:"column:name"`
 	CheckSheetCheckPointValue []*CheckSheetCheckPointValue `gorm:"foreignKey:CheckSheetCheckPointId;references:Id"`
+	Parameter                 Parameter                    `gorm:"foreignKey:ParameterId;references:Id"`
 	CheckSheet                CheckSheet                   `gorm:"foreignKey:CheckSheetId;references:Id"`
 	Auditable                 Auditable                    `gorm:"embedded"`
 }

@@ -49,7 +49,6 @@ func main() {
 		injector.MqttTopicModule,
 		injector.ReportDocumentTemplateModule,
 		injector.AuditLogModule,
-		injector.SmtpServerModule,
 		injector.ModbusServerModule,
 		injector.CheckSheetDocumentModule,
 		injector.SystemSettingModule,

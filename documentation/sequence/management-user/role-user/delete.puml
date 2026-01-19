@@ -37,7 +37,7 @@ database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
 
 title
-<size:20><b>Sequence Diagram - Create Role & User Data</b></size>
+<size:20><b>Sequence Diagram - Delete Role & User Data</b></size>
 <size:14>(Role, User)</size>
 ----
 end title
@@ -49,6 +49,7 @@ note over admin, dbPsql
 
     <b><resource></b> = user | role
     <b>{endpoint}</b> = /users | /roles
+    <b>{id}</b> = Resource Identifier (e.g., 1, 2, 3)
 end note
 ' === FETCH EXISTING DATA ===
 admin -> boundListData: Click Trash Button
@@ -57,7 +58,7 @@ Tombol dengan Icon Trash
 end note
 activate boundListData
 
-boundListData -> authMiddleware: POST {endpoint}
+boundListData -> authMiddleware: DELETE {endpoint}/{id}
 activate authMiddleware
 
 authMiddleware -> dbRedis: Validate JWT Token
