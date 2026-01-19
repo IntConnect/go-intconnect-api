@@ -16,8 +16,8 @@ CREATE TABLE facilities
     camera_y       FLOAT                NOT NULL DEFAULT 0,
     camera_z       FLOAT                NOT NULL DEFAULT 0,
     created_by     VARCHAR(255),
-    created_at     TIMESTAMP                     DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP                     DEFAULT CURRENT_TIMESTAMP,
+    created_at     TIMESTAMP                     DEFAULT NOW(),
+    updated_at     TIMESTAMP                     DEFAULT NOW(),
     updated_by     VARCHAR(255),
     deleted_at     TIMESTAMP,
     deleted_by     VARCHAR(255)

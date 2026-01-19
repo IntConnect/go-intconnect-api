@@ -13,9 +13,9 @@ CREATE TABLE registers
     rotation_x       FLOAT        NOT NULL DEFAULT 0,
     rotation_y       FLOAT        NOT NULL DEFAULT 0,
     rotation_z       FLOAT        NOT NULL DEFAULT 0,   
-    created_at       TIMESTAMP    NOT NULL DEFAULT current_timestamp,
+    created_at       TIMESTAMP    NOT NULL DEFAULT NOW(),
     created_by       VARCHAR(255),
-    updated_at       TIMESTAMP    NOT NULL DEFAULT current_timestamp,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT NOW(),
     updated_by       VARCHAR(255),
     deleted_at       TIMESTAMP,
     deleted_by       VARCHAR(255)

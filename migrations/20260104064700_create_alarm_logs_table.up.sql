@@ -10,6 +10,6 @@ CREATE TABLE alarm_logs
     note            VARCHAR(255),
     acknowledged_at TIMESTAMP,
     resolved_at     TIMESTAMP,
-    created_at      TIMESTAMP                                  DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP                                  DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP                                  DEFAULT NOW(),
+    updated_at      TIMESTAMP                                  DEFAULT NOW()
 )

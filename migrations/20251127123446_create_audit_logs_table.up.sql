@@ -11,5 +11,5 @@ CREATE TABLE audit_logs
     ip_address  VARCHAR(255) NOT NULL,
     user_agent  VARCHAR(255) NOT NULL,
     created_by  VARCHAR(255),
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at  TIMESTAMP DEFAULT NOW()
 )

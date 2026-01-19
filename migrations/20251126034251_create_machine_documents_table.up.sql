@@ -6,8 +6,8 @@ CREATE TABLE machine_documents
     description VARCHAR(255),
     file_path   VARCHAR(255) NOT NULL,
     created_by  VARCHAR(255),
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at  TIMESTAMP DEFAULT NOW(),
+    updated_at  TIMESTAMP DEFAULT NOW(),
     updated_by  VARCHAR(255),
     deleted_at  TIMESTAMP,
     deleted_by  VARCHAR(255)

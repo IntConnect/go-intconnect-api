@@ -13,9 +13,9 @@ CREATE TABLE check_sheet_document_templates
     effective_date  DATE                            NOT NULL,
     starting_hour   TIME                            NOT NULL,
     created_by      VARCHAR(255),
-    created_at      TIMESTAMP                                DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP                                DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMP                                DEFAULT NOW(),
+    updated_at      TIMESTAMP                                DEFAULT NOW(),
     updated_by      VARCHAR(255),
-    deleted_at      TIMESTAMP                                DEFAULT CURRENT_TIMESTAMP,
+    deleted_at      TIMESTAMP                                DEFAULT NOW(),
     deleted_by      VARCHAR(255)
 )

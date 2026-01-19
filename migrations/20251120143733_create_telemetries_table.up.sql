@@ -5,7 +5,7 @@ CREATE TABLE telemetries
     id           BIGSERIAL NOT NULL,
     parameter_id BIGINT    NOT NULL REFERENCES parameters (id),
     value        FLOAT,
-    timestamp    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    timestamp    TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id, timestamp)
 );
 

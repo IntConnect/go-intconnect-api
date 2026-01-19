@@ -100,7 +100,7 @@ FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
 ORDER BY bucket;
 
 ALTER TABLE check_sheet_document_templates
-    ADD COLUMN starting_hour TIME NOT NULL default CURRENT_TIMESTAMP;
+    ADD COLUMN starting_hour TIME NOT NULL default NOW();
 
 SELECT *
 FROM telemetries
