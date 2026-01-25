@@ -127,7 +127,7 @@ ORDER BY bucket;
 ALTER TABLE machine_documents DROP COLUMN code;
 
 DROP TABLE check_sheet_values;
-
+SELECT * FROM telemetries ORDER BY id DESC;
 CREATE TABLE users_test
 (
     id          SERIAL PRIMARY KEY,

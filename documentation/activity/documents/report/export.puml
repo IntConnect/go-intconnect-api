@@ -1,0 +1,69 @@
+@startuml
+title Activity Diagram – Export Report Document
+
+'================================================
+' STYLING
+'================================================
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
+
+skinparam Padding 3
+skinparam PartitionHeaderFontStyle bold
+
+skinparam ArrowColor #2E2E2E
+skinparam ArrowThickness 2
+
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #7A7A7A
+
+skinparam StartColor #4CAF50
+skinparam EndColor #E53935
+
+skinparam DiamondBackgroundColor #FFF7CC
+skinparam DiamondBorderColor #C5A600
+
+!define ROLES Administrator\nMaintenance\nSupervisor\nOperator\nManager
+!define SYSTEM #AntiqueWhite|System
+
+'================================================
+' PAGE 1 – ACCESS & MENU
+'================================================
+|ROLES|
+start
+:Login;
+:Sorot Menu\nDocument;
+:Pilih Menu\nGenerate Report;
+:Mengisi Field\nFilter;
+note
+- Start Date
+- End Date
+- Interval
+- Report Document Template
+endnote
+:Tekan Tombol\nSubmit;
+note
+Tombol dengan
+Icon Upload
+endnote
+|SYSTEM|
+:Mengambil Data Sesuai\nDengan Filter;
+:Menampilkan Data \nDalam Table View;
+|ROLES|
+:Pilih Tipe Document;
+if (PDF?) then (Ya)
+:Tekan Tombol\nExport Into PDF;
+
+
+elseif (Excel)  then (Ya)
+:Tekan Tombol\nExport Into XLSX;
+|SYSTEM|
+|ROLES|
+
+else (No)
+|ROLES|
+end
+endif
+ 
+stop
+@enduml

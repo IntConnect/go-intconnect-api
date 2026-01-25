@@ -1,0 +1,76 @@
+@startuml
+title Activity Diagram – Melihat dan Mengubah Nilai Register
+
+'================================================
+' STYLING
+'================================================
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
+
+skinparam Padding 3
+skinparam PartitionHeaderFontStyle bold
+
+skinparam ArrowColor #2E2E2E
+skinparam ArrowThickness 2
+
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #7A7A7A
+
+skinparam StartColor #4CAF50
+skinparam EndColor #E53935
+
+skinparam DiamondBackgroundColor #FFF7CC
+skinparam DiamondBorderColor #C5A600
+
+!define ROLES Administrator
+!define SYSTEM #AntiqueWhite|System
+
+'================================================
+' PAGE 1 – ACCESS & MENU
+'================================================
+|ROLES|
+start
+:Login;
+:;
+if (PDF?) then (Ya)
+:Tekan Tombol\nExport Into PDF;
+
+
+elseif (Excel)  then (Ya)
+:Tekan Tombol\nExport Into XLSX;
+|SYSTEM|
+|ROLES|
+
+else (No)
+|ROLES|
+end
+endif
+:Sorot Menu\nConfiguration;
+
+:Pilih Menu\nMachine;
+:Menekan Tombol Dashboard;
+note
+Tombol dengan
+Icon Gauge
+endnote
+
+|SYSTEM|
+:Redirect ke Halaman\nMachine Dashboard;
+|ROLES|
+:Menambahkan Featured\nParameter;
+:Mengatur Chart;
+repeat
+:Menekan Tombol\nStore Chart;
+
+|SYSTEM|
+  :Validasi Data;
+  backward:Menampilkan\nPesan Error;
+repeat while (Valid?)
+|SYSTEM|
+
+
+:Menyimpan Data;
+:Menampilkan Pesan Sukses;
+stop
+@enduml
