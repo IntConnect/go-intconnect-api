@@ -332,36 +332,6 @@ func (permissionSeeder *PermissionSeeder) Run(gormDatabase *gorm.DB) error {
 			Auditable:   entity.NewAuditable("System"),
 		},
 
-		// SMTP Server
-		{
-			Code:        "SMTP_SERVER_VIEW",
-			Name:        "View",
-			Category:    "SMTP Server",
-			Description: "Permission to view SMTP servers",
-			Auditable:   entity.NewAuditable("System"),
-		},
-		{
-			Code:        "SMTP_SERVER_CREATE",
-			Name:        "Create",
-			Category:    "SMTP Server",
-			Description: "Permission to create SMTP servers",
-			Auditable:   entity.NewAuditable("System"),
-		},
-		{
-			Code:        "SMTP_SERVER_EDIT",
-			Name:        "Update",
-			Category:    "SMTP Server",
-			Description: "Permission to update SMTP servers",
-			Auditable:   entity.NewAuditable("System"),
-		},
-		{
-			Code:        "SMTP_SERVER_DELETE",
-			Name:        "Delete",
-			Category:    "SMTP Server",
-			Description: "Permission to delete SMTP servers",
-			Auditable:   entity.NewAuditable("System"),
-		},
-
 		// Modbus Server
 		{
 			Code:        "MODBUS_SERVER_VIEW",
