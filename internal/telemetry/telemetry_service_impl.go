@@ -50,9 +50,11 @@ func (telemetryService *ServiceImpl) GenerateReport(ginContext *gin.Context, tel
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		var searchedParameterIds []uint64
 		var mapOfParameterMachine = make(map[uint64]*entity.Machine)
+		var mapOfParameter = make(map[uint64]*entity.Parameter)
 		for _, parameterEntity := range reportDocumentTemplateEntity.Parameters {
 			searchedParameterIds = append(searchedParameterIds, parameterEntity.Id)
 			mapOfParameterMachine[parameterEntity.Id] = &parameterEntity.MqttTopic.Machine
+			mapOfParameter[parameterEntity.Id] = parameterEntity
 		}
 		dateTimeLayout := "2006-01-02 15:04"
 		startDate, _ := time.Parse(dateTimeLayout, telemetryReportFilterRequest.StartDate)
@@ -64,12 +66,12 @@ func (telemetryService *ServiceImpl) GenerateReport(ginContext *gin.Context, tel
 		for _, telemetryEntity := range telemetryEntities {
 			if telemetryReportValueArr, isExists := mapOfTelemetryReportValue[telemetryEntity.Bucket]; isExists {
 				telemetryReportValueArr = append(telemetryReportValueArr, &model.TelemetryReportValue{
-					Timestamp:   telemetryEntity.Bucket,
-					MachineId:   mapOfParameterMachine[telemetryEntity.ParameterId].Id,
-					MachineName: mapOfParameterMachine[telemetryEntity.ParameterId].Name,
-					MachineCode: mapOfParameterMachine[telemetryEntity.ParameterId].Code,
-					ParameterId: telemetryEntity.ParameterId,
-					Value:       telemetryEntity.LastValue,
+					Timestamp:     telemetryEntity.Bucket,
+					MachineId:     mapOfParameterMachine[telemetryEntity.ParameterId].Id,
+					MachineName:   mapOfParameterMachine[telemetryEntity.ParameterId].Name,
+					MachineCode:   mapOfParameterMachine[telemetryEntity.ParameterId].Code,
+					ParameterName: mapOfParameter[telemetryEntity.ParameterId].Name,
+					Value:         telemetryEntity.LastValue,
 				})
 				mapOfTelemetryReportValue[telemetryEntity.Bucket] = telemetryReportValueArr
 			} else {

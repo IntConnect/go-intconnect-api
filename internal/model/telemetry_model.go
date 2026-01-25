@@ -28,12 +28,12 @@ type TelemetryGrouped struct {
 }
 
 type TelemetryReportValue struct {
-	Timestamp   time.Time `json:"timestamp"`
-	MachineId   uint64    `json:"machine_id"`
-	MachineName string    `json:"machine_name"`
-	MachineCode string    `json:"machine_code"`
-	ParameterId uint64    `json:"parameter_id"`
-	Value       *float64  `json:"value"`
+	Timestamp     time.Time `json:"timestamp"`
+	MachineId     uint64    `json:"machine_id"`
+	MachineName   string    `json:"machine_name"`
+	MachineCode   string    `json:"machine_code"`
+	ParameterName string    `json:"parameter_name"`
+	Value         *float64  `json:"value"`
 }
 
 type TelemetryIntervalValues struct {
