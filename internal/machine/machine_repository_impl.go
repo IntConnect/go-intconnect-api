@@ -12,14 +12,14 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (machineRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]entity.Machine, error) {
-	var machineEntities []entity.Machine
+func (machineRepositoryImpl *RepositoryImpl) FindAll(gormTransaction *gorm.DB) ([]*entity.Machine, error) {
+	var machineEntities []*entity.Machine
 	err := gormTransaction.Find(&machineEntities).Error
 	return machineEntities, err
 }
 
-func (machineRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, machineIds []uint64) ([]entity.Machine, error) {
-	var machineEntities []entity.Machine
+func (machineRepositoryImpl *RepositoryImpl) FindBatchById(gormTransaction *gorm.DB, machineIds []uint64) ([]*entity.Machine, error) {
+	var machineEntities []*entity.Machine
 	err := gormTransaction.Where("id IN ?", machineIds).Find(&machineEntities).Error
 	return machineEntities, err
 }
@@ -29,8 +29,8 @@ func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(
 	orderClause string,
 	offsetVal, limitPage int,
 	searchQuery string,
-) ([]entity.Machine, int64, error) {
-	var machineEntities []entity.Machine
+) ([]*entity.Machine, int64, error) {
+	var machineEntities []*entity.Machine
 	var totalItems int64
 	rawQuery := gormTransaction.Model(&entity.Machine{})
 	if searchQuery != "" {

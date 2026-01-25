@@ -60,7 +60,7 @@ func (machineService *ServiceImpl) FindAll() []*model.MachineResponse {
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		machineEntities, err := machineService.machineRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		machineResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[entity.Machine, *model.MachineResponse](machineEntities, mapper.FuncMapAuditable)
+		machineResponsesRequest = helper.MapEntitiesIntoResponsesWithFunc[*entity.Machine, *model.MachineResponse](machineEntities, mapper.FuncMapAuditable)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -78,7 +78,7 @@ func (machineService *ServiceImpl) FindAllPagination(paginationReq *model.Pagina
 			paginationQuery.Limit,
 			paginationQuery.SearchQuery)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		machineResponses = helper.MapEntitiesIntoResponsesWithFunc[entity.Machine, *model.MachineResponse](
+		machineResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.Machine, *model.MachineResponse](
 			machineEntities,
 			mapper.FuncMapAuditable,
 		)

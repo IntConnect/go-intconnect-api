@@ -18,6 +18,6 @@ type Machine struct {
 	Auditable        Auditable          `gorm:"embedded"`
 }
 
-func (machineEntity Machine) GetAuditable() *Auditable {
+func (machineEntity *Machine) GetAuditable() *Auditable {
 	return &machineEntity.Auditable
 }
