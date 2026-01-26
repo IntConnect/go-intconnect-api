@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Melihat dan Mengubah Nilai Register
+title Activity Diagram – Melihat Real-Time Chart Multi Machine Dashboard Mode Executive
 
 '================================================
 ' STYLING
@@ -32,35 +32,13 @@ skinparam DiamondBorderColor #C5A600
 |ROLES|
 start
 :Login;
-:Mode Dashboard;
-if (Executive?) then (Ya)
-:Menekan Pinpoint Area;
-:Memilih Machine;
 
+:Memilih  Parameter;
 
-elseif (Machine)  then (Ya)
+:Klik Submit;
 |SYSTEM|
-|ROLES|
+:Filter Data\ndari Websocket;
+:Menampilkan Data;
 
-else (No)
-|ROLES|
-end
-endif
-:Menekan Panel Register;
-:Mengisi Nilai Value;
-
-
-repeat
-:Menekan Tombol Send;
-
-|SYSTEM|
-  :Validasi Data;
-  backward:Menampilkan\nPesan Error;
-repeat while (Valid?)
-|SYSTEM|
-
-
-:Menyimpan Data;
-:Menampilkan Pesan Sukses;
 stop
 @enduml

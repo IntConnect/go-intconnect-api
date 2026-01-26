@@ -1,0 +1,180 @@
+@startuml
+
+' Font configuration
+skinparam defaultFontName Times New Roman
+skinparam defaultFontSize 15
+
+' Participant styling
+skinparam participant {
+    BackgroundColor #ECF0F1
+    BorderColor #34495E
+    FontColor Black
+    FontName Times New Roman
+    FontSize 15
+}
+
+skinparam sequence {
+    ArrowColor #34495E
+    LifeLineBorderColor #34495E
+    LifeLineBackgroundColor #ECF0F1
+    ArrowFontName Times New Roman
+    ArrowFontSize 15
+}
+
+skinparam actorFontSize 15
+skinparam noteFontSize 15
+skinparam noteFontName "Times New Roman"
+
+' Actors and components
+actor "Administrator" as admin #E74C3C
+boundary "Dashboard\nPage" as boundDashboard #3498DB
+control "Auth\nMiddleware" as authMiddleware #9B59B6
+control "Register\nController" as controller #2ECC71
+control "Register\nService" as service #F39C12
+control "Register\nRepository" as repository #E67E22
+control "Modbus\nService" as modbusService #16A085
+database "Redis Cache" as dbRedis #C0392B
+database "PostgreSQL" as dbPsql #2980B9
+database "Modbus Server" as modbusServer #7F8C8D
+
+title
+<size:20><b>Sequence Diagram - View and Update Register Value</b></size>
+----
+end title
+
+autonumber
+
+note over admin, modbusServer
+    **Dashboard Mode:**
+    • Executive View: Pinpoint Area → Select Machine
+    • Machine View: Direct Machine Selection
+end note
+
+' === ACCESS DASHBOARD ===
+admin -> boundDashboard: Access Dashboard Mode
+activate boundDashboard
+
+alt Executive View
+    admin -> boundDashboard: Click Pinpoint Area
+    boundDashboard --> admin: **Show Facility Overview**
+    admin -> boundDashboard: Select Machine
+else Machine View
+    admin -> boundDashboard: Select Machine Directly
+end
+
+boundDashboard --> admin: **Display Machine Dashboard**
+
+' === VIEW REGISTER PANEL ===
+admin -> boundDashboard: Click Register Panel
+boundDashboard --> admin: **Show Register List\nwith Current Values**
+
+' === UPDATE REGISTER VALUE ===
+admin -> boundDashboard: Input New Value\n& Click Send
+
+boundDashboard -> authMiddleware: PUT /registers/value/{id}
+activate authMiddleware
+
+authMiddleware -> dbRedis: Validate JWT Token
+activate dbRedis
+dbRedis --> authMiddleware: Token Status
+deactivate dbRedis
+
+alt #LightPink Unauthorized (401)
+    authMiddleware --> boundDashboard: Authentication Failed
+    boundDashboard --> admin: **Redirect to Login**
+    deactivate authMiddleware
+    deactivate boundDashboard
+
+else #LightPink Forbidden (403)
+    authMiddleware --> boundDashboard: Insufficient Permission
+    boundDashboard --> admin: **Show 403 Forbidden Page**
+    deactivate authMiddleware
+    deactivate boundDashboard
+
+else #LightGreen Authenticated
+
+    authMiddleware -> controller: Forward Request
+    deactivate authMiddleware
+    activate controller
+
+    controller -> controller: Validate Request
+
+    controller -> service: Process Update Value
+    activate service
+
+    service -> service: Business Validation\n(Data Type, Range, Rules)
+
+    alt #LightPink Validation Failed
+        service --> controller: 422 Validation Error
+        controller --> boundDashboard: Error Response
+        boundDashboard --> admin: **Show Validation Error**
+        deactivate service
+        deactivate controller
+
+    else #LightGreen Validation Success
+
+        ' === SAVE TO DATABASE ===
+        service -> repository: Update Register Value
+        activate repository
+
+        repository -> dbPsql: Update Register Data
+        activate dbPsql
+
+        alt #LightPink Database Error
+            dbPsql --> repository: SQLException
+            deactivate dbPsql
+            repository --> service: Database Error
+            deactivate repository
+            service --> controller: 500 Internal Server Error
+            controller --> boundDashboard: Error Response
+            boundDashboard --> admin: **Show Error Message**
+            deactivate service
+            deactivate controller
+
+        else #LightGreen Success
+            dbPsql --> repository: Success
+            deactivate dbPsql
+
+            repository --> service: Success
+            deactivate repository
+
+            ' === SEND TO MODBUS SERVER ===
+            service -> modbusService: Write Register Value
+            activate modbusService
+
+            modbusService -> modbusServer: Send Command\n(Write Register)
+            activate modbusServer
+
+            alt #LightPink Modbus Error
+                modbusServer --> modbusService: Connection/Write Error
+                deactivate modbusServer
+                modbusService --> service: Modbus Exception
+                deactivate modbusService
+                service --> controller: 500 Internal Server Error
+                controller --> boundDashboard: Error Response
+                boundDashboard --> admin: **Show Modbus Error**
+                deactivate service
+                deactivate controller
+
+            else #LightGreen Modbus Success
+                modbusServer --> modbusService: Success
+                deactivate modbusServer
+
+                modbusService --> service: Value Written
+                deactivate modbusService
+
+                service --> controller: Success Response
+                deactivate service
+
+                controller --> boundDashboard: 200 OK
+                deactivate controller
+
+                boundDashboard --> admin: **Show Success Message**
+                boundDashboard --> admin: **Refresh Register Panel\nwith Updated Value**
+                deactivate boundDashboard
+            end
+        end
+    end
+end
+
+@enduml

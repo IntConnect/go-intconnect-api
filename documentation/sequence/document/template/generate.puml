@@ -100,7 +100,7 @@ else #LightGreen Authenticated
     repository --> service: Return <resource> List
     deactivate repository
 
-service -> service: Grouped By Timestamp
+    service -> service: Grouped By Timestamp
     service --> controller: Return Data List
     deactivate service
 
@@ -108,8 +108,65 @@ service -> service: Grouped By Timestamp
     deactivate controller
 
     boundList --> admin: **Display <resource> List**
-    deactivate boundList
 
+    ' === EXPORT FLOW ===
+    admin -> boundList: Click Export Button
+    note over admin, op
+    Choose Export Format:
+    - PDF
+    - Excel
+    end note
+
+    alt #LightBlue Export to PDF
+        boundList -> boundList: Generate PDF from Data\n(Client-side using library)
+        boundList --> admin: **Download PDF File**
+
+    else #LightYellow Export to Excel
+        boundList -> authMiddleware: POST /telemetries/report/export/excel
+        activate authMiddleware
+
+        authMiddleware -> dbRedis: Validate JWT Token
+        activate dbRedis
+        dbRedis --> authMiddleware: Token Status
+        deactivate dbRedis
+
+        alt #LightPink Unauthorized (401)
+            authMiddleware --> boundList: Authentication Failed
+            boundList --> admin: **Show Error Message**
+            deactivate authMiddleware
+
+        else #LightGreen Authenticated
+            authMiddleware -> controller: Forward Request
+            deactivate authMiddleware
+            activate controller
+
+            controller -> service: Export to Excel
+            activate service
+
+            service -> repository: Find All with Filters
+            activate repository
+
+            repository -> dbPsql: Query <resource> Data\n With Filter
+            activate dbPsql
+            dbPsql --> repository: Data Result
+            deactivate dbPsql
+
+            repository --> service: Return <resource> List
+            deactivate repository
+
+            service -> service: Create Excel Document
+            service -> service: Format Data & Apply Styles
+            service --> controller: Return Excel Buffer/File
+            deactivate service
+
+            controller --> boundList: 200 OK + Excel File
+            deactivate controller
+
+            boundList --> admin: **Download Excel File**
+        end
+    end
+
+    deactivate boundList
 end
 
 @enduml
