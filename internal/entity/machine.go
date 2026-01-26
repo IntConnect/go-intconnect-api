@@ -13,6 +13,8 @@ type Machine struct {
 	ModelPath        string             `gorm:"column:model_path"`
 	Facility         Facility           `gorm:"foreignKey:FacilityId;references:Id"`
 	MqttTopic        *MqttTopic         `gorm:"foreignKey:MachineId;"`
+	Parameters       []*Parameter       `gorm:"foreignKey:MachineId;references:Id"`
+	Registers        []*Register        `gorm:"foreignKey:MachineId;references:Id"`
 	MachineDocuments []*MachineDocument `gorm:"foreignKey:MachineId;references:Id"`
 	DashboardWidgets []*DashboardWidget `gorm:"foreignKey:MachineId;references:Id"`
 	Auditable        Auditable          `gorm:"embedded"`

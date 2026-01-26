@@ -55,20 +55,26 @@ func (machineRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, machineId uint64) (*entity.Machine, error) {
 	var machineEntity entity.Machine
 	err := gormTransaction.Model(&entity.Machine{}).
-		Preload("MachineDocuments", func(db *gorm.DB) *gorm.DB {
-			return db.
+		Preload("MachineDocuments", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.
 				Select("id", "description", "machine_id", "name", "file_path")
 		}).
-		Preload("MqttTopic", func(db *gorm.DB) *gorm.DB {
-			return db.
+		Preload("MqttTopic", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.
 				Select("id", "name", "mqtt_broker_id", "machine_id").
-				Preload("Parameters", func(db *gorm.DB) *gorm.DB {
-					return db.Select("id", "name", "code", "mqtt_topic_id", "unit", "is_featured")
+				Preload("Parameters", func(gormTransaction *gorm.DB) *gorm.DB {
+					return gormTransaction.Select("id", "name", "code", "mqtt_topic_id", "unit", "is_featured")
 				})
 		}).
 		Preload("MqttTopic.MqttBroker").
 		Preload("DashboardWidgets").
 		Preload("Facility").
+		Preload("Parameters", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.Select("id", "machine_id", "name", "unit", "position_x", "position_y", "position_z", "rotation_x", "rotation_y", "rotation_z")
+		}).
+		Preload("Registers", func(gormTransaction *gorm.DB) *gorm.DB {
+			return gormTransaction.Select("id", "machine_id", "name", "unit", "position_x", "position_y", "position_z", "rotation_x", "rotation_y", "rotation_z")
+		}).
 		Where("id = ?", machineId).
 		First(&machineEntity).Error
 

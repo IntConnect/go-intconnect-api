@@ -62,6 +62,7 @@ func (registerRepositoryImpl *RepositoryImpl) FindAllPagination(
 func (registerRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, registerId uint64) (*entity.Register, error) {
 	var registerEntity entity.Register
 	err := gormTransaction.Model(&entity.Register{}).
+		Preload("ModbusServer").
 		Where("id = ?", registerId).Find(&registerEntity).Error
 
 	return &registerEntity, err

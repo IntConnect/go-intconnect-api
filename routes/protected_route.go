@@ -212,6 +212,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	registerRouterGroup.GET("/dependency", protectedRoutes.registerController.FindRegisterDependency)
 	registerRouterGroup.POST("", protectedRoutes.registerController.CreateRegister)
 	registerRouterGroup.PUT("/:id", protectedRoutes.registerController.UpdateRegister)
+	registerRouterGroup.PUT("/value/:id", protectedRoutes.registerController.UpdateRegisterValue)
 	registerRouterGroup.DELETE("/:id", protectedRoutes.registerController.DeleteRegister)
 
 	alarmLogRouterGroup := routerGroup.Group("alarm-logs")

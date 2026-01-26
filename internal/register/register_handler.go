@@ -81,3 +81,15 @@ func (registerHandler *Handler) DeleteRegister(ginContext *gin.Context) {
 	paginatedResponse := registerHandler.registerService.Delete(ginContext, &deleteRegisterModel)
 	ginContext.JSON(http.StatusOK, paginatedResponse)
 }
+
+func (registerHandler *Handler) UpdateRegisterValue(ginContext *gin.Context) {
+	var updateRegisterValueRequest model.UpdateRegisterValueRequest
+	err := ginContext.ShouldBindBodyWithJSON(&updateRegisterValueRequest)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	registerId := ginContext.Param("id")
+	parsedRegisterId, err := strconv.ParseUint(registerId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	updateRegisterValueRequest.Id = parsedRegisterId
+	registerHandler.registerService.UpdateValue(ginContext, &updateRegisterValueRequest)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponse[interface{}]("Register value has been updated", nil))
+}

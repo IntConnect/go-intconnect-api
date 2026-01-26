@@ -69,7 +69,8 @@ SELECT *
 FROM processed_parameter_sequences;
 SELECT *
 FROM permissions;
-DELETE FROM alarm_logs;
+DELETE
+FROM alarm_logs;
 DELETE
 FROM check_sheet_values;
 DELETE
@@ -99,9 +100,6 @@ FROM (SELECT time_bucket_gapfill('5 minutes'::interval, timestamp) AS bucket,
       GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
 
-ALTER TABLE check_sheet_document_templates
-    ADD COLUMN starting_hour TIME NOT NULL default NOW();
-
 SELECT *
 FROM telemetries
 WHERE parameter_id = 1
@@ -110,7 +108,8 @@ SELECT *
 FROM check_sheet_check_points;
 SELECT *
 FROM check_sheet_check_point_values;
-SELECT * FROM roles_permissions;
+SELECT *
+FROM roles_permissions;
 SELECT bucket,
        parameter_id,
        last_value
@@ -124,23 +123,29 @@ FROM (SELECT time_bucket_gapfill('1 hours'::interval, timestamp, '2026-01-09 08:
       GROUP BY bucket, parameter_id) q
 ORDER BY bucket;
 
-ALTER TABLE machine_documents DROP COLUMN code;
+ALTER TABLE machine_documents
+    DROP COLUMN code;
 
 DROP TABLE check_sheet_values;
+SELECT *
+FROM telemetries
+ORDER BY id DESC;
+
+SELECT *
+FROM registers;
+
+ALTER TABLE registers
+    ADD COLUMN position_x FLOAT NOT NULL DEFAULT 0,
+    ADD COLUMN position_y FLOAT NOT NULL DEFAULT 0,
+    ADD COLUMN position_z FLOAT NOT NULL DEFAULT 0,
+    ADD COLUMN rotation_x FLOAT NOT NULL DEFAULT 0,
+    ADD COLUMN rotation_y FLOAT NOT NULL DEFAULT 0,
+    ADD COLUMN rotation_z FLOAT NOT NULL DEFAULT 0;
+
+ALTER TABLE registers
+    ADD COLUMN unit VARCHAR(255) NOT NULL DEFAULT '';
+
+
+SELECT * FROM parameters WHERE name = 'Delta T'
+
 SELECT * FROM telemetries ORDER BY id DESC;
-CREATE TABLE users_test
-(
-    id          SERIAL PRIMARY KEY,
-    role_id     BIGINT REFERENCES roles (id) NOT NULL,
-    username    VARCHAR(255)                 NOT NULL UNIQUE,
-    name        VARCHAR(255)                 NOT NULL UNIQUE,
-    email       VARCHAR(255)                 NOT NULL UNIQUE,
-    password    VARCHAR(255)                 NOT NULL,
-    avatar_path VARCHAR(255)                 NOT NULL,
-    created_by  VARCHAR(255),
-    created_at  TIMESTAMP DEFAULT NOW(),
-    updated_at  TIMESTAMP DEFAULT NOW(),
-    updated_by  VARCHAR(255),
-    deleted_at  TIMESTAMP DEFAULT NOW(),
-    deleted_by  VARCHAR(255)
-)

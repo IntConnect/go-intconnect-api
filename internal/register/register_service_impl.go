@@ -1,6 +1,9 @@
 package register
 
 import (
+	"context"
+	"fmt"
+	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -8,6 +11,8 @@ import (
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
 	"go-intconnect-api/pkg/mapper"
+	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -171,6 +176,54 @@ func (registerService *ServiceImpl) Update(ginContext *gin.Context, updateRegist
 	paginationRequest := model.NewPaginationRequest()
 	paginationResp = registerService.FindAllPagination(&paginationRequest)
 	return paginationResp
+}
+func (registerService *ServiceImpl) UpdateValue(ginContext *gin.Context, updateRegisterValueRequest *model.UpdateRegisterValueRequest) {
+	valErr := registerService.validatorService.ValidateStruct(updateRegisterValueRequest)
+	registerService.validatorService.ParseValidationError(valErr, *updateRegisterValueRequest)
+	err := registerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		registerEntity, err := registerService.registerRepository.FindById(gormTransaction, updateRegisterValueRequest.Id)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		modbusClient, err := configs.NewModbusTCPClient(
+			ctx,
+			fmt.Sprintf("%s:%s", registerEntity.ModbusServer.IpAddress, registerEntity.ModbusServer.Port),
+			1,
+		)
+		if err != nil {
+			exception.ThrowApplicationError(exception.NewApplicationError(500, "Manage value failed! there is error in target modbus"))
+		}
+		defer func(modbusClient *configs.ModbusTCPClient) {
+			err := modbusClient.Close()
+			if err != nil {
+				exception.ThrowApplicationError(exception.NewApplicationError(500, "Manage value failed! there is error in target modbus"))
+			}
+		}(modbusClient)
+		err = modbusClient.WriteFloat32(0, updateRegisterValueRequest.Value)
+		if err != nil {
+			log.Println("write failed:", err)
+		}
+		auditPayload := registerService.auditLogService.Build(
+			nil,
+			map[string]interface{}{
+				"id":              registerEntity.Id,
+				"name":            registerEntity.Name,
+				"memory_location": registerEntity.MemoryLocation,
+				"value":           updateRegisterValueRequest.Value,
+			},
+			nil,
+			"",
+		)
+
+		err = registerService.auditLogService.Record(ginContext,
+			model.AUDIT_LOG_UPDATE,
+			model.AUDIT_LOG_FEATURE_REGISTER_VALUE,
+			auditPayload)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
 }
 
 func (registerService *ServiceImpl) Delete(ginContext *gin.Context, deleteRegisterRequest *model.DeleteResourceGeneralRequest) *model.PaginatedResponse[*model.RegisterResponse] {

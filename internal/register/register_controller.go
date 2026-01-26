@@ -10,4 +10,5 @@ type Controller interface {
 	CreateRegister(ginContext *gin.Context)
 	DeleteRegister(ginContext *gin.Context)
 	UpdateRegister(ginContext *gin.Context)
+	UpdateRegisterValue(ginContext *gin.Context)
 }

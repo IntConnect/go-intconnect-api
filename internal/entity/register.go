@@ -8,6 +8,13 @@ type Register struct {
 	Name           string       `gorm:"column:name"`
 	Description    string       `gorm:"column:description"`
 	DataType       string       `gorm:"column:data_type"`
+	PositionX      float64      `gorm:"column:position_x"`
+	PositionY      float64      `gorm:"column:position_y"`
+	PositionZ      float64      `gorm:"column:position_z"`
+	RotationX      float64      `gorm:"column:rotation_x"`
+	RotationY      float64      `gorm:"column:rotation_y"`
+	RotationZ      float64      `gorm:"column:rotation_z"`
+	Unit           string       `gorm:"column:unit"`
 	Machine        Machine      `gorm:"foreignKey:MachineId;references:Id"`
 	ModbusServer   ModbusServer `gorm:"foreignKey:ModbusServerId;references:Id"`
 	Auditable      Auditable    `gorm:"embedded"`

@@ -16,20 +16,18 @@ func NewRepository() *RepositoryImpl {
 func (telemetryRepositoryImpl *RepositoryImpl) FindAllFilter(gormTransaction *gorm.DB, searchedParameterIds []uint64, intervalVal string, startDate, endDate time.Time) ([]*entity.TelemetryQuery, error) {
 	sqlQuery := `
 SELECT
-	id,
   bucket,
   parameter_id,
   last_value
 FROM (
     SELECT 
-        id,
       time_bucket_gapfill(?::interval, timestamp) AS bucket,
       parameter_id,
       last(value, timestamp) AS last_value
     FROM telemetries
     WHERE parameter_id IN (?)
       AND timestamp BETWEEN ? AND ?
-    GROUP BY id, bucket, parameter_id
+    GROUP BY bucket, parameter_id
 ) q
 ORDER BY bucket;
 `

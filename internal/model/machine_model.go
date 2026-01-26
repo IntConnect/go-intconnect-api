@@ -14,10 +14,11 @@ type MachineResponse struct {
 	ThumbnailPath     string                     `json:"thumbnail_path"`
 	ModelPath         string                     `json:"model_path"`
 	MqttTopic         *MqttTopicResponse         `json:"mqtt_topic" mapstructure:"MqttTopic"`
-	Parameter         *ParameterResponse         `json:"parameter" mapstructure:"Parameter"`
+	Parameters        []*ParameterResponse       `json:"parameters" mapstructure:"Parameters"`
+	Registers         []*RegisterResponse        `json:"registers" mapstructure:"Registers"`
 	MachineDocuments  []*MachineDocumentResponse `json:"machine_documents" mapstructure:"MachineDocuments"`
 	DashboardWidget   []*DashboardWidgetResponse `json:"widgets" mapstructure:"DashboardWidgets"`
-	Facility          *FacilityResponse          `json:"facility" `
+	Facility          *FacilityResponse          `json:"facility"`
 	AuditableResponse *AuditableResponse         `json:"auditable" mapstructure:"-"`
 }
 
