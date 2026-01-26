@@ -3,6 +3,7 @@ CREATE TABLE registers
     id               SERIAL PRIMARY KEY,
     machine_id       BIGINT       NOT NULL REFERENCES machines (id),
     modbus_server_id BIGINT       NOT NULL REFERENCES modbus_servers (id),
+    code             VARCHAR(255) NOT NULL DEFAULT '',
     memory_location  VARCHAR(255) NOT NULL,
     name             VARCHAR(255) NOT NULL,
     description      VARCHAR(255) NOT NULL,

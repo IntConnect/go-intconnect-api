@@ -143,9 +143,10 @@ ALTER TABLE registers
     ADD COLUMN rotation_z FLOAT NOT NULL DEFAULT 0;
 
 ALTER TABLE registers
-    ADD COLUMN unit VARCHAR(255) NOT NULL DEFAULT '';
+    ADD COLUMN unit VARCHAR(255) NOT NULL DEFAULT '',
+    ADD COLUMN code VARCHAR(255) NOT NULL DEFAULT '';
 
 
-SELECT * FROM parameters WHERE name = 'Delta T'
-
-SELECT * FROM telemetries ORDER BY id DESC;
+SELECT *
+FROM telemetries
+ORDER BY id DESC;
