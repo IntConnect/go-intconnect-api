@@ -28,10 +28,11 @@ skinparam noteFontName "Times New Roman"
 ' Actors and components
 actor "Administrator" as admin #E74C3C
 boundary "Dashboard\nPage" as boundDashboard #3498DB
+boundary "Facility\nPage" as boundFacility #3498DB
+boundary "Machine\nPage" as boundMachine #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Register\nController" as controller #2ECC71
 control "Register\nService" as service #F39C12
-control "Register\nRepository" as repository #E67E22
 control "Modbus\nService" as modbusService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
@@ -44,32 +45,29 @@ end title
 
 autonumber
 
-note over admin, modbusServer
-    **Dashboard Mode:**
-    • Executive View: Pinpoint Area → Select Machine
-    • Machine View: Direct Machine Selection
-end note
-
 ' === ACCESS DASHBOARD ===
-admin -> boundDashboard: Access Dashboard Mode
+admin -> boundDashboard: Access Dashboard
 activate boundDashboard
 
-alt Executive View
+alt Executive Mode
     admin -> boundDashboard: Click Pinpoint Area
-    boundDashboard --> admin: **Show Facility Overview**
-    admin -> boundDashboard: Select Machine
-else Machine View
+    boundDashboard --> admin: Redirect Into Facility Overview
+    admin -> boundFacility: Select Machine
+    boundDashboard --> admin: Redirect Into Machine Overview
+admin -> boundMachine: Click Register Panel
+
+else Machine Mode
     admin -> boundDashboard: Select Machine Directly
+admin -> boundDashboard: Click Register Panel
+
 end
 
-boundDashboard --> admin: **Display Machine Dashboard**
 
 ' === VIEW REGISTER PANEL ===
-admin -> boundDashboard: Click Register Panel
-boundDashboard --> admin: **Show Register List\nwith Current Values**
+boundDashboard --> admin: Show Manage Dialog Register Value
 
 ' === UPDATE REGISTER VALUE ===
-admin -> boundDashboard: Input New Value\n& Click Send
+admin -> boundDashboard: Input  Value\n& Click Send
 
 boundDashboard -> authMiddleware: PUT /registers/value/{id}
 activate authMiddleware
@@ -108,35 +106,12 @@ else #LightGreen Authenticated
         service --> controller: 422 Validation Error
         controller --> boundDashboard: Error Response
         boundDashboard --> admin: **Show Validation Error**
-        deactivate service
-        deactivate controller
 
     else #LightGreen Validation Success
 
-        ' === SAVE TO DATABASE ===
-        service -> repository: Update Register Value
-        activate repository
 
-        repository -> dbPsql: Update Register Data
-        activate dbPsql
 
-        alt #LightPink Database Error
-            dbPsql --> repository: SQLException
-            deactivate dbPsql
-            repository --> service: Database Error
-            deactivate repository
-            service --> controller: 500 Internal Server Error
-            controller --> boundDashboard: Error Response
-            boundDashboard --> admin: **Show Error Message**
-            deactivate service
-            deactivate controller
 
-        else #LightGreen Success
-            dbPsql --> repository: Success
-            deactivate dbPsql
-
-            repository --> service: Success
-            deactivate repository
 
             ' === SEND TO MODBUS SERVER ===
             service -> modbusService: Write Register Value
@@ -153,8 +128,6 @@ else #LightGreen Authenticated
                 service --> controller: 500 Internal Server Error
                 controller --> boundDashboard: Error Response
                 boundDashboard --> admin: **Show Modbus Error**
-                deactivate service
-                deactivate controller
 
             else #LightGreen Modbus Success
                 modbusServer --> modbusService: Success
@@ -170,11 +143,8 @@ else #LightGreen Authenticated
                 deactivate controller
 
                 boundDashboard --> admin: **Show Success Message**
-                boundDashboard --> admin: **Refresh Register Panel\nwith Updated Value**
                 deactivate boundDashboard
             end
         end
-    end
 end
-
 @enduml

@@ -27,6 +27,10 @@ skinparam noteFontName "Times New Roman"
 
 ' Actors and components
 actor "Administrator" as admin #E74C3C
+actor "Manager" as mgr #3498DB
+actor "Supervisor" as spv #2ECC71
+actor "Maintenance" as mtn #F39C12
+actor "Operator" as op #9B59B6
 boundary "Dashboard\nPage" as boundList #3498DB
 control "Auth\nMiddleware" as authMiddleware #9B59B6
 control "Layer\nController" as controller #2ECC71
@@ -36,19 +40,18 @@ database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
 
 title
-<size:20><b>Sequence Diagram - Membaca Real-Time Chart Multi-Machine Dashboard Mode Executive</b></size>
+<size:20><b>Sequence Diagram - Read Real-Time Chart Machine Dashboard Mode Machine</b></size>
 ----
 end title
 
 autonumber
 
 
-
 ' === MAIN FLOW ===
-admin -> boundList: Access Dashboard\nMode Executive
+admin -> boundList: Access Dashboard Mode Machine
 activate boundList
 
-boundList -> authMiddleware: GET /mqtt-brokers
+boundList -> authMiddleware: GET /machines
 activate authMiddleware
 
 ' === AUTHENTICATION ===
@@ -75,19 +78,19 @@ else #LightGreen Authenticated
     deactivate authMiddleware
     activate controller
 
-    controller -> service: Get MQTT List
+    controller -> service: Get Machine List
     activate service
 
     ' === FETCH DATA FROM DATABASE ===
     service -> repository: Find All
     activate repository
 
-    repository -> dbPsql: Query Data
+    repository -> dbPsql: Query Data with\nMQTT Broker and Parameter
     activate dbPsql
     dbPsql --> repository: Data Result
     deactivate dbPsql
 
-    repository --> service: Return MQTT Broker List
+    repository --> service: Return Machine List
     deactivate repository
 
     service --> controller: Return Data List
@@ -95,17 +98,16 @@ else #LightGreen Authenticated
 
     controller --> boundList: 200 OK + Data
     deactivate controller
-
-    boundList --> admin: **Display MQTT Broker List**
+    boundList -> boundList: Create WebSocket Connection
+    boundList --> admin: Display Real-Time Data
+    boundList --> admin: Attach Parameter\nData Into Selection
     deactivate boundList
-    admin -> boundList: Pilih Mesin dan Parameter
+    admin -> boundList: Pick Parameter
     note over admin, boundList
-    Dibatasi 2 Mesin
-    dan 4 Parameter
+    Dibatasi 4 Parameter
     endnote
-    boundList -> boundList: Membuat Koneksi ke WebSocket
-    boundList --> admin: Menampilkan Data Real-Time
-
+    boundList -> boundList: Filter Real-Time Data
+    boundList --> admin: Display Data in Chart
 end
 
 @enduml

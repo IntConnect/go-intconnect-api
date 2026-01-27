@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Penghapusan Data Pada Fitur-Fitur di Menu Configuration
+title Activity Diagram – Menghapus Data Pada Fitur-Fitur dengan Kategori Configuration
 
 '================================================
 ' STYLING
