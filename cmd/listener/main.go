@@ -31,11 +31,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	InsertionWorkersAmount = 25
-	InsertionQueueSize     = 1000
-)
-
 func main() {
 	contextWithCancel, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
@@ -81,6 +76,7 @@ type ListenerFluxor struct {
 	alarmMutex                     sync.Mutex
 	redisInstance                  *configs.RedisInstance
 	websocketHub                   *websocketConfig.Hub
+	listenerSettingPayload         model.ListenerSettingPayload
 }
 
 func NewListenerFluxor() *ListenerFluxor {
@@ -95,6 +91,13 @@ func NewListenerFluxor() *ListenerFluxor {
 	redisConfig := configs.NewRedisConfig(redisHostName, redisPassword, redisDatabaseIndex)
 	redisInstance, err := configs.InitRedisInstance(redisConfig)
 	websocketHub := websocketConfig.NewHub()
+	listenerSettingPayload := model.ListenerSettingPayload{
+		InsertionWorkersAmount: 25,
+		InsertionQueueSize:     1000,
+		ParameterRecoveryCount: 20,
+		SnapshotTicker:         1,
+		SnapshotTickerType:     "Minutes",
+	}
 
 	if err != nil {
 		logger.WithError(err).Fatal("failed to init redis instance")
@@ -106,7 +109,7 @@ func NewListenerFluxor() *ListenerFluxor {
 		parametersMap:                  make(map[string]*entity.Parameter),
 		processedParametersMap:         make(map[uint64]*entity.Parameter),
 		processedParameterSequencesMap: make(map[uint64][]entity.ProcessedParameterSequence),
-		insertionChan:                  make(chan []*entity.Telemetry, InsertionQueueSize),
+		insertionChan:                  make(chan []*entity.Telemetry, listenerSettingPayload.InsertionQueueSize),
 		waitGroup:                      &sync.WaitGroup{},
 		telemetryRepository:            telemetryRepository,
 		parameterRepository:            parameterRepository,
@@ -117,6 +120,7 @@ func NewListenerFluxor() *ListenerFluxor {
 		recoveryBuffers:                make(map[uint64]*AlarmRecoveryWindow),
 		redisInstance:                  redisInstance,
 		websocketHub:                   websocketHub,
+		listenerSettingPayload:         listenerSettingPayload,
 	}
 
 	if err := listenerFluxor.loadInitialConfiguration(); err != nil {
@@ -175,6 +179,14 @@ func (listenerFluxor *ListenerFluxor) loadInitialConfiguration() error {
 		len(listenerFluxor.mqttBrokersMap),
 		len(listenerFluxor.parametersMap),
 		len(listenerFluxor.processedParametersMap))
+
+	newListenerSettingPayload := model.ListenerSettingPayload{}
+	listenerSettingString, err := listenerFluxor.redisInstance.RedisClient.Get(context.Background(), "dashboard_settings:listener_setting").Result()
+	err = json.Unmarshal([]byte(listenerSettingString), &newListenerSettingPayload)
+	if err != nil {
+		logger.Warn("Failed to load listener setting payload")
+	}
+	listenerFluxor.listenerSettingPayload = newListenerSettingPayload
 	return nil
 }
 
@@ -272,6 +284,14 @@ func (listenerFluxor *ListenerFluxor) CheckConfigurationPeriodically() {
 	changed := isMqttBrokerMapChanged(listenerFluxor.mqttBrokersMap, newMqttBrokersMap)
 	listenerFluxor.rwMutex.RUnlock()
 
+	newListenerSettingPayload := model.ListenerSettingPayload{}
+	listenerSettingString, err := listenerFluxor.redisInstance.RedisClient.Get(context.Background(), "dashboard_settings:listener_setting").Result()
+	err = json.Unmarshal([]byte(listenerSettingString), &newListenerSettingPayload)
+	if err != nil {
+		logger.Warn("Failed to load listener setting payload")
+	}
+	listenerFluxor.listenerSettingPayload = newListenerSettingPayload
+
 	if changed {
 		logger.Warn("MQTT broker configuration changed. Restarting MQTT broker...")
 		listenerFluxor.rwMutex.Lock()
@@ -341,7 +361,7 @@ func (listenerFluxor *ListenerFluxor) resubscribeTopics(ctx context.Context) err
 }
 
 func (listenerFluxor *ListenerFluxor) StartWorkers(ctx context.Context) {
-	for i := 1; i <= InsertionWorkersAmount; i++ {
+	for i := 1; i <= int(listenerFluxor.listenerSettingPayload.InsertionWorkersAmount); i++ {
 		listenerFluxor.waitGroup.Add(1)
 		go insertionWorker(i, ctx, listenerFluxor.insertionChan, listenerFluxor.telemetryRepository, listenerFluxor.waitGroup, listenerFluxor.gormDatabase)
 	}
@@ -589,7 +609,7 @@ func converterMqttTopicsToListenerResponse(mqttTopicEntities []entity.MqttTopic)
 
 func (listenerFluxor *ListenerFluxor) StartSnapshotSaver(ctx context.Context) {
 	go func() {
-		snapshotTicker := time.NewTicker(3 * time.Second)
+		snapshotTicker := time.NewTicker(1 * time.Minute)
 		defer snapshotTicker.Stop()
 
 		for {
