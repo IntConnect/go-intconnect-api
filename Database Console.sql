@@ -146,7 +146,10 @@ ALTER TABLE registers
     ADD COLUMN unit VARCHAR(255) NOT NULL DEFAULT '',
     ADD COLUMN code VARCHAR(255) NOT NULL DEFAULT '';
 
+ALTER TABLE check_sheet_document_templates
+    ADD COLUMN
+        interval_type VARCHAR(255) NOT NULL DEFAULT 'Hour';
+
 
 SELECT *
-FROM telemetries
-ORDER BY id DESC;
+FROM check_sheet_document_templates;

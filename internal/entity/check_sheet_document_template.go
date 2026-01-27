@@ -13,6 +13,7 @@ type CheckSheetDocumentTemplate struct {
 	Description    string                                   `gorm:"column:description"`
 	Category       trait.CheckSheetDocumentTemplateCategory `gorm:"column:category"`
 	Interval       int                                      `gorm:"column:interval"`
+	IntervalType   string                                   `gorm:"column:interval_type"`
 	RotationType   string                                   `gorm:"column:rotation_type"`
 	RevisionNumber int                                      `gorm:"column:revision_number"`
 	EffectiveDate  time.Time                                `gorm:"column:effective_date"`
