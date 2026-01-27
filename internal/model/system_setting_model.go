@@ -36,11 +36,11 @@ type DashboardSettingPayload struct {
 }
 
 type ListenerSettingPayload struct {
-	InsertionWorkersAmount *uint64 `mapstructure:"insertion_workers_amount" validate:"required,gte=1"`
-	InsertionQueueSize     *uint64 `mapstructure:"insertion_queue_size" validate:"required,gte=1"`
-	ParameterRecoveryCount uint64  `mapstructure:"parameter_recovery_count" validate:"required,gte=1"`
-	SnapshotTicker         uint64  `mapstructure:"snapshot_ticker" validate:"required,gte=1"`
-	SnapshotTickerType     string  `mapstructure:"snapshot_ticker_type" validate:"required"`
+	InsertionWorkersAmount uint64 `mapstructure:"insertion_workers_amount" validate:"required,gte=1"`
+	InsertionQueueSize     uint64 `mapstructure:"insertion_queue_size" validate:"required,gte=1"`
+	ParameterRecoveryCount uint64 `mapstructure:"parameter_recovery_count" validate:"required,gte=1"`
+	SnapshotTicker         uint64 `mapstructure:"snapshot_ticker" validate:"required,gte=1"`
+	SnapshotTickerType     string `mapstructure:"snapshot_ticker_type" validate:"required"`
 }
 
 type SystemSettingResponse struct {

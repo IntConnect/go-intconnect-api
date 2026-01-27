@@ -1,6 +1,7 @@
 package system_setting
 
 import (
+	"go-intconnect-api/configs"
 	auditLog "go-intconnect-api/internal/audit_log"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
@@ -29,6 +30,7 @@ func NewService(systemSettingRepository Repository, validatorService validator.S
 	viperConfig *viper.Viper, auditLogService auditLog.Service,
 	localStorageService *storage.Manager,
 	systemSettingRegistry *Registry,
+	redisInstance *configs.RedisInstance,
 ) *ServiceImpl {
 	systemSettingRegistry.Register(
 		"DASHBOARD_SETTINGS",
@@ -36,7 +38,7 @@ func NewService(systemSettingRepository Repository, validatorService validator.S
 	)
 	systemSettingRegistry.Register(
 		"LISTENER_SETTINGS",
-		processor.NewListenerSettingHandler(validatorService),
+		processor.NewListenerSettingHandler(validatorService, redisInstance),
 	)
 	return &ServiceImpl{
 		systemSettingRepository: systemSettingRepository,
@@ -65,8 +67,8 @@ func (systemSettingService *ServiceImpl) FindByKey(systemSettingKey string, isMi
 	var systemSettingResponsesRequest *model.SystemSettingResponse
 
 	err := systemSettingService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		systemSettingEntities, _ := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, systemSettingKey)
-
+		systemSettingEntities, err := systemSettingService.systemSettingRepository.FindByKey(gormTransaction, systemSettingKey)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if isMinimal {
 			systemSettingResponsesRequest = helper.MapEntityIntoResponse[*entity.SystemSetting, *model.SystemSettingResponse](systemSettingEntities)
 		} else {

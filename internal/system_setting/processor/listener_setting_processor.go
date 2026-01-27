@@ -1,6 +1,9 @@
 package processor
 
 import (
+	"encoding/json"
+	"fmt"
+	"go-intconnect-api/configs"
 	"go-intconnect-api/internal/entity"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/validator"
@@ -14,13 +17,16 @@ import (
 
 type ListenerSettingHandler struct {
 	validatorService validator.Service
+	redisInstance    *configs.RedisInstance
 }
 
 func NewListenerSettingHandler(
 	validatorService validator.Service,
+	redisInstance *configs.RedisInstance,
 ) *ListenerSettingHandler {
 	return &ListenerSettingHandler{
 		validatorService: validatorService,
+		redisInstance:    redisInstance,
 	}
 }
 
@@ -45,5 +51,17 @@ func (listenerSettingHandler *ListenerSettingHandler) Handle(
 	](manageSystemSettingRequest)
 
 	systemSettingEntity.Value = updatedSystemSettingEntity.Value
+	marshalledListenerSettingEntity, err := json.Marshal(updatedSystemSettingEntity.Value)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
+	fmt.Println(marshalledListenerSettingEntity, updatedSystemSettingEntity.Value)
+	redisKey := fmt.Sprintf("dashboard_settings:listener_setting")
+	err = listenerSettingHandler.redisInstance.RedisClient.Set(
+		ginContext.Request.Context(),
+		redisKey,
+		marshalledListenerSettingEntity,
+		0,
+	).Err()
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
+
 	return updatedSystemSettingEntity, nil
 }
