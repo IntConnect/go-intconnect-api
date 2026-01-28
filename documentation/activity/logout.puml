@@ -50,9 +50,8 @@ skinparam NoteBorderColor #E0C66F
 |ROLES|
 start
 :Membuka Aplikasi;
-:Menekan Login;
 :Menyorot Menu User;
-:Menekan Tombol Login;
+:Menekan Tombol Logout;
 |#AntiqueWhite|System|
 :Menghapus Informasi Sesi;
 :Redirect ke\nHalaman Login;

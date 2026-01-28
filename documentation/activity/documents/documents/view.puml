@@ -1,111 +1,58 @@
 @startuml
+title Activity Diagram – Melihat Data Pada Fitur-Fitur dengan Kategori Documents
 
-' Font configuration
-skinparam defaultFontName Times New Roman
-skinparam defaultFontSize 15
+'================================================
+' STYLING
+'================================================
+skinparam backgroundColor #FAFAFA
+skinparam DefaultFontName "Times New Roman"
+skinparam defaultFontSize 14
 
-' Participant styling
-skinparam participant {
-    BackgroundColor #ECF0F1
-    BorderColor #34495E
-    FontColor Black
-    FontName Times New Roman
-    FontSize 15
-}
+skinparam Padding 3
+skinparam PartitionHeaderFontStyle bold
 
-skinparam sequence {
-    ArrowColor #34495E
-    LifeLineBorderColor #34495E
-    LifeLineBackgroundColor #ECF0F1
-    ArrowFontName Times New Roman
-    ArrowFontSize 15
-}
+skinparam ArrowColor #2E2E2E
+skinparam ArrowThickness 2
 
-skinparam actorFontSize 15
-skinparam noteFontSize 15
-skinparam noteFontName "Times New Roman"
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #7A7A7A
 
-' Actors and components
-actor "Administrator" as admin #E74C3C
-boundary "Dashboard\nPage" as boundList #3498DB
-control "Auth\nMiddleware" as authMiddleware #9B59B6
-control "Layer\nController" as controller #2ECC71
-control "Layer\nService" as service #F39C12
-control "Layer\nRepository" as repository #E67E22
-database "Redis Cache" as dbRedis #C0392B
-database "PostgreSQL" as dbPsql #2980B9
+skinparam StartColor #4CAF50
+skinparam EndColor #E53935
 
-title
-<size:20><b>Sequence Diagram - Membaca Real-Time Chart Multi-Machine Dashboard Mode Executive</b></size>
-----
-end title
+skinparam DiamondBackgroundColor #FFF7CC
+skinparam DiamondBorderColor #C5A600
 
-autonumber
+!define ROLES Administrator
+!define SYSTEM #AntiqueWhite|System
 
-
-
-' === MAIN FLOW ===
-admin -> boundList: Access Dashboard\nMode Executive
-activate boundList
-
-boundList -> authMiddleware: GET /mqtt-brokers
-activate authMiddleware
-
-' === AUTHENTICATION ===
-authMiddleware -> dbRedis: Validate JWT Token
-activate dbRedis
-dbRedis --> authMiddleware: Token Status
-deactivate dbRedis
-
-alt #LightPink Unauthorized (401)
-    authMiddleware --> boundList: Authentication Failed
-    boundList --> admin: **Redirect to Login**
-    deactivate authMiddleware
-    deactivate boundList
-
-else #LightPink Forbidden (403)
-    authMiddleware --> boundList: Insufficient Permission
-    boundList --> admin: **Show 403 Forbidden Page**
-    deactivate authMiddleware
-    deactivate boundList
-
-else #LightGreen Authenticated
-
-    authMiddleware -> controller: Forward Request
-    deactivate authMiddleware
-    activate controller
-
-    controller -> service: Get MQTT List
-    activate service
-
-    ' === FETCH DATA FROM DATABASE ===
-    service -> repository: Find All
-    activate repository
-
-    repository -> dbPsql: Query Data
-    activate dbPsql
-    dbPsql --> repository: Data Result
-    deactivate dbPsql
-
-    repository --> service: Return MQTT Broker List
-    deactivate repository
-
-    service --> controller: Return Data List
-    deactivate service
-
-    controller --> boundList: 200 OK + Data
-    deactivate controller
-
-    boundList --> admin: **Display MQTT Broker List**
-    deactivate boundList
-    admin -> boundList: Pilih Mesin dan Parameter
-    note over admin, boundList
-    Dibatasi 2 Mesin
-    dan 4 Parameter
-    endnote
-    boundList -> boundList: Membuat Koneksi ke WebSocket
-    boundList --> admin: Menampilkan Data Real-Time
-
+'================================================
+' PAGE 1 – ACCESS & MENU
+'================================================
+|ROLES|
+start
+:Login;
+:Sorot Menu\nDocuments;
+:Pilih Menu;
+if (Report Document\nTemplate?) then (Ya)
+elseif (Check Sheet\nDocument Template)  then (Ya)
+else (No)
 end
+endif
 
+|SYSTEM|
+:Redirect ke Halaman\nDaftar Data;
+|SYSTEM|
+if (Memiliki Akses?) then (Ya)
+:Menampilkan Halaman\nDaftar Data;
+
+else (Tidak)
+:Menampilkan Halaman
+401 Unauthorized;
+endif
+
+:Menampilkan Halaman\nDaftar Data;
+
+
+stop
 @enduml

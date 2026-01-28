@@ -1,5 +1,5 @@
 @startuml
-title Activity Diagram – Penghapusan Data Pada Fitur-Fitur di Menu Connection
+title Activity Diagram – Mengubah Data Pada Fitur-Fitur dengan Kategori Connection
 
 '================================================
 ' STYLING
@@ -65,7 +65,6 @@ repeat
   backward:Menampilkan\nPesan Error;
 repeat while (Valid?)
 
-title **Activity – Create Master Data (Persistence & Result)**
 
 '================================================
 ' PAGE 3 – SAVE & RESULT
