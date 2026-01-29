@@ -52,6 +52,14 @@ func (alarmLogHandler *Handler) FindAlarmLogByMachineId(ginContext *gin.Context)
 	machineId := ginContext.Param("id")
 	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	alarmLogResponses := alarmLogHandler.alarmLogService.FindByMachineId(ginContext, parsedMachineId)
+	alarmLogResponses := alarmLogHandler.alarmLogService.FindByMachineId(ginContext, parsedMachineId, false)
+	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Alarm log fetch successfully", alarmLogResponses))
+}
+
+func (alarmLogHandler *Handler) FindMinimalAlarmLogByMachineId(ginContext *gin.Context) {
+	machineId := ginContext.Param("id")
+	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
+	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
+	alarmLogResponses := alarmLogHandler.alarmLogService.FindByMachineId(ginContext, parsedMachineId, true)
 	ginContext.JSON(http.StatusOK, helper.NewSuccessResponseWithEntries("Alarm log fetch successfully", alarmLogResponses))
 }

@@ -9,7 +9,7 @@ import (
 type Service interface {
 	FindAll() []*model.MachineResponse
 	FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.MachineResponse]
-	FindById(ginContext *gin.Context, machineId uint64) *model.MachineResponse
+	FindById(ginContext *gin.Context, machineId uint64, isMinimal bool) *model.MachineResponse
 	FindByFacilityId(ginContext *gin.Context, facilityId uint64) []*model.MachineResponse
 	ManageDashboard(ginContext *gin.Context, machineDashboardWidget *model.MachineDashboardWidget)
 	Create(ginContext *gin.Context, createMachineRequest *model.CreateMachineRequest)

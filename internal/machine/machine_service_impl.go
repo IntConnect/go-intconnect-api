@@ -95,12 +95,16 @@ func (machineService *ServiceImpl) FindAllPagination(paginationReq *model.Pagina
 	)
 }
 
-func (machineService *ServiceImpl) FindById(ginContext *gin.Context, machineId uint64) *model.MachineResponse {
+func (machineService *ServiceImpl) FindById(ginContext *gin.Context, machineId uint64, isMinimal bool) *model.MachineResponse {
 	var machineResponseRequest *model.MachineResponse
 	err := machineService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		machineEntity, err := machineService.machineRepository.FindById(gormTransaction, machineId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		machineResponseRequest = helper.MapEntityIntoResponse[*entity.Machine, *model.MachineResponse](machineEntity)
+		if isMinimal {
+			machineResponseRequest = helper.MapEntityIntoResponseWithIgnoredFields[*entity.Machine, *model.MachineResponse](machineEntity, []string{}, mapper.FuncMapAuditable)
+		} else {
+			machineResponseRequest = helper.MapEntityIntoResponse[*entity.Machine, *model.MachineResponse](machineEntity, mapper.FuncMapAuditable)
+		}
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

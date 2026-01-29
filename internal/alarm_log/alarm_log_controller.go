@@ -7,4 +7,5 @@ type Controller interface {
 	FindAllAlarmLogPagination(ginContext *gin.Context)
 	UpdateAlarmLog(ginContext *gin.Context)
 	FindAlarmLogByMachineId(context *gin.Context)
+	FindMinimalAlarmLogByMachineId(context *gin.Context)
 }

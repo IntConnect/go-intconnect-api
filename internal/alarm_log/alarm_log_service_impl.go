@@ -37,15 +37,15 @@ func NewService(alarmLogRepository Repository, validatorService validator.Servic
 }
 
 func (alarmLogService *ServiceImpl) FindAll() []*model.AlarmLogResponse {
-	var allAlarmLog []*model.AlarmLogResponse
+	var alarmLogResponses []*model.AlarmLogResponse
 	err := alarmLogService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		alarmLogResponse, err := alarmLogService.alarmLogRepository.FindAll(gormTransaction)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allAlarmLog = helper.MapEntitiesIntoResponsesWithFunc[*entity.AlarmLog, *model.AlarmLogResponse](alarmLogResponse, mapper.FuncMapAlarmLog)
+		alarmLogResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.AlarmLog, *model.AlarmLogResponse](alarmLogResponse, mapper.FuncMapAlarmLog)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return allAlarmLog
+	return alarmLogResponses
 }
 
 func (alarmLogService *ServiceImpl) FindAllPagination(paginationReq *model.PaginationRequest) *model.PaginatedResponse[*model.AlarmLogResponse] {
@@ -100,8 +100,8 @@ func (alarmLogService *ServiceImpl) Update(ginContext *gin.Context, updateAlarmL
 	return paginatedResp
 }
 
-func (alarmLogService *ServiceImpl) FindByMachineId(ginContext *gin.Context, machineId uint64) []*model.AlarmLogResponse {
-	var allAlarmLog []*model.AlarmLogResponse
+func (alarmLogService *ServiceImpl) FindByMachineId(ginContext *gin.Context, machineId uint64, isMinimal bool) []*model.AlarmLogResponse {
+	var alarmLogResponses []*model.AlarmLogResponse
 	err := alarmLogService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parameterEntities, err := alarmLogService.parameterRepository.FindBatchByMachineId(gormTransaction, machineId)
 		var parameterIds []uint64
@@ -110,9 +110,13 @@ func (alarmLogService *ServiceImpl) FindByMachineId(ginContext *gin.Context, mac
 		}
 		alarmLogResponse, err := alarmLogService.alarmLogRepository.FindByParameterIds(gormTransaction, parameterIds)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		allAlarmLog = helper.MapEntitiesIntoResponsesWithFunc[*entity.AlarmLog, *model.AlarmLogResponse](alarmLogResponse, mapper.FuncMapAlarmLog)
+		if isMinimal {
+			alarmLogResponses = helper.MapEntitiesIntoResponsesWithIgnoredFieldsWithFunc[*entity.AlarmLog, *model.AlarmLogResponse](alarmLogResponse, []string{}, mapper.FuncMapAlarmLog)
+		} else {
+			alarmLogResponses = helper.MapEntitiesIntoResponsesWithFunc[*entity.AlarmLog, *model.AlarmLogResponse](alarmLogResponse, mapper.FuncMapAlarmLog)
+		}
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return allAlarmLog
+	return alarmLogResponses
 }

@@ -6,6 +6,7 @@ type Controller interface {
 	FindAllMachine(ginContext *gin.Context)
 	FindAllMachinePagination(ginContext *gin.Context)
 	FindMachineById(ginContext *gin.Context)
+	FindMinimalMachineById(ginContext *gin.Context)
 	FindMachineByFacilityId(ginContext *gin.Context)
 	ManageDashboard(ginContext *gin.Context)
 	CreateMachine(ginContext *gin.Context)
