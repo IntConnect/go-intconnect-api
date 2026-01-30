@@ -34,7 +34,7 @@ func (mqttBrokerRepositoryImpl *RepositoryImpl) FindAllPagination(
 	// Search
 	if searchQuery != "" {
 		searchPattern := "%" + searchQuery + "%"
-		rawQuery = rawQuery.Where("host_name ILIKE ? OR mqtt_port ILIKE ? OR ws_port ILIKE ? OR username ILIKE ? OR password ILIKE ?", searchPattern, searchPattern, searchPattern, searchPattern, searchPattern, searchPattern)
+		rawQuery = rawQuery.Where("host_name ILIKE ? OR mqtt_port ILIKE ? OR ws_port ILIKE ? OR username ILIKE ? OR password ILIKE ?", searchPattern, searchPattern, searchPattern, searchPattern, searchPattern)
 	}
 
 	// Count first
