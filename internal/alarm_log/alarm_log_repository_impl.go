@@ -35,7 +35,10 @@ func (alarmLogRepositoryImpl *RepositoryImpl) FindAllPagination(
 	// Search
 	if searchQuery != "" {
 		searchPattern := "%" + searchQuery + "%"
-		rawQuery = rawQuery.Where("action ILIKE ? OR feature ILIKE ? OR description ILIKE ?", searchPattern, searchPattern, searchPattern)
+		rawQuery = rawQuery.
+			Joins("LEFT JOIN parameters ON parameters.id = alarm_logs.parameter_id").
+			Joins("LEFT JOIN users ON users.id = alarm_logs.acknowledged_by").
+			Where("parameters.name ILIKE ? OR CAST(alarm_logs.value AS TEXT) ILIKE ? OR users.name ILIKE ? OR type ILIKE ?", searchPattern, searchPattern, searchPattern, searchPattern)
 	}
 
 	// Count first
