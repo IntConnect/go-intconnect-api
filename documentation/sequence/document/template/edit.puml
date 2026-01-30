@@ -50,7 +50,6 @@ note over admin, dbPsql
     <b><resource></b> = report-document-templates | check-sheet-document-templates
     <b>{endpoint}</b> = /report-document-templates | /check-sheet-document-templates
 end note
-
 ' === FETCH EXISTING DATA ===
 admin -> boundEdit: Click Edit Button
 activate boundEdit
@@ -63,26 +62,20 @@ activate dbRedis
 dbRedis --> authMiddleware: Token Status
 deactivate dbRedis
 
-alt #LightPink Unauthorized (401)
-    authMiddleware --> boundEdit: Authentication Failed
-    boundEdit --> admin: **Redirect to Login**
+alt #LightPink Error (401 / 403 / 404)
+    authMiddleware --> boundEdit: Error Response
+    boundEdit --> admin: Show Error Message
     deactivate authMiddleware
     deactivate boundEdit
 
-else #LightPink Forbidden (403)
-    authMiddleware --> boundEdit: Insufficient Permission
-    boundEdit --> admin: **Redirect to Forbidden Page**
-    deactivate authMiddleware
-    deactivate boundEdit
 
-else #LightGreen Authenticated
+else #LightGreen Success
 
     authMiddleware -> controller: Forward Request
     deactivate authMiddleware
     activate controller
 
-    controller -> controller: Parsing ID from Param
-    controller -> service: Forward Id
+    controller -> service: Parsing & Forward Request
     activate service
 
     service -> repository: Find By Id
@@ -91,19 +84,6 @@ else #LightGreen Authenticated
     repository -> dbPsql: Query Data By Id
     activate dbPsql
 
-    alt #LightPink Data Not Found
-        dbPsql --> repository: No Data
-        deactivate dbPsql
-        repository --> service: nil
-        deactivate repository
-        service --> controller: 404 Not Found
-        controller --> boundEdit: Error Response
-        boundEdit --> admin: **Show Error Message**
-        deactivate service
-        deactivate controller
-        deactivate boundEdit
-
-    else #LightGreen Data Found
         dbPsql --> repository: Existing  Data
         deactivate dbPsql
 
@@ -116,8 +96,8 @@ else #LightGreen Authenticated
         controller --> boundEdit: Return Data
         deactivate controller
 
-        boundEdit --> admin: Display Edit Form\nwith Existing Data
-
+        boundEdit --> admin: Display Edit Form
+ end
         ' === UPDATE PROCESS ===
         admin -> boundEdit: Modify & Submit Data
 
@@ -190,7 +170,5 @@ else #LightGreen Authenticated
                 deactivate boundEdit
             end
         end
-    end
-end
 
 @enduml

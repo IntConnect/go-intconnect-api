@@ -36,9 +36,8 @@ control "File\nService" as fileService #16A085
 database "Redis Cache" as dbRedis #C0392B
 database "PostgreSQL" as dbPsql #2980B9
 database "Local Storage" as localStorage #7F8C8D
-
 title
-<size:20><b>Sequence Diagram - Update Configuration Data</b></size>
+<size:20>Sequence Diagram - Update Configuration Data</size>
 <size:14>(Facility, Machine, Parameter, Register)</size>
 ----
 end title
@@ -46,15 +45,16 @@ end title
 autonumber
 
 note over admin, localStorage
-    **Placeholder Mapping:**
-
-    <b><resource></b> = facility | machine | parameter | register
-    <b><Resource></b> = Facility | Machine | Parameter | Register
-    <b>{endpoint}</b> = /facilities | /machines | /parameters | /registers
-    <b>{id}</b> = Resource Identifier (e.g., 1, 2, 3)
+Placeholder Mapping:
+<resource> = facility | machine | parameter | register
+<Resource> = Facility | Machine | Parameter | Register
+{endpoint} = /facilities | /machines | /parameters | /registers
+{id} = Resource Identifier
 end note
 
-' === FETCH EXISTING DATA ===
+' =====================
+' PHASE 1: FETCH EXISTING DATA (MINIMIZED)
+' =====================
 admin -> boundEdit: Click Edit Button
 activate boundEdit
 
@@ -62,168 +62,122 @@ boundEdit -> authMiddleware: GET {endpoint}/{id}
 activate authMiddleware
 
 authMiddleware -> dbRedis: Validate JWT Token
-activate dbRedis
 dbRedis --> authMiddleware: Token Status
-deactivate dbRedis
 
-alt #LightPink Unauthorized (401)
-    authMiddleware --> boundEdit: Authentication Failed
-    boundEdit --> admin: **Redirect to Login**
+alt #LightPink Error (401 / 403 / 404)
+    authMiddleware --> boundEdit: Error Response
+    boundEdit --> admin: Show Error Message
     deactivate authMiddleware
     deactivate boundEdit
 
-else #LightPink Forbidden (403)
-    authMiddleware --> boundEdit: Insufficient Permission
-    boundEdit --> admin: **Redirect to Forbidden Page**
-    deactivate authMiddleware
-    deactivate boundEdit
-
-else #LightGreen Authenticated
-
-    authMiddleware -> controller: Forward Request
+else #LightGreen Success
+    authMiddleware --> controller: Forward Request
     deactivate authMiddleware
     activate controller
 
-    controller -> controller: Parsing ID from Param
-    controller -> service: Forward Id
+    controller -> service: Get Existing Data
+    activate service
+    service -> repository: Find By Id
+    repository -> dbPsql: Query Data
+    dbPsql --> repository: Existing Data
+    repository --> service: Parsing Into Response
+    service --> controller: Parsing Into JSON
+    deactivate service
+    deactivate controller
+
+    controller --> boundEdit: Existing Data
+    boundEdit --> admin: Display Edit Form
+end
+
+' =====================
+' PHASE 2: UPDATE DATA (DETAILED)
+' =====================
+admin -> boundEdit: Modify & Submit Data
+
+boundEdit -> authMiddleware: PUT {endpoint}/{id}
+activate authMiddleware
+
+authMiddleware -> dbRedis: Validate JWT Token
+dbRedis --> authMiddleware: Token Status
+
+alt #LightPink Unauthorized / Forbidden
+    authMiddleware --> boundEdit: Error Response
+    boundEdit --> admin: Show Error Message
+    deactivate authMiddleware
+
+else #LightGreen Authenticated
+    authMiddleware --> controller: Forward Request
+    deactivate authMiddleware
+    activate controller
+
+    controller -> controller: Validate Request
+    controller -> service: Process Update
     activate service
 
-    service -> repository: Find By Id
-    activate repository
+    service -> service: Business Validation
 
-    repository -> dbPsql: Query Data By Id
-    activate dbPsql
-
-    alt #LightPink Data Not Found
-        dbPsql --> repository: No Data
-        deactivate dbPsql
-        repository --> service: nil
-        deactivate repository
-        service --> controller: 404 Not Found
+    alt #LightPink Validation Failed
+        service --> controller: 422 Validation Error
         controller --> boundEdit: Error Response
-        boundEdit --> admin: **Show Error Message**
+        boundEdit --> admin: Show Validation Error
         deactivate service
         deactivate controller
-        deactivate boundEdit
 
-    else #LightGreen Data Found
-        dbPsql --> repository: Existing  Data
-        deactivate dbPsql
+    else #LightGreen Validation Success
 
-        repository --> service: <Resource> Entity
-        deactivate repository
+        opt New File Uploaded
+            service -> fileService: Upload New File
+            activate fileService
+            fileService -> localStorage: Save File
+            localStorage --> fileService: File Path
+            deactivate fileService
 
-        service --> controller: Return <resource> Data
-        deactivate service
+            opt Old File Exists
+                service -> fileService: Delete Old File
+                activate fileService
+                fileService -> localStorage: Delete File
+                deactivate fileService
+            end
+        end
 
-        controller --> boundEdit: Return Data
-        deactivate controller
+        service -> repository: Update Data
+        activate repository
+        repository -> dbPsql: Update <resource>
+        activate dbPsql
 
-        boundEdit --> admin: Display Edit Form\nwith Existing Data
+        alt #LightPink Database Error
+            dbPsql --> repository: SQLException
+            deactivate dbPsql
+            repository --> service: Error
+            deactivate repository
 
-        ' === UPDATE PROCESS ===
-        admin -> boundEdit: Modify & Submit Data
+            opt New File Uploaded
+                service -> fileService: Delete New File (Rollback)
+                activate fileService
+                fileService -> localStorage: Delete File
+                deactivate fileService
+            end
 
-        boundEdit -> authMiddleware: PUT {endpoint}/{id}
-        activate authMiddleware
-
-        authMiddleware -> dbRedis: Validate JWT Token
-        activate dbRedis
-        dbRedis --> authMiddleware: Token Status
-        deactivate dbRedis
-
-        authMiddleware -> controller: Forward Request
-        deactivate authMiddleware
-        activate controller
-
-        controller -> controller: Validate Request
-
-        controller -> service: Process Update
-        activate service
-
-        service -> service: Business Validation\n(Duplication, Rules)
-
-        alt #LightPink Validation Failed
-            service --> controller: 422 Validation Error
+            service --> controller: 500 Internal Server Error
             controller --> boundEdit: Error Response
-            boundEdit --> admin: **Show Validation Error**
+            boundEdit --> admin: Show Error Message
             deactivate service
             deactivate controller
 
-        else #LightGreen Validation Success
+        else #LightGreen Success
+            dbPsql --> repository: Success
+            deactivate dbPsql
+            repository --> service: Success
+            deactivate repository
 
-            ' === FILE UPLOAD (if exists) ===
-            opt New File Uploaded
-                service -> fileService: Upload New File
-                activate fileService
+            service --> controller: Success
+            deactivate service
+            controller --> boundEdit: 200 OK
+            deactivate controller
 
-                fileService -> localStorage: Save New File
-                activate localStorage
-                localStorage --> fileService: New File Path
-                deactivate localStorage
-
-                fileService --> service: New File Path
-                deactivate fileService
-
-                ' Delete old file if exists
-                opt Old File Exists
-                    service -> fileService: Delete Old File
-                    activate fileService
-                    fileService -> localStorage: Delete Old File
-                    activate localStorage
-                    deactivate localStorage
-                    deactivate fileService
-                end
-            end
-
-            ' === UPDATE DATABASE ===
-            service -> repository: Update Data
-            activate repository
-
-            repository -> dbPsql: Update <resource> Data
-            activate dbPsql
-
-            alt #LightPink Database Error
-                dbPsql --> repository: SQLException
-                deactivate dbPsql
-
-                repository --> service: Database Error
-                service -> service: Parsing Error
-                deactivate repository
-
-                ' Rollback: Delete new file & restore old
-                opt New File Was Uploaded
-                    service -> fileService: Delete New File (Rollback)
-                    activate fileService
-                    fileService -> localStorage: Delete New File
-                    activate localStorage
-                    deactivate localStorage
-                    deactivate fileService
-                end
-
-                service --> controller: 500 Internal Server Error
-                controller --> boundEdit: Error Response
-                boundEdit --> admin: **Show Error Message**
-                deactivate service
-                deactivate controller
-
-            else #LightGreen Success
-                dbPsql --> repository: Success
-                deactivate dbPsql
-
-                repository --> service: Success
-                deactivate repository
-
-                service --> controller: Success Response
-                deactivate service
-
-                controller --> boundEdit: 200 OK
-                deactivate controller
-
-                boundEdit --> admin: **Show Success Message**
-                boundEdit --> admin: **Redirect to {endpoint}**
-                deactivate boundEdit
-            end
+            boundEdit --> admin: Show Success Message
+            boundEdit --> admin: Redirect to {endpoint}
+            deactivate boundEdit
         end
     end
 end
