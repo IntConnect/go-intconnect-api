@@ -221,7 +221,7 @@ func (listenerFluxor *ListenerFluxor) startMqttConnection() error {
 
 func (listenerFluxor *ListenerFluxor) StartPeriodicChecker() {
 	go func() {
-		ticker := time.NewTicker(1 * time.Second)
+		ticker := time.NewTicker(1 * time.Minute)
 		defer ticker.Stop()
 
 		for range ticker.C {
@@ -609,7 +609,7 @@ func converterMqttTopicsToListenerResponse(mqttTopicEntities []entity.MqttTopic)
 
 func (listenerFluxor *ListenerFluxor) StartSnapshotSaver(ctx context.Context) {
 	go func() {
-		snapshotTicker := time.NewTicker(1 * time.Minute)
+		snapshotTicker := time.NewTicker(10 * time.Second)
 		defer snapshotTicker.Stop()
 
 		for {
