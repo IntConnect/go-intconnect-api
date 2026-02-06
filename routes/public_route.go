@@ -34,6 +34,6 @@ func (publicRoutes *PublicRoutes) Setup(routerGroup *gin.RouterGroup) {
 
 	publicRouterGroup.GET("/system-settings/:key", publicRoutes.systemSettingController.FindMinimalSystemSettingByKey)
 	publicRouterGroup.GET("/facilities", publicRoutes.facilityController.FindMinimalAllFacility)
-	publicRouterGroup.GET("/machines", publicRoutes.machineController.FindMinimalMachineById)
+	publicRouterGroup.GET("/machines/:id", publicRoutes.machineController.FindMinimalMachineById)
 	publicRouterGroup.GET("/alarm-logs/machine/:id", publicRoutes.alarmLogController.FindMinimalAlarmLogByMachineId)
 }
