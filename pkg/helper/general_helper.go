@@ -1,7 +1,9 @@
 package helper
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/pkg/exception"
@@ -18,11 +20,17 @@ import (
 )
 
 func CheckErrorOperation(indicatedError error, applicationError *exception.ApplicationError) bool {
+
+	if errors.Is(indicatedError, context.Canceled) {
+		// client aborted request → ignore / log ringan
+		return false
+	}
 	if indicatedError != nil {
 		logger.Debug(indicatedError)
 		panic(applicationError)
 		return true
 	}
+
 	return false
 }
 
