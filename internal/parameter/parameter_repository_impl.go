@@ -47,7 +47,7 @@ func (parameterRepositoryImpl *RepositoryImpl) FindAllPagination(
 	// Search
 	if searchQuery != "" {
 		searchPattern := "%" + searchQuery + "%"
-		rawQuery = rawQuery.Where("name ILIKE ? OR code ILIKE ? OR unit ILIKE ? OR min_value ILIKE ? OR max_value ILIKE ? OR description ILIKE ?", searchPattern, searchPattern, searchPattern, searchPattern, searchPattern)
+		rawQuery = rawQuery.Where("name ILIKE ? OR code ILIKE ? OR unit ILIKE ? OR CAST(min_value AS TEXT) ILIKE ? OR CAST(max_value AS TEXT) ILIKE ? OR description ILIKE ?", searchPattern, searchPattern, searchPattern, searchPattern, searchPattern, searchPattern)
 	}
 
 	// Count first

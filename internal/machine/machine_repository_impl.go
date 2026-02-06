@@ -73,7 +73,7 @@ func (machineRepositoryImpl *RepositoryImpl) FindById(gormTransaction *gorm.DB, 
 			return gormTransaction.Select("id", "machine_id", "name", "unit", "position_x", "position_y", "position_z", "rotation_x", "rotation_y", "rotation_z")
 		}).
 		Preload("Registers", func(gormTransaction *gorm.DB) *gorm.DB {
-			return gormTransaction.Select("id", "machine_id", "name", "unit", "position_x", "position_y", "position_z", "rotation_x", "rotation_y", "rotation_z")
+			return gormTransaction.Select("id", "machine_id", "name", "code", "unit", "position_x", "position_y", "position_z", "rotation_x", "rotation_y", "rotation_z")
 		}).
 		Where("id = ?", machineId).
 		First(&machineEntity).Error
