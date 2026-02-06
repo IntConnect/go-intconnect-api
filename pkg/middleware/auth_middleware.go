@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"context"
-	"fmt"
 	"go-intconnect-api/configs"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/role"
@@ -54,10 +52,10 @@ func AuthMiddleware(viperConfig *viper.Viper, redisConfig *configs.RedisInstance
 		}
 
 		// 3. Ambil token valid dari Redis
-		userId := int64(claims["id"].(float64)) // asumsi "id" selalu ada
-		redisKey := fmt.Sprintf("auth:token:%d", userId)
-		cachedToken, err := redisConfig.RedisClient.Get(context.Background(), redisKey).Result()
-		if err == redis.Nil || cachedToken != tokenString {
+		//userId := int64(claims["id"].(float64)) // asumsi "id" selalu ada
+		//redisKey := fmt.Sprintf("auth:token:%d", userId)
+		//cachedToken, err := redisConfig.RedisClient.Get(context.Background(), redisKey).Result()
+		if err == redis.Nil /* || cachedToken != tokenString */ {
 			ginContext.JSON(http.StatusUnauthorized, helper.NewErrorResponse("", helper.NewErrorDetail(
 				exception.StatusAuthError, exception.ErrTokenExpiredOrInvalid, nil)))
 			ginContext.Abort()
