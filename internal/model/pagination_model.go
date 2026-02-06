@@ -17,13 +17,6 @@ type PaginationQuery struct {
 	SearchQuery string
 }
 
-type PaginationResponse[T any] struct {
-	Data        []T   `json:"data"`
-	TotalItems  int64 `json:"totalItems"`
-	TotalPages  int   `json:"totalPages"`
-	CurrentPage int   `json:"currentPage"`
-}
-
 type PaginationMeta struct {
 	CurrentPage int   `json:"current_page"`
 	PageSize    int   `json:"page_size"`

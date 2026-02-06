@@ -2,7 +2,7 @@ package entity
 
 type ModbusServer struct {
 	Id        uint64    `gorm:"column:id;primaryKey;autoIncrement"`
-	IpAddress string    `gorm:"column:ip_address"`
+	HostName  string    `gorm:"column:host_name"`
 	Port      string    `gorm:"column:port"`
 	SlaveId   string    `gorm:"column:slave_id"`
 	Timeout   int       `gorm:"column:timeout"`

@@ -188,7 +188,7 @@ func (registerService *ServiceImpl) UpdateValue(ginContext *gin.Context, updateR
 
 		modbusClient, err := configs.NewModbusTCPClient(
 			ctx,
-			fmt.Sprintf("%s:%s", registerEntity.ModbusServer.IpAddress, registerEntity.ModbusServer.Port),
+			fmt.Sprintf("%s:%s", registerEntity.ModbusServer.HostName, registerEntity.ModbusServer.Port),
 			1,
 		)
 		if err != nil {
