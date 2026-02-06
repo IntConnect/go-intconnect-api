@@ -2,7 +2,6 @@ package seeders
 
 import (
 	"go-intconnect-api/internal/entity"
-	"go-intconnect-api/internal/trait"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -21,7 +20,6 @@ func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
 		Email:      "admin@gmail.com",
 		Password:   string(hashedPassword),
 		AvatarPath: "",
-		Status:     trait.UserStatusActive,
 		Auditable:  entity.NewAuditable("Administrator"),
 	})
 	gormDatabase.Model(&entity.User{}).Create(&entity.User{
@@ -31,7 +29,6 @@ func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
 		Email:      "admin2@gmail.com",
 		Password:   string(hashedPassword),
 		AvatarPath: "",
-		Status:     trait.UserStatusActive,
 		Auditable:  entity.NewAuditable("Administrator"),
 	})
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("mngr"), bcrypt.DefaultCost)
@@ -43,7 +40,6 @@ func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
 		Email:      "mngr@gmail.com",
 		Password:   string(hashedPassword),
 		AvatarPath: "",
-		Status:     trait.UserStatusActive,
 		Auditable:  entity.NewAuditable("Administrator"),
 	})
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("spv"), bcrypt.DefaultCost)
@@ -55,7 +51,6 @@ func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
 		Email:      "supervisor@gmail.com",
 		Password:   string(hashedPassword),
 		AvatarPath: "",
-		Status:     trait.UserStatusActive,
 		Auditable:  entity.NewAuditable("Administrator"),
 	})
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("mtn"), bcrypt.DefaultCost)
@@ -67,7 +62,6 @@ func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
 		Email:      "maintenance@gmail.com",
 		Password:   string(hashedPassword),
 		AvatarPath: "",
-		Status:     trait.UserStatusActive,
 		Auditable:  entity.NewAuditable("Administrator"),
 	})
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("oprt"), bcrypt.DefaultCost)
@@ -79,7 +73,6 @@ func (userSeeder *UserSeeder) Run(gormDatabase *gorm.DB) error {
 		Email:      "operator@gmail.com",
 		Password:   string(hashedPassword),
 		AvatarPath: "",
-		Status:     trait.UserStatusActive,
 		Auditable:  entity.NewAuditable("Administrator"),
 	})
 	return nil

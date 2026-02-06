@@ -8,7 +8,6 @@ import (
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/role"
 	"go-intconnect-api/internal/storage"
-	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/internal/validator"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -135,7 +134,6 @@ func (userService *ServiceImpl) Create(ginContext *gin.Context, createUserReques
 	userService.validatorService.ParseValidationError(valErr, *createUserRequest)
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userEntity := helper.MapCreateRequestIntoEntity[model.CreateUserRequest, entity.User](createUserRequest)
-		userEntity.Status = trait.UserStatusActive
 		userEntity.Auditable = entity.NewAuditable(userJwtClaims.Name)
 		err := userService.userRepository.Create(gormTransaction, userEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"go-intconnect-api/internal/trait"
 	"mime/multipart"
 )
 
@@ -21,14 +20,13 @@ type UserResponse struct {
 	Name              string              `json:"name"`
 	Email             string              `json:"email"`
 	AvatarPath        string              `json:"avatar_path"`
-	Status            trait.UserStatus    `json:"status"`
 	RoleResponse      *RoleResponse       `json:"role,omitempty" mapstructure:"role"`
 	AuditLogResponse  []*AuditLogResponse `json:"audit_log" mapstructure:"AuditLog"`
 	AuditableResponse *AuditableResponse  `json:"auditable_response"`
 }
 
 type CreateUserRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50,unique=users;username"`
+	Username string `json:"username" validate:"required,min=3,max=15,unique=users;username"`
 	Name     string `json:"name" validate:"required,min=3,max=100"`
 	Email    string `json:"email" validate:"required,email,min=3,max=100,unique=users;email"`
 	Password string `json:"password" validate:"required,min=3,max=100,weakPassword"`
@@ -59,7 +57,7 @@ func (updateUserProfileRequest *UpdateUserProfileRequest) GetId() uint64 {
 }
 
 type LoginUserRequest struct {
-	UserIdentifier string `json:"user_identifier" validate:"required,min=3,max=100"`
+	UserIdentifier string `json:"user_identifier" validate:"required,min=3,max=15"`
 	Password       string `json:"password" validate:"required"`
 }
 
