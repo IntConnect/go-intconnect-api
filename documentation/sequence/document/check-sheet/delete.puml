@@ -106,14 +106,13 @@ service -> service: Validate Request
 
             dbPsql --> repository: Success
             deactivate dbPsql
-            repository --> service: Return nil
             deactivate repository
 
             service -> service: Record Audit Log
                     service -> repository: Find All Data
                     activate repository
 
-                    repository -> dbPsql: Query Check Sheet Data\n(Pagination, Filter, Sort)
+                    repository -> dbPsql: Query Check Sheet Data
                     activate dbPsql
                     dbPsql --> repository: Data Result
 deactivate dbPsql

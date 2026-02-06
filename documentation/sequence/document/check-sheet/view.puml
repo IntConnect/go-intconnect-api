@@ -81,7 +81,7 @@ else #LightGreen Authenticated
     service -> repository: Find All with Filters
     activate repository
     
-    repository -> dbPsql: Query Check Sheet Data\n(Pagination, Filter, Sort)
+    repository -> dbPsql: Query Check Sheet Data
     activate dbPsql
     dbPsql --> repository: Data Result
     deactivate dbPsql

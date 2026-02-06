@@ -196,8 +196,7 @@ else #LightGreen Success
                 controller --> boundEdit: 200 OK
                 deactivate controller
 
-                boundEdit --> admin: **Show Success Message**
-                boundEdit --> admin: **Redirect to system-settings**
+                boundEdit --> admin: **Show Success Message and Redirect to system-settings**
                 deactivate boundEdit
             end
         end
