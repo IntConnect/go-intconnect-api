@@ -34,7 +34,9 @@ func (mqttTopicRepositoryImpl *RepositoryImpl) FindAllPagination(
 	// Search
 	if searchQuery != "" {
 		searchPattern := "%" + searchQuery + "%"
-		rawQuery = rawQuery.Where("name ILIKE ? OR email ILIKE ? OR name ILIKE ?", searchPattern, searchPattern, searchPattern)
+		rawQuery = rawQuery.
+			Joins("LEFT JOIN machines ON machines.id = mqtt_topics.machine_id").
+			Where("mqtt_topics.name ILIKE ? OR machines.name ILIKE ? OR  CAST(qos AS TEXT) ILIKE ?", searchPattern, searchPattern, searchPattern)
 	}
 
 	// Count first
