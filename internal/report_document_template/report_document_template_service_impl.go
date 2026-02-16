@@ -147,13 +147,18 @@ func (reportDocumentTemplateService *ServiceImpl) Update(ginContext *gin.Context
 		}
 
 		// Generate daftar parameter baru
-		newParameterIds := make([]entity.Parameter, 0, len(updateReportDocumentTemplateRequest.ParameterIds))
+		var newParameterIds []uint64
 		for _, parameterId := range updateReportDocumentTemplateRequest.ParameterIds {
-			newParameterIds = append(newParameterIds, entity.Parameter{Id: parameterId})
+			newParameterIds = append(newParameterIds, parameterId)
 		}
 
+		parameterEntities, err := reportDocumentTemplateService.parameterRepository.FindBatchById(gormTransaction, updateReportDocumentTemplateRequest.ParameterIds)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		// Replace relasi M2M
-		if err := gormTransaction.Model(reportDocumentTemplate).Association("Parameters").Replace(&newParameterIds); err != nil {
+		if err := gormTransaction.
+			Model(reportDocumentTemplate).
+			Association("Parameters").
+			Replace(parameterEntities); err != nil {
 			helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		}
 		auditPayload := reportDocumentTemplateService.auditLogService.Build(
