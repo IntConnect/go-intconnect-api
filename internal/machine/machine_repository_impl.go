@@ -103,6 +103,6 @@ func (machineRepositoryImpl *RepositoryImpl) Update(gormTransaction *gorm.DB, ma
 }
 
 func (machineRepositoryImpl *RepositoryImpl) Delete(gormTransaction *gorm.DB, machineEntity *entity.Machine) error {
-	return gormTransaction.Save(machineEntity).Error
+	return gormTransaction.Delete(machineEntity).Error
 
 }
