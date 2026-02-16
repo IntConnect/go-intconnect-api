@@ -26,7 +26,7 @@ type UserResponse struct {
 }
 
 type CreateUserRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=15,unique=users;username"`
+	Username string `json:"username" validate:"required,min=3,max=100,unique=users;username"`
 	Name     string `json:"name" validate:"required,min=3,max=100"`
 	Email    string `json:"email" validate:"required,email,min=3,max=100,unique=users;email"`
 	Password string `json:"password" validate:"required,min=3,max=100,weakPassword"`
@@ -57,7 +57,7 @@ func (updateUserProfileRequest *UpdateUserProfileRequest) GetId() uint64 {
 }
 
 type LoginUserRequest struct {
-	UserIdentifier string `json:"user_identifier" validate:"required,min=3,max=15"`
+	UserIdentifier string `json:"user_identifier" validate:"required,min=3,max=100"`
 	Password       string `json:"password" validate:"required"`
 }
 

@@ -224,6 +224,10 @@ func (userService *ServiceImpl) Update(ginContext *gin.Context, updateUserReques
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		pastUserEntity := *userEntity
 		helper.MapUpdateRequestIntoEntity(updateUserRequest, userEntity)
+		if updateUserRequest.Password != "" {
+			userEntity.Password, err = helper.HashPassword(updateUserRequest.Password)
+			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusInternalServerError, exception.ErrInternalServerError))
+		}
 		err = userService.userRepository.Update(gormTransaction, userEntity)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		auditPayload := userService.auditLogService.Build(
