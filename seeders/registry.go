@@ -6,15 +6,20 @@ import (
 
 // Map nama seeder → struct
 var SeederRegistry = map[string]Seeder{
-	"InitialSeeder":        &InitialSeeder{},
-	"PermissionSeeder":     &PermissionSeeder{},
-	"UserSeeder":           &UserSeeder{},
-	"RoleSeeder":           &RoleSeeder{},
-	"RolePermissionSeeder": &RolePermissionSeeder{},
-	"MqttBrokerSeeder":     &MqttBrokerSeeder{},
-	"MqttTopicSeeder":      &MqttTopicSeeder{},
-	"FacilitySeeder":       &FacilitySeeder{},
-	"MachineSeeder":        &MachineSeeder{},
+	"InitialSeeder":                    &InitialSeeder{},
+	"PermissionSeeder":                 &PermissionSeeder{},
+	"UserSeeder":                       &UserSeeder{},
+	"RoleSeeder":                       &RoleSeeder{},
+	"RolePermissionSeeder":             &RolePermissionSeeder{},
+	"MqttBrokerSeeder":                 &MqttBrokerSeeder{},
+	"MqttTopicSeeder":                  &MqttTopicSeeder{},
+	"FacilitySeeder":                   &FacilitySeeder{},
+	"MachineSeeder":                    &MachineSeeder{},
+	"CheckSheetSeeder":                 &CheckSheetSeeder{},
+	"CheckSheetDocumentTemplateSeeder": &CheckSheetDocumentTemplateSeeder{},
+	"AlarmLogSeeder":                   &AlarmLogSeeder{},
+	"MachineSingleSeeder":              &MachineSingleSeeder{},
+	"FacilitySingleSeeder":             &FacilitySingleSeeder{},
 }
 
 // Ambil seeder dari nama
