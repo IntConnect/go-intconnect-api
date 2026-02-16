@@ -32,18 +32,17 @@ type CreateCheckSheetDocumentTemplateRequest struct {
 }
 
 type UpdateCheckSheetDocumentTemplateRequest struct {
-	Id             uint64 `json:"-" validate:"required,number,gte=1,exists=check_sheet_document_templates;id"`
-	MachineId      uint64 `json:"machine_id" validate:"required,gte=1,exists=machines;id"`
-	Name           string `json:"name" validate:"required,min=3,max=255"`
-	No             string `json:"no" validate:"required,min=3,max=255"`
-	Description    string `json:"description"`
-	Category       string `json:"category" validate:"required"`
-	Interval       int    `json:"interval" validate:"required,gte=1"`
-	IntervalType   string `json:"interval_type" validate:"required,oneof=Hour Minute"`
-	RotationType   string `json:"rotation_type" validate:"required,oneof=Daily Weekly Monthly"`
-	RevisionNumber int    `json:"revision_number"`
-	EffectiveDate  string `json:"effective_date" validate:"required,date"`
-	StartingHour   string `json:"starting_hour" validate:"required,time"`
+	Id            uint64 `json:"-" validate:"required,number,gte=1,exists=check_sheet_document_templates;id"`
+	MachineId     uint64 `json:"machine_id" validate:"required,gte=1,exists=machines;id"`
+	Name          string `json:"name" validate:"required,min=3,max=255"`
+	No            string `json:"no" validate:"required,min=3,max=255"`
+	Description   string `json:"description"`
+	Category      string `json:"category" validate:"required"`
+	Interval      int    `json:"interval" validate:"required,gte=1"`
+	IntervalType  string `json:"interval_type" validate:"required,oneof=Hour Minute"`
+	RotationType  string `json:"rotation_type" validate:"required,oneof=Daily Weekly Monthly"`
+	EffectiveDate string `json:"effective_date" validate:"required,date"`
+	StartingHour  string `json:"starting_hour" validate:"required,time"`
 }
 
 func (checkSheetDocumentTemplateResponse *CheckSheetDocumentTemplateResponse) GetAuditableResponse() *AuditableResponse {
