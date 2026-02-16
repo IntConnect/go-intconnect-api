@@ -152,7 +152,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	parameterRouterGroup.POST("", protectedRoutes.parameterController.CreateParameter)
 	parameterRouterGroup.PUT("/:id", protectedRoutes.parameterController.UpdateParameter)
 	parameterRouterGroup.PUT("operation/:id", protectedRoutes.parameterController.UpdateParameterOperation)
-	parameterRouterGroup.DELETE("", protectedRoutes.parameterController.DeleteParameter)
+	parameterRouterGroup.DELETE("/:id", protectedRoutes.parameterController.DeleteParameter)
 
 	mqttTopicRouterGroup := routerGroup.Group("mqtt-topics")
 	mqttTopicRouterGroup.GET("pagination", protectedRoutes.mqttTopicController.FindAllMqttTopicPagination)
