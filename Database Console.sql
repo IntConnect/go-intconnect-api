@@ -2,92 +2,7 @@
 DROP DATABASE IF EXISTS go_intconnect_system;
 CREATE DATABASE go_intconnect_system;
 
-SELECT *
-FROM audit_logs;
-SELECT *
-FROM machine_documents;
-SELECT *
-FROM machines;
-SELECT *
-FROM users;
-SELECT *
-FROM facilities;
-SELECT *
-FROM mqtt_topics;
-SELECT *
-FROM system_settings;
-SELECT *
-FROM parameter_operations;
-SELECT *
-FROM mqtt_brokers;
-SELECT *
-FROM telemetries;
-SELECT *
-FROM parameters;
-SELECT *
-FROM parameters;
-SELECT *
-FROM telemetries;
-SELECT *
-FROM report_document_templates;
-SELECT *
-FROM roles;
-SELECT *
-FROM parameters;
-SELECT *
-FROM machines;
-SELECT *
-FROM check_sheet_document_templates;
-SELECT *
-FROM check_sheets;
-SELECT *
-FROM check_sheet_values;
-SELECT *
-FROM dashboard_widgets;
-DELETE
-FROM dashboard_widgets;
-SELECT *
-FROM modbus_servers;
-SELECT *
-FROM registers;
-SELECT *
-FROM dashboard_widgets;
-SELECT *
-FROM parameters
-WHERE is_featured = TRUE;
-SELECT *
-FROM mqtt_topics;
-SELECT *
-FROM users;
-SELECT *
-FROM roles;
-SELECT *
-FROM roles_permissions;
-SELECT *
-FROM alarm_logs;
-SELECT *
-FROM processed_parameter_sequences;
-SELECT *
-FROM permissions;
-DELETE
-FROM alarm_logs;
-DELETE
-FROM check_sheet_values;
-DELETE
-FROM check_sheets;
-DELETE
-FROM parameters;
-DELETE
-FROM telemetries;
-DELETE
-FROM alarm_logs;
-DELETE
-FROM dashboard_widgets;
-DELETE
-FROM facilities;
-DELETE
-FROM machines;
-
+DELETE FROM dashboard_widgets;;
 SELECT bucket,
        parameter_id,
        last_value
@@ -142,9 +57,6 @@ ALTER TABLE registers
     ADD COLUMN rotation_y FLOAT NOT NULL DEFAULT 0,
     ADD COLUMN rotation_z FLOAT NOT NULL DEFAULT 0;
 
-ALTER TABLE registers
-    ADD COLUMN unit VARCHAR(255) NOT NULL DEFAULT '',
-    ADD COLUMN code VARCHAR(255) NOT NULL DEFAULT '';
 
 ALTER TABLE check_sheet_document_templates
     ADD COLUMN
@@ -152,4 +64,24 @@ ALTER TABLE check_sheet_document_templates
 
 
 SELECT *
-FROM check_sheet_document_templates;
+FROM users;
+
+SELECT * FROM mqtt_brokers;
+DELETE FROM mqtt_brokers WHERE id =11;
+DELETE FROM mqtt_topics WHERE mqtt_broker_id != 1 OR mqtt_broker_id != 2;
+DELETE FROM parameters WHERE id IN (SELECT id from mqtt_topics WHERE mqtt_broker_id != 1 OR mqtt_broker_id != 2) ;
+
+UPDATE roles SET deleted_at = NULL;
+
+DROP TABLE IF EXISTS "public"."telemetries";
+CREATE TABLE "public"."telemetries" (
+  "id" SERIAL,
+  "parameter_id" int8 NOT NULL,
+  "value" float8,
+  "timestamp" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+SELECT * FROM users;
+SELECT * FROM check_sheet_document_templates;
+SELECT * FROM mqtt_brokers;
+SELECT * FROM permissions;
