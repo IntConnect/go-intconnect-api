@@ -1,6 +1,7 @@
 package machine
 
 import (
+	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/pkg/exception"
 	"go-intconnect-api/pkg/helper"
@@ -86,7 +87,7 @@ func (machineHandler *Handler) CreateMachine(ginContext *gin.Context) {
 	thumbnailFile, _ := ginContext.FormFile("thumbnail")
 	createMachineModel.Model = modelFile
 	createMachineModel.Thumbnail = thumbnailFile
-	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents[", "].document_file", len(createMachineModel.MachineDocuments))
+	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents.", ".document_file", len(createMachineModel.MachineDocuments))
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
 	for i, machineDocument := range createMachineModel.MachineDocuments {
 		machineDocument.DocumentFile = extractIndexedFiles[i]
@@ -107,12 +108,9 @@ func (machineHandler *Handler) UpdateMachine(ginContext *gin.Context) {
 	thumbnailFile, _ := ginContext.FormFile("thumbnail")
 	updateMachineModel.Model = modelFile
 	updateMachineModel.Thumbnail = thumbnailFile
-	extractIndexedFiles, err := helper.ExtractIndexedFiles(ginContext, "machine_documents[", "].document_file", len(updateMachineModel.MachineDocuments))
-	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrBadRequest))
-	for i, machineDocument := range updateMachineModel.MachineDocuments {
-		machineDocument.DocumentFile = extractIndexedFiles[i]
-		updateMachineModel.MachineDocuments[i] = machineDocument
-	}
+
+	updateMachineModel.MachineDocuments = helper.ParseMachineDocumentsFromForm(ginContext)
+	fmt.Println(updateMachineModel)
 	machineId := ginContext.Param("id")
 	parsedMachineId, err := strconv.ParseUint(machineId, 10, 64)
 	helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrParameterInvalid))

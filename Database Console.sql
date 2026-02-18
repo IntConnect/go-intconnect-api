@@ -85,3 +85,5 @@ SELECT * FROM users;
 SELECT * FROM check_sheet_document_templates;
 SELECT * FROM mqtt_brokers;
 SELECT * FROM permissions;
+SELECT * FROM dashboard_widgets;
+DELETE FROM dashboard_widgets WHERE id = 32 OR id = 33;

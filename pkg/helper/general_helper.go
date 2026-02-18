@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"go-intconnect-api/internal/model"
 	"go-intconnect-api/internal/trait"
 	"go-intconnect-api/pkg/exception"
@@ -39,7 +40,34 @@ func CheckPointerWrapper[T any](targetChecking *T, renderPayload func()) {
 		renderPayload()
 	}
 }
+func ParseMachineDocumentsFromForm(ginContext *gin.Context) []model.CreateMachineDocumentRequest {
+	form := ginContext.Request.PostForm
+	multipartForm, _ := ginContext.MultipartForm()
 
+	var documents []model.CreateMachineDocumentRequest
+	for i := 0; ; i++ {
+		nameKey := fmt.Sprintf("machine_documents[%d][name]", i)
+		name, exists := form[nameKey]
+		if !exists {
+			break
+		}
+
+		// Ambil file dari multipartForm.File
+		var documentFile *multipart.FileHeader
+		fileKey := fmt.Sprintf("machine_documents[%d][document_file]", i)
+		if files, ok := multipartForm.File[fileKey]; ok && len(files) > 0 {
+			documentFile = files[0]
+		}
+
+		doc := model.CreateMachineDocumentRequest{
+			Name:         name[0],
+			Description:  form[fmt.Sprintf("machine_documents[%d][description]", i)][0],
+			DocumentFile: documentFile,
+		}
+		documents = append(documents, doc)
+	}
+	return documents
+}
 func ExtractIndexedFiles(
 	ginContext *gin.Context,
 	prefixKey string,

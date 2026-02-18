@@ -61,7 +61,7 @@ type MachineDashboardWidget struct {
 }
 
 type DashboardWidget struct {
-	Id     uint64                 `json:"id" `
+	Id     uint64                 `json:"id"`
 	Code   string                 `json:"code" validate:"required"`
 	Layout map[string]interface{} `json:"layout"`
 	Config map[string]interface{} `json:"config"`

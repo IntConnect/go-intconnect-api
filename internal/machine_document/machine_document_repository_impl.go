@@ -42,6 +42,6 @@ func (machineDocumentRepository *RepositoryImpl) UpdateBatch(gormTransaction *go
 	return gormTransaction.Save(machineDocumentEntities).Error
 }
 
-func (machineDocumentRepository *RepositoryImpl) Delete(gormTransaction *gorm.DB, id uint64) error {
-	return gormTransaction.Model(entity.MachineDocument{}).Where("id = ?", id).Delete(entity.MachineDocument{}).Error
+func (machineDocumentRepository *RepositoryImpl) DeleteBatch(gormTransaction *gorm.DB, machineDocumentIds []uint64) error {
+	return gormTransaction.Model(&entity.MachineDocument{}).Where("id IN ?", machineDocumentIds).Delete(&entity.MachineDocument{}).Error
 }

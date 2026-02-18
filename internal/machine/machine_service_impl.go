@@ -153,6 +153,7 @@ func (machineService *ServiceImpl) ManageDashboard(ginContext *gin.Context, mach
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		machineService.changeFeaturedParameter(gormTransaction, machineDashboardWidget.AddedParameterIds, true)
 		machineService.changeFeaturedParameter(gormTransaction, machineDashboardWidget.RemoveParameterIds, false)
+		fmt.Println(dashboardWidgetEntities)
 		if len(dashboardWidgetEntities) > 0 {
 			err := machineService.dashboardWidgetRepository.CreateBatch(gormTransaction, dashboardWidgetEntities)
 			helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -242,12 +243,18 @@ func (machineService *ServiceImpl) Update(ginContext *gin.Context, updateMachine
 		if len(machineDocuments) != len(updateMachineRequest.DeletedMachineDocumentIds) {
 			exception.ThrowApplicationError(exception.NewApplicationError(http.StatusNotFound, fmt.Sprintf("%s machine documents", exception.ErrSomeResourceNotFound)))
 		}
+		fmt.Println(updateMachineRequest.DeletedMachineDocumentIds)
+		machineDocumentIds := make([]uint64, 0)
 		for i, machineDocumentEntity := range machineDocuments {
 			newPath, err := machineService.localStorageService.Disk().MoveFile(machineDocumentEntity.FilePath, "machines/documents")
 			helper.CheckErrorOperation(err, exception.NewApplicationError(http.StatusBadRequest, exception.ErrSavingResources))
 			machineDocuments[i].Auditable = entity.DeleteAuditable(userJwtClaims.Username)
 			machineDocuments[i].FilePath = newPath
+			machineDocumentIds = append(machineDocumentIds, machineDocuments[i].Id)
 		}
+		err = machineService.machineDocumentRepository.DeleteBatch(gormTransaction, machineDocumentIds)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
 		var machineDocumentEntities []*entity.MachineDocument
 		for _, createMachineDocumentRequest := range updateMachineRequest.MachineDocuments {
 			machineDocumentEntity := helper.MapCreateRequestIntoEntity[model.CreateMachineDocumentRequest, entity.MachineDocument](&createMachineDocumentRequest)

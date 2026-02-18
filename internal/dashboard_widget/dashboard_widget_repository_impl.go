@@ -21,7 +21,7 @@ func (dashboardWidgetRepository *RepositoryImpl) DeleteBatchByCode(gormTransacti
 }
 
 func (dashboardWidgetRepository *RepositoryImpl) CreateBatch(gormTransaction *gorm.DB, dashboardWidgets []*entity.DashboardWidget) error {
-	err := gormTransaction.Create(&dashboardWidgets).Error
+	err := gormTransaction.Save(&dashboardWidgets).Error
 	return err
 }
 

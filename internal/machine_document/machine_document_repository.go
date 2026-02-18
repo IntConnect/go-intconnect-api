@@ -13,5 +13,5 @@ type Repository interface {
 	Create(gormTransaction *gorm.DB, machineDocumentEntity *entity.MachineDocument) error
 	CreateBatch(gormTransaction *gorm.DB, machineDocumentEntities []*entity.MachineDocument) error
 	UpdateBatch(gormTransaction *gorm.DB, machineDocumentEntities []*entity.MachineDocument) error
-	Delete(gormTransaction *gorm.DB, machineDocumentId uint64) error
+	DeleteBatch(gormTransaction *gorm.DB, machineDocumentIds []uint64) error
 }
