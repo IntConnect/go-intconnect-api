@@ -195,6 +195,7 @@ func (protectedRoutes *ProtectedRoutes) Setup(routerGroup *gin.RouterGroup) {
 	telemetryRouterGroup := routerGroup.Group("telemetries")
 	telemetryRouterGroup.POST("/report", protectedRoutes.telemetryController.GenerateReport)
 	telemetryRouterGroup.POST("/interval", protectedRoutes.telemetryController.IntervalReport)
+	telemetryRouterGroup.POST("/xlsx", protectedRoutes.telemetryController.GenerateXLSX)
 
 	checkSheetRouterGroup := routerGroup.Group("check-sheets")
 	checkSheetRouterGroup.GET("pagination", protectedRoutes.checkSheetController.FindAllCheckSheetPagination)

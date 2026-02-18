@@ -30,6 +30,21 @@ type UpdateMqttBrokerRequest struct {
 	IsActive bool   `json:"is_active"`
 }
 
+type BrokerInfo struct {
+	HostName string `json:"host_name"` // match camelCase dari Vue
+	MqttPort string `json:"mqtt_port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type WebsocketMessage struct {
+	Type       string      `json:"type"`
+	BrokerInfo *BrokerInfo `json:"broker_info,omitempty"`
+	Topic      string      `json:"topic,omitempty"`
+	Payload    string      `json:"payload,omitempty"`
+	Error      string      `json:"error,omitempty"`
+}
+
 func (mqttBrokerResponse *MqttBrokerResponse) GetAuditableResponse() *AuditableResponse {
 	return mqttBrokerResponse.AuditableResponse
 }

@@ -33,7 +33,7 @@ ORDER BY bucket;
 `
 
 	var telemetryEntities []*entity.TelemetryQuery
-	err := gormTransaction.Raw(sqlQuery, intervalVal, searchedParameterIds, startDate, endDate).Scan(&telemetryEntities).Error
+	err := gormTransaction.Debug().Raw(sqlQuery, intervalVal, searchedParameterIds, startDate, endDate).Scan(&telemetryEntities).Error
 	return telemetryEntities, err
 }
 func (telemetryRepositoryImpl *RepositoryImpl) FindAllInterval(

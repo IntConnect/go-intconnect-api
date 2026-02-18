@@ -1,6 +1,7 @@
 package telemetry
 
 import (
+	"bytes"
 	"go-intconnect-api/internal/model"
 
 	"github.com/gin-gonic/gin"
@@ -9,4 +10,5 @@ import (
 type Service interface {
 	GenerateReport(ginContext *gin.Context, telemetryReportFilterRequest *model.TelemetryReportFilterRequest) []*model.TelemetryGrouped
 	IntervalReport(ginContext *gin.Context, telemetryIntervalFilterRequest *model.TelemetryIntervalFilterRequest) *model.TelemetryIntervalValues
+	GenerateXLSX(ginContext *gin.Context, telemetryReportFilterRequest *model.TelemetryReportFilterRequest) (bytes.Buffer, error)
 }
